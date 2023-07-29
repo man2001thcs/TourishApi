@@ -1,17 +1,20 @@
-﻿using WebApplication1.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using WebApplication1.Data;
+using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
 namespace WebApplication1.Repository.InheritanceRepo;
-    public class BookRepository : IBookRepository
+public class BookRepository : IBookRepository
 {
     private readonly MyDbContext _context;
+    public static int PAGE_SIZE { get; set; } = 5;
     public BookRepository(MyDbContext _context)
     {
         this._context = _context;
     }
 
-    public BookVM Add(BookModel bookModel)
+    public BookModel Add(BookModel bookModel)
     {
 
         var book = new Book
@@ -23,12 +26,11 @@ namespace WebApplication1.Repository.InheritanceRepo;
             CreateDate = bookModel.CreateDate,
             UpdateDate = bookModel.UpdateDate,
             PublisherId = bookModel.PublisherId,
-            AuthorId = bookModel.AuthorId,
         };
         _context.Add(book);
         _context.SaveChanges();
 
-        return new BookVM
+        return new BookModel
         {
             id = bookModel.id,
             Title = bookModel.Title,
@@ -53,45 +55,83 @@ namespace WebApplication1.Repository.InheritanceRepo;
         }
     }
 
-    public List<BookVM> GetAll()
+    public BookVM GetAll(string? search, double? from, double? to, string? sortBy, int page = 1)
     {
-        var bookList = _context.Books.Select(book => new BookVM
+        var bookQuery = _context.Books.Include(book => book.BookStatus).
+            Include(book => book.BookCategories).
+            ThenInclude(book => book.Category).AsQueryable();
+
+        #region Filtering
+        if (!string.IsNullOrEmpty(search))
         {
-            id = book.id,
-            Title = book.Title,
-            Description = book.Description,
-            PageNumber = book.PageNumber,
-            CreateDate = book.CreateDate,
-            UpdateDate = book.UpdateDate,
-            PublisherId = book.PublisherId,
-            AuthorId = book.AuthorId,
-        });
-        return bookList.ToList();
+            bookQuery = bookQuery.Where(book => book.Title.Contains(search));
+        }
+        if (from.HasValue)
+        {
+            bookQuery = bookQuery.Where(book => book.BookStatus.CurrentPrice >= from);
+        }
+        if (to.HasValue)
+        {
+            bookQuery = bookQuery.Where(book => book.BookStatus.CurrentPrice <= to);
+        }
+        #endregion
+
+        #region Sorting
+        //Default sort by Name (TenHh)
+        bookQuery = bookQuery.OrderBy(book => book.Title);
+
+        if (!string.IsNullOrEmpty(sortBy))
+        {
+            switch (sortBy)
+            {
+                case "title_desc":
+                    bookQuery = bookQuery.OrderByDescending(book => book.Title);
+                    break;
+                case "price_asc":
+                    bookQuery = bookQuery.OrderBy(book => book.BookStatus.CurrentPrice);
+                    break;
+                case "price_desc":
+                    bookQuery = bookQuery.OrderByDescending(book => book.BookStatus.CurrentPrice);
+                    break;
+                case "best_seller":
+                    bookQuery = bookQuery.OrderByDescending(book => book.BookStatus.SoldNumberInMonth);
+                    break;
+            }
+        }
+        #endregion
+
+        #region Paging
+        var result = PaginatorModel<Book>.Create(bookQuery, page, PAGE_SIZE);
+        #endregion
+
+        var bookVM = new BookVM
+        {
+            resultCd = 0,
+            Data = result.ToList(),
+        };
+        return bookVM;
 
     }
 
     public BookVM getById(Guid id)
     {
-        var book = _context.Books.FirstOrDefault((book
-            => book.id == id));
+        var book = _context.Books.Where(book => book.id == id).Include(book => book.BookStatus).
+            Include(book => book.BookCategories).
+            ThenInclude(book => book.Category).FirstOrDefault();
         if (book == null) { return null; }
-        return new BookVM
+
+        var bookVM = new BookVM
         {
-            id = book.id,
-            Title = book.Title,
-            Description = book.Description,
-            PageNumber = book.PageNumber,
-            CreateDate = book.CreateDate,
-            UpdateDate = book.UpdateDate,
-            PublisherId = book.PublisherId,
-            AuthorId = book.AuthorId,
+            resultCd = 0,
+            Data = book,
         };
+        return bookVM;
     }
 
-    public void Update(BookVM bookVM)
+    public void Update(BookModel bookModel)
     {
         var book = _context.Books.FirstOrDefault((book
-            => book.id == bookVM.id));
+            => book.id == bookModel.id));
         if (book != null)
         {
             book.UpdateDate = DateTime.UtcNow;
@@ -100,9 +140,8 @@ namespace WebApplication1.Repository.InheritanceRepo;
             book.PageNumber = book.PageNumber;
             book.CreateDate = book.CreateDate;
             book.PublisherId = book.PublisherId;
-            book.AuthorId = book.AuthorId;
             _context.SaveChanges();
         }
     }
-}
+
 }

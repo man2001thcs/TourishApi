@@ -1,6 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using WebApplication1.Data;
+using System.Text;
+using WebApplication1.Data.DbContextFile;
+using WebApplication1.Model;
 using WebApplication1.Repository.InheritanceRepo;
 using WebApplication1.Repository.Interface;
 
@@ -21,13 +25,57 @@ namespace MyWebApiApp
 
             services.AddControllers();
 
+            services.AddControllers().AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            );
+
             services.AddDbContext<MyDbContext>(option =>
             {
                 option.UseSqlServer(Configuration.GetConnectionString("MyDB"));
             });
 
+            services.AddScoped<IBookRepository, BookRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
 
+            services.Configure<AppSetting>(Configuration.GetSection("AppSettings"));
+
+            var secretKey = Configuration["AppSettings:SecretKey"];
+            var secretKeyBytes = Encoding.UTF8.GetBytes(secretKey);
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(opt =>
+                {
+                    opt.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        //tự cấp token
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+
+                        //ký vào token
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
+
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
+
+            // Book permission
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("CreateBookAccess", policy =>
+                                  policy.RequireClaim("Permissions", "createBook:term"));
+                options.AddPolicy("UpdateBookAccess", policy =>
+                                  policy.RequireClaim("Permissions", "updateBook:term"));
+                options.AddPolicy("DeleteBookAccess", policy =>
+                                  policy.RequireClaim("Permissions", "deleteBook:term"));
+
+                options.AddPolicy("CreateCategoryAccess", policy =>
+                                 policy.RequireClaim("Permissions", "createCategory:term"));
+                options.AddPolicy("UpdateCategoryAccess", policy =>
+                                  policy.RequireClaim("Permissions", "updateCategory:term"));
+                options.AddPolicy("DeleteCategoryAccess", policy =>
+                                  policy.RequireClaim("Permissions", "deleteCategory:term"));
+            });
 
             services.AddSwaggerGen(c =>
             {

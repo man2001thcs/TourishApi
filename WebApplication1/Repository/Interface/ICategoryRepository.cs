@@ -5,10 +5,10 @@ namespace WebApplication1.Repository.Interface
 {
     public interface ICategoryRepository
     {
-        List<CategoryVM> GetAll();
-        CategoryVM getById(Guid id);
-        CategoryVM Add(CategoryModel categoryModel);
-        void Update(CategoryVM categoryVM);
-        void Delete(Guid id);
+        Response GetAll(string? search, string? sortBy, int page = 1);
+        Response getById(Guid id);
+        Response Add(CategoryModel categoryModel);
+        Response Update(CategoryModel categoryModel);
+        Response Delete(Guid id);
     }
 }

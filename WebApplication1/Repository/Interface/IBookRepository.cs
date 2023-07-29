@@ -5,10 +5,10 @@ namespace WebApplication1.Repository.Interface
 {
     public interface IBookRepository
     {
-        List<BookVM> GetAll();
+        BookVM GetAll(string? search, double? from, double? to, string? sortBy, int page = 1);
         BookVM getById(Guid id);
-        BookVM Add(BookModel bookModel);
-        void Update(BookVM bookVM);
+        BookModel Add(BookModel bookModel);
+        void Update(BookModel bookModel);
         void Delete(Guid id);
     }
 }

@@ -1,10 +1,9 @@
-﻿namespace WebApplication1.Model.VirtualModel
+﻿using WebApplication1.Data;
+
+namespace WebApplication1.Model.VirtualModel
 {
-    public class CategoryVM
+    public class CategoryVM : Response
     {
-        public Guid Id { get; set; }
-        public required string Name { get; set; }
-        public DateTime CreateDate { get; set; }
-        public DateTime UpdateDate { get; set; }
+        public List<Category> Categories { get; set; }
     }
 }

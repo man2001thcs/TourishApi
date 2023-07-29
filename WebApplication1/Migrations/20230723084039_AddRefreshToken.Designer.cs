@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data.DbContextFile;
 
@@ -11,9 +12,11 @@ using WebApplication1.Data.DbContextFile;
 namespace WebApplication1.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230723084039_AddRefreshToken")]
+    partial class AddRefreshToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -208,10 +211,6 @@ namespace WebApplication1.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -308,8 +307,6 @@ namespace WebApplication1.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("ReceiptId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Receipt", (string)null);
                 });
@@ -509,18 +506,6 @@ namespace WebApplication1.Migrations
                     b.Navigation("Receipt");
                 });
 
-            modelBuilder.Entity("WebApplication1.Data.Receipt", b =>
-                {
-                    b.HasOne("WebApplication1.Data.User", "User")
-                        .WithMany("ReceiptList")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("FK_User_Receipt");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("WebApplication1.Data.RelationData.BookCategory", b =>
                 {
                     b.HasOne("WebApplication1.Data.Book", "Book")
@@ -579,8 +564,6 @@ namespace WebApplication1.Migrations
 
             modelBuilder.Entity("WebApplication1.Data.User", b =>
                 {
-                    b.Navigation("ReceiptList");
-
                     b.Navigation("RefreshTokenList");
                 });
 

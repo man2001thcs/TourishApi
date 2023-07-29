@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using WebApplication1.Data.RelationData;
 
 namespace WebApplication1.Data
 {
@@ -16,17 +17,18 @@ namespace WebApplication1.Data
         [Required]
         [MaxLength(200)]
         public string? Description { get; set; }
-
-        [Required]
-        [ForeignKey("Category")]
-        public Guid AuthorId { get; set; }
-        public Category? Category { get; set; }
         public int PageNumber { get; set; }
         public Guid PublisherId { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
 
+        // Relationship
+        public BookStatus? BookStatus { get; set; }
+        public ICollection<BookCategory> BookCategories { get; set; }
+        public ICollection<BookPublisher> BookPublishers { get; set; }
+        public ICollection<BookAuthor> BookAuthors { get; set; }
         public ICollection<FullReceipt> FullReceiptList { get; set; }
+        public ICollection<BookVoucher> BookVouchers { get; set; }
 
         public Book()
         {

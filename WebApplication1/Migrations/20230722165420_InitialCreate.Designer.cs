@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data.DbContextFile;
 
@@ -11,9 +12,11 @@ using WebApplication1.Data.DbContextFile;
 namespace WebApplication1.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230722165420_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,42 +24,6 @@ namespace WebApplication1.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("WebApplication1.Data.Authentication.RefreshToken", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("ExpiredDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsRevoked")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("IssueDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("JwtId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TokenDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("RefreshToken", (string)null);
-                });
 
             modelBuilder.Entity("WebApplication1.Data.Author", b =>
                 {
@@ -208,10 +175,6 @@ namespace WebApplication1.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -309,8 +272,6 @@ namespace WebApplication1.Migrations
 
                     b.HasKey("ReceiptId");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("Receipt", (string)null);
                 });
 
@@ -327,49 +288,6 @@ namespace WebApplication1.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("BookCategory", (string)null);
-                });
-
-            modelBuilder.Entity("WebApplication1.Data.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserName")
-                        .IsUnique();
-
-                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.Voucher", b =>
@@ -399,18 +317,6 @@ namespace WebApplication1.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Voucher", (string)null);
-                });
-
-            modelBuilder.Entity("WebApplication1.Data.Authentication.RefreshToken", b =>
-                {
-                    b.HasOne("WebApplication1.Data.User", "User")
-                        .WithMany("RefreshTokenList")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_User_RefreshToken");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.BookAuthor", b =>
@@ -509,18 +415,6 @@ namespace WebApplication1.Migrations
                     b.Navigation("Receipt");
                 });
 
-            modelBuilder.Entity("WebApplication1.Data.Receipt", b =>
-                {
-                    b.HasOne("WebApplication1.Data.User", "User")
-                        .WithMany("ReceiptList")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("FK_User_Receipt");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("WebApplication1.Data.RelationData.BookCategory", b =>
                 {
                     b.HasOne("WebApplication1.Data.Book", "Book")
@@ -575,13 +469,6 @@ namespace WebApplication1.Migrations
             modelBuilder.Entity("WebApplication1.Data.Receipt", b =>
                 {
                     b.Navigation("FullReceiptList");
-                });
-
-            modelBuilder.Entity("WebApplication1.Data.User", b =>
-                {
-                    b.Navigation("ReceiptList");
-
-                    b.Navigation("RefreshTokenList");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.Voucher", b =>

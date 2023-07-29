@@ -1,21 +1,21 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using WebApplication1.Data.RelationData;
 
 namespace WebApplication1.Data
 {
-    [Table("Category")]
-    public class Category
+    [Table("Voucher")]
+    public class Voucher
     {
         [Key]
         public Guid Id { get; set; }
-        [Required]
         public required string Name { get; set; }
-        public string Description { get; set; }
+        public float discountFloat { get; set; }
+        public double discountAmount { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
 
         // Relationship
-        public ICollection<BookCategory> BookCategories { get; set; }
+        public ICollection<BookVoucher> BookVouchers { get; set; }
+
     }
 }

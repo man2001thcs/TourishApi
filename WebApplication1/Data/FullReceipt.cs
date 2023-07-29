@@ -1,5 +1,8 @@
-﻿namespace WebApplication1.Data
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace WebApplication1.Data
 {
+    [Table("FullReceipt")]
     public class FullReceipt
     {
         public Guid ReceiptId { get; set; }
