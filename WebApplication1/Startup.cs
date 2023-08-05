@@ -36,6 +36,7 @@ namespace MyWebApiApp
 
             services.AddScoped<IBookRepository, BookRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IVoucherRepository, VoucherRepository>();
 
             services.Configure<AppSetting>(Configuration.GetSection("AppSettings"));
 

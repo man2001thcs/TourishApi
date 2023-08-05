@@ -4,10 +4,12 @@
     {
         public int PageIndex { get; set; }
         public int TotalPage { get; set; }
+        public int TotalCount { get; set; }
 
         public PaginatorModel(List<T> items, int count, int pageIndex, int pageSize)
         {
             PageIndex = pageIndex;
+            TotalCount = count;
             TotalPage = (int)Math.Ceiling(count / (double)pageSize);
             AddRange(items);
         }

@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 using WebApplication1.Model;
+using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -24,17 +26,42 @@ namespace WebApplication1.Controllers.Category
         {
             try
             {
-                var category = new CategoryModel
+                var categoryExist = _categoryRepository.getByName(categoryModel.Name);
+
+                if (categoryExist.Data == null)
                 {
-                    Name = categoryModel.Name,
-                    Description = categoryModel.Description,
-                };
-                _categoryRepository.Add(category);
-                return StatusCode(StatusCodes.Status201Created, category);
+                    var category = new CategoryModel
+                    {
+                        Name = categoryModel.Name,
+                        Description = categoryModel.Description,
+                    };
+
+                    Debug.WriteLine(category.ToString());
+
+                    _categoryRepository.Add(category);
+
+                    var response = new Response
+                    {
+                        resultCd = 0,
+                        MessageCode = "I201",
+                    };
+                    return Ok(response);
+                }
+                else
+                {
+                    var response = new Response
+                    {
+                        resultCd = 1,
+                        MessageCode = "C201",
+                    };
+                    return StatusCode(StatusCodes.Status200OK, response);
+                }
+
             }
-            catch
+
+            catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest(ex);
             }
         }
     }

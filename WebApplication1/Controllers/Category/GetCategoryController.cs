@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -18,16 +19,22 @@ namespace WebApplication1.Controllers.Category
 
         // GET: api/<ValuesController>
         [HttpGet]
-        public IActionResult GetAll(string? search, string? sortBy, int page = 1)
+        public IActionResult GetAll(string? search, string? sortBy, int page = 1, int pageSize = 5)
         {
             try
             {
-                var categoryList = _categoryRepository.GetAll(search, sortBy, page = 1);
+                var categoryList = _categoryRepository.GetAll(search, sortBy, page, pageSize);
                 return Ok(categoryList);
             }
-            catch
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError);
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C204",
+                    Error = ex.Message
+                };
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
 
         }
@@ -35,14 +42,32 @@ namespace WebApplication1.Controllers.Category
         [HttpGet("{id}")]
         public IActionResult GetById(Guid id)
         {
-            var category = _categoryRepository.getById(id);
-            if (category == null)
+            try
             {
-                return NotFound();
+                var category = _categoryRepository.getById(id);
+                if (category == null)
+                {
+                    var response = new Response
+                    {
+                        resultCd = 1,
+                        MessageCode = "C200",
+                    };
+                    return NotFound(response);
+                }
+                else
+                {
+                    return Ok(category);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return Ok(category);
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C204",
+                    Error = ex.Message
+                };
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
         }
     }

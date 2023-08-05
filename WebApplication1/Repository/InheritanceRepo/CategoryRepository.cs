@@ -20,8 +20,10 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             var category = new Category
             {
-                Id = categoryModel.Id,
                 Name = categoryModel.Name,
+                Description = categoryModel.Description,
+                CreateDate = DateTime.UtcNow,
+                UpdateDate = DateTime.UtcNow,
             };
             _context.Add(category);
             _context.SaveChanges();
@@ -29,7 +31,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             return new Response
             {
                 resultCd = 0,
-                MessageCode = "I001",
+                MessageCode = "I201",
                 // Create type success               
             };
 
@@ -48,12 +50,12 @@ namespace WebApplication1.Repository.InheritanceRepo
             return new Response
             {
                 resultCd = 0,
-                MessageCode = "D001",
+                MessageCode = "I203",
                 // Delete type success               
             };
         }
 
-        public Response GetAll(string? search, string? sortBy, int page = 1)
+        public Response GetAll(string? search, string? sortBy, int page = 1, int pageSize = 5)
         {
             var categoryQuery = _context.Categories.AsQueryable();
 
@@ -86,13 +88,14 @@ namespace WebApplication1.Repository.InheritanceRepo
             #endregion
 
             #region Paging
-            var result = PaginatorModel<Category>.Create(categoryQuery, page, PAGE_SIZE);
+            var result = PaginatorModel<Category>.Create(categoryQuery, page, pageSize);
             #endregion
 
             var categoryVM = new Response
             {
                 resultCd = 0,
                 Data = result.ToList(),
+                count = result.TotalCount,
             };
             return categoryVM;
 
@@ -102,7 +105,18 @@ namespace WebApplication1.Repository.InheritanceRepo
         {
             var category = _context.Categories.FirstOrDefault((category
                 => category.Id == id));
-            if (category == null) { return null; }
+
+            return new Response
+            {
+                resultCd = 0,
+                Data = category
+            };
+        }
+
+        public Response getByName(String name)
+        {
+            var category = _context.Categories.FirstOrDefault((category
+                => category.Name == name));
 
             return new Response
             {
@@ -126,7 +140,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             return new Response
             {
                 resultCd = 0,
-                MessageCode = "U001",
+                MessageCode = "I202",
                 // Update type success               
             };
         }

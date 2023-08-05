@@ -47,7 +47,7 @@ namespace WebApplication1.Controllers
             return Ok(new Response
             {
                 resultCd = 0,
-                MessageCode = "C000",
+                MessageCode = "I000",
                 Data = token
             });
         }
@@ -175,7 +175,7 @@ namespace WebApplication1.Controllers
                 // Check 2: Check algorithm
                 if (validatedToken is JwtSecurityToken jwtSecurityToken)
                 {
-                    var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha512Signature, StringComparison.InvariantCultureIgnoreCase);
+                    var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha512, StringComparison.InvariantCultureIgnoreCase);
 
                     if (!result)
                     {
@@ -205,7 +205,19 @@ namespace WebApplication1.Controllers
                     });
                 }
 
-                // Check 4: Check if refreshToken exist in db
+                // Check 4: Check expired
+                var expiredDateExt = expiredDate.AddMinutes(30);
+                if (expiredDateExt < DateTime.UtcNow)
+                {
+                    return Ok(new Response
+                    {
+                        resultCd = 1,
+                        MessageCode = "C004",
+                        // expired
+                    });
+                }
+
+                // Check 5: Check if refreshToken exist in db
                 var existToken = _context.RefreshTokens.FirstOrDefault(token =>
                 token.TokenDescription == tokenModel.RefreshToken
                );
@@ -215,18 +227,18 @@ namespace WebApplication1.Controllers
                     return Ok(new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C004",
+                        MessageCode = "C005",
                         // Refresh token does not exist
                     });
                 }
 
-                // Check 5: Check if refreshToken is used or revoked
+                // Check 6: Check if refreshToken is used or revoked
                 if (existToken.IsUsed)
                 {
                     return Ok(new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C005",
+                        MessageCode = "C006",
                         // Refresh token has been used
                     });
                 }
@@ -236,19 +248,19 @@ namespace WebApplication1.Controllers
                     return Ok(new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C006",
+                        MessageCode = "C007",
                         // Refresh token has been revoked
                     });
                 }
 
-                // Check 6: Check if accesstoken.id == JwtId in refreshtoken
+                // Check 7: Check if accesstoken.id == JwtId in refreshtoken
                 var jti = tokenInverification.Claims.FirstOrDefault(token => token.Type == JwtRegisteredClaimNames.Jti).Value;
                 if (existToken.JwtId != jti)
                 {
                     return Ok(new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C007",
+                        MessageCode = "C008",
                         // Token doesnt match
                     });
                 }
@@ -266,7 +278,8 @@ namespace WebApplication1.Controllers
                 return Ok(new Response
                 {
                     resultCd = 0,
-                    MessageCode = "C000",
+                    MessageCode = "I001",
+                    Data = token
                 });
 
 
@@ -276,7 +289,7 @@ namespace WebApplication1.Controllers
                 return BadRequest(new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C003",
+                    MessageCode = "C009",
                     Error = ex.Message
                 });
             }
