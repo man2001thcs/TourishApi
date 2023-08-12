@@ -1,48 +1,48 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.Book
+namespace WebApplication1.Controllers.Voucher
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UpdateBookController : ControllerBase
+    public class DeleteVoucherController : ControllerBase
     {
-        private readonly IBookRepository _bookRepository;
+        private readonly IVoucherRepository _voucherRepository;
 
-        public UpdateBookController(IBookRepository bookRepository)
+        public DeleteVoucherController(IVoucherRepository voucherRepository)
         {
-            _bookRepository = bookRepository;
+            _voucherRepository = voucherRepository;
         }
 
-        [HttpPut("{id}")]
-        [Authorize(Policy = "UpdateBookAccess")]
-        public IActionResult UpdateBookById(Guid id, BookModel bookModel)
+        [HttpDelete("{id}")]
+        [Authorize(Policy = "DeleteVoucherAccess")]
+        public IActionResult DeleteById(Guid id)
         {
+
             try
             {
-                _bookRepository.Update(bookModel);
+                _voucherRepository.Delete(id);
                 var response = new Response
                 {
                     resultCd = 0,
-                    MessageCode = "I102",
+                    MessageCode = "I303",
                 };
                 return Ok(response);
             }
-            catch (Exception ex)
+            catch
             {
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C104",
-                    Error = ex.Message
+                    MessageCode = "C304",
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
+
 
         }
     }

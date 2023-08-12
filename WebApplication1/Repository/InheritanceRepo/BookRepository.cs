@@ -14,7 +14,7 @@ public class BookRepository : IBookRepository
         this._context = _context;
     }
 
-    public BookModel Add(BookModel bookModel)
+    public Response Add(BookModel bookModel)
     {
 
         var book = new Book
@@ -30,32 +30,34 @@ public class BookRepository : IBookRepository
         _context.Add(book);
         _context.SaveChanges();
 
-        return new BookModel
+        return new Response
         {
-            id = bookModel.id,
-            Title = bookModel.Title,
-            Description = bookModel.Description,
-            PageNumber = bookModel.PageNumber,
-            CreateDate = bookModel.CreateDate,
-            UpdateDate = bookModel.UpdateDate,
-            PublisherId = bookModel.PublisherId,
-            AuthorId = bookModel.AuthorId,
+            resultCd = 0,
+            MessageCode = "I101",
+            // Create type success               
         };
 
     }
 
-    public void Delete(Guid id)
+    public Response Delete(Guid id)
     {
         var book = _context.Books.FirstOrDefault((book
-           => book.id == id));
+          => book.id == id));
         if (book != null)
         {
             _context.Remove(book);
             _context.SaveChanges();
         }
+
+        return new Response
+        {
+            resultCd = 0,
+            MessageCode = "I103",
+            // Delete type success               
+        };
     }
 
-    public BookVM GetAll(string? search, double? from, double? to, string? sortBy, int page = 1)
+    public Response GetAll(string? search, double? from, double? to, string? sortBy, int page = 1)
     {
         var bookQuery = _context.Books.Include(book => book.BookStatus).
             Include(book => book.BookCategories).
@@ -104,31 +106,43 @@ public class BookRepository : IBookRepository
         var result = PaginatorModel<Book>.Create(bookQuery, page, PAGE_SIZE);
         #endregion
 
-        var bookVM = new BookVM
+        var bookVM = new Response
         {
             resultCd = 0,
             Data = result.ToList(),
+            count = result.TotalCount,
         };
-        return bookVM;
 
+        return bookVM;
     }
 
-    public BookVM getById(Guid id)
+    public Response getById(Guid id)
     {
         var book = _context.Books.Where(book => book.id == id).Include(book => book.BookStatus).
-            Include(book => book.BookCategories).
-            ThenInclude(book => book.Category).FirstOrDefault();
+           Include(book => book.BookCategories).
+           ThenInclude(book => book.Category).FirstOrDefault();
         if (book == null) { return null; }
 
-        var bookVM = new BookVM
+        return new Response
         {
             resultCd = 0,
-            Data = book,
+            Data = book
         };
-        return bookVM;
     }
 
-    public void Update(BookModel bookModel)
+    public Response getByName(String Title)
+    {
+        var book = _context.Books.FirstOrDefault((book
+            => book.Title == Title));
+
+        return new Response
+        {
+            resultCd = 0,
+            Data = book
+        };
+    }
+
+    public Response Update(BookModel bookModel)
     {
         var book = _context.Books.FirstOrDefault((book
             => book.id == bookModel.id));
@@ -142,6 +156,12 @@ public class BookRepository : IBookRepository
             book.PublisherId = book.PublisherId;
             _context.SaveChanges();
         }
-    }
 
+        return new Response
+        {
+            resultCd = 0,
+            MessageCode = "I102",
+            // Update type success               
+        };
+    }
 }

@@ -119,6 +119,20 @@ namespace WebApplication1.Controllers
                 permissions.Add(PolicyTerm.CREATE_CATEGORY);
                 permissions.Add(PolicyTerm.UPDATE_CATEGORY);
                 permissions.Add(PolicyTerm.DELETE_CATEGORY);
+
+
+                permissions.Add(PolicyTerm.CREATE_VOUCHER);
+                permissions.Add(PolicyTerm.UPDATE_VOUCHER);
+                permissions.Add(PolicyTerm.DELETE_VOUCHER);
+
+                permissions.Add(PolicyTerm.CREATE_AUTHOR);
+                permissions.Add(PolicyTerm.UPDATE_AUTHOR);
+                permissions.Add(PolicyTerm.DELETE_AUTHOR);
+
+
+                permissions.Add(PolicyTerm.CREATE_PUBLISHER);
+                permissions.Add(PolicyTerm.UPDATE_PUBLISHER);
+                permissions.Add(PolicyTerm.DELETE_PUBLISHER);
             }
 
             if (role == UserRole.Staff)

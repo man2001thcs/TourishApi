@@ -23,6 +23,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 Name = voucherModel.Name,
                 DiscountFloat = voucherModel.DiscountFloat,
                 DiscountAmount = voucherModel.DiscountAmount,
+                Description = voucherModel.Description,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
@@ -116,7 +117,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response getById(Guid id)
         {
-            var voucher = _context.Categories.FirstOrDefault((voucher
+            var voucher = _context.Vouchers.FirstOrDefault((voucher
                 => voucher.Id == id));
 
             return new Response
@@ -128,7 +129,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response getByName(String name)
         {
-            var voucher = _context.Categories.FirstOrDefault((voucher
+            var voucher = _context.Vouchers.FirstOrDefault((voucher
                 => voucher.Name == name));
 
             return new Response
@@ -148,6 +149,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 voucher.Name = voucherModel.Name;
                 voucher.DiscountFloat = voucherModel.DiscountFloat;
                 voucher.DiscountAmount = voucherModel.DiscountAmount;
+                voucher.Description = voucherModel.Description;
                 _context.SaveChanges();
             }
 

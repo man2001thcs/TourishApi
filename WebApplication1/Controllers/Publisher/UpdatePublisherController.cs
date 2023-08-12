@@ -6,30 +6,31 @@ using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.Book
+namespace WebApplication1.Controllers.Publisher
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UpdateBookController : ControllerBase
+    public class UpdatePublisherController : ControllerBase
     {
-        private readonly IBookRepository _bookRepository;
+        private readonly IPublisherRepository _publisherRepository;
 
-        public UpdateBookController(IBookRepository bookRepository)
+        public UpdatePublisherController(IPublisherRepository publisherRepository)
         {
-            _bookRepository = bookRepository;
+            _publisherRepository = publisherRepository;
         }
 
         [HttpPut("{id}")]
-        [Authorize(Policy = "UpdateBookAccess")]
-        public IActionResult UpdateBookById(Guid id, BookModel bookModel)
+        [Authorize(Policy = "UpdatePublisherAccess")]
+        public IActionResult UpdatePublisherById(Guid id, PublisherModel PublisherModel)
         {
+
             try
             {
-                _bookRepository.Update(bookModel);
+                _publisherRepository.Update(PublisherModel);
                 var response = new Response
                 {
                     resultCd = 0,
-                    MessageCode = "I102",
+                    MessageCode = "I502",
                 };
                 return Ok(response);
             }
@@ -38,11 +39,13 @@ namespace WebApplication1.Controllers.Book
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C104",
+                    MessageCode = "C504",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
+
+
 
         }
     }

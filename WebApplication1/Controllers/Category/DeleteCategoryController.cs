@@ -22,27 +22,25 @@ namespace WebApplication1.Controllers.Category
         [Authorize(Policy = "DeleteCategoryAccess")]
         public IActionResult DeleteById(Guid id)
         {
-            {
-                try
-                {
-                    _categoryRepository.Delete(id);
-                    var response = new Response
-                    {
-                        resultCd = 0,
-                        MessageCode = "I203",
-                    };
-                    return Ok(response);
-                }
-                catch
-                {
-                    var response = new Response
-                    {
-                        resultCd = 1,
-                        MessageCode = "C204",
-                    };
-                    return StatusCode(StatusCodes.Status500InternalServerError, response);
-                }
 
+            try
+            {
+                _categoryRepository.Delete(id);
+                var response = new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "I203",
+                };
+                return Ok(response);
+            }
+            catch
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C204",
+                };
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
         }
     }

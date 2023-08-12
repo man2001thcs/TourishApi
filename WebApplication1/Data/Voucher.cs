@@ -11,6 +11,7 @@ namespace WebApplication1.Data
         public required string Name { get; set; }
         public float DiscountFloat { get; set; }
         public double DiscountAmount { get; set; }
+        public string Description { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
 

@@ -37,6 +37,8 @@ namespace MyWebApiApp
             services.AddScoped<IBookRepository, BookRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IVoucherRepository, VoucherRepository>();
+            services.AddScoped<IAuthorRepository, AuthorRepository>();
+            services.AddScoped<IPublisherRepository, PublisherRepository>();
 
             services.Configure<AppSetting>(Configuration.GetSection("AppSettings"));
 
@@ -64,18 +66,39 @@ namespace MyWebApiApp
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("CreateBookAccess", policy =>
-                                  policy.RequireClaim("Permissions", "createBook:term"));
+                                  policy.RequireClaim("Permissions", PolicyTerm.CREATE_BOOK));
                 options.AddPolicy("UpdateBookAccess", policy =>
-                                  policy.RequireClaim("Permissions", "updateBook:term"));
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_BOOK));
                 options.AddPolicy("DeleteBookAccess", policy =>
-                                  policy.RequireClaim("Permissions", "deleteBook:term"));
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_BOOK));
 
                 options.AddPolicy("CreateCategoryAccess", policy =>
-                                 policy.RequireClaim("Permissions", "createCategory:term"));
+                                 policy.RequireClaim("Permissions", PolicyTerm.CREATE_CATEGORY));
                 options.AddPolicy("UpdateCategoryAccess", policy =>
-                                  policy.RequireClaim("Permissions", "updateCategory:term"));
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_CATEGORY));
                 options.AddPolicy("DeleteCategoryAccess", policy =>
-                                  policy.RequireClaim("Permissions", "deleteCategory:term"));
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_CATEGORY));
+
+                options.AddPolicy("CreateVoucherAccess", policy =>
+                                policy.RequireClaim("Permissions", PolicyTerm.CREATE_VOUCHER));
+                options.AddPolicy("UpdateVoucherAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_VOUCHER));
+                options.AddPolicy("DeleteVoucherAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_VOUCHER));
+
+                options.AddPolicy("CreatePublisherAccess", policy =>
+                               policy.RequireClaim("Permissions", PolicyTerm.CREATE_PUBLISHER));
+                options.AddPolicy("UpdatePublisherAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_PUBLISHER));
+                options.AddPolicy("DeletePublisherAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_PUBLISHER));
+
+                options.AddPolicy("CreateAuthorAccess", policy =>
+                             policy.RequireClaim("Permissions", PolicyTerm.CREATE_AUTHOR));
+                options.AddPolicy("UpdateAuthorAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_AUTHOR));
+                options.AddPolicy("DeleteAuthorAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_AUTHOR));
             });
 
             services.AddSwaggerGen(c =>

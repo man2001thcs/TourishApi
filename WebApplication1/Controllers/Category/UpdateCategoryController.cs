@@ -23,29 +23,29 @@ namespace WebApplication1.Controllers.Category
         [Authorize(Policy = "UpdateCategoryAccess")]
         public IActionResult UpdateCategoryById(Guid id, CategoryModel CategoryModel)
         {
-            {
-                try
-                {
-                    _categoryRepository.Update(CategoryModel);
-                    var response = new Response
-                    {
-                        resultCd = 0,
-                        MessageCode = "I202",
-                    };
-                    return Ok(response);
-                }
-                catch (Exception ex)
-                {
-                    var response = new Response
-                    {
-                        resultCd = 1,
-                        MessageCode = "C204",
-                        Error = ex.Message
-                    };
-                    return StatusCode(StatusCodes.Status500InternalServerError, response);
-                }
 
+            try
+            {
+                _categoryRepository.Update(CategoryModel);
+                var response = new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "I202",
+                };
+                return Ok(response);
             }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C204",
+                    Error = ex.Message
+                };
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+
+
 
         }
     }

@@ -4,34 +4,34 @@ using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.Book
+namespace WebApplication1.Controllers.Author
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GetBookController : ControllerBase
+    public class GetAuthorController : ControllerBase
     {
-        private readonly IBookRepository _bookRepository;
+        private readonly IAuthorRepository _authorRepository;
 
-        public GetBookController(IBookRepository bookRepository)
+        public GetAuthorController(IAuthorRepository authorRepository)
         {
-            _bookRepository = bookRepository;
+            _authorRepository = authorRepository;
         }
 
         // GET: api/<ValuesController>
         [HttpGet]
-        public IActionResult GetAll(string? search, double? from, double? to, string? sortBy, int pageSize = 1)
+        public IActionResult GetAll(string? search, string? sortBy, int page = 1, int pageSize = 5)
         {
             try
             {
-                var bookList = _bookRepository.GetAll(search, from, to, sortBy, pageSize);
-                return Ok(bookList);
+                var authorList = _authorRepository.GetAll(search, sortBy, page, pageSize);
+                return Ok(authorList);
             }
             catch (Exception ex)
             {
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C104",
+                    MessageCode = "C404",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
@@ -44,19 +44,19 @@ namespace WebApplication1.Controllers.Book
         {
             try
             {
-                var book = _bookRepository.getById(id);
-                if (book.Data == null)
+                var author = _authorRepository.getById(id);
+                if (author.Data == null)
                 {
                     var response = new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C100",
+                        MessageCode = "C400",
                     };
                     return NotFound(response);
                 }
                 else
                 {
-                    return Ok(book);
+                    return Ok(author);
                 }
             }
             catch (Exception ex)
@@ -64,7 +64,7 @@ namespace WebApplication1.Controllers.Book
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C104",
+                    MessageCode = "C404",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
@@ -72,3 +72,4 @@ namespace WebApplication1.Controllers.Book
         }
     }
 }
+

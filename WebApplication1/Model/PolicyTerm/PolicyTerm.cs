@@ -12,6 +12,17 @@
         public const string DELETE_CATEGORY = "deleteCategory:term";
         public const string UPDATE_CATEGORY = "updateCategory:term";
 
+        public const string CREATE_VOUCHER = "createVoucher:term";
+        public const string DELETE_VOUCHER = "deleteVoucher:term";
+        public const string UPDATE_VOUCHER = "updateVoucher:term";
+
+        public const string CREATE_AUTHOR = "createAuthor:term";
+        public const string DELETE_AUTHOR = "deleteAuthor:term";
+        public const string UPDATE_AUTHOR = "updateAuthor:term";
+
+        public const string CREATE_PUBLISHER = "createPublisher:term";
+        public const string DELETE_PUBLISHER = "deletePublisher:term";
+        public const string UPDATE_PUBLISHER = "updatePublisher:term";
 
     }
 
