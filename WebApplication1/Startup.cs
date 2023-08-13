@@ -7,6 +7,8 @@ using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
 using WebApplication1.Repository.InheritanceRepo;
 using WebApplication1.Repository.Interface;
+using WebApplication1.Repository.Interface.Relation;
+using WebApplication1.Repository.Relation.InheritanceRepo;
 
 namespace MyWebApiApp
 {
@@ -39,6 +41,12 @@ namespace MyWebApiApp
             services.AddScoped<IVoucherRepository, VoucherRepository>();
             services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddScoped<IPublisherRepository, PublisherRepository>();
+
+            // Relation
+            services.AddScoped<IBookCategoryRepository, BookCategoryRepository>();
+            services.AddScoped<IBookVoucherRepository, BookVoucherRepository>();
+            services.AddScoped<IBookAuthorRepository, BookAuthorRepository>();
+            services.AddScoped<IBookPublisherRepository, BookPublisherRepository>();
 
             services.Configure<AppSetting>(Configuration.GetSection("AppSettings"));
 

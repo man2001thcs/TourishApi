@@ -14,11 +14,10 @@ namespace WebApplication1.Data
         [MaxLength(100)]
         public string? Title { get; set; }
 
-        [Required]
         [MaxLength(200)]
         public string? Description { get; set; }
         public int PageNumber { get; set; }
-        public Guid PublisherId { get; set; }
+        public Guid? PublisherId { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
 

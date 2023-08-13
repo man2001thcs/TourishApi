@@ -18,6 +18,12 @@ namespace WebApplication1.Data.DbContextFile
         public DbSet<Voucher> Vouchers { get; set; }
         public DbSet<Author> Authors { get; set; }
         public DbSet<Publisher> Publishers { get; set; }
+
+        // Relation
+        public DbSet<BookCategory> BookCategoryList { get; set; }
+        public DbSet<BookAuthor> BookAuthorList { get; set; }
+        public DbSet<BookVoucher> BookVoucherList { get; set; }
+        public DbSet<BookPublisher> BookPublisherList { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         #endregion

@@ -42,7 +42,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response Delete(Guid id)
         {
-            var author = _context.Categories.FirstOrDefault((author
+            var author = _context.Authors.FirstOrDefault((author
                => author.Id == id));
             if (author != null)
             {

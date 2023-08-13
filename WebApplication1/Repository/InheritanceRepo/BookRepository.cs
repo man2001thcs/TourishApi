@@ -57,7 +57,7 @@ public class BookRepository : IBookRepository
         };
     }
 
-    public Response GetAll(string? search, double? from, double? to, string? sortBy, int page = 1)
+    public Response GetAll(string? search, double? from, double? to, string? sortBy, int page = 1, int pageSize = 5)
     {
         var bookQuery = _context.Books.Include(book => book.BookStatus).
             Include(book => book.BookCategories).

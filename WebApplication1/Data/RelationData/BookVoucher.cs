@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace WebApplication1.Data
+namespace WebApplication1.Data.RelationData
 {
     [Table("BookVoucher")]
     public class BookVoucher
