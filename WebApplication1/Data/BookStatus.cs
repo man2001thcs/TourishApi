@@ -7,6 +7,7 @@ namespace WebApplication1.Data
     public class BookStatus
     {
         [Key]
+        public Guid Id { get; set; }
         public Guid ProductId { get; set; }
         public int SoldNumberInMonth { get; set; }
         public int TotalSoldNumber { get; set; }

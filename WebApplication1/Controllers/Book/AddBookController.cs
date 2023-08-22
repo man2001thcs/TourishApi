@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
@@ -13,33 +14,33 @@ namespace WebApplication1.Controllers.Book
     public class AddBookController : ControllerBase
     {
         private readonly IBookRepository _bookRepository;
+        private readonly IBookStatusRepository _bookStatusRepository;
 
-        public AddBookController(IBookRepository bookRepository)
+        private readonly char[] delimiter = new char[] { ';' };
+
+        public AddBookController(IBookRepository bookRepository, IBookStatusRepository bookStatusRepository
+            )
         {
             _bookRepository = bookRepository;
+            _bookStatusRepository = bookStatusRepository;
         }
 
         [HttpPost]
         [Authorize(Policy = "CreateBookAccess")]
-        public IActionResult CreateNew(BookModel bookModel)
+        public async Task<IActionResult> CreateNew(BookInsertModel bookInsertModel)
         {
             try
             {
 
-                var authorExist = _bookRepository.getByName(bookModel.Title);
+                var bookExist = _bookRepository.getByName(bookInsertModel.Title);
 
-                if (authorExist.Data == null)
+                if (bookExist.Data == null)
                 {
-                    var book = new BookModel
-                    {
-                        id = bookModel.id,
-                        Title = bookModel.Title,
-                        AuthorId = bookModel.AuthorId,
-                        Description = bookModel.Description,
-                        PublisherId = bookModel.PublisherId,
-                        PageNumber = bookModel.PageNumber,
-                    };
-                    _bookRepository.Add(book);
+                    var bookReturn = await _bookRepository.Add(bookInsertModel);
+
+                    var bookReturnId = (Guid)bookReturn.returnId;
+
+                    Debug.Write(bookReturnId);
 
                     var response = new Response
                     {
@@ -58,9 +59,17 @@ namespace WebApplication1.Controllers.Book
                     return StatusCode(StatusCodes.Status200OK, response);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                return BadRequest();
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C105",
+                    Error = ex.Message,
+                    Data = ex
+
+                };
+                return BadRequest(response);
             }
         }
     }

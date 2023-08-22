@@ -9,11 +9,11 @@ namespace WebApplication1.Controllers.Publisher
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DeletePublisherController : ControllerBase
+    public class DeletedPublisherController : ControllerBase
     {
         private readonly IPublisherRepository _publisherRepository;
 
-        public DeletePublisherController(IPublisherRepository publisherRepository)
+        public DeletedPublisherController(IPublisherRepository publisherRepository)
         {
             _publisherRepository = publisherRepository;
         }

@@ -6,30 +6,31 @@ using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.Book
+namespace WebApplication1.Controllers.Notification
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UpdateBookController : ControllerBase
+    public class UpdateNotificationController : ControllerBase
     {
-        private readonly IBookRepository _bookRepository;
+        private readonly INotificationRepository _notificationRepository;
 
-        public UpdateBookController(IBookRepository bookRepository)
+        public UpdateNotificationController(INotificationRepository notificationRepository)
         {
-            _bookRepository = bookRepository;
+            _notificationRepository = notificationRepository;
         }
 
         [HttpPut("{id}")]
-        [Authorize(Policy = "UpdateBookAccess")]
-        public IActionResult UpdateBookById(Guid id, BookInsertModel bookModel)
+        [Authorize(Policy = "UpdateNotificationAccess")]
+        public IActionResult UpdateNotificationById(Guid id, NotificationModel NotificationModel)
         {
+
             try
             {
-                _bookRepository.Update(bookModel);
+                _notificationRepository.Update(NotificationModel);
                 var response = new Response
                 {
                     resultCd = 0,
-                    MessageCode = "I102",
+                    MessageCode = "I502",
                 };
                 return Ok(response);
             }
@@ -38,11 +39,13 @@ namespace WebApplication1.Controllers.Book
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C104",
+                    MessageCode = "C504",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
+
+
 
         }
     }

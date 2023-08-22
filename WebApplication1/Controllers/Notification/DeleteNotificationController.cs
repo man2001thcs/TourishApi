@@ -1,48 +1,48 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.Book
+namespace WebApplication1.Controllers.Notification
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UpdateBookController : ControllerBase
+    public class DeleteNotificationController : ControllerBase
     {
-        private readonly IBookRepository _bookRepository;
+        private readonly INotificationRepository _notificationRepository;
 
-        public UpdateBookController(IBookRepository bookRepository)
+        public DeleteNotificationController(INotificationRepository notificationRepository)
         {
-            _bookRepository = bookRepository;
+            _notificationRepository = notificationRepository;
         }
 
-        [HttpPut("{id}")]
-        [Authorize(Policy = "UpdateBookAccess")]
-        public IActionResult UpdateBookById(Guid id, BookInsertModel bookModel)
+        [HttpDelete("{id}")]
+        [Authorize(Policy = "DeleteNotificationAccess")]
+        public IActionResult DeleteById(Guid id)
         {
+
             try
             {
-                _bookRepository.Update(bookModel);
+                _notificationRepository.Delete(id);
                 var response = new Response
                 {
                     resultCd = 0,
-                    MessageCode = "I102",
+                    MessageCode = "I503",
                 };
                 return Ok(response);
             }
-            catch (Exception ex)
+            catch
             {
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C104",
-                    Error = ex.Message
+                    MessageCode = "C504",
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }
+
 
         }
     }

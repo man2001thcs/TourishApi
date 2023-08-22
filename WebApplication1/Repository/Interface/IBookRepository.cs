@@ -8,8 +8,8 @@ namespace WebApplication1.Repository.Interface
         Response GetAll(string? search, double? from, double? to, string? sortBy, int page = 1, int pageSize = 5);
         Response getById(Guid id);
         Response getByName(String Title);
-        Response Add(BookModel bookModel);
-        Response Update(BookModel bookModel);
+        Task<Response> Add(BookInsertModel bookModel);
+        Response Update(BookInsertModel bookModel);
         Response Delete(Guid id);
     }
 }

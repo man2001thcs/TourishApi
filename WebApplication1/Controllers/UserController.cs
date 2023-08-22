@@ -52,6 +52,43 @@ namespace WebApplication1.Controllers
             });
         }
 
+        [HttpPost("SignIn")]
+        public async Task<IActionResult> SignIn(UserModel model)
+        {
+            var user = _context.Users.SingleOrDefault(p => p.UserName == model.UserName || p.Email == model.Email);
+            if (user == null) //không đúng
+            {
+                var userInsert = new User
+                {
+                    FullName = model.UserName,
+                    Email = model.Email,
+                    Password = model.Password,
+                    PhoneNumber = model.PhoneNumber,
+                    Address = model.Address,
+                    UserName = model.UserName,
+                };
+                _context.Users.Add(userInsert);
+            }
+            else
+            {
+                return Ok(new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C001"
+                });
+            }
+
+            //cấp token
+            var token = await GenerateToken(user);
+
+            return Ok(new Response
+            {
+                resultCd = 0,
+                MessageCode = "I000",
+                Data = token
+            });
+        }
+
         private async Task<TokenModel> GenerateToken(User user)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
@@ -75,7 +112,7 @@ namespace WebApplication1.Controllers
 
                 }),
 
-                Expires = DateTime.UtcNow.AddMinutes(10),
+                Expires = DateTime.UtcNow.AddMinutes(20),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha512Signature)
             };
 
@@ -220,7 +257,7 @@ namespace WebApplication1.Controllers
                 }
 
                 // Check 4: Check expired
-                var expiredDateExt = expiredDate.AddMinutes(30);
+                var expiredDateExt = expiredDate.AddMinutes(40);
                 if (expiredDateExt < DateTime.UtcNow)
                 {
                     return Ok(new Response

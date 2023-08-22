@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data.Authentication;
+using WebApplication1.Data.Connection;
 using WebApplication1.Data.RelationData;
 
 namespace WebApplication1.Data.DbContextFile
@@ -19,11 +20,20 @@ namespace WebApplication1.Data.DbContextFile
         public DbSet<Author> Authors { get; set; }
         public DbSet<Publisher> Publishers { get; set; }
 
+        //
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+
+        public DbSet<NotificationCon> NotificationConList { get; set; }
+
         // Relation
         public DbSet<BookCategory> BookCategoryList { get; set; }
         public DbSet<BookAuthor> BookAuthorList { get; set; }
         public DbSet<BookVoucher> BookVoucherList { get; set; }
         public DbSet<BookPublisher> BookPublisherList { get; set; }
+        public DbSet<BookStatus> BookStatusList { get; set; }
+
+        //
         public DbSet<User> Users { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         #endregion
@@ -43,7 +53,7 @@ namespace WebApplication1.Data.DbContextFile
             modelBuilder.Entity<BookStatus>(entity =>
             {
                 entity.ToTable(nameof(BookStatus));
-                entity.HasKey(bookStatus => bookStatus.ProductId);
+                entity.HasKey(bookStatus => bookStatus.Id);
                 entity.Property(bookStatus => bookStatus.UpdateDate).IsRequired().HasDefaultValueSql("getutcdate()");
             });
 
@@ -173,6 +183,51 @@ namespace WebApplication1.Data.DbContextFile
                 .WithMany(e => e.RefreshTokenList)
                 .HasForeignKey(e => e.UserId)
                 .HasConstraintName("FK_User_RefreshToken");
+            });
+
+            modelBuilder.Entity<Message>(entity =>
+            {
+                entity.ToTable(nameof(Message));
+                entity.HasKey(message => message.Id);
+                entity.Property(message => message.UpdateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+                entity.Property(message => message.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+                entity.HasOne(e => e.UserSent)
+                .WithMany(e => e.MessageSentList)
+                .HasForeignKey(e => e.UserSentId)
+                .HasConstraintName("FK_User_SentMessage")
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+                entity.HasOne(e => e.UserReceive)
+                .WithMany(e => e.MessageReceiveList)
+                .HasForeignKey(e => e.UserReceiveId)
+                .HasConstraintName("FK_User_ReceiveMessage")
+                .OnDelete(DeleteBehavior.ClientSetNull);
+            });
+
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.ToTable(nameof(Notification));
+                entity.HasKey(notification => notification.Id);
+                entity.Property(notification => notification.UpdateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+                entity.Property(notification => notification.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+                entity.HasOne(e => e.User)
+                .WithMany(e => e.NotificationList)
+                .HasForeignKey(e => e.UserId)
+                .HasConstraintName("FK_User_Notification");
+            });
+
+            modelBuilder.Entity<NotificationCon>(entity =>
+            {
+                entity.ToTable(nameof(NotificationCon));
+                entity.HasKey(notification => notification.Id);
+                entity.Property(notification => notification.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+                entity.HasOne(e => e.User)
+                .WithMany(e => e.NotificationConList)
+                .HasForeignKey(e => e.UserId)
+                .HasConstraintName("FK_User_NotificationCon");
             });
         }
     }

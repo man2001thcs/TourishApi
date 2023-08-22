@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using WebApplication1.Data.Authentication;
+using WebApplication1.Data.Connection;
 
 namespace WebApplication1.Data
 {
@@ -27,6 +28,11 @@ namespace WebApplication1.Data
 
         public ICollection<RefreshToken> RefreshTokenList { get; set; }
         public ICollection<Receipt> ReceiptList { get; set; }
+        public ICollection<Message> MessageSentList { get; set; }
+        public ICollection<Message> MessageReceiveList { get; set; }
+        public ICollection<Notification> NotificationList { get; set; }
+
+        public ICollection<NotificationCon> NotificationConList { get; set; }
 
         public User()
         {

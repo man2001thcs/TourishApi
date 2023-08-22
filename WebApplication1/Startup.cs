@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SignalR.Hub;
 using System.Text;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
 using WebApplication1.Repository.InheritanceRepo;
 using WebApplication1.Repository.Interface;
-using WebApplication1.Repository.Interface.Relation;
-using WebApplication1.Repository.Relation.InheritanceRepo;
 
 namespace MyWebApiApp
 {
@@ -24,6 +24,18 @@ namespace MyWebApiApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAngularOrigins",
+                builder =>
+                {
+                    builder.WithOrigins("http://localhost:4200")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .SetIsOriginAllowed((host) => true)
+                   .AllowCredentials();
+                });
+            });
 
             services.AddControllers();
 
@@ -42,11 +54,10 @@ namespace MyWebApiApp
             services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddScoped<IPublisherRepository, PublisherRepository>();
 
-            // Relation
-            services.AddScoped<IBookCategoryRepository, BookCategoryRepository>();
-            services.AddScoped<IBookVoucherRepository, BookVoucherRepository>();
-            services.AddScoped<IBookAuthorRepository, BookAuthorRepository>();
-            services.AddScoped<IBookPublisherRepository, BookPublisherRepository>();
+            services.AddScoped<IBookStatusRepository, BookStatusRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
+
+            services.AddSingleton<IUserIdProvider, IdBasedUserIdProvider>();
 
             services.Configure<AppSetting>(Configuration.GetSection("AppSettings"));
 
@@ -133,6 +144,7 @@ namespace MyWebApiApp
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<NotificationHub>("api/user/notify");
                 endpoints.MapControllers();
             });
         }

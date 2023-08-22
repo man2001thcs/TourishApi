@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
+using WebApplication1.Data.RelationData;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
@@ -9,31 +10,47 @@ public class BookRepository : IBookRepository
 {
     private readonly MyDbContext _context;
     public static int PAGE_SIZE { get; set; } = 5;
+    private readonly char[] delimiter = new char[] { ';' };
     public BookRepository(MyDbContext _context)
     {
         this._context = _context;
     }
 
-    public Response Add(BookModel bookModel)
+    public async Task<Response> Add(BookInsertModel bookModel)
     {
+
+        var bookStatus = new BookStatus
+        {
+            CurrentPrice = bookModel.CurrentPrice,
+            TotalSoldNumber = bookModel.TotalSoldNumber,
+            RemainNumber = bookModel.RemainNumber,
+            SoldNumberInMonth = bookModel.SoldNumberInMonth,
+        };
+
 
         var book = new Book
         {
-            id = new Guid(),
             Title = bookModel.Title,
             Description = bookModel.Description,
             PageNumber = bookModel.PageNumber,
-            CreateDate = bookModel.CreateDate,
-            UpdateDate = bookModel.UpdateDate,
             PublisherId = bookModel.PublisherId,
+            CreateDate = DateTime.UtcNow,
+            UpdateDate = DateTime.UtcNow,
+
+            BookStatus = bookStatus,
+            BookAuthors = AddBookAuthor(bookModel.AuthorRelationString),
+            BookCategories = AddBookCategory(bookModel.CategoryRelationString),
+            BookVouchers = AddBookVoucher(bookModel.VoucherRelationString)
         };
+
         _context.Add(book);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         return new Response
         {
             resultCd = 0,
             MessageCode = "I101",
+            returnId = book.id,
             // Create type success               
         };
 
@@ -142,8 +159,17 @@ public class BookRepository : IBookRepository
         };
     }
 
-    public Response Update(BookModel bookModel)
+    public Response Update(BookInsertModel bookModel)
     {
+        var bookStatus = new BookStatus
+        {
+            CurrentPrice = bookModel.CurrentPrice,
+            TotalSoldNumber = bookModel.TotalSoldNumber,
+            RemainNumber = bookModel.RemainNumber,
+            SoldNumberInMonth = bookModel.SoldNumberInMonth,
+        };
+
+
         var book = _context.Books.FirstOrDefault((book
             => book.id == bookModel.id));
         if (book != null)
@@ -154,6 +180,12 @@ public class BookRepository : IBookRepository
             book.PageNumber = book.PageNumber;
             book.CreateDate = book.CreateDate;
             book.PublisherId = book.PublisherId;
+
+            book.BookStatus = bookStatus;
+            book.BookAuthors = AddBookAuthor(bookModel.AuthorRelationString);
+            book.BookCategories = AddBookCategory(bookModel.CategoryRelationString);
+            book.BookVouchers = AddBookVoucher(bookModel.VoucherRelationString);
+
             _context.SaveChanges();
         }
 
@@ -163,5 +195,62 @@ public class BookRepository : IBookRepository
             MessageCode = "I102",
             // Update type success               
         };
+    }
+
+    private List<BookAuthor> AddBookAuthor(string RelationArrayString)
+    {
+        var bookAuthorList = new List<BookAuthor>();
+
+        string[] RelationArray = RelationArrayString.Split(delimiter);
+
+        if (RelationArray.Length > 0)
+        {
+            foreach (var Relation in RelationArray)
+            {
+                bookAuthorList.Add(new BookAuthor
+                {
+                    AuthorId = Guid.Parse(Relation)
+                });
+            }
+        }
+        return bookAuthorList;
+    }
+
+    private List<BookVoucher> AddBookVoucher(string RelationArrayString)
+    {
+        var bookVoucherList = new List<BookVoucher>();
+
+        string[] RelationArray = RelationArrayString.Split(delimiter);
+
+        if (RelationArray.Length > 0)
+        {
+            foreach (var Relation in RelationArray)
+            {
+                bookVoucherList.Add(new BookVoucher
+                {
+                    VoucherId = Guid.Parse(Relation)
+                });
+            }
+        }
+        return bookVoucherList;
+    }
+
+    private List<BookCategory> AddBookCategory(string RelationArrayString)
+    {
+        var bookCategoryList = new List<BookCategory>();
+
+        string[] RelationArray = RelationArrayString.Split(delimiter);
+
+        if (RelationArray.Length > 0)
+        {
+            foreach (var Relation in RelationArray)
+            {
+                bookCategoryList.Add(new BookCategory
+                {
+                    CategoryId = Guid.Parse(Relation)
+                });
+            }
+        }
+        return bookCategoryList;
     }
 }

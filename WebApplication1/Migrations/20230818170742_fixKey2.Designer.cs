@@ -12,8 +12,8 @@ using WebApplication1.Data.DbContextFile;
 namespace WebApplication1.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20230722175041_AddUser")]
-    partial class AddUser
+    [Migration("20230818170742_fixKey2")]
+    partial class fixKey2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,42 @@ namespace WebApplication1.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("WebApplication1.Data.Authentication.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ExpiredDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("IssueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("JwtId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TokenDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshToken", (string)null);
+                });
 
             modelBuilder.Entity("WebApplication1.Data.Author", b =>
                 {
@@ -71,14 +107,13 @@ namespace WebApplication1.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("PageNumber")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("PublisherId")
+                    b.Property<Guid?>("PublisherId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Title")
@@ -94,43 +129,17 @@ namespace WebApplication1.Migrations
                     b.ToTable("Book");
                 });
 
-            modelBuilder.Entity("WebApplication1.Data.BookAuthor", b =>
-                {
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AuthorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("BookId", "AuthorId");
-
-                    b.HasIndex("AuthorId");
-
-                    b.ToTable("BookAuthor", (string)null);
-                });
-
-            modelBuilder.Entity("WebApplication1.Data.BookPublisher", b =>
-                {
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("PublisherId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("BookId", "PublisherId");
-
-                    b.HasIndex("PublisherId");
-
-                    b.ToTable("BookPublisher", (string)null);
-                });
-
             modelBuilder.Entity("WebApplication1.Data.BookStatus", b =>
                 {
-                    b.Property<Guid>("ProductId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("CurrentPrice")
                         .HasColumnType("float");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("RemainNumber")
                         .HasColumnType("int");
@@ -146,24 +155,12 @@ namespace WebApplication1.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("getutcdate()");
 
-                    b.HasKey("ProductId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId")
+                        .IsUnique();
 
                     b.ToTable("BookStatus", (string)null);
-                });
-
-            modelBuilder.Entity("WebApplication1.Data.BookVoucher", b =>
-                {
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("VoucherId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("BookId", "VoucherId");
-
-                    b.HasIndex("VoucherId");
-
-                    b.ToTable("BookVoucher", (string)null);
                 });
 
             modelBuilder.Entity("WebApplication1.Data.Category", b =>
@@ -174,6 +171,10 @@ namespace WebApplication1.Migrations
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -272,7 +273,24 @@ namespace WebApplication1.Migrations
 
                     b.HasKey("ReceiptId");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("Receipt", (string)null);
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.RelationData.BookAuthor", b =>
+                {
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("BookId", "AuthorId");
+
+                    b.HasIndex("AuthorId");
+
+                    b.ToTable("BookAuthor", (string)null);
                 });
 
             modelBuilder.Entity("WebApplication1.Data.RelationData.BookCategory", b =>
@@ -288,6 +306,36 @@ namespace WebApplication1.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("BookCategory", (string)null);
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.RelationData.BookPublisher", b =>
+                {
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PublisherId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("BookId", "PublisherId");
+
+                    b.HasIndex("PublisherId");
+
+                    b.ToTable("BookPublisher", (string)null);
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.RelationData.BookVoucher", b =>
+                {
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VoucherId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("BookId", "VoucherId");
+
+                    b.HasIndex("VoucherId");
+
+                    b.ToTable("BookVoucher", (string)null);
                 });
 
             modelBuilder.Entity("WebApplication1.Data.User", b =>
@@ -342,6 +390,16 @@ namespace WebApplication1.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("DiscountAmount")
+                        .HasColumnType("float");
+
+                    b.Property<float>("DiscountFloat")
+                        .HasColumnType("real");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -351,57 +409,21 @@ namespace WebApplication1.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("getutcdate()");
 
-                    b.Property<double>("discountAmount")
-                        .HasColumnType("float");
-
-                    b.Property<float>("discountFloat")
-                        .HasColumnType("real");
-
                     b.HasKey("Id");
 
                     b.ToTable("Voucher", (string)null);
                 });
 
-            modelBuilder.Entity("WebApplication1.Data.BookAuthor", b =>
+            modelBuilder.Entity("WebApplication1.Data.Authentication.RefreshToken", b =>
                 {
-                    b.HasOne("WebApplication1.Data.Author", "Author")
-                        .WithMany("BookAuthors")
-                        .HasForeignKey("AuthorId")
+                    b.HasOne("WebApplication1.Data.User", "User")
+                        .WithMany("RefreshTokenList")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_BookAuthor_Author");
+                        .HasConstraintName("FK_User_RefreshToken");
 
-                    b.HasOne("WebApplication1.Data.Book", "Book")
-                        .WithMany("BookAuthors")
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_BookAuthor_Book");
-
-                    b.Navigation("Author");
-
-                    b.Navigation("Book");
-                });
-
-            modelBuilder.Entity("WebApplication1.Data.BookPublisher", b =>
-                {
-                    b.HasOne("WebApplication1.Data.Book", "Book")
-                        .WithMany("BookPublishers")
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_BookPublisher_Book");
-
-                    b.HasOne("WebApplication1.Data.Publisher", "Publisher")
-                        .WithMany("BookPublishers")
-                        .HasForeignKey("PublisherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_BookPublisher_Publisher");
-
-                    b.Navigation("Book");
-
-                    b.Navigation("Publisher");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.BookStatus", b =>
@@ -414,27 +436,6 @@ namespace WebApplication1.Migrations
                         .HasConstraintName("FK_Book_BookStatus");
 
                     b.Navigation("Book");
-                });
-
-            modelBuilder.Entity("WebApplication1.Data.BookVoucher", b =>
-                {
-                    b.HasOne("WebApplication1.Data.Book", "Book")
-                        .WithMany("BookVouchers")
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_BookVoucher_Book");
-
-                    b.HasOne("WebApplication1.Data.Voucher", "Voucher")
-                        .WithMany("BookVouchers")
-                        .HasForeignKey("VoucherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_BookVoucher_Voucher");
-
-                    b.Navigation("Book");
-
-                    b.Navigation("Voucher");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.FullReceipt", b =>
@@ -458,6 +459,39 @@ namespace WebApplication1.Migrations
                     b.Navigation("Receipt");
                 });
 
+            modelBuilder.Entity("WebApplication1.Data.Receipt", b =>
+                {
+                    b.HasOne("WebApplication1.Data.User", "User")
+                        .WithMany("ReceiptList")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_User_Receipt");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.RelationData.BookAuthor", b =>
+                {
+                    b.HasOne("WebApplication1.Data.Author", "Author")
+                        .WithMany("BookAuthors")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_BookAuthor_Author");
+
+                    b.HasOne("WebApplication1.Data.Book", "Book")
+                        .WithMany("BookAuthors")
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_BookAuthor_Book");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Book");
+                });
+
             modelBuilder.Entity("WebApplication1.Data.RelationData.BookCategory", b =>
                 {
                     b.HasOne("WebApplication1.Data.Book", "Book")
@@ -477,6 +511,48 @@ namespace WebApplication1.Migrations
                     b.Navigation("Book");
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.RelationData.BookPublisher", b =>
+                {
+                    b.HasOne("WebApplication1.Data.Book", "Book")
+                        .WithMany("BookPublishers")
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_BookPublisher_Book");
+
+                    b.HasOne("WebApplication1.Data.Publisher", "Publisher")
+                        .WithMany("BookPublishers")
+                        .HasForeignKey("PublisherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_BookPublisher_Publisher");
+
+                    b.Navigation("Book");
+
+                    b.Navigation("Publisher");
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.RelationData.BookVoucher", b =>
+                {
+                    b.HasOne("WebApplication1.Data.Book", "Book")
+                        .WithMany("BookVouchers")
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_BookVoucher_Book");
+
+                    b.HasOne("WebApplication1.Data.Voucher", "Voucher")
+                        .WithMany("BookVouchers")
+                        .HasForeignKey("VoucherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_BookVoucher_Voucher");
+
+                    b.Navigation("Book");
+
+                    b.Navigation("Voucher");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.Author", b =>
@@ -512,6 +588,13 @@ namespace WebApplication1.Migrations
             modelBuilder.Entity("WebApplication1.Data.Receipt", b =>
                 {
                     b.Navigation("FullReceiptList");
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.User", b =>
+                {
+                    b.Navigation("ReceiptList");
+
+                    b.Navigation("RefreshTokenList");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.Voucher", b =>

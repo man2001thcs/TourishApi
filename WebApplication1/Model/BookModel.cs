@@ -12,4 +12,20 @@
         public DateTime UpdateDate { get; set; }
 
     }
+
+    public class BookInsertModel
+    {
+        public Guid id { get; set; }
+        public Guid PublisherId { get; set; }
+        public string Title { get; set; }
+        public int PageNumber { get; set; }
+        public string Description { get; set; }
+        public int SoldNumberInMonth { get; set; }
+        public int TotalSoldNumber { get; set; }
+        public int RemainNumber { get; set; }
+        public double CurrentPrice { get; set; }
+        public string CategoryRelationString { get; set; }
+        public string AuthorRelationString { get; set; }
+        public string VoucherRelationString { get; set; }
+    }
 }

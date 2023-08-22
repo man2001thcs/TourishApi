@@ -8,6 +8,8 @@
 
         public object? Data { get; set; }
 
+        public Guid? returnId { get; set; }
+
         public int? count { get; set; }
     }
 }
