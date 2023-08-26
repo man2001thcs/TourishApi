@@ -19,11 +19,11 @@ namespace WebApplication1.Controllers.Book
 
         // GET: api/<ValuesController>
         [HttpGet]
-        public IActionResult GetAll(string? search, double? from, double? to, string? sortBy, int pageSize = 1)
+        public IActionResult GetAll(string? search, double? from, double? to, string? sortBy, int page = 1, int pageSize = 5)
         {
             try
             {
-                var bookList = _bookRepository.GetAll(search, from, to, sortBy, pageSize);
+                var bookList = _bookRepository.GetAll(search, from, to, sortBy, page, pageSize);
                 return Ok(bookList);
             }
             catch (Exception ex)

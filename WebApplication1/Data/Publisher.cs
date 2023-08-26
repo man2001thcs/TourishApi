@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using WebApplication1.Data.RelationData;
 
 namespace WebApplication1.Data
 {
@@ -23,6 +22,6 @@ namespace WebApplication1.Data
         public DateTime UpdateDate { get; set; }
 
         // Relationship
-        public ICollection<BookPublisher> BookPublishers { get; set; }
+        public ICollection<Book> BookList { get; set; }
     }
 }

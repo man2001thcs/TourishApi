@@ -21,11 +21,11 @@ namespace WebApplication1.Controllers.Book
 
         [HttpPut("{id}")]
         [Authorize(Policy = "UpdateBookAccess")]
-        public IActionResult UpdateBookById(Guid id, BookInsertModel bookModel)
+        public async Task<IActionResult> UpdateBookById(Guid id, BookUpdateModel bookModel)
         {
             try
             {
-                _bookRepository.Update(bookModel);
+                await _bookRepository.Update(bookModel);
                 var response = new Response
                 {
                     resultCd = 0,

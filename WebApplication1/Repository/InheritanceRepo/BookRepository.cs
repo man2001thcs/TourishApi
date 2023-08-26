@@ -135,9 +135,15 @@ public class BookRepository : IBookRepository
 
     public Response getById(Guid id)
     {
-        var book = _context.Books.Where(book => book.id == id).Include(book => book.BookStatus).
-           Include(book => book.BookCategories).
-           ThenInclude(book => book.Category).FirstOrDefault();
+        var book = _context.Books.Where(book => book.id == id).Include(book => book.BookStatus)
+            .Include(book => book.Publisher)
+           .Include(book => book.BookCategories)
+           .ThenInclude(book => book.Category)
+            .Include(book => book.BookVouchers)
+           .ThenInclude(book => book.Voucher)
+            .Include(book => book.BookAuthors)
+           .ThenInclude(book => book.Author)
+           .FirstOrDefault();
         if (book == null) { return null; }
 
         return new Response
@@ -159,32 +165,44 @@ public class BookRepository : IBookRepository
         };
     }
 
-    public Response Update(BookInsertModel bookModel)
+    public async Task<Response> Update(BookUpdateModel bookModel)
     {
-        var bookStatus = new BookStatus
-        {
-            CurrentPrice = bookModel.CurrentPrice,
-            TotalSoldNumber = bookModel.TotalSoldNumber,
-            RemainNumber = bookModel.RemainNumber,
-            SoldNumberInMonth = bookModel.SoldNumberInMonth,
-        };
-
-
         var book = _context.Books.FirstOrDefault((book
             => book.id == bookModel.id));
         if (book != null)
         {
-            book.UpdateDate = DateTime.UtcNow;
-            book.Title = book.Title;
-            book.Description = book.Description;
-            book.PageNumber = book.PageNumber;
-            book.CreateDate = book.CreateDate;
-            book.PublisherId = book.PublisherId;
 
-            book.BookStatus = bookStatus;
-            book.BookAuthors = AddBookAuthor(bookModel.AuthorRelationString);
-            book.BookCategories = AddBookCategory(bookModel.CategoryRelationString);
-            book.BookVouchers = AddBookVoucher(bookModel.VoucherRelationString);
+            book.Title = bookModel.Title ?? book.Title;
+            book.Description = bookModel.Description ?? book.Description;
+            book.PageNumber = bookModel.PageNumber ?? book.PageNumber;
+            book.PublisherId = bookModel.PublisherId ?? book.PublisherId;
+
+
+            if (bookModel.BookStatus != null)
+            {
+                book.BookStatus = bookModel.BookStatus;
+            };
+
+
+            if (bookModel.AuthorRelationString != "" && bookModel.AuthorRelationString != null)
+            {
+                await _context.BookAuthorList.Where(a => a.BookId == bookModel.id).ExecuteDeleteAsync();
+                book.BookAuthors = AddBookAuthor(bookModel.AuthorRelationString);
+            }
+
+            if (bookModel.CategoryRelationString != "" && bookModel.CategoryRelationString != null)
+            {
+                await _context.BookCategoryList.Where(a => a.BookId == bookModel.id).ExecuteDeleteAsync();
+                book.BookCategories = AddBookCategory(bookModel.CategoryRelationString);
+            }
+
+            if (bookModel.VoucherRelationString != "" && bookModel.VoucherRelationString != null)
+            {
+                await _context.BookVoucherList.Where(a => a.BookId == bookModel.id).ExecuteDeleteAsync();
+                book.BookVouchers = AddBookVoucher(bookModel.VoucherRelationString);
+            }
+
+            book.UpdateDate = DateTime.UtcNow;
 
             _context.SaveChanges();
         }

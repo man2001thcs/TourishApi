@@ -24,7 +24,7 @@ namespace WebApplication1.Data
         // Relationship
         public BookStatus? BookStatus { get; set; }
         public ICollection<BookCategory> BookCategories { get; set; }
-        public ICollection<BookPublisher> BookPublishers { get; set; }
+        public Publisher? Publisher { get; set; }
         public ICollection<BookAuthor> BookAuthors { get; set; }
         public ICollection<FullReceipt> FullReceiptList { get; set; }
         public ICollection<BookVoucher> BookVouchers { get; set; }

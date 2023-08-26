@@ -9,7 +9,7 @@ namespace WebApplication1.Repository.Interface
         Response getById(Guid id);
         Response getByName(String Title);
         Task<Response> Add(BookInsertModel bookModel);
-        Response Update(BookInsertModel bookModel);
+        Task<Response> Update(BookUpdateModel bookModel);
         Response Delete(Guid id);
     }
 }

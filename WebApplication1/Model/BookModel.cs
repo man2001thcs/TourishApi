@@ -1,4 +1,6 @@
-﻿namespace WebApplication1.Model
+﻿using WebApplication1.Data;
+
+namespace WebApplication1.Model
 {
     public class BookModel
     {
@@ -27,5 +29,20 @@
         public string CategoryRelationString { get; set; }
         public string AuthorRelationString { get; set; }
         public string VoucherRelationString { get; set; }
+    }
+
+    public class BookUpdateModel
+    {
+        public Guid id { get; set; }
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public int? PageNumber { get; set; }
+        public Guid? PublisherId { get; set; }
+
+        // Relationship
+        public BookStatus? BookStatus { get; set; }
+        public string? CategoryRelationString { get; set; }
+        public string? AuthorRelationString { get; set; }
+        public string? VoucherRelationString { get; set; }
     }
 }

@@ -27,6 +27,12 @@ namespace SignalR.Hub
             await Clients.All.SendOffersToAll(notification);
         }
 
+        public async Task SendTotalNumber(Guid userId)
+        {
+            var notificationCount = _context.Notifications.Where(u => u.UserId == userId && !u.IsRead && !u.IsDeleted).Count();
+            await Clients.All.SendString(notificationCount.ToString());
+        }
+
         public async Task SendString(String a)
         {
             await Clients.All.SendString(a);
@@ -112,7 +118,7 @@ namespace SignalR.Hub
             var connection = _context.NotificationConList.FirstOrDefault(u => u.ConnectionID == Context.ConnectionId);
             if (connection != null)
                 connection.Connected = false;
-           await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             Debug.WriteLine("Disconnected!!");
 
             await base.OnDisconnectedAsync(exception);

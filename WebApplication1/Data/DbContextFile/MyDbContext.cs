@@ -30,7 +30,6 @@ namespace WebApplication1.Data.DbContextFile
         public DbSet<BookCategory> BookCategoryList { get; set; }
         public DbSet<BookAuthor> BookAuthorList { get; set; }
         public DbSet<BookVoucher> BookVoucherList { get; set; }
-        public DbSet<BookPublisher> BookPublisherList { get; set; }
         public DbSet<BookStatus> BookStatusList { get; set; }
 
         //
@@ -134,18 +133,13 @@ namespace WebApplication1.Data.DbContextFile
                 .HasConstraintName("FK_BookCategory_Category");
             });
 
-            modelBuilder.Entity<BookPublisher>(entity =>
+            modelBuilder.Entity<Publisher>(entity =>
             {
-                entity.ToTable(nameof(BookPublisher));
-                entity.HasKey(e => new { e.BookId, e.PublisherId });
+                entity.ToTable(nameof(Publisher));
+                entity.HasKey(e => e.Id);
 
-                entity.HasOne(e => e.Book)
-                .WithMany(b => b.BookPublishers)
-                .HasForeignKey(e => e.BookId)
-                .HasConstraintName("FK_BookPublisher_Book");
-
-                entity.HasOne(e => e.Publisher)
-                .WithMany(c => c.BookPublishers)
+                entity.HasMany(e => e.BookList)
+                .WithOne(c => c.Publisher)
                 .HasForeignKey(e => e.PublisherId)
                 .HasConstraintName("FK_BookPublisher_Publisher");
             });
