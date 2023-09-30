@@ -1,22 +1,22 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace WebApplication1.Data
+namespace WebApplication1.Data.RestHouse
 {
-    [Table("Author")]
-    public class Author
+    [Table("Hotel")]
+    public class Hotel
     {
         [Key]
         public Guid Id { get; set; }
 
         [Required]
-        [MaxLength(50)]
-        public required string Name { get; set; }
-        public string? PhoneNumber { get; set; }
-        public string? Email { get; set; }
-        public string? Address { get; set; }
+        [MaxLength(100)]
+        public required string PlaceBranch { get; set; }
+        public string? HotlineNumber { get; set; }
+        public string? SupportEmail { get; set; }
+        public string? HeadQuarterAddress { get; set; }
         [Required]
-        [MaxLength(200)]
+        [MaxLength(900)]
         public string? Description { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }

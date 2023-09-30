@@ -38,12 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-	  <Content Include="Resources\*">
-		  <CopyToPublishDirectory>always</CopyToPublishDirectory>
-	  </Content>
-	  
-	  <Folder Include="Migrations\" />
-	  <Folder Include="Resources\Images\" />
+	  <Folder Include="Repository\InheritanceRepo\" />
 	  <Folder Include="wwwroot\Resources\Images\" />
   </ItemGroup>
 

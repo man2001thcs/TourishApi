@@ -57,17 +57,7 @@ namespace MyWebApiApp
                 });
             });
 
-            services.AddScoped<IBookRepository, BookRepository>();
-            services.AddScoped<ICategoryRepository, CategoryRepository>();
-            services.AddScoped<IVoucherRepository, VoucherRepository>();
             services.AddScoped<IAuthorRepository, AuthorRepository>();
-            services.AddScoped<IPublisherRepository, PublisherRepository>();
-            services.AddScoped<IReceiptRepository, ReceiptRepository>();
-
-            services.AddScoped<IBookStatusRepository, BookStatusRepository>();
-            services.AddScoped<INotificationRepository, NotificationRepository>();
-            services.AddScoped<IMessageRepository, MessageRepository>();
-            services.AddScoped<IFileRepository, FileRepository>();
 
             services.AddScoped(x => new BlobServiceClient(Configuration.GetValue<string>("AzureBlobStorage")));
             services.AddScoped<IBlobService, BlobService>();
@@ -99,34 +89,6 @@ namespace MyWebApiApp
             // Book permission
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("CreateBookAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.CREATE_BOOK));
-                options.AddPolicy("UpdateBookAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_BOOK));
-                options.AddPolicy("DeleteBookAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_BOOK));
-
-                options.AddPolicy("CreateCategoryAccess", policy =>
-                                 policy.RequireClaim("Permissions", PolicyTerm.CREATE_CATEGORY));
-                options.AddPolicy("UpdateCategoryAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_CATEGORY));
-                options.AddPolicy("DeleteCategoryAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_CATEGORY));
-
-                options.AddPolicy("CreateVoucherAccess", policy =>
-                                policy.RequireClaim("Permissions", PolicyTerm.CREATE_VOUCHER));
-                options.AddPolicy("UpdateVoucherAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_VOUCHER));
-                options.AddPolicy("DeleteVoucherAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_VOUCHER));
-
-                options.AddPolicy("CreatePublisherAccess", policy =>
-                               policy.RequireClaim("Permissions", PolicyTerm.CREATE_PUBLISHER));
-                options.AddPolicy("UpdatePublisherAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_PUBLISHER));
-                options.AddPolicy("DeletePublisherAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_PUBLISHER));
-
                 options.AddPolicy("CreateAuthorAccess", policy =>
                                   policy.RequireClaim("Permissions", PolicyTerm.CREATE_AUTHOR));
                 options.AddPolicy("UpdateAuthorAccess", policy =>
@@ -134,12 +96,6 @@ namespace MyWebApiApp
                 options.AddPolicy("DeleteAuthorAccess", policy =>
                                   policy.RequireClaim("Permissions", PolicyTerm.DELETE_AUTHOR));
 
-                options.AddPolicy("CreateReceiptAccess", policy =>
-                                 policy.RequireClaim("Permissions", PolicyTerm.CREATE_RECEIPT));
-                options.AddPolicy("UpdateReceiptAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_RECEIPT));
-                options.AddPolicy("DeleteReceiptAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_RECEIPT));
 
                 options.AddPolicy("CreateMessageAccess", policy =>
                                   policy.RequireClaim("Permissions", PolicyTerm.CREATE_MESSAGE));
