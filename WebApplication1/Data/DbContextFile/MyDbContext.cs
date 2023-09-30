@@ -25,6 +25,9 @@ namespace WebApplication1.Data.DbContextFile
         public DbSet<Notification> Notifications { get; set; }
 
         public DbSet<NotificationCon> NotificationConList { get; set; }
+        public DbSet<MessageCon> MessageConList { get; set; }
+
+        public DbSet<SaveFile> SaveFileList { get; set; }
 
         // Relation
         public DbSet<BookCategory> BookCategoryList { get; set; }
@@ -99,6 +102,8 @@ namespace WebApplication1.Data.DbContextFile
                 .HasForeignKey<BookStatus>(e => e.ProductId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Book_BookStatus");
+
+                entity.Property(e => e.Description).HasColumnType("ntext");
             });
 
             modelBuilder.Entity<BookAuthor>(entity =>
@@ -222,6 +227,24 @@ namespace WebApplication1.Data.DbContextFile
                 .WithMany(e => e.NotificationConList)
                 .HasForeignKey(e => e.UserId)
                 .HasConstraintName("FK_User_NotificationCon");
+            });
+
+            modelBuilder.Entity<MessageCon>(entity =>
+            {
+                entity.ToTable(nameof(MessageCon));
+                entity.HasKey(message => message.Id);
+                entity.Property(message => message.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+                entity.HasOne(e => e.User)
+                .WithMany(e => e.MessageConList)
+                .HasForeignKey(e => e.UserId)
+                .HasConstraintName("FK_User_MessageCon");
+            });
+
+            modelBuilder.Entity<SaveFile>(entity =>
+            {
+                entity.ToTable(nameof(SaveFile));
+                entity.Property(saveFile => saveFile.CreatedDate).IsRequired().HasDefaultValueSql("getutcdate()");
             });
         }
     }

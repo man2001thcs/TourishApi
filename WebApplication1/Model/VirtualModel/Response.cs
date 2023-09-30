@@ -10,6 +10,8 @@
 
         public Guid? returnId { get; set; }
 
+        public string? type { get; set; }
+
         public int? count { get; set; }
     }
 }

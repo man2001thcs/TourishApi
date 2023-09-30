@@ -7,14 +7,14 @@ namespace WebApplication1.Data
     {
         public Guid ReceiptId { get; set; }
         public Guid ProductId { get; set; }
-        public int totalNumber { get; set; }
-        public double singlePrice { get; set; }
-        public float discountFloat { get; set; }
-        public double discountAmount { get; set; }
+        public int TotalNumber { get; set; }
+        public double SinglePrice { get; set; }
+        public float DiscountFloat { get; set; }
+        public double DiscountAmount { get; set; }
 
         // Relationship
-        public required Book Book { get; set; }
-        public required Receipt Receipt { get; set; }
+        public Book Book { get; set; }
+        public Receipt Receipt { get; set; }
 
     }
 }

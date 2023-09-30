@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using SignalR.Hub;
 using SignalR.Hub.Client;
-using System.Diagnostics;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
@@ -26,7 +26,7 @@ namespace WebApplication1.Controllers.Notification
         }
 
         [HttpPost]
-        //[Authorize(Policy = "CreateNotificationAccess")]
+        [Authorize(Policy = "CreateNotificationAccess")]
         public IActionResult CreateNew(NotificationModel notificationModel)
         {
             try
@@ -45,8 +45,6 @@ namespace WebApplication1.Controllers.Notification
                         CreateDate = DateTime.Now,
                     };
 
-                    Debug.WriteLine(notification.ToString());
-
                     _notificationRepository.Add(notification);
 
                     notificationHub.Clients.All.SendOffersToAll(notification);
@@ -54,7 +52,7 @@ namespace WebApplication1.Controllers.Notification
                     var response = new Response
                     {
                         resultCd = 0,
-                        MessageCode = "I501",
+                        MessageCode = "I701",
                     };
                     return Ok(response);
                 }
@@ -63,7 +61,7 @@ namespace WebApplication1.Controllers.Notification
                     var response = new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C501",
+                        MessageCode = "C701",
                     };
                     return StatusCode(StatusCodes.Status200OK, response);
                 }

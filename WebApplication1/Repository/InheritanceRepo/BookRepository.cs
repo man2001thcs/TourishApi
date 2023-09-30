@@ -34,6 +34,13 @@ public class BookRepository : IBookRepository
             Description = bookModel.Description,
             PageNumber = bookModel.PageNumber,
             PublisherId = bookModel.PublisherId,
+
+            BookSize = bookModel.BookSize,
+            BookWeight = bookModel.BookWeight,
+            CoverMaterial = bookModel.CoverMaterial,
+            PublishYear = bookModel.PublishYear,
+            Language = bookModel.Language,
+
             CreateDate = DateTime.UtcNow,
             UpdateDate = DateTime.UtcNow,
 
@@ -74,11 +81,15 @@ public class BookRepository : IBookRepository
         };
     }
 
-    public Response GetAll(string? search, double? from, double? to, string? sortBy, int page = 1, int pageSize = 5)
+    public Response GetAll(string? search, double? from, double? to, string? sortBy, string? category,
+        string? publisherString, string? authorString, float? saleFloat, int page = 1, int pageSize = 5)
     {
         var bookQuery = _context.Books.Include(book => book.BookStatus).
             Include(book => book.BookCategories).
-            ThenInclude(book => book.Category).AsQueryable();
+            ThenInclude(book => book.Category).
+            Include(Book => Book.BookVouchers).
+            ThenInclude(book => book.Voucher).
+            AsQueryable();
 
         #region Filtering
         if (!string.IsNullOrEmpty(search))
@@ -92,6 +103,59 @@ public class BookRepository : IBookRepository
         if (to.HasValue)
         {
             bookQuery = bookQuery.Where(book => book.BookStatus.CurrentPrice <= to);
+        }
+        #endregion
+
+        #region Category
+        if (!string.IsNullOrEmpty(category))
+        {
+            bookQuery = bookQuery.Where(book =>
+                book.BookCategories.Count(categoryOne =>
+                    categoryOne.Category.Name.Contains(category)
+                ) > 0
+               );
+        }
+        #endregion
+
+        #region SaleFloat
+        if (saleFloat > 0)
+        {
+            bookQuery = bookQuery.Where(book =>
+                book.BookVouchers.Count(voucher =>
+                    voucher.Voucher.DiscountFloat >= saleFloat
+                ) > 0
+               );
+        }
+        #endregion
+
+        #region Publisher
+        if (!string.IsNullOrEmpty(publisherString))
+        {
+            string[] publisherArray = publisherString.Split(delimiter);
+
+            if (publisherArray.Length > 0)
+            {
+                bookQuery = bookQuery.Where(book =>
+                   publisherArray.Contains(book.Publisher.PublisherName)
+
+                );
+            }
+        }
+        #endregion
+
+
+        #region Author
+        if (!string.IsNullOrEmpty(authorString))
+        {
+            string[] authorArray = authorString.Split(delimiter);
+
+            if (authorArray.Length > 0)
+            {
+                bookQuery = bookQuery.Where(book =>
+                book.BookAuthors.Count(author =>
+                    authorArray.Contains(author.Author.Name)) > 0
+               );
+            }
         }
         #endregion
 
@@ -176,6 +240,19 @@ public class BookRepository : IBookRepository
             book.Description = bookModel.Description ?? book.Description;
             book.PageNumber = bookModel.PageNumber ?? book.PageNumber;
             book.PublisherId = bookModel.PublisherId ?? book.PublisherId;
+            book.Language = bookModel.Language;
+
+            book.BookSize = bookModel.BookSize ?? book.BookSize;
+
+            if (!float.IsNaN(bookModel.BookWeight))
+            {
+                book.BookWeight = bookModel.BookWeight;
+            }
+
+
+            book.CoverMaterial = bookModel.CoverMaterial;
+
+            book.PublishYear = bookModel.PublishYear;
 
 
             if (bookModel.BookStatus != null)

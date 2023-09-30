@@ -24,6 +24,18 @@
         public const string DELETE_PUBLISHER = "deletePublisher:term";
         public const string UPDATE_PUBLISHER = "updatePublisher:term";
 
+        public const string CREATE_NOTIFICATION = "createNotification:term";
+        public const string DELETE_NOTIFICATION = "deleteNotification:term";
+        public const string UPDATE_NOTIFICATION = "updateNotification:term";
+
+        public const string CREATE_RECEIPT = "createReceipt:term";
+        public const string DELETE_RECEIPT = "deleteReceipt:term";
+        public const string UPDATE_RECEIPT = "updateReceipt:term";
+
+        public const string CREATE_MESSAGE = "createMessage:term";
+        public const string DELETE_MESSAGE = "deleteMessage:term";
+        public const string UPDATE_MESSAGE = "updateMessage:term";
+
     }
 
 

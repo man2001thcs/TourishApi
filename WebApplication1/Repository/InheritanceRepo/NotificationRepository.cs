@@ -33,7 +33,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             return new Response
             {
                 resultCd = 0,
-                MessageCode = "I201",
+                MessageCode = "I701",
                 // Create type success               
             };
 
@@ -52,7 +52,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             return new Response
             {
                 resultCd = 0,
-                MessageCode = "I203",
+                MessageCode = "I703",
                 // Delete type success               
             };
         }
@@ -143,7 +143,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             return new Response
             {
                 resultCd = 0,
-                MessageCode = "I202",
+                MessageCode = "I702",
                 // Update type success               
             };
         }

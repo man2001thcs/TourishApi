@@ -32,7 +32,7 @@ namespace WebApplication1.Controllers.Notification
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C504",
+                    MessageCode = "C704",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
@@ -51,7 +51,7 @@ namespace WebApplication1.Controllers.Notification
                     var response = new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C500",
+                        MessageCode = "C700",
                     };
                     return NotFound(response);
                 }
@@ -65,7 +65,7 @@ namespace WebApplication1.Controllers.Notification
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C504",
+                    MessageCode = "C704",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);

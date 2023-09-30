@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SignalR.Hub.Client;
-using System.Diagnostics;
 using System.Security.Claims;
 using WebApplication1.Data;
 using WebApplication1.Data.Connection;
@@ -60,16 +59,15 @@ namespace SignalR.Hub
                 {
                     await Clients.Client(connection.ConnectionID).SendOffersToUser(userId, notification);
                 }
-                else
-                {
-                    await Clients.Client(connection.ConnectionID).SendOffersToUser(userId, null);
-                }
             }
             catch (Exception ex)
             {
                 var connection = _context.NotificationConList.FirstOrDefault(u => u.UserId == userId && u.Connected);
                 //await Clients.Client(connection.ConnectionID).SendOffersToUser(userId, null);
-                await Clients.Client(connection.ConnectionID).SendString("gg");
+                if (connection != null)
+                {
+                    await Clients.Client(connection.ConnectionID).SendError(userId, "Lỗi xảy ra: " + ex.ToString());
+                }
             }
 
         }
@@ -81,17 +79,13 @@ namespace SignalR.Hub
 
         public override async Task OnConnectedAsync()
         {
-            var name = Context.User.Identity.Name;
             var userId = Context.User.FindFirstValue("Id");
-
-            Debug.WriteLine("Name: " + Context.User.FindFirstValue("Id"));
 
             var user = _context.Users.Include(u => u.NotificationConList)
                 .SingleOrDefault(u => u.Id.ToString() == userId);
 
             if (user != null)
             {
-                _context.NotificationConList.Where(u => u.UserId.ToString() == userId && u.Connected).ExecuteUpdate(f => f.SetProperty(x => x.Connected, false));
 
                 var notifyCon = new NotificationCon
                 {
@@ -119,7 +113,6 @@ namespace SignalR.Hub
             if (connection != null)
                 connection.Connected = false;
             await _context.SaveChangesAsync();
-            Debug.WriteLine("Disconnected!!");
 
             await base.OnDisconnectedAsync(exception);
         }

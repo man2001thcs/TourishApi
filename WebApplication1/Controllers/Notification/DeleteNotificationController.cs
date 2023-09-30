@@ -29,7 +29,7 @@ namespace WebApplication1.Controllers.Notification
                 var response = new Response
                 {
                     resultCd = 0,
-                    MessageCode = "I503",
+                    MessageCode = "I703",
                 };
                 return Ok(response);
             }
@@ -38,7 +38,7 @@ namespace WebApplication1.Controllers.Notification
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C504",
+                    MessageCode = "C704",
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
             }

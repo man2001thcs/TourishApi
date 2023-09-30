@@ -100,14 +100,29 @@ namespace WebApplication1.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("BookSize")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("BookWeight")
+                        .HasColumnType("real");
+
+                    b.Property<int>("CoverMaterial")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("ntext");
+
+                    b.Property<int>("Language")
+                        .HasColumnType("int");
 
                     b.Property<int>("PageNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PublishYear")
                         .HasColumnType("int");
 
                     b.Property<Guid?>("PublisherId")
@@ -187,6 +202,38 @@ namespace WebApplication1.Migrations
                     b.ToTable("Category");
                 });
 
+            modelBuilder.Entity("WebApplication1.Data.Connection.MessageCon", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Connected")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ConnectionID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getutcdate()");
+
+                    b.Property<string>("UserAgent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("MessageCon", (string)null);
+                });
+
             modelBuilder.Entity("WebApplication1.Data.Connection.NotificationCon", b =>
                 {
                     b.Property<Guid>("Id")
@@ -227,16 +274,16 @@ namespace WebApplication1.Migrations
                     b.Property<Guid>("ReceiptId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("discountAmount")
+                    b.Property<double>("DiscountAmount")
                         .HasColumnType("float");
 
-                    b.Property<float>("discountFloat")
+                    b.Property<float>("DiscountFloat")
                         .HasColumnType("real");
 
-                    b.Property<double>("singlePrice")
+                    b.Property<double>("SinglePrice")
                         .HasColumnType("float");
 
-                    b.Property<int>("totalNumber")
+                    b.Property<int>("TotalNumber")
                         .HasColumnType("int");
 
                     b.HasKey("ProductId", "ReceiptId");
@@ -261,6 +308,9 @@ namespace WebApplication1.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("getutcdate()");
+
+                    b.Property<Guid?>("GroupId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -378,10 +428,24 @@ namespace WebApplication1.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("getutcdate()");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<string>("TransportMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("VoucherId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("ReceiptId");
@@ -434,6 +498,42 @@ namespace WebApplication1.Migrations
                     b.HasIndex("VoucherId");
 
                     b.ToTable("BookVoucher", (string)null);
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.SaveFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccessSourceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("Bookid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getutcdate()");
+
+                    b.Property<string>("FileType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("MessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ResourceType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Bookid");
+
+                    b.HasIndex("MessageId");
+
+                    b.ToTable("SaveFile", (string)null);
                 });
 
             modelBuilder.Entity("WebApplication1.Data.User", b =>
@@ -544,6 +644,18 @@ namespace WebApplication1.Migrations
                         .HasConstraintName("FK_Book_BookStatus");
 
                     b.Navigation("Book");
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.Connection.MessageCon", b =>
+                {
+                    b.HasOne("WebApplication1.Data.User", "User")
+                        .WithMany("MessageConList")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_User_MessageCon");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.Connection.NotificationCon", b =>
@@ -685,6 +797,21 @@ namespace WebApplication1.Migrations
                     b.Navigation("Voucher");
                 });
 
+            modelBuilder.Entity("WebApplication1.Data.SaveFile", b =>
+                {
+                    b.HasOne("WebApplication1.Data.Book", "Book")
+                        .WithMany("Files")
+                        .HasForeignKey("Bookid");
+
+                    b.HasOne("WebApplication1.Data.Message", "Message")
+                        .WithMany("Files")
+                        .HasForeignKey("MessageId");
+
+                    b.Navigation("Book");
+
+                    b.Navigation("Message");
+                });
+
             modelBuilder.Entity("WebApplication1.Data.Author", b =>
                 {
                     b.Navigation("BookAuthors");
@@ -700,12 +827,19 @@ namespace WebApplication1.Migrations
 
                     b.Navigation("BookVouchers");
 
+                    b.Navigation("Files");
+
                     b.Navigation("FullReceiptList");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.Category", b =>
                 {
                     b.Navigation("BookCategories");
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.Message", b =>
+                {
+                    b.Navigation("Files");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.Publisher", b =>
@@ -720,6 +854,8 @@ namespace WebApplication1.Migrations
 
             modelBuilder.Entity("WebApplication1.Data.User", b =>
                 {
+                    b.Navigation("MessageConList");
+
                     b.Navigation("MessageReceiveList");
 
                     b.Navigation("MessageSentList");

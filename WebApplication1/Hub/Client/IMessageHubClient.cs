@@ -3,10 +3,11 @@ using WebApplication1.Model;
 
 namespace SignalR.Hub.Client
 {
-    public interface INotificationHubClient
+    public interface IMessageHubClient
     {
-        Task SendOffersToUser(Guid userId, NotificationModel notification);
-        Task SendOffersToAll(NotificationModel notification);
+        Task SendMessageToUser(Guid userId, MessageModel notification);
+        Task SendMessageToAll(MessageModel notification);
         Task SendString(String stringA);
+        Task SendError(Guid userId, string error);
     }
 }

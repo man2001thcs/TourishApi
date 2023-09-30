@@ -6,8 +6,9 @@ namespace WebApplication1.Data
     public class Message
     {
         public Guid Id { get; set; }
-        public Guid UserSentId { get; set; }
+        public required Guid UserSentId { get; set; }
         public Guid UserReceiveId { get; set; }
+        public Guid? GroupId { get; set; }
         public string Content { get; set; }
         public Boolean IsRead { get; set; }
         public Boolean IsDeleted { get; set; }
@@ -17,5 +18,13 @@ namespace WebApplication1.Data
         // Relationship
         public User UserSent { get; set; }
         public User UserReceive { get; set; }
+        public ICollection<SaveFile>? Files { get; set; }
+
+        public Message()
+        {
+            this.Content = "";
+            this.IsRead = false;
+            this.IsDeleted = false;
+        }
     }
 }

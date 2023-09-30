@@ -8,6 +8,11 @@ namespace WebApplication1.Model
         public string Title { get; set; }
         public int PageNumber { get; set; }
         public string Description { get; set; }
+        public CoverMaterialEnum CoverMaterial { get; set; }
+        public LanguageEnum Language { get; set; }
+        public string BookSize { get; set; }
+        public float BookWeight { get; set; }
+        public int PublishYear { get; set; }
         public Guid PublisherId { get; set; }
         public Guid AuthorId { get; set; }
         public DateTime CreateDate { get; set; }
@@ -22,6 +27,11 @@ namespace WebApplication1.Model
         public string Title { get; set; }
         public int PageNumber { get; set; }
         public string Description { get; set; }
+        public CoverMaterialEnum CoverMaterial { get; set; }
+        public LanguageEnum Language { get; set; }
+        public string BookSize { get; set; }
+        public float BookWeight { get; set; }
+        public int PublishYear { get; set; }
         public int SoldNumberInMonth { get; set; }
         public int TotalSoldNumber { get; set; }
         public int RemainNumber { get; set; }
@@ -38,6 +48,12 @@ namespace WebApplication1.Model
         public string? Description { get; set; }
         public int? PageNumber { get; set; }
         public Guid? PublisherId { get; set; }
+
+        public CoverMaterialEnum CoverMaterial { get; set; }
+        public string BookSize { get; set; }
+        public float BookWeight { get; set; }
+        public int PublishYear { get; set; }
+        public LanguageEnum Language { get; set; }
 
         // Relationship
         public BookStatus? BookStatus { get; set; }

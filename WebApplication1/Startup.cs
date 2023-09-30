@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Azure.Storage.Blobs;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -9,6 +10,8 @@ using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
 using WebApplication1.Repository.InheritanceRepo;
 using WebApplication1.Repository.Interface;
+using WebApplication1.Service;
+using WebApplication1.Trigger;
 
 namespace MyWebApiApp
 {
@@ -45,7 +48,13 @@ namespace MyWebApiApp
 
             services.AddDbContext<MyDbContext>(option =>
             {
-                option.UseSqlServer(Configuration.GetConnectionString("MyDB"));
+                option.UseSqlServer(Configuration.GetConnectionString("AzureDb"));
+
+                option.UseTriggers(triggerOptions =>
+                {
+                    triggerOptions.AddTrigger<NotificationConTrigger>();
+                    triggerOptions.AddTrigger<MessageConTrigger>();
+                });
             });
 
             services.AddScoped<IBookRepository, BookRepository>();
@@ -53,9 +62,15 @@ namespace MyWebApiApp
             services.AddScoped<IVoucherRepository, VoucherRepository>();
             services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddScoped<IPublisherRepository, PublisherRepository>();
+            services.AddScoped<IReceiptRepository, ReceiptRepository>();
 
             services.AddScoped<IBookStatusRepository, BookStatusRepository>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<IMessageRepository, MessageRepository>();
+            services.AddScoped<IFileRepository, FileRepository>();
+
+            services.AddScoped(x => new BlobServiceClient(Configuration.GetValue<string>("AzureBlobStorage")));
+            services.AddScoped<IBlobService, BlobService>();
 
             services.AddSingleton<IUserIdProvider, IdBasedUserIdProvider>();
 
@@ -113,11 +128,32 @@ namespace MyWebApiApp
                                   policy.RequireClaim("Permissions", PolicyTerm.DELETE_PUBLISHER));
 
                 options.AddPolicy("CreateAuthorAccess", policy =>
-                             policy.RequireClaim("Permissions", PolicyTerm.CREATE_AUTHOR));
+                                  policy.RequireClaim("Permissions", PolicyTerm.CREATE_AUTHOR));
                 options.AddPolicy("UpdateAuthorAccess", policy =>
                                   policy.RequireClaim("Permissions", PolicyTerm.UPDATE_AUTHOR));
                 options.AddPolicy("DeleteAuthorAccess", policy =>
                                   policy.RequireClaim("Permissions", PolicyTerm.DELETE_AUTHOR));
+
+                options.AddPolicy("CreateReceiptAccess", policy =>
+                                 policy.RequireClaim("Permissions", PolicyTerm.CREATE_RECEIPT));
+                options.AddPolicy("UpdateReceiptAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_RECEIPT));
+                options.AddPolicy("DeleteReceiptAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_RECEIPT));
+
+                options.AddPolicy("CreateMessageAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.CREATE_MESSAGE));
+                options.AddPolicy("UpdateMessageAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_MESSAGE));
+                options.AddPolicy("DeleteMessageAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_MESSAGE));
+
+                options.AddPolicy("CreateNotificationAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.CREATE_NOTIFICATION));
+                options.AddPolicy("UpdateNotificationAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_NOTIFICATION));
+                options.AddPolicy("DeleteNotificationAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_NOTIFICATION));
             });
 
             services.AddSwaggerGen(c =>
@@ -129,11 +165,24 @@ namespace MyWebApiApp
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
                 app.UseSwagger();
+                app.UseDeveloperExceptionPage();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWebApiApp v1"));
+            }
+
+            if (!env.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseDeveloperExceptionPage();
+
+                app.UseSwaggerUI(options =>
+                {
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWebApiApp v1");
+                    options.RoutePrefix = string.Empty;
+                });
             }
 
             app.UseHttpsRedirection();
@@ -145,6 +194,8 @@ namespace MyWebApiApp
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<NotificationHub>("api/user/notify");
+                endpoints.MapHub<MessageHub>("api/user/message");
+
                 endpoints.MapControllers();
             });
         }
