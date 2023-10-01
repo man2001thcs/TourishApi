@@ -1,20 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TourishApi.Repository.Interface.Resthouse;
 using WebApplication1.Model.VirtualModel;
-using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.Author
+namespace WebApplication1.Controllers.Transport.RestHouse.Hotel
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GetAuthorController : ControllerBase
+    public class GetPassengerCarController : ControllerBase
     {
-        private readonly IAuthorRepository _authorRepository;
+        private readonly IHotelRepository _entityRepository;
 
-        public GetAuthorController(IAuthorRepository authorRepository)
+        public GetPassengerCarController(IHotelRepository entityRepository)
         {
-            _authorRepository = authorRepository;
+            _entityRepository = entityRepository;
         }
 
         // GET: api/<ValuesController>
@@ -23,15 +23,15 @@ namespace WebApplication1.Controllers.Author
         {
             try
             {
-                var authorList = _authorRepository.GetAll(search, sortBy, page, pageSize);
-                return Ok(authorList);
+                var entityList = _entityRepository.GetAll(search, sortBy, page, pageSize);
+                return Ok(entityList);
             }
             catch (Exception ex)
             {
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C404",
+                    MessageCode = "C214",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
@@ -44,19 +44,19 @@ namespace WebApplication1.Controllers.Author
         {
             try
             {
-                var author = _authorRepository.getById(id);
-                if (author.Data == null)
+                var entity = _entityRepository.getById(id);
+                if (entity.Data == null)
                 {
                     var response = new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C400",
+                        MessageCode = "C210",
                     };
                     return NotFound(response);
                 }
                 else
                 {
-                    return Ok(author);
+                    return Ok(entity);
                 }
             }
             catch (Exception ex)
@@ -64,7 +64,7 @@ namespace WebApplication1.Controllers.Author
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C404",
+                    MessageCode = "C214",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);

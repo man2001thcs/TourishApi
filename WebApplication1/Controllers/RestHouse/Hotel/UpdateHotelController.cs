@@ -1,37 +1,33 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1.Model;
+using TourishApi.Repository.Interface.Resthouse;
+using WebApplication1.Model.RestHouse;
 using WebApplication1.Model.VirtualModel;
-using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.Author
+namespace WebApplication1.Controllers.RestHouse.Hotel
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UpdateAuthorController : ControllerBase
+    public class UpdateHotelController : ControllerBase
     {
-        private readonly IAuthorRepository _authorRepository;
+        private readonly IHotelRepository _entityRepository;
 
-        public UpdateAuthorController(IAuthorRepository authorRepository)
+        public UpdateHotelController(IHotelRepository entityRepository)
         {
-            _authorRepository = authorRepository;
+            _entityRepository = entityRepository;
         }
 
         [HttpPut("{id}")]
-        [Authorize(Policy = "UpdateAuthorAccess")]
-        public IActionResult UpdateAuthorById(Guid id, AuthorModel AuthorModel)
+        [Authorize(Policy = "UpdateHotelAccess")]
+        public IActionResult UpdateHotelById(Guid id, HotelModel HotelModel)
         {
 
             try
             {
-                _authorRepository.Update(AuthorModel);
-                var response = new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "I402",
-                };
+                var response = _entityRepository.Update(HotelModel);
+
                 return Ok(response);
             }
             catch (Exception ex)
@@ -39,7 +35,7 @@ namespace WebApplication1.Controllers.Author
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C404",
+                    MessageCode = "C214",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);

@@ -15,6 +15,8 @@ namespace WebApplication1.Data.RestHouse
         public string? HotlineNumber { get; set; }
         public string? SupportEmail { get; set; }
         public string? HeadQuarterAddress { get; set; }
+        public float DiscountFloat { get; set; }
+        public double DiscountAmount { get; set; }
         [Required]
         [MaxLength(900)]
         public string? Description { get; set; }

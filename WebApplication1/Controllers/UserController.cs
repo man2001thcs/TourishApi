@@ -172,7 +172,7 @@ namespace WebApplication1.Controllers
                 permissions.Add(PolicyTerm.DELETE_PUBLISHER);
             }
 
-            if (role == UserRole.User)
+            if (role == UserRole.Staff)
             {
                 //BOOK policy
                 permissions.Add(PolicyTerm.CREATE_BOOK);

@@ -1,35 +1,36 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TourishApi.Repository.Interface.Schedule;
+using TourishApi.Repository.Interface.Transport;
 using WebApplication1.Model.VirtualModel;
-using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.Author
+namespace WebApplication1.Controllers.Transport
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DeleteAuthorController : ControllerBase
+    public class DeleteAirPlaneController : ControllerBase
     {
-        private readonly IAuthorRepository _authorRepository;
+        private readonly IAirPlaneRepository _entityRepository;
 
-        public DeleteAuthorController(IAuthorRepository authorRepository)
+        public DeleteAirPlaneController(IAirPlaneRepository entityRepository)
         {
-            _authorRepository = authorRepository;
+            _entityRepository = entityRepository;
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Policy = "DeleteAuthorAccess")]
+        [Authorize(Policy = "DeleteAirPlaneAccess")]
         public IActionResult DeleteById(Guid id)
         {
             {
                 try
                 {
-                    _authorRepository.Delete(id);
+                    _entityRepository.Delete(id);
                     var response = new Response
                     {
                         resultCd = 0,
-                        MessageCode = "I403",
+                        MessageCode = "I123",
                     };
                     return Ok(response);
                 }
@@ -38,7 +39,7 @@ namespace WebApplication1.Controllers.Author
                     var response = new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C404",
+                        MessageCode = "C124",
                     };
                     return StatusCode(StatusCodes.Status500InternalServerError, response);
                 }

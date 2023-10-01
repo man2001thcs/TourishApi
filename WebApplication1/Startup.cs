@@ -6,10 +6,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SignalR.Hub;
 using System.Text;
+using TourishApi.Repository.Interface.Schedule;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
-using WebApplication1.Repository.InheritanceRepo;
-using WebApplication1.Repository.Interface;
 using WebApplication1.Service;
 using WebApplication1.Trigger;
 
@@ -57,7 +56,7 @@ namespace MyWebApiApp
                 });
             });
 
-            services.AddScoped<IAuthorRepository, AuthorRepository>();
+            services.AddScoped<IMovingScheduleRepository, PassengerCarRepository>();
 
             services.AddScoped(x => new BlobServiceClient(Configuration.GetValue<string>("AzureBlobStorage")));
             services.AddScoped<IBlobService, BlobService>();

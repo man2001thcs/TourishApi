@@ -7,7 +7,7 @@ namespace WebApplication1.Data
 {
     public enum UserRole
     {
-        Member = 0, User = 1, Admin = 2,
+        Member = 0, Staff = 1, Admin = 2,
     }
 
     [Table("User")]
@@ -27,7 +27,6 @@ namespace WebApplication1.Data
         public string Address { get; set; }
 
         public ICollection<RefreshToken> RefreshTokenList { get; set; }
-        public ICollection<Receipt> ReceiptList { get; set; }
         public ICollection<Message> MessageSentList { get; set; }
         public ICollection<Message> MessageReceiveList { get; set; }
         public ICollection<Notification> NotificationList { get; set; }

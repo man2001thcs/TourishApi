@@ -15,6 +15,8 @@ namespace WebApplication1.Data.Transport
         public string? HotlineNumber { get; set; }
         public string? SupportEmail { get; set; }
         public string? HeadquarterAddress { get; set; }
+        public float DiscountFloat { get; set; }
+        public double DiscountAmount { get; set; }
         [Required]
         [MaxLength(900)]
         public string? Description { get; set; }
