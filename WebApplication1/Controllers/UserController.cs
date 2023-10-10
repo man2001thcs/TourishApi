@@ -149,37 +149,67 @@ namespace WebApplication1.Controllers
             if (role == UserRole.Admin)
             {
                 //BOOK policy
-                permissions.Add(PolicyTerm.CREATE_BOOK);
-                permissions.Add(PolicyTerm.UPDATE_BOOK);
-                permissions.Add(PolicyTerm.DELETE_BOOK);
+                permissions.Add(PolicyTerm.CREATE_TOURISH_PLAN);
+                permissions.Add(PolicyTerm.UPDATE_TOURISH_PLAN);
+                permissions.Add(PolicyTerm.DELETE_TOURISH_PLAN);
 
-                permissions.Add(PolicyTerm.CREATE_CATEGORY);
-                permissions.Add(PolicyTerm.UPDATE_CATEGORY);
-                permissions.Add(PolicyTerm.DELETE_CATEGORY);
-
-
-                permissions.Add(PolicyTerm.CREATE_VOUCHER);
-                permissions.Add(PolicyTerm.UPDATE_VOUCHER);
-                permissions.Add(PolicyTerm.DELETE_VOUCHER);
-
-                permissions.Add(PolicyTerm.CREATE_AUTHOR);
-                permissions.Add(PolicyTerm.UPDATE_AUTHOR);
-                permissions.Add(PolicyTerm.DELETE_AUTHOR);
+                permissions.Add(PolicyTerm.CREATE_PASSENGER_CAR);
+                permissions.Add(PolicyTerm.UPDATE_PASSENGER_CAR);
+                permissions.Add(PolicyTerm.DELETE_PASSENGER_CAR);
 
 
-                permissions.Add(PolicyTerm.CREATE_PUBLISHER);
-                permissions.Add(PolicyTerm.UPDATE_PUBLISHER);
-                permissions.Add(PolicyTerm.DELETE_PUBLISHER);
+                permissions.Add(PolicyTerm.CREATE_AIRPLANE);
+                permissions.Add(PolicyTerm.UPDATE_AIRPLANE);
+                permissions.Add(PolicyTerm.DELETE_AIRPLANE);
+
+                permissions.Add(PolicyTerm.CREATE_HOTEL);
+                permissions.Add(PolicyTerm.UPDATE_HOTEL);
+                permissions.Add(PolicyTerm.DELETE_HOTEL);
+
+                permissions.Add(PolicyTerm.CREATE_HOME_STAY);
+                permissions.Add(PolicyTerm.UPDATE_HOME_STAY);
+                permissions.Add(PolicyTerm.DELETE_HOME_STAY);
+
+                permissions.Add(PolicyTerm.CREATE_RESTAURANT);
+                permissions.Add(PolicyTerm.UPDATE_RESTAURANT);
+                permissions.Add(PolicyTerm.DELETE_RESTAURANT);
+
+                permissions.Add(PolicyTerm.CREATE_RECEIPT);
+                permissions.Add(PolicyTerm.UPDATE_RECEIPT);
+                permissions.Add(PolicyTerm.DELETE_RECEIPT);
             }
 
             if (role == UserRole.Staff)
             {
                 //BOOK policy
-                permissions.Add(PolicyTerm.CREATE_BOOK);
-                permissions.Add(PolicyTerm.UPDATE_BOOK);
+                permissions.Add(PolicyTerm.CREATE_TOURISH_PLAN);
+                permissions.Add(PolicyTerm.UPDATE_TOURISH_PLAN);
+                permissions.Add(PolicyTerm.DELETE_TOURISH_PLAN);
 
-                permissions.Add(PolicyTerm.CREATE_CATEGORY);
-                permissions.Add(PolicyTerm.UPDATE_CATEGORY);
+                permissions.Add(PolicyTerm.CREATE_PASSENGER_CAR);
+                permissions.Add(PolicyTerm.UPDATE_PASSENGER_CAR);
+                permissions.Add(PolicyTerm.DELETE_PASSENGER_CAR);
+
+
+                permissions.Add(PolicyTerm.CREATE_AIRPLANE);
+                permissions.Add(PolicyTerm.UPDATE_AIRPLANE);
+                permissions.Add(PolicyTerm.DELETE_AIRPLANE);
+
+                permissions.Add(PolicyTerm.CREATE_HOTEL);
+                permissions.Add(PolicyTerm.UPDATE_HOTEL);
+                permissions.Add(PolicyTerm.DELETE_HOTEL);
+
+                permissions.Add(PolicyTerm.CREATE_HOME_STAY);
+                permissions.Add(PolicyTerm.UPDATE_HOME_STAY);
+                permissions.Add(PolicyTerm.DELETE_HOME_STAY);
+
+                permissions.Add(PolicyTerm.CREATE_RESTAURANT);
+                permissions.Add(PolicyTerm.UPDATE_RESTAURANT);
+                permissions.Add(PolicyTerm.DELETE_RESTAURANT);
+
+                permissions.Add(PolicyTerm.CREATE_RECEIPT);
+                permissions.Add(PolicyTerm.UPDATE_RECEIPT);
+                permissions.Add(PolicyTerm.DELETE_RECEIPT);
             }
 
             return permissions.ToArray();

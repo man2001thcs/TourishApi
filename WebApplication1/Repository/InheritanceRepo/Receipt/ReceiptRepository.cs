@@ -17,29 +17,57 @@ public class ReceiptRepository : IReceiptRepository
         this._context = _context;
     }
 
-    public async Task<Response> Add(TotalReceiptInsertModel receiptModel)
+    public async Task<Response> Add(FullReceiptInsertModel receiptModel)
     {
+        var totalReceipt = _context.TotalReceiptList.FirstOrDefault(entity => entity.TourishPlanId == receiptModel.TourishPlanId);
 
-        var receipt = new TotalReceipt
+        if (totalReceipt == null)
         {
-            UserId = receiptModel.UserId,
-            Status = receiptModel.Status,
+            totalReceipt = new TotalReceipt
+            {
+                TourishPlanId = receiptModel.TourishPlanId,
+                Status = ReceiptStatus.Created,
+                Description = receiptModel.Description,
+
+                CreatedDate = DateTime.UtcNow,
+                UpdateDate = DateTime.UtcNow
+            };
+
+            await _context.AddAsync(totalReceipt);
+            await _context.SaveChangesAsync();
+        }
+
+
+        var fullReceipt = new FullReceipt
+        {
+            TotalReceiptId = totalReceipt.TotalReceiptId,
+            OriginalPrice = receiptModel.OriginalPrice,
+            GuestName = receiptModel.GuestName,
             Description = receiptModel.Description,
-            CreatedDate = DateTime.UtcNow,
-            UpdateDate = DateTime.UtcNow,
-
-            FullReceiptList = AddFullReceipt(receiptModel.SingleReceiptString),
-
+            TotalTicket = receiptModel.TotalTicket,
+            DiscountAmount = receiptModel.DiscountAmount,
+            DiscountFloat = receiptModel.DiscountFloat,
+            Status = FullReceiptStatus.Created,
+            CreatedDate = receiptModel.CreatedDate,
+            UpdateDate = receiptModel.UpdateDate
         };
 
-        _context.Add(receipt);
+        var plan = _context.TourishPlan.FirstOrDefault((plan
+              => plan.Id == totalReceipt.TourishPlanId));
+        if (plan != null)
+        {
+            plan.RemainTicket--;
+        }
+
+        _context.Add(fullReceipt);
+
         await _context.SaveChangesAsync();
 
         return new Response
         {
             resultCd = 0,
-            MessageCode = "I4101",
-            returnId = receipt.ReceiptId,
+            MessageCode = "I511",
+            returnId = fullReceipt.FullReceiptId,
             // Create type success               
         };
 
@@ -47,10 +75,16 @@ public class ReceiptRepository : IReceiptRepository
 
     public Response Delete(Guid id)
     {
-        var receipt = _context.TotalReceiptList.FirstOrDefault((receipt
-          => receipt.ReceiptId == id));
+        var receipt = _context.FullReceiptList.Include(entity => entity.TotalReceipt).FirstOrDefault((receipt
+          => receipt.FullReceiptId == id));
         if (receipt != null)
         {
+            var plan = _context.TourishPlan.FirstOrDefault((plan
+                => plan.Id == receipt.TotalReceipt.TourishPlanId));
+            if (plan != null)
+            {
+                plan.RemainTicket++;
+            }
             _context.Remove(receipt);
             _context.SaveChanges();
         }
@@ -58,20 +92,46 @@ public class ReceiptRepository : IReceiptRepository
         return new Response
         {
             resultCd = 0,
-            MessageCode = "I4103",
+            MessageCode = "I513",
             // Delete type success               
         };
     }
 
-    public Response GetAll(string? userId, ReceiptStatus? status, string? sortBy, int page = 1, int pageSize = 5)
+    public Response DeleteAll(Guid tourishPlanId)
+    {
+        var receipt = _context.TotalReceiptList.FirstOrDefault((receipt
+          => receipt.TourishPlanId == tourishPlanId));
+        if (receipt != null)
+        {
+            _context.Remove(receipt);
+
+            var plan = _context.TourishPlan.FirstOrDefault((plan
+               => plan.Id == tourishPlanId));
+            if (plan != null)
+            {
+                plan.RemainTicket = plan.TotalTicket;
+            }
+
+            _context.SaveChanges();
+        }
+
+        return new Response
+        {
+            resultCd = 0,
+            MessageCode = "I513",
+            // Delete type success               
+        };
+    }
+
+    public Response GetAll(string? tourishPlanId, ReceiptStatus? status, string? sortBy, int page = 1, int pageSize = 5)
     {
         var receiptQuery = _context.TotalReceiptList.Include(receipt => receipt.FullReceiptList).
             AsQueryable();
 
         #region Filtering
-        if (!string.IsNullOrEmpty(userId))
+        if (!string.IsNullOrEmpty(tourishPlanId))
         {
-            receiptQuery = receiptQuery.Where(receipt => receipt.UserId == new Guid(userId));
+            receiptQuery = receiptQuery.Where(receipt => receipt.TourishPlanId == new Guid(tourishPlanId));
         }
 
         if (!string.IsNullOrEmpty(status.ToString()))
@@ -111,7 +171,7 @@ public class ReceiptRepository : IReceiptRepository
 
     public Response getById(Guid id)
     {
-        var receipt = _context.TotalReceiptList.Where(receipt => receipt.ReceiptId == id).Include(receipt => receipt.FullReceiptList)
+        var receipt = _context.TotalReceiptList.Where(receipt => receipt.TotalReceiptId == id).Include(receipt => receipt.FullReceiptList)
            .FirstOrDefault();
         if (receipt == null) { return null; }
 
@@ -122,18 +182,31 @@ public class ReceiptRepository : IReceiptRepository
         };
     }
 
-    public async Task<Response> Update(TotalReceiptModel receiptModel)
+    public async Task<Response> Update(FullReceiptUpdateModel receiptModel)
     {
-        var receipt = _context.TotalReceiptList.FirstOrDefault((receipt
-            => receipt.ReceiptId == receiptModel.ReceiptId));
+        var receipt = _context.FullReceiptList.FirstOrDefault((receipt
+            => receipt.FullReceiptId == receiptModel.FullReceiptId));
         if (receipt != null)
         {
+            receipt.GuestName = receiptModel.GuestName;
+            receipt.Status = receiptModel.Status;
+            receipt.DiscountAmount = receiptModel.DiscountAmount;
+            receipt.DiscountFloat = receiptModel.DiscountFloat;
+            receipt.OriginalPrice = receiptModel.OriginalPrice;
+            receipt.TotalTicket = receiptModel.TotalTicket;
             receipt.Description = receiptModel.Description;
             receipt.Status = receiptModel.Status;
 
             receipt.UpdateDate = DateTime.UtcNow;
 
-            if (receiptModel.Status == ReceiptStatus.Completed) receipt.CompleteDate = DateTime.UtcNow;
+            if (receiptModel.Status == FullReceiptStatus.Completed) receipt.CompleteDate = DateTime.UtcNow;
+
+            var totalReceiptComplete = await _context.TotalReceiptList.Where(receipt => receipt.TotalReceiptId == receiptModel.TotalReceiptId && receipt.FullReceiptList.Count(fullReceipt => fullReceipt.Status == FullReceiptStatus.Completed) <= 1).FirstOrDefaultAsync();
+
+            if (totalReceiptComplete != null)
+            {
+                totalReceiptComplete.Status = ReceiptStatus.Completed;
+            };
 
             _context.SaveChanges();
         }
@@ -141,33 +214,8 @@ public class ReceiptRepository : IReceiptRepository
         return new Response
         {
             resultCd = 0,
-            MessageCode = "I4102",
+            MessageCode = "I512",
             // Update type success               
         };
     }
-
-    private List<FullReceipt> AddFullReceipt(string FullReceiptString)
-    {
-        var receiptList = new List<FullReceipt>();
-
-        dynamic FullReceiptArray = Newtonsoft.Json.JsonConvert.DeserializeObject(FullReceiptString);
-
-        if (FullReceiptArray.Length > 0)
-        {
-            foreach (var FullReceipt in FullReceiptArray)
-            {
-                receiptList.Add(new FullReceipt
-                {
-                    ServiceId = FullReceipt.ServiceId,
-                    ServiceType = FullReceipt.ServiceType,
-                    TotalNumber = FullReceipt.TotalNumber,
-                    SinglePrice = FullReceipt.SinglePrice,
-                    DiscountAmount = FullReceipt.DiscountAmount,
-                    DiscountFloat = FullReceipt.DiscountFloat,
-                });
-            }
-        }
-        return receiptList;
-    }
-
 }

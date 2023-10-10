@@ -18,6 +18,6 @@ namespace WebApplication1.Data
         public required string FileType { get; set; }
         public DateTime CreatedDate { get; set; }
         public Message? Message { get; set; }
-        public Book? Book { get; set; }
+        public TourishPlan? TourishPlan { get; set; }
     }
 }

@@ -11,15 +11,15 @@ namespace WebApplication1.Controllers.RestHouse.HomeStay
     [ApiController]
     public class DeleteHomeStayController : ControllerBase
     {
-        private readonly IHotelRepository _entityRepository;
+        private readonly IHomeStayRepository _entityRepository;
 
-        public DeleteHomeStayController(IHotelRepository entityRepository)
+        public DeleteHomeStayController(IHomeStayRepository entityRepository)
         {
             _entityRepository = entityRepository;
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Policy = "DeleteHotelAccess")]
+        [Authorize(Policy = "DeleteHomeStayAccess")]
         public IActionResult DeleteById(Guid id)
         {
             {

@@ -16,6 +16,11 @@
     "storage1": {
       "type": "storage",
       "connectionId": "thanagor"
+    },
+    "mssql2": {
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:AzureDb",
+      "dynamicId": null
     }
   }
 }

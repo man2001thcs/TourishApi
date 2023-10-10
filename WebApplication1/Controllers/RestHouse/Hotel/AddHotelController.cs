@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 using TourishApi.Repository.Interface.Resthouse;
 using WebApplication1.Model.RestHouse;
 using WebApplication1.Model.VirtualModel;

@@ -6,13 +6,12 @@ namespace WebApplication1.Model
     public class TourishPlanModel
     {
         public Guid Id { get; set; }
-        public required string GuestName { get; set; }
         public string? TourName { get; set; }
         public string StartingPoint { get; set; }
         public string EndPoint { get; set; }
-        public string? PhoneNumber { get; set; }
-        public string? Email { get; set; }
-        public string? Address { get; set; }
+        public int TotalTicket { get; set; }
+        public int RemainTicket { get; set; }
+        public string SupportNumber { get; set; }
         public PlanStatus PlanStatus { get; set; }
         public string? Description { get; set; }
         public DateTime CreateDate { get; set; }
@@ -29,9 +28,9 @@ namespace WebApplication1.Model
         public string? TourName { get; set; }
         public string StartingPoint { get; set; }
         public string EndPoint { get; set; }
-        public string? PhoneNumber { get; set; }
-        public string? Email { get; set; }
-        public string? Address { get; set; }
+        public int TotalTicket { get; set; }
+        public int RemainTicket { get; set; }
+        public string SupportNumber { get; set; }
         public PlanStatus PlanStatus { get; set; }
         public string? Description { get; set; }
 
@@ -46,13 +45,12 @@ namespace WebApplication1.Model
     public class TourishPlanUpdateModel
     {
         public Guid Id { get; set; }
-        public required string GuestName { get; set; }
         public string? TourName { get; set; }
         public string StartingPoint { get; set; }
         public string EndPoint { get; set; }
-        public string? PhoneNumber { get; set; }
-        public string? Email { get; set; }
-        public string? Address { get; set; }
+        public int TotalTicket { get; set; }
+        public int RemainTicket { get; set; }
+        public string SupportNumber { get; set; }
         public PlanStatus PlanStatus { get; set; }
         public string? Description { get; set; }
 

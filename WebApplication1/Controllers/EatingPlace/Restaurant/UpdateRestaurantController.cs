@@ -10,11 +10,11 @@ namespace WebApplication1.Controllers.EatingPlace.Restaurant
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UpdateHomeStayController : ControllerBase
+    public class UpdateRestaurantController : ControllerBase
     {
         private readonly IRestaurantRepository _entityRepository;
 
-        public UpdateHomeStayController(IRestaurantRepository entityRepository)
+        public UpdateRestaurantController(IRestaurantRepository entityRepository)
         {
             _entityRepository = entityRepository;
         }

@@ -7,7 +7,7 @@ namespace WebApplication1.Data
 {
     public enum PlanStatus
     {
-        Waiting = 0, ConfirmInfo = 1, Paid = 2, OnGoing = 3, Complete = 4, Repaid = 5, Cancel = 6
+        Waiting = 0, ConfirmInfo = 1, AllPaid = 2, OnGoing = 3, Complete = 4, Repaid = 5, Cancel = 6
     }
 
     [Table("TourishPlan")]
@@ -18,16 +18,16 @@ namespace WebApplication1.Data
 
         [Required]
         [MaxLength(50)]
-        public required string GuestName { get; set; }
         public string? TourName { get; set; }
         public string StartingPoint { get; set; }
         public string EndPoint { get; set; }
-        public string? PhoneNumber { get; set; }
-        public string? Email { get; set; }
-        public string? Address { get; set; }
+        public string SupportNumber { get; set; }
+        public int TotalTicket { get; set; }
+        public int RemainTicket { get; set; }
         public PlanStatus PlanStatus { get; set; }
+
         [Required]
-        [MaxLength(200)]
+        [Column(TypeName = "ntext")]
         public string? Description { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }

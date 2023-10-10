@@ -1,25 +1,25 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TourishApi.Repository.Interface.Transport;
+using TourishApi.Repository.Interface.Restaurant;
 using WebApplication1.Model.VirtualModel;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.Transport.PassengerCar
+namespace WebApplication1.Controllers.EatingPlace.Restaurant
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DeletePassengerCarController : ControllerBase
+    public class DeleteRestaurantController : ControllerBase
     {
-        private readonly IPassengerCarRepository _entityRepository;
+        private readonly IRestaurantRepository _entityRepository;
 
-        public DeletePassengerCarController(IPassengerCarRepository entityRepository)
+        public DeleteRestaurantController(IRestaurantRepository entityRepository)
         {
             _entityRepository = entityRepository;
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Policy = "DeletePassengerCarAccess")]
+        [Authorize(Policy = "DeleteRestaurantAccess")]
         public IActionResult DeleteById(Guid id)
         {
             {
@@ -29,7 +29,7 @@ namespace WebApplication1.Controllers.Transport.PassengerCar
                     var response = new Response
                     {
                         resultCd = 0,
-                        MessageCode = "I123",
+                        MessageCode = "I313",
                     };
                     return Ok(response);
                 }
@@ -38,7 +38,7 @@ namespace WebApplication1.Controllers.Transport.PassengerCar
                     var response = new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C124",
+                        MessageCode = "C314",
                     };
                     return StatusCode(StatusCodes.Status500InternalServerError, response);
                 }

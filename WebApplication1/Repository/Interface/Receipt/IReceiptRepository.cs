@@ -6,10 +6,10 @@ namespace WebApplication1.Repository.Interface.Receipt
 {
     public interface IReceiptRepository
     {
-        Response GetAll(string? userId, ReceiptStatus? status, string? sortBy, int page = 1, int pageSize = 5);
+        Response GetAll(string? TourishPlanId, ReceiptStatus? status, string? sortBy, int page = 1, int pageSize = 5);
         Response getById(Guid id);
-        Task<Response> Add(TotalReceiptInsertModel receiptModel);
-        Task<Response> Update(TotalReceiptModel receiptModel);
+        Task<Response> Add(FullReceiptInsertModel receiptModel);
+        Task<Response> Update(FullReceiptUpdateModel receiptModel);
         Response Delete(Guid id);
     }
 }

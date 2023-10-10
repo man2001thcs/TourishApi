@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Net;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Schedule;
@@ -22,22 +21,21 @@ public class TourishPlanRepository : ITourishPlanRepository
 
         var tourishPlan = new TourishPlan
         {
-            GuestName = entityModel.GuestName,
             TourName = entityModel.TourName,
             Description = entityModel.Description,
             StartingPoint = entityModel.StartingPoint,
             EndPoint = entityModel.EndPoint,
 
-            PhoneNumber = entityModel.PhoneNumber,
-            Email = entityModel.Email,
-            Address = entityModel.Address,
+            RemainTicket = entityModel.RemainTicket,
+            TotalTicket = entityModel.TotalTicket,
+            SupportNumber = entityModel.SupportNumber,
 
             PlanStatus = entityModel.PlanStatus,
             StartDate = entityModel.StartDate,
             EndDate = entityModel.EndDate,
 
             CreateDate = DateTime.UtcNow,
-            UpdateDate = DateTime.UtcNow,           
+            UpdateDate = DateTime.UtcNow,
         };
 
         if (!String.IsNullOrEmpty(entityModel.EatingScheduleString))
@@ -61,7 +59,7 @@ public class TourishPlanRepository : ITourishPlanRepository
         return new Response
         {
             resultCd = 0,
-            MessageCode = "I101",
+            MessageCode = "I411",
             returnId = tourishPlan.Id,
             // Create type success               
         };
@@ -81,7 +79,7 @@ public class TourishPlanRepository : ITourishPlanRepository
         return new Response
         {
             resultCd = 0,
-            MessageCode = "I103",
+            MessageCode = "I413",
             // Delete type success               
         };
     }
@@ -113,7 +111,7 @@ public class TourishPlanRepository : ITourishPlanRepository
             {
                 case "title_desc":
                     entityQuery = entityQuery.OrderByDescending(entity => entity.TourName);
-                    break;               
+                    break;
             }
         }
         #endregion
@@ -169,15 +167,14 @@ public class TourishPlanRepository : ITourishPlanRepository
 
             entity.TourName = entityModel.TourName ?? entity.TourName;
 
-            entity.GuestName = entityModel.GuestName;
             entity.TourName = entityModel.TourName;
             entity.Description = entityModel.Description;
             entity.StartingPoint = entityModel.StartingPoint;
             entity.EndPoint = entityModel.EndPoint;
 
-            entity.PhoneNumber = entityModel.PhoneNumber;
-            entity.Email = entityModel.Email;
-            entity.Address = entityModel.Address;
+            entity.RemainTicket = entityModel.RemainTicket;
+            entity.TotalTicket = entityModel.TotalTicket;
+            entity.SupportNumber = entityModel.SupportNumber;
 
             entity.PlanStatus = entityModel.PlanStatus;
             entity.StartDate = entityModel.StartDate;
@@ -209,7 +206,7 @@ public class TourishPlanRepository : ITourishPlanRepository
         return new Response
         {
             resultCd = 0,
-            MessageCode = "I102",
+            MessageCode = "I412",
             // Update type success               
         };
     }
@@ -243,7 +240,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                 }
             }
         }
-       
+
         return scheduleList;
     }
 
@@ -308,7 +305,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                             SupportNumber = schedule.supportNumber,
 
                             RestHouseBranchId = schedule.restHouseBranchId,
-                            RestHouseType = schedule.restHouseType,                                                                              
+                            RestHouseType = schedule.restHouseType,
                             Description = schedule.description,
 
                             StartDate = schedule.startDate,

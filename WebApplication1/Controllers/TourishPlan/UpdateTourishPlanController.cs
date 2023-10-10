@@ -1,32 +1,32 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TourishApi.Repository.Interface.Resthouse;
-using WebApplication1.Model.RestHouse;
+using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
+using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.RestHouse.HomeStay
+namespace WebApplication1.Controllers.TourishPlan
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UpdateHomeStayController : ControllerBase
+    public class UpdateTourishPlanController : ControllerBase
     {
-        private readonly IHomeStayRepository _entityRepository;
+        private readonly ITourishPlanRepository _entityRepository;
 
-        public UpdateHomeStayController(IHomeStayRepository entityRepository)
+        public UpdateTourishPlanController(ITourishPlanRepository entityRepository)
         {
             _entityRepository = entityRepository;
         }
 
         [HttpPut("{id}")]
-        [Authorize(Policy = "UpdateHomeStayAccess")]
-        public IActionResult UpdateHomeStayById(Guid id, HomeStayModel HomeStayModel)
+        [Authorize(Policy = "UpdateTourishPlanAccess")]
+        public IActionResult UpdateTourishPlanById(Guid id, TourishPlanUpdateModel TourishPlanModel)
         {
 
             try
             {
-                var response = _entityRepository.Update(HomeStayModel);
+                var response = _entityRepository.Update(TourishPlanModel);
 
                 return Ok(response);
             }
@@ -35,7 +35,7 @@ namespace WebApplication1.Controllers.RestHouse.HomeStay
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C224",
+                    MessageCode = "C414",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);

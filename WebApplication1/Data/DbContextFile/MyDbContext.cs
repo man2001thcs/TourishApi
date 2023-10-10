@@ -30,7 +30,7 @@ namespace WebApplication1.Data.DbContextFile
 
         public DbSet<TourishPlan> TourishPlan { get; set; }
         public DbSet<TotalReceipt> TotalReceiptList { get; set; }
-
+        public DbSet<FullReceipt> FullReceiptList { get; set; }
 
         //
         public DbSet<Message> Messages { get; set; }
@@ -70,6 +70,24 @@ namespace WebApplication1.Data.DbContextFile
                 .WithOne(e => e.TourishPlan)
                 .HasForeignKey(e => e.TourishPlanId)
                 .HasConstraintName("FK_TourishPlan_StayingSchedules");
+
+                entity.HasOne(e => e.TotalReceipt)
+                .WithOne(e => e.TourishPlan)
+                .HasForeignKey<TotalReceipt>(e => e.TourishPlanId)
+                .HasConstraintName("FK_TourishPlan_TotalReceipt");
+            });
+
+            modelBuilder.Entity<TotalReceipt>(entity =>
+            {
+                entity.ToTable(nameof(TotalReceipt));
+                entity.HasKey(e => e.TotalReceiptId);
+                entity.Property(e => e.CreatedDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+
+                entity.HasMany(e => e.FullReceiptList)
+               .WithOne(e => e.TotalReceipt)
+               .HasForeignKey(e => e.TotalReceiptId)
+               .HasConstraintName("FK_TotalReceipt_FullReceipt");
             });
 
 
@@ -92,6 +110,7 @@ namespace WebApplication1.Data.DbContextFile
                 .HasForeignKey(e => e.UserId)
                 .HasConstraintName("FK_User_RefreshToken");
             });
+
 
             modelBuilder.Entity<Message>(entity =>
             {

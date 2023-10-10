@@ -1,32 +1,31 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using TourishApi.Repository.Interface.Restaurant;
-using WebApplication1.Model.Restaurant;
+using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
+using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.EatingPlace.Restaurant
+namespace WebApplication1.Controllers.TourishPlan
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AddHomeStayController : ControllerBase
+    public class AddTourishPlanController : ControllerBase
     {
-        private readonly IRestaurantRepository _entityRepository;
+        private readonly ITourishPlanRepository _entityRepository;
 
-        public AddHomeStayController(IRestaurantRepository airPlaneRepository)
+        public AddTourishPlanController(ITourishPlanRepository airPlaneRepository)
         {
             _entityRepository = airPlaneRepository;
         }
 
         [HttpPost]
-        [Authorize(Policy = "CreateRestaurantAccess")]
-        public IActionResult CreateNew(RestaurantModel entityModel)
+        [Authorize(Policy = "CreateTourishPlanAccess")]
+        public IActionResult CreateNew(TourishPlanInsertModel entityModel)
         {
             try
             {
-                var entityExist = _entityRepository.getByName(entityModel.PlaceBranch);
+                var entityExist = _entityRepository.getByName(entityModel.TourName);
 
                 if (entityExist.Data == null)
                 {
@@ -39,7 +38,7 @@ namespace WebApplication1.Controllers.EatingPlace.Restaurant
                     var response = new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C311",
+                        MessageCode = "C411",
                     };
                     return StatusCode(StatusCodes.Status200OK, response);
                 }

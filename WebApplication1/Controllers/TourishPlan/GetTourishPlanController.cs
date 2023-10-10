@@ -1,19 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TourishApi.Repository.Interface.Restaurant;
-using TourishApi.Repository.Interface.Resthouse;
 using WebApplication1.Model.VirtualModel;
+using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.EatingPlace.Restaurant
+namespace WebApplication1.Controllers.TourishPlan
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GetPassengerCarController : ControllerBase
+    public class GetTourishPlanController : ControllerBase
     {
-        private readonly IRestaurantRepository _entityRepository;
+        private readonly ITourishPlanRepository _entityRepository;
 
-        public GetPassengerCarController(IRestaurantRepository entityRepository)
+        public GetTourishPlanController(ITourishPlanRepository entityRepository)
         {
             _entityRepository = entityRepository;
         }
@@ -32,7 +31,7 @@ namespace WebApplication1.Controllers.EatingPlace.Restaurant
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C314",
+                    MessageCode = "C414",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
@@ -51,7 +50,7 @@ namespace WebApplication1.Controllers.EatingPlace.Restaurant
                     var response = new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C310",
+                        MessageCode = "C410",
                     };
                     return NotFound(response);
                 }
@@ -65,7 +64,7 @@ namespace WebApplication1.Controllers.EatingPlace.Restaurant
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C314",
+                    MessageCode = "C414",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);

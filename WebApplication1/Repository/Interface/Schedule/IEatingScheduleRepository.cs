@@ -3,7 +3,7 @@ using WebApplication1.Model.VirtualModel;
 
 namespace TourishApi.Repository.Interface.Schedule
 {
-    public interface IMovingScheduleRepository
+    public interface IEatingScheduleRepository
     {
         Response GetAll(Guid planId, string? search, string? sortBy, int page = 1, int pageSize = 5);
         Response getById(Guid id);

@@ -14,7 +14,7 @@ namespace WebApplication1.Data.Transport
         public required string BranchName { get; set; }
         public string? HotlineNumber { get; set; }
         public string? SupportEmail { get; set; }
-        public string? HeadquarterAddress { get; set; }
+        public string? HeadQuarterAddress { get; set; }
         public float DiscountFloat { get; set; }
         public double DiscountAmount { get; set; }
         [Required]

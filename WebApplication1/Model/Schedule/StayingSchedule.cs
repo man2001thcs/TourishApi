@@ -10,7 +10,7 @@
         public string? PlaceName { get; set; }
         public string? Address { get; set; }
         public string? SupportNumber { get; set; }
-
+        public double? SinglePrice { get; set; }
         public RestHouseType RestHouseType { get; set; }
         public Guid RestHouseBranchId { get; set; }
         public string? Description { get; set; }

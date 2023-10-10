@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TourishApi.Repository.Interface.Schedule;
 using TourishApi.Repository.Interface.Transport;
 using WebApplication1.Model.VirtualModel;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.Transport
+namespace WebApplication1.Controllers.Transport.AirPlane
 {
     [Route("api/[controller]")]
     [ApiController]

@@ -8,11 +8,11 @@ namespace WebApplication1.Controllers.RestHouse.HomeStay
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GetPassengerCarController : ControllerBase
+    public class GetHomeStayController : ControllerBase
     {
-        private readonly IHotelRepository _entityRepository;
+        private readonly IHomeStayRepository _entityRepository;
 
-        public GetPassengerCarController(IHotelRepository entityRepository)
+        public GetHomeStayController(IHomeStayRepository entityRepository)
         {
             _entityRepository = entityRepository;
         }
@@ -23,8 +23,8 @@ namespace WebApplication1.Controllers.RestHouse.HomeStay
         {
             try
             {
-                var authorList = _entityRepository.GetAll(search, sortBy, page, pageSize);
-                return Ok(authorList);
+                var entityList = _entityRepository.GetAll(search, sortBy, page, pageSize);
+                return Ok(entityList);
             }
             catch (Exception ex)
             {
@@ -44,8 +44,8 @@ namespace WebApplication1.Controllers.RestHouse.HomeStay
         {
             try
             {
-                var author = _entityRepository.getById(id);
-                if (author.Data == null)
+                var entity = _entityRepository.getById(id);
+                if (entity.Data == null)
                 {
                     var response = new Response
                     {
@@ -56,7 +56,7 @@ namespace WebApplication1.Controllers.RestHouse.HomeStay
                 }
                 else
                 {
-                    return Ok(author);
+                    return Ok(entity);
                 }
             }
             catch (Exception ex)

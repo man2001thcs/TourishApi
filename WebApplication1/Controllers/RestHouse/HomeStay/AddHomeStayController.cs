@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 using TourishApi.Repository.Interface.Resthouse;
 using WebApplication1.Model.RestHouse;
 using WebApplication1.Model.VirtualModel;
@@ -13,16 +12,16 @@ namespace WebApplication1.Controllers.RestHouse.HomeStay
     [ApiController]
     public class AddHomeStayController : ControllerBase
     {
-        private readonly IHotelRepository _entityRepository;
+        private readonly IHomeStayRepository _entityRepository;
 
-        public AddHomeStayController(IHotelRepository airPlaneRepository)
+        public AddHomeStayController(IHomeStayRepository airPlaneRepository)
         {
             _entityRepository = airPlaneRepository;
         }
 
         [HttpPost]
-        [Authorize(Policy = "CreateHotelAccess")]
-        public IActionResult CreateNew(HotelModel entityModel)
+        [Authorize(Policy = "CreateHomeStayAccess")]
+        public IActionResult CreateNew(HomeStayModel entityModel)
         {
             try
             {

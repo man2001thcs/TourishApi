@@ -1,18 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TourishApi.Repository.Interface.Transport;
+using TourishApi.Repository.Interface.Restaurant;
 using WebApplication1.Model.VirtualModel;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.Transport.AirPlane
+namespace WebApplication1.Controllers.EatingPlace.Restaurant
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GetAirPlaneController : ControllerBase
+    public class GetRestaurantController : ControllerBase
     {
-        private readonly IAirPlaneRepository _entityRepository;
+        private readonly IRestaurantRepository _entityRepository;
 
-        public GetAirPlaneController(IAirPlaneRepository entityRepository)
+        public GetRestaurantController(IRestaurantRepository entityRepository)
         {
             _entityRepository = entityRepository;
         }
@@ -31,7 +31,7 @@ namespace WebApplication1.Controllers.Transport.AirPlane
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C124",
+                    MessageCode = "C314",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
@@ -50,7 +50,7 @@ namespace WebApplication1.Controllers.Transport.AirPlane
                     var response = new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C120",
+                        MessageCode = "C310",
                     };
                     return NotFound(response);
                 }
@@ -64,7 +64,7 @@ namespace WebApplication1.Controllers.Transport.AirPlane
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C124",
+                    MessageCode = "C314",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);

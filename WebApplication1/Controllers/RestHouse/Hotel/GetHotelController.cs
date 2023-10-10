@@ -8,11 +8,11 @@ namespace WebApplication1.Controllers.Transport.RestHouse.Hotel
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GetPassengerCarController : ControllerBase
+    public class GetHotelController : ControllerBase
     {
         private readonly IHotelRepository _entityRepository;
 
-        public GetPassengerCarController(IHotelRepository entityRepository)
+        public GetHotelController(IHotelRepository entityRepository)
         {
             _entityRepository = entityRepository;
         }

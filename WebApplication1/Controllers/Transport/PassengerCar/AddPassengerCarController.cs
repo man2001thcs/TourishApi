@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using TourishApi.Repository.Interface.Schedule;
 using TourishApi.Repository.Interface.Transport;
 using WebApplication1.Model.Transport;
 using WebApplication1.Model.VirtualModel;

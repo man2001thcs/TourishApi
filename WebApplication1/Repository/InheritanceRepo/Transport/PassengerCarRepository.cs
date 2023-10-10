@@ -24,7 +24,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Transport
                 BranchName = addModel.BranchName,
                 HotlineNumber = addModel.HotlineNumber,
                 SupportEmail = addModel.SupportEmail,
-                HeadquarterAddress = addModel.HeadquarterAddress,
+                HeadQuarterAddress = addModel.HeadquarterAddress,
                 Description = addModel.Description,
                 DiscountAmount = addModel.DiscountAmount,
                 DiscountFloat = addModel.DiscountFloat,
@@ -140,7 +140,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Transport
                 entity.BranchName = entityModel.BranchName;
                 entity.HotlineNumber = entityModel.HotlineNumber;
                 entity.SupportEmail = entityModel.SupportEmail;
-                entity.HeadquarterAddress = entityModel.HeadquarterAddress;
+                entity.HeadQuarterAddress = entityModel.HeadquarterAddress;
                 entity.Description = entityModel.Description;
                 entity.DiscountAmount = entityModel.DiscountAmount;
                 entity.DiscountFloat = entityModel.DiscountFloat;

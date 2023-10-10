@@ -16,12 +16,13 @@ namespace WebApplication1.Data.Schedule
         public string? PlaceName { get; set; }
         public string? Address { get; set; }
         public string? SupportNumber { get; set; }
+        public Guid RestaurantId { get; set; }
 
         [Required]
         [MaxLength(600)]
         public string? Description { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
 

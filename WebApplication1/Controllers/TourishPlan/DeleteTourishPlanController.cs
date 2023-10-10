@@ -1,25 +1,25 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TourishApi.Repository.Interface.Restaurant;
 using WebApplication1.Model.VirtualModel;
+using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.EatingPlace.Restaurant
+namespace WebApplication1.Controllers.TourishPlan
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DeleteHomeStayController : ControllerBase
+    public class DeleteTourishPlanController : ControllerBase
     {
-        private readonly IRestaurantRepository _entityRepository;
+        private readonly ITourishPlanRepository _entityRepository;
 
-        public DeleteHomeStayController(IRestaurantRepository entityRepository)
+        public DeleteTourishPlanController(ITourishPlanRepository entityRepository)
         {
             _entityRepository = entityRepository;
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Policy = "DeleteRestaurantAccess")]
+        [Authorize(Policy = "DeleteTourishPlanAccess")]
         public IActionResult DeleteById(Guid id)
         {
             {
@@ -29,7 +29,7 @@ namespace WebApplication1.Controllers.EatingPlace.Restaurant
                     var response = new Response
                     {
                         resultCd = 0,
-                        MessageCode = "I313",
+                        MessageCode = "I413",
                     };
                     return Ok(response);
                 }
@@ -38,7 +38,7 @@ namespace WebApplication1.Controllers.EatingPlace.Restaurant
                     var response = new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C314",
+                        MessageCode = "C414",
                     };
                     return StatusCode(StatusCodes.Status500InternalServerError, response);
                 }

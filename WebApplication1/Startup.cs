@@ -6,9 +6,16 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SignalR.Hub;
 using System.Text;
-using TourishApi.Repository.Interface.Schedule;
+using TourishApi.Repository.Interface.Restaurant;
+using TourishApi.Repository.Interface.Resthouse;
+using TourishApi.Repository.Interface.Transport;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
+using WebApplication1.Repository.InheritanceRepo;
+using WebApplication1.Repository.InheritanceRepo.RestaurantPlace;
+using WebApplication1.Repository.InheritanceRepo.RestHoouse;
+using WebApplication1.Repository.InheritanceRepo.Transport;
+using WebApplication1.Repository.Interface;
 using WebApplication1.Service;
 using WebApplication1.Trigger;
 
@@ -56,7 +63,15 @@ namespace MyWebApiApp
                 });
             });
 
-            services.AddScoped<IMovingScheduleRepository, PassengerCarRepository>();
+            services.AddScoped<IPassengerCarRepository, PassengerCarRepository>();
+            services.AddScoped<IAirPlaneRepository, AirPlaneRepository>();
+
+            services.AddScoped<IHotelRepository, HotelRepository>();
+            services.AddScoped<IHomeStayRepository, HomeStayRepository>();
+
+            services.AddScoped<IRestaurantRepository, RestaurantRepository>();
+
+            services.AddScoped<ITourishPlanRepository, TourishPlanRepository>();
 
             services.AddScoped(x => new BlobServiceClient(Configuration.GetValue<string>("AzureBlobStorage")));
             services.AddScoped<IBlobService, BlobService>();
@@ -88,12 +103,47 @@ namespace MyWebApiApp
             // Book permission
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("CreateAuthorAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.CREATE_AUTHOR));
-                options.AddPolicy("UpdateAuthorAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_AUTHOR));
-                options.AddPolicy("DeleteAuthorAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_AUTHOR));
+                options.AddPolicy("CreateAirPlaneAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.CREATE_AIRPLANE));
+                options.AddPolicy("UpdateAirPlaneAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_AIRPLANE));
+                options.AddPolicy("DeleteAirPlaneAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_AIRPLANE));
+
+                options.AddPolicy("CreatePassengerCarAccess", policy =>
+                                 policy.RequireClaim("Permissions", PolicyTerm.CREATE_PASSENGER_CAR));
+                options.AddPolicy("UpdatePassengerCarAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_PASSENGER_CAR));
+                options.AddPolicy("DeletePassengerCarAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_PASSENGER_CAR));
+
+                options.AddPolicy("CreateHotelAccess", policy =>
+                              policy.RequireClaim("Permissions", PolicyTerm.CREATE_HOTEL));
+                options.AddPolicy("UpdateHotelAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_HOTEL));
+                options.AddPolicy("DeleteHotelAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_HOTEL));
+
+                options.AddPolicy("CreateHomeStayAccess", policy =>
+                          policy.RequireClaim("Permissions", PolicyTerm.CREATE_HOME_STAY));
+                options.AddPolicy("UpdateHomeStayAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_HOME_STAY));
+                options.AddPolicy("DeleteHomeStayAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_HOME_STAY));
+
+                options.AddPolicy("CreateRestaurantAccess", policy =>
+                       policy.RequireClaim("Permissions", PolicyTerm.CREATE_RESTAURANT));
+                options.AddPolicy("UpdateRestaurantAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_RESTAURANT));
+                options.AddPolicy("DeleteRestaurantAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_RESTAURANT));
+
+                options.AddPolicy("CreateTourishPlanAccess", policy =>
+                       policy.RequireClaim("Permissions", PolicyTerm.CREATE_TOURISH_PLAN));
+                options.AddPolicy("UpdateTourishPlanAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_TOURISH_PLAN));
+                options.AddPolicy("DeleteTourishPlanAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_TOURISH_PLAN));
 
 
                 options.AddPolicy("CreateMessageAccess", policy =>
@@ -103,12 +153,6 @@ namespace MyWebApiApp
                 options.AddPolicy("DeleteMessageAccess", policy =>
                                   policy.RequireClaim("Permissions", PolicyTerm.DELETE_MESSAGE));
 
-                options.AddPolicy("CreateNotificationAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.CREATE_NOTIFICATION));
-                options.AddPolicy("UpdateNotificationAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_NOTIFICATION));
-                options.AddPolicy("DeleteNotificationAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_NOTIFICATION));
             });
 
             services.AddSwaggerGen(c =>
