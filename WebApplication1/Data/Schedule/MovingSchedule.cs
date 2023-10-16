@@ -23,6 +23,7 @@ namespace WebApplication1.Data.Schedule
 
         public VehicleType VehicleType { get; set; }
         public Guid TransportId { get; set; }
+        public double? SinglePrice { get; set; }
 
         public string StartingPlace { get; set; }
         public string HeadingPlace { get; set; }

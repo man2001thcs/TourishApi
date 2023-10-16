@@ -88,6 +88,7 @@ namespace WebApplication1.Data.DbContextFile
                .WithOne(e => e.TotalReceipt)
                .HasForeignKey(e => e.TotalReceiptId)
                .HasConstraintName("FK_TotalReceipt_FullReceipt");
+
             });
 
 

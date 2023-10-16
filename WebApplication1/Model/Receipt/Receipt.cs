@@ -8,6 +8,8 @@ namespace WebApplication1.Model.Receipt
         public Guid FullReceiptId { get; set; }
         public Guid TotalReceiptId { get; set; }
         public string GuestName { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Email { get; set; }
         public double OriginalPrice { get; set; }
         public int TotalTicket { get; set; }
         public FullReceiptStatus Status { get; set; }
@@ -26,6 +28,8 @@ namespace WebApplication1.Model.Receipt
         public Guid TotalReceiptId { get; set; }
         public string GuestName { get; set; }
         public double OriginalPrice { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Email { get; set; }
         public int TotalTicket { get; set; }
         public FullReceiptStatus Status { get; set; }
         public string Description { get; set; }

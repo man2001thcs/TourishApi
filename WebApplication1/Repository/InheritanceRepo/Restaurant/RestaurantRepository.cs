@@ -45,7 +45,7 @@ namespace WebApplication1.Repository.InheritanceRepo.RestaurantPlace
 
         public Response Delete(Guid id)
         {
-            var deleteEntity = _context.PlaneAirlineList.FirstOrDefault((entity
+            var deleteEntity = _context.RestaurantList.FirstOrDefault((entity
                => entity.Id == id));
             if (deleteEntity != null)
             {
@@ -108,7 +108,7 @@ namespace WebApplication1.Repository.InheritanceRepo.RestaurantPlace
 
         public Response getById(Guid id)
         {
-            var entity = _context.PlaneAirlineList.FirstOrDefault((entity
+            var entity = _context.RestaurantList.FirstOrDefault((entity
                 => entity.Id == id));
 
             return new Response
@@ -120,8 +120,8 @@ namespace WebApplication1.Repository.InheritanceRepo.RestaurantPlace
 
         public Response getByName(String name)
         {
-            var entity = _context.PlaneAirlineList.FirstOrDefault((entity
-                => entity.BranchName == name));
+            var entity = _context.RestaurantList.FirstOrDefault((entity
+                => entity.PlaceBranch == name));
 
             return new Response
             {

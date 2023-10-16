@@ -17,6 +17,7 @@ namespace WebApplication1.Data.Schedule
         public string? Address { get; set; }
         public string? SupportNumber { get; set; }
         public Guid RestaurantId { get; set; }
+        public double? SinglePrice { get; set; }
 
         [Required]
         [MaxLength(600)]

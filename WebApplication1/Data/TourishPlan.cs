@@ -7,7 +7,7 @@ namespace WebApplication1.Data
 {
     public enum PlanStatus
     {
-        Waiting = 0, ConfirmInfo = 1, AllPaid = 2, OnGoing = 3, Complete = 4, Repaid = 5, Cancel = 6
+        Waiting = 0, ConfirmInfo = 1, AllPaid = 2, OnGoing = 3, Complete = 4, Cancel = 5
     }
 
     [Table("TourishPlan")]

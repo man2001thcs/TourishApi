@@ -23,6 +23,7 @@ namespace WebApplication1.Data.Schedule
 
         public RestHouseType RestHouseType { get; set; }
         public Guid RestHouseBranchId { get; set; }
+        public double? SinglePrice { get; set; }
 
         [Required]
         [MaxLength(600)]

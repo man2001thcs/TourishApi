@@ -21,12 +21,12 @@ namespace WebApplication1.Controllers.TourishPlan
 
         [HttpPut("{id}")]
         [Authorize(Policy = "UpdateTourishPlanAccess")]
-        public IActionResult UpdateTourishPlanById(Guid id, TourishPlanUpdateModel TourishPlanModel)
+        public async Task<IActionResult> UpdateTourishPlanById(Guid id, TourishPlanUpdateModel TourishPlanModel)
         {
 
             try
             {
-                var response = _entityRepository.Update(TourishPlanModel);
+                var response = await _entityRepository.Update(TourishPlanModel);
 
                 return Ok(response);
             }

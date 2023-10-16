@@ -9,35 +9,13 @@ namespace WebApplication1.Controllers.Receipt
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GetReceiptController : ControllerBase
+    public class GetFullReceiptController : ControllerBase
     {
         private readonly IReceiptRepository _receiptRepository;
 
-        public GetReceiptController(IReceiptRepository receiptRepository)
+        public GetFullReceiptController(IReceiptRepository receiptRepository)
         {
             _receiptRepository = receiptRepository;
-        }
-
-        // GET: api/<ValuesController>
-        [HttpGet]
-        public IActionResult GetAll(string? userId, string? sortBy, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
-        {
-            try
-            {
-                var receiptList = _receiptRepository.GetAll(userId, status, sortBy, page, pageSize);
-                return Ok(receiptList);
-            }
-            catch (Exception ex)
-            {
-                var response = new Response
-                {
-                    resultCd = 1,
-                    MessageCode = "C514",
-                    Error = ex.Message
-                };
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
-            }
-
         }
 
         [HttpGet("{id}")]
@@ -45,7 +23,7 @@ namespace WebApplication1.Controllers.Receipt
         {
             try
             {
-                var receipt = _receiptRepository.getById(id);
+                var receipt = _receiptRepository.getFullReceiptById(id);
                 if (receipt.Data == null)
                 {
                     var response = new Response

@@ -3,6 +3,7 @@ using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Schedule;
 using WebApplication1.Model;
+using WebApplication1.Model.Schedule;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
 namespace WebApplication1.Repository.InheritanceRepo;
@@ -134,6 +135,7 @@ public class TourishPlanRepository : ITourishPlanRepository
     {
         var entity = _context.TourishPlan.Where(entity => entity.Id == id).Include(entity => entity.EatSchedules).
             Include(entity => entity.StayingSchedules).
+            Include(entity => entity.MovingSchedules).
              Include(entity => entity.TotalReceipt).
              ThenInclude(entity => entity.FullReceiptList)
            .FirstOrDefault();
@@ -221,23 +223,24 @@ public class TourishPlanRepository : ITourishPlanRepository
 
             if (scheduleArray != null)
             {
-                if (scheduleArray.length > 0)
-                {
+                
                     foreach (var schedule in scheduleArray)
                     {
                         scheduleList.Add(new EatSchedule
                         {
                             PlaceName = schedule.placeName,
+                            SinglePrice = schedule.singlePrice,
                             Address = schedule.address,
                             SupportNumber = schedule.supportNumber,
                             Description = schedule.description,
+                            RestaurantId = schedule.restaurantId,                    
                             StartDate = schedule.startDate,
                             EndDate = schedule.endDate,
                             CreateDate = DateTime.UtcNow,
                             UpdateDate = DateTime.UtcNow,
                         });
                     }
-                }
+                
             }
         }
 
@@ -254,8 +257,7 @@ public class TourishPlanRepository : ITourishPlanRepository
 
             if (scheduleArray != null)
             {
-                if (scheduleArray.length > 0)
-                {
+              
                     foreach (var schedule in scheduleArray)
                     {
                         scheduleList.Add(new MovingSchedule
@@ -265,6 +267,7 @@ public class TourishPlanRepository : ITourishPlanRepository
 
                             VehicleType = schedule.vehicleType,
                             TransportId = schedule.transportId,
+                            SinglePrice = schedule.singlePrice,
 
                             PhoneNumber = schedule.phoneNumber,
                             StartingPlace = schedule.startingPlace,
@@ -277,7 +280,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                             UpdateDate = DateTime.UtcNow,
                         });
                     }
-                }
+                
             }
         }
 
@@ -294,8 +297,7 @@ public class TourishPlanRepository : ITourishPlanRepository
 
             if (scheduleArray != null)
             {
-                if (scheduleArray.length > 0)
-                {
+                
                     foreach (var schedule in scheduleArray)
                     {
                         scheduleList.Add(new StayingSchedule
@@ -303,6 +305,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                             PlaceName = schedule.placeName,
                             Address = schedule.address,
                             SupportNumber = schedule.supportNumber,
+                            SinglePrice = schedule.singlePrice,
 
                             RestHouseBranchId = schedule.restHouseBranchId,
                             RestHouseType = schedule.restHouseType,
@@ -315,7 +318,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                             UpdateDate = DateTime.UtcNow,
                         });
                     }
-                }
+                
             }
         }
 

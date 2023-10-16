@@ -21,7 +21,7 @@ namespace WebApplication1.Controllers.TourishPlan
 
         [HttpPost]
         [Authorize(Policy = "CreateTourishPlanAccess")]
-        public IActionResult CreateNew(TourishPlanInsertModel entityModel)
+        public async Task<IActionResult> CreateNew(TourishPlanInsertModel entityModel)
         {
             try
             {
@@ -29,7 +29,7 @@ namespace WebApplication1.Controllers.TourishPlan
 
                 if (entityExist.Data == null)
                 {
-                    var response = _entityRepository.Add(entityModel);
+                    var response = await _entityRepository.Add(entityModel);
 
                     return Ok(response);
                 }

@@ -24,7 +24,6 @@ namespace WebApplication1.Model
     public class TourishPlanInsertModel
     {
         public Guid Id { get; set; }
-        public required string GuestName { get; set; }
         public string? TourName { get; set; }
         public string StartingPoint { get; set; }
         public string EndPoint { get; set; }

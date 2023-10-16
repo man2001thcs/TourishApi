@@ -12,10 +12,12 @@ using TourishApi.Repository.Interface.Transport;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
 using WebApplication1.Repository.InheritanceRepo;
+using WebApplication1.Repository.InheritanceRepo.Receipt;
 using WebApplication1.Repository.InheritanceRepo.RestaurantPlace;
 using WebApplication1.Repository.InheritanceRepo.RestHoouse;
 using WebApplication1.Repository.InheritanceRepo.Transport;
 using WebApplication1.Repository.Interface;
+using WebApplication1.Repository.Interface.Receipt;
 using WebApplication1.Service;
 using WebApplication1.Trigger;
 
@@ -70,6 +72,7 @@ namespace MyWebApiApp
             services.AddScoped<IHomeStayRepository, HomeStayRepository>();
 
             services.AddScoped<IRestaurantRepository, RestaurantRepository>();
+            services.AddScoped<IReceiptRepository, ReceiptRepository>();
 
             services.AddScoped<ITourishPlanRepository, TourishPlanRepository>();
 
@@ -144,6 +147,13 @@ namespace MyWebApiApp
                                   policy.RequireClaim("Permissions", PolicyTerm.UPDATE_TOURISH_PLAN));
                 options.AddPolicy("DeleteTourishPlanAccess", policy =>
                                   policy.RequireClaim("Permissions", PolicyTerm.DELETE_TOURISH_PLAN));
+
+                options.AddPolicy("CreateReceiptAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.CREATE_RECEIPT));
+                options.AddPolicy("UpdateReceiptAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_RECEIPT));
+                options.AddPolicy("DeleteReceiptAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_RECEIPT));
 
 
                 options.AddPolicy("CreateMessageAccess", policy =>

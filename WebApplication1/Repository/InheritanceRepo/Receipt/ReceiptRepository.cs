@@ -44,32 +44,45 @@ public class ReceiptRepository : IReceiptRepository
             OriginalPrice = receiptModel.OriginalPrice,
             GuestName = receiptModel.GuestName,
             Description = receiptModel.Description,
+            PhoneNumber = receiptModel.PhoneNumber,
+            Email = receiptModel.Email,
             TotalTicket = receiptModel.TotalTicket,
             DiscountAmount = receiptModel.DiscountAmount,
             DiscountFloat = receiptModel.DiscountFloat,
             Status = FullReceiptStatus.Created,
-            CreatedDate = receiptModel.CreatedDate,
-            UpdateDate = receiptModel.UpdateDate
+            CreatedDate = DateTime.UtcNow,
+            UpdateDate = DateTime.UtcNow
         };
 
         var plan = _context.TourishPlan.FirstOrDefault((plan
               => plan.Id == totalReceipt.TourishPlanId));
-        if (plan != null)
+        
+        if (plan != null && plan.RemainTicket >= receiptModel.TotalTicket)
         {
-            plan.RemainTicket--;
+            plan.RemainTicket = plan.RemainTicket - receiptModel.TotalTicket;
+            _context.Add(fullReceipt);
+
+            await _context.SaveChangesAsync();
+
+            return new Response
+            {
+                resultCd = 0,
+                MessageCode = "I511",
+                returnId = fullReceipt.FullReceiptId,
+                // Create type success               
+            };
+        } else
+        {
+            return new Response
+            {
+                resultCd = 0,
+                MessageCode = "C515",
+                returnId = fullReceipt.FullReceiptId,
+                // Create type success               
+            };
         }
 
-        _context.Add(fullReceipt);
-
-        await _context.SaveChangesAsync();
-
-        return new Response
-        {
-            resultCd = 0,
-            MessageCode = "I511",
-            returnId = fullReceipt.FullReceiptId,
-            // Create type success               
-        };
+       
 
     }
 
@@ -125,7 +138,8 @@ public class ReceiptRepository : IReceiptRepository
 
     public Response GetAll(string? tourishPlanId, ReceiptStatus? status, string? sortBy, int page = 1, int pageSize = 5)
     {
-        var receiptQuery = _context.TotalReceiptList.Include(receipt => receipt.FullReceiptList).
+        var receiptQuery = _context.TotalReceiptList.Include(receipt => receipt.FullReceiptList)
+            .Include(receipt => receipt.TourishPlan).
             AsQueryable();
 
         #region Filtering
@@ -172,6 +186,19 @@ public class ReceiptRepository : IReceiptRepository
     public Response getById(Guid id)
     {
         var receipt = _context.TotalReceiptList.Where(receipt => receipt.TotalReceiptId == id).Include(receipt => receipt.FullReceiptList)
+           .FirstOrDefault();
+        if (receipt == null) { return null; }
+
+        return new Response
+        {
+            resultCd = 0,
+            Data = receipt
+        };
+    }
+
+    public Response getFullReceiptById(Guid id)
+    {
+        var receipt = _context.FullReceiptList.Where(receipt => receipt.FullReceiptId == id).Include(entity => entity.TotalReceipt).ThenInclude(entity => entity.TourishPlan)
            .FirstOrDefault();
         if (receipt == null) { return null; }
 

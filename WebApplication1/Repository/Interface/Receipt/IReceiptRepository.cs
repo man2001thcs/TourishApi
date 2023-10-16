@@ -8,6 +8,7 @@ namespace WebApplication1.Repository.Interface.Receipt
     {
         Response GetAll(string? TourishPlanId, ReceiptStatus? status, string? sortBy, int page = 1, int pageSize = 5);
         Response getById(Guid id);
+        Response getFullReceiptById(Guid id);
         Task<Response> Add(FullReceiptInsertModel receiptModel);
         Task<Response> Update(FullReceiptUpdateModel receiptModel);
         Response Delete(Guid id);
