@@ -52,41 +52,64 @@ namespace WebApplication1.Controllers
             });
         }
 
-        [HttpPost("SignIn")]
-        public async Task<IActionResult> SignIn(UserModel model)
+        [HttpPost("CheckExist")]
+        public async Task<IActionResult> CheckExist(String userName )
         {
-            var user = _context.Users.SingleOrDefault(p => p.UserName == model.UserName || p.Email == model.Email);
+            var user = _context.Users.SingleOrDefault(p => p.UserName == userName);
             if (user == null) //không đúng
             {
-                var userInsert = new User
+                return Ok(new Response
                 {
-                    FullName = model.UserName,
-                    Email = model.Email,
-                    Password = model.Password,
-                    PhoneNumber = model.PhoneNumber,
-                    Address = model.Address,
-                    UserName = model.UserName,
-                };
-                _context.Users.Add(userInsert);
+                    resultCd = 0,
+                    MessageCode = "I010"
+                });
             }
             else
             {
                 return Ok(new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C001"
+                    MessageCode = "C010"
+                });
+            }     
+        }
+
+        [HttpPost("SignIn")]
+        public async Task<IActionResult> SignIn(UserModel model)
+        {
+            var userExist = _context.Users.Count(p => p.UserName == model.UserName || p.Email == model.Email);
+            if (userExist < 1) //không đúng
+            {
+                var userInsert = new User
+                {
+                    UserName = model.UserName,
+                    Email = model.Email,
+                    Password = model.Password,
+                    PhoneNumber = model.PhoneNumber,
+                    Address = model.Address,
+                    FullName = model.FullName,
+                    CreateDate = DateTime.UtcNow,
+                    UpdateDate = DateTime.UtcNow,
+                };
+                _context.Users.Add(userInsert);
+                _context.SaveChanges();
+
+                return Ok(new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "I010",
+                });
+            }
+            else
+            {
+                return Ok(new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C010"
                 });
             }
 
-            //cấp token
-            var token = await GenerateToken(user);
-
-            return Ok(new Response
-            {
-                resultCd = 0,
-                MessageCode = "I000",
-                Data = token
-            });
+            
         }
 
         private async Task<TokenModel> GenerateToken(User user)

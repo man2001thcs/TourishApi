@@ -20,11 +20,11 @@ namespace WebApplication1.Controllers.Receipt
 
         // GET: api/<ValuesController>
         [HttpGet]
-        public IActionResult GetAll(string? userId, string? sortBy, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
+        public IActionResult GetAll(string? tourishPlanId, string? sortBy, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
         {
             try
             {
-                var receiptList = _receiptRepository.GetAll(userId, status, sortBy, page, pageSize);
+                var receiptList = _receiptRepository.GetAll(tourishPlanId, status, sortBy, page, pageSize);
                 return Ok(receiptList);
             }
             catch (Exception ex)

@@ -26,6 +26,9 @@ namespace WebApplication1.Data
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
 
+        public DateTime CreateDate { get; set; }
+        public DateTime UpdateDate { get; set; }
+
         public ICollection<RefreshToken> RefreshTokenList { get; set; }
         public ICollection<Message> MessageSentList { get; set; }
         public ICollection<Message> MessageReceiveList { get; set; }

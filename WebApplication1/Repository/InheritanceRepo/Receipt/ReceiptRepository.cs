@@ -78,7 +78,7 @@ public class ReceiptRepository : IReceiptRepository
                 resultCd = 0,
                 MessageCode = "C515",
                 returnId = fullReceipt.FullReceiptId,
-                // Create type success               
+                // Out of ticket              
             };
         }
 
