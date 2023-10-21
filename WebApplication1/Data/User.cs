@@ -7,7 +7,7 @@ namespace WebApplication1.Data
 {
     public enum UserRole
     {
-        Member = 0, Staff = 1, Admin = 2,
+        New = 0, Staff = 1, Admin = 2,
     }
 
     [Table("User")]
@@ -39,7 +39,7 @@ namespace WebApplication1.Data
 
         public User()
         {
-            this.Role = UserRole.Member;
+            this.Role = UserRole.New;
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebApplication1.Data.Receipt;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface.Receipt;
 

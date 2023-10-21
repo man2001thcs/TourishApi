@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using WebApplication1.Data.Receipt;
+﻿using WebApplication1.Data.Receipt;
 
 namespace WebApplication1.Model.Receipt
 {

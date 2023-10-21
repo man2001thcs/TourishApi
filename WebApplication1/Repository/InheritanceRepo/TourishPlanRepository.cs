@@ -3,7 +3,6 @@ using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Schedule;
 using WebApplication1.Model;
-using WebApplication1.Model.Schedule;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
 namespace WebApplication1.Repository.InheritanceRepo;
@@ -223,24 +222,24 @@ public class TourishPlanRepository : ITourishPlanRepository
 
             if (scheduleArray != null)
             {
-                
-                    foreach (var schedule in scheduleArray)
+
+                foreach (var schedule in scheduleArray)
+                {
+                    scheduleList.Add(new EatSchedule
                     {
-                        scheduleList.Add(new EatSchedule
-                        {
-                            PlaceName = schedule.placeName,
-                            SinglePrice = schedule.singlePrice,
-                            Address = schedule.address,
-                            SupportNumber = schedule.supportNumber,
-                            Description = schedule.description,
-                            RestaurantId = schedule.restaurantId,                    
-                            StartDate = schedule.startDate,
-                            EndDate = schedule.endDate,
-                            CreateDate = DateTime.UtcNow,
-                            UpdateDate = DateTime.UtcNow,
-                        });
-                    }
-                
+                        PlaceName = schedule.placeName,
+                        SinglePrice = schedule.singlePrice,
+                        Address = schedule.address,
+                        SupportNumber = schedule.supportNumber,
+                        Description = schedule.description,
+                        RestaurantId = schedule.restaurantId,
+                        StartDate = schedule.startDate,
+                        EndDate = schedule.endDate,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow,
+                    });
+                }
+
             }
         }
 
@@ -257,30 +256,30 @@ public class TourishPlanRepository : ITourishPlanRepository
 
             if (scheduleArray != null)
             {
-              
-                    foreach (var schedule in scheduleArray)
+
+                foreach (var schedule in scheduleArray)
+                {
+                    scheduleList.Add(new MovingSchedule
                     {
-                        scheduleList.Add(new MovingSchedule
-                        {
-                            DriverName = schedule.driverName ?? "",
-                            VehiclePlate = schedule.vehiclePlate,
+                        DriverName = schedule.driverName ?? "",
+                        VehiclePlate = schedule.vehiclePlate,
 
-                            VehicleType = schedule.vehicleType,
-                            TransportId = schedule.transportId,
-                            SinglePrice = schedule.singlePrice,
+                        VehicleType = schedule.vehicleType,
+                        TransportId = schedule.transportId,
+                        SinglePrice = schedule.singlePrice,
 
-                            PhoneNumber = schedule.phoneNumber,
-                            StartingPlace = schedule.startingPlace,
-                            HeadingPlace = schedule.headingPlace,
+                        PhoneNumber = schedule.phoneNumber,
+                        StartingPlace = schedule.startingPlace,
+                        HeadingPlace = schedule.headingPlace,
 
-                            Description = schedule.description,
-                            StartDate = schedule.startDate,
-                            EndDate = schedule.endDate,
-                            CreateDate = DateTime.UtcNow,
-                            UpdateDate = DateTime.UtcNow,
-                        });
-                    }
-                
+                        Description = schedule.description,
+                        StartDate = schedule.startDate,
+                        EndDate = schedule.endDate,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow,
+                    });
+                }
+
             }
         }
 
@@ -297,28 +296,28 @@ public class TourishPlanRepository : ITourishPlanRepository
 
             if (scheduleArray != null)
             {
-                
-                    foreach (var schedule in scheduleArray)
+
+                foreach (var schedule in scheduleArray)
+                {
+                    scheduleList.Add(new StayingSchedule
                     {
-                        scheduleList.Add(new StayingSchedule
-                        {
-                            PlaceName = schedule.placeName,
-                            Address = schedule.address,
-                            SupportNumber = schedule.supportNumber,
-                            SinglePrice = schedule.singlePrice,
+                        PlaceName = schedule.placeName,
+                        Address = schedule.address,
+                        SupportNumber = schedule.supportNumber,
+                        SinglePrice = schedule.singlePrice,
 
-                            RestHouseBranchId = schedule.restHouseBranchId,
-                            RestHouseType = schedule.restHouseType,
-                            Description = schedule.description,
+                        RestHouseBranchId = schedule.restHouseBranchId,
+                        RestHouseType = schedule.restHouseType,
+                        Description = schedule.description,
 
-                            StartDate = schedule.startDate,
-                            EndDate = schedule.endDate,
+                        StartDate = schedule.startDate,
+                        EndDate = schedule.endDate,
 
-                            CreateDate = DateTime.UtcNow,
-                            UpdateDate = DateTime.UtcNow,
-                        });
-                    }
-                
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow,
+                    });
+                }
+
             }
         }
 

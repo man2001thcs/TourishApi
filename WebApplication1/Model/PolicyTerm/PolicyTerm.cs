@@ -36,6 +36,14 @@
         public const string DELETE_MESSAGE = "deleteMessage:term";
         public const string UPDATE_MESSAGE = "updateMessage:term";
 
+        public const string DELETE_USER = "deleteUser:term";
+        public const string UPDATE_INFO_USER = "updateInfoUser:term";
+        public const string UPDATE_PASSWORD_USER = "updatePasswordUser:term";
+
+        public const string GET_USER = "getUser:term";
+        public const string GET_USER_LIST = "getUserList:term";
+        public const string SELF_GET_USER = "getUser:term";
+
     }
 
 

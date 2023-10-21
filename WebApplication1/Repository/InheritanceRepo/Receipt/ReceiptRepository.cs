@@ -56,7 +56,7 @@ public class ReceiptRepository : IReceiptRepository
 
         var plan = _context.TourishPlan.FirstOrDefault((plan
               => plan.Id == totalReceipt.TourishPlanId));
-        
+
         if (plan != null && plan.RemainTicket >= receiptModel.TotalTicket)
         {
             plan.RemainTicket = plan.RemainTicket - receiptModel.TotalTicket;
@@ -71,7 +71,8 @@ public class ReceiptRepository : IReceiptRepository
                 returnId = fullReceipt.FullReceiptId,
                 // Create type success               
             };
-        } else
+        }
+        else
         {
             return new Response
             {
@@ -82,7 +83,7 @@ public class ReceiptRepository : IReceiptRepository
             };
         }
 
-       
+
 
     }
 

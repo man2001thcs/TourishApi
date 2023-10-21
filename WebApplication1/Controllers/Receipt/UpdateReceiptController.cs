@@ -21,7 +21,7 @@ namespace WebApplication1.Controllers.Receipt
 
         [HttpPut("{id}")]
         [Authorize(Policy = "UpdateReceiptAccess")]
-        public async Task<IActionResult> UpdateReceiptById(Guid id, FullReceiptUpdateModel receiptModel)
+        public async Task<IActionResult> UpdateReceiptById(Guid fullReceiptId, FullReceiptUpdateModel receiptModel)
         {
             try
             {

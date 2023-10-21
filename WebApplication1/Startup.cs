@@ -72,6 +72,7 @@ namespace MyWebApiApp
             services.AddScoped<IHomeStayRepository, HomeStayRepository>();
 
             services.AddScoped<IRestaurantRepository, RestaurantRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IReceiptRepository, ReceiptRepository>();
 
             services.AddScoped<ITourishPlanRepository, TourishPlanRepository>();
@@ -162,6 +163,17 @@ namespace MyWebApiApp
                                   policy.RequireClaim("Permissions", PolicyTerm.UPDATE_MESSAGE));
                 options.AddPolicy("DeleteMessageAccess", policy =>
                                   policy.RequireClaim("Permissions", PolicyTerm.DELETE_MESSAGE));
+
+                options.AddPolicy("UpdateUserPasswordAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_PASSWORD_USER));
+                options.AddPolicy("UpdateUserInfoAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_INFO_USER));
+                options.AddPolicy("GetUserListAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.GET_USER_LIST));
+                options.AddPolicy("GetUserAccess", policy =>
+                                 policy.RequireClaim("Permissions", PolicyTerm.GET_USER));
+                options.AddPolicy("SelfGetUserAccess", policy =>
+                                 policy.RequireClaim("Permissions", PolicyTerm.SELF_GET_USER));
 
             });
 
