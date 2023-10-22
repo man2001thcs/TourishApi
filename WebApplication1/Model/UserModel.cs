@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using WebApplication1.Data;
 
 namespace WebApplication1.Model
 {
@@ -12,6 +13,7 @@ namespace WebApplication1.Model
         public required string FullName { get; set; }
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
+        public UserRole? Role { get; set; }
 
         public string? GoogleToken { get; set; }
     }
@@ -23,6 +25,7 @@ namespace WebApplication1.Model
         public string? FullName { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
+        public UserRole? Role { get; set; }
     }
 
     public class UserUpdatePasswordModel

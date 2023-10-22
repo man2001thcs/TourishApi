@@ -111,6 +111,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 userExist.FullName = model.FullName ?? userExist.FullName;
                 userExist.PhoneNumber = model.PhoneNumber ?? userExist.PhoneNumber;
                 userExist.Address = model.Address ?? userExist.Address;
+                userExist.Role = model.Role ?? userExist.Role;
 
                 if (userExist.Password != "None")
                 {
