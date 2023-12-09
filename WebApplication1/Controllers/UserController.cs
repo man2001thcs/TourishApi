@@ -749,7 +749,7 @@ namespace WebApplication1.Controllers
                 }
 
                 // Check 4: Check expired
-                var expiredDateExt = expiredDate.AddMinutes(40);
+                var expiredDateExt = expiredDate.AddHours(24);
                 if (expiredDateExt < DateTime.UtcNow)
                 {
                     return Ok(new Response

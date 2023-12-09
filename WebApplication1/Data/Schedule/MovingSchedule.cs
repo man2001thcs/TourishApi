@@ -8,6 +8,11 @@ namespace WebApplication1.Data.Schedule
         PassengerCar = 0, Plane = 1, Train = 2
     }
 
+    public enum MovingScheduleStatus
+    {
+        Created = 0, OnGoing = 1, Completed = 2, Cancelled = 3
+    }
+
     [Table("MovingSchedule")]
     public class MovingSchedule
     {
@@ -20,6 +25,7 @@ namespace WebApplication1.Data.Schedule
         public string? DriverName { get; set; }
         public string? VehiclePlate { get; set; }
         public string? PhoneNumber { get; set; }
+        public string? BranchName { get; set; }
 
         public VehicleType VehicleType { get; set; }
         public Guid TransportId { get; set; }
@@ -27,6 +33,7 @@ namespace WebApplication1.Data.Schedule
 
         public string StartingPlace { get; set; }
         public string HeadingPlace { get; set; }
+        public MovingScheduleStatus Status { get; set; }
 
         [Required]
         [MaxLength(600)]

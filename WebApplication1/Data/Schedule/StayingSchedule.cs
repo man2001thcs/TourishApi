@@ -8,6 +8,11 @@ namespace WebApplication1.Data.Schedule
         HomeStay = 0, Hotel = 1
     }
 
+    public enum StayingScheduleStatus
+    {
+        Created = 0, OnGoing = 1, Completed = 2, Cancelled = 3
+    }
+
     [Table("StayingSchedule")]
     public class StayingSchedule
     {
@@ -24,6 +29,7 @@ namespace WebApplication1.Data.Schedule
         public RestHouseType RestHouseType { get; set; }
         public Guid RestHouseBranchId { get; set; }
         public double? SinglePrice { get; set; }
+        public StayingScheduleStatus Status { get; set; }
 
         [Required]
         [MaxLength(600)]

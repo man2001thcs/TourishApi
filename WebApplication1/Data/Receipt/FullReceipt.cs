@@ -18,9 +18,9 @@ namespace WebApplication1.Data.Receipt
         public string Email { get; set; }
         public double OriginalPrice { get; set; }
         public int TotalTicket { get; set; }
+        public FullReceiptStatus Status { get; set; }
         [Required]
         [MaxLength(900)]
-        public FullReceiptStatus Status { get; set; }
         public string Description { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime UpdateDate { get; set; }

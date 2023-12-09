@@ -1,8 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using WebApplication1.Data.Receipt;
 
 namespace WebApplication1.Data.Schedule
 {
+    public enum EatScheduleStatus
+    {
+        Created = 0, OnGoing = 1, Completed = 2, Cancelled = 3
+    }
 
     [Table("EatSchedule")]
     public class EatSchedule
@@ -18,6 +23,7 @@ namespace WebApplication1.Data.Schedule
         public string? SupportNumber { get; set; }
         public Guid RestaurantId { get; set; }
         public double? SinglePrice { get; set; }
+        public EatScheduleStatus Status { get; set; }
 
         [Required]
         [MaxLength(600)]

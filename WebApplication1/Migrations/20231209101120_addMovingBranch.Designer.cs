@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data.DbContextFile;
 
@@ -11,9 +12,11 @@ using WebApplication1.Data.DbContextFile;
 namespace TourishApi.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231209101120_addMovingBranch")]
+    partial class addMovingBranch
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -221,8 +224,7 @@ namespace TourishApi.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(900)
-                        .HasColumnType("nvarchar(900)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("DiscountAmount")
                         .HasColumnType("float");
@@ -246,6 +248,7 @@ namespace TourishApi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
+                        .HasMaxLength(900)
                         .HasColumnType("int");
 
                     b.Property<Guid>("TotalReceiptId")
@@ -495,9 +498,6 @@ namespace TourishApi.Migrations
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
                     b.Property<string>("SupportNumber")
                         .HasColumnType("nvarchar(max)");
 
@@ -555,9 +555,6 @@ namespace TourishApi.Migrations
                     b.Property<string>("StartingPlace")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
 
                     b.Property<Guid>("TourishPlanId")
                         .HasColumnType("uniqueidentifier");
@@ -617,9 +614,6 @@ namespace TourishApi.Migrations
 
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
 
                     b.Property<string>("SupportNumber")
                         .HasColumnType("nvarchar(max)");

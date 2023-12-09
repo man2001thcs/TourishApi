@@ -1,4 +1,6 @@
-﻿namespace WebApplication1.Model.Schedule
+﻿using WebApplication1.Data.Schedule;
+
+namespace WebApplication1.Model.Schedule
 {
     public enum RestHouseType
     {
@@ -13,6 +15,7 @@
         public double? SinglePrice { get; set; }
         public RestHouseType RestHouseType { get; set; }
         public Guid RestHouseBranchId { get; set; }
+        public StayingScheduleStatus Status { get; set; }
         public string? Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }

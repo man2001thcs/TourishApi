@@ -233,6 +233,9 @@ public class TourishPlanRepository : ITourishPlanRepository
                         SupportNumber = schedule.supportNumber,
                         Description = schedule.description,
                         RestaurantId = schedule.restaurantId,
+
+                        Status = schedule.status ?? 0,
+
                         StartDate = schedule.startDate,
                         EndDate = schedule.endDate,
                         CreateDate = DateTime.UtcNow,
@@ -263,10 +266,13 @@ public class TourishPlanRepository : ITourishPlanRepository
                     {
                         DriverName = schedule.driverName ?? "",
                         VehiclePlate = schedule.vehiclePlate,
+                        BranchName = schedule.branchName,
 
                         VehicleType = schedule.vehicleType,
                         TransportId = schedule.transportId,
                         SinglePrice = schedule.singlePrice,
+
+                        Status = schedule.status ?? 0,
 
                         PhoneNumber = schedule.phoneNumber,
                         StartingPlace = schedule.startingPlace,
@@ -305,6 +311,8 @@ public class TourishPlanRepository : ITourishPlanRepository
                         Address = schedule.address,
                         SupportNumber = schedule.supportNumber,
                         SinglePrice = schedule.singlePrice,
+
+                        Status = schedule.status ?? 0,
 
                         RestHouseBranchId = schedule.restHouseBranchId,
                         RestHouseType = schedule.restHouseType,
