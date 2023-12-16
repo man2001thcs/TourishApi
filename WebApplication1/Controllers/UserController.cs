@@ -303,7 +303,7 @@ namespace WebApplication1.Controllers
                 {
                     var userName = tokenInverification.FindFirstValue("UserName");
                     var updateModel = model;
-                    updateModel.UserName = userName;                  
+                    updateModel.UserName = userName;
 
                     var entity = await this._userRepository.UpdatePassword(updateModel);
                     return Ok(entity);

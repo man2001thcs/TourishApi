@@ -229,12 +229,35 @@ public class ReceiptRepository : IReceiptRepository
 
             if (receiptModel.Status == FullReceiptStatus.Completed) receipt.CompleteDate = DateTime.UtcNow;
 
-            var totalReceiptComplete = await _context.TotalReceiptList.Where(receipt => receipt.TotalReceiptId == receiptModel.TotalReceiptId && receipt.FullReceiptList.Count(fullReceipt => fullReceipt.Status == FullReceiptStatus.Completed) <= 1).FirstOrDefaultAsync();
+            await _context.SaveChangesAsync();
 
-            if (totalReceiptComplete != null)
+
+            var totalReceiptComplete = await _context.TotalReceiptList.Where(receipt => receipt.TotalReceiptId == receiptModel.TotalReceiptId).Include(entity => entity.FullReceiptList).FirstOrDefaultAsync();
+
+            var totalCount = totalReceiptComplete.FullReceiptList.Count();
+
+            var createCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt => fullReceipt.Status == FullReceiptStatus.Created);
+            var onGoingCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt => fullReceipt.Status == FullReceiptStatus.AwaitPayment);
+            var complteteCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt => fullReceipt.Status == FullReceiptStatus.Completed);
+            var cancelCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt => fullReceipt.Status == FullReceiptStatus.Cancelled);
+
+            if (totalCount == createCount)
+            {
+                totalReceiptComplete.Status = ReceiptStatus.Created;
+            }
+            else if (onGoingCount < totalCount && onGoingCount > 1)
+            {
+                totalReceiptComplete.Status = ReceiptStatus.OnGoing;
+            }
+            else if (complteteCount == totalCount)
             {
                 totalReceiptComplete.Status = ReceiptStatus.Completed;
-            };
+            }
+            else if (cancelCount == totalCount)
+            {
+                totalReceiptComplete.Status = ReceiptStatus.Cancelled;
+            }
+
 
             _context.SaveChanges();
         }

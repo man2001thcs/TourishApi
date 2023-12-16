@@ -4,7 +4,7 @@ namespace WebApplication1.Data.Receipt
 {
     public enum ReceiptStatus
     {
-        Created = 0, Completed = 1, Cancelled = 2,
+        Created = 0, OnGoing = 1, Completed = 2, Cancelled = 3,
     }
 
     [Table("TotalReceipt")]

@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using WebApplication1.Data.Receipt;
 
 namespace WebApplication1.Data.Schedule
 {

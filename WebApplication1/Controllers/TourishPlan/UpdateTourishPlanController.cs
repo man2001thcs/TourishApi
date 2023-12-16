@@ -21,7 +21,7 @@ namespace WebApplication1.Controllers.TourishPlan
 
         [HttpPut("{id}")]
         [Authorize(Policy = "UpdateTourishPlanAccess")]
-        public async Task<IActionResult> UpdateTourishPlanById(Guid id, TourishPlanUpdateModel TourishPlanModel)
+        public async Task<IActionResult> UpdateTourishPlanById(TourishPlanUpdateModel TourishPlanModel)
         {
 
             try
