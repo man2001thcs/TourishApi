@@ -54,12 +54,12 @@ public class ReceiptRepository : IReceiptRepository
             UpdateDate = DateTime.UtcNow
         };
 
-        var plan = _context.TourishPlan.FirstOrDefault((plan
+        var planExist = _context.TourishPlan.FirstOrDefault((plan
               => plan.Id == totalReceipt.TourishPlanId));
 
-        if (plan != null && plan.RemainTicket >= receiptModel.TotalTicket)
+        if (planExist != null && planExist.RemainTicket >= receiptModel.TotalTicket)
         {
-            plan.RemainTicket = plan.RemainTicket - receiptModel.TotalTicket;
+            planExist.RemainTicket = planExist.RemainTicket - receiptModel.TotalTicket;
             _context.Add(fullReceipt);
 
             await _context.SaveChangesAsync();
@@ -97,7 +97,7 @@ public class ReceiptRepository : IReceiptRepository
                 => plan.Id == receipt.TotalReceipt.TourishPlanId));
             if (plan != null)
             {
-                plan.RemainTicket++;
+                plan.RemainTicket = plan.RemainTicket + receipt.TotalTicket;
             }
             _context.Remove(receipt);
             _context.SaveChanges();
@@ -212,10 +212,12 @@ public class ReceiptRepository : IReceiptRepository
 
     public async Task<Response> Update(FullReceiptUpdateModel receiptModel)
     {
-        var receipt = _context.FullReceiptList.FirstOrDefault((receipt
+        var receipt = _context.FullReceiptList.Include(entity => entity.TotalReceipt).FirstOrDefault((receipt
             => receipt.FullReceiptId == receiptModel.FullReceiptId));
         if (receipt != null)
         {
+            var oldTotalTicket = receipt.TotalTicket;
+
             receipt.GuestName = receiptModel.GuestName;
             receipt.Status = receiptModel.Status;
             receipt.DiscountAmount = receiptModel.DiscountAmount;
@@ -226,11 +228,27 @@ public class ReceiptRepository : IReceiptRepository
             receipt.Status = receiptModel.Status;
 
             receipt.UpdateDate = DateTime.UtcNow;
-
             if (receiptModel.Status == FullReceiptStatus.Completed) receipt.CompleteDate = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+            var planExist = _context.TourishPlan.FirstOrDefault((plan
+              => plan.Id == receipt.TotalReceipt.TourishPlanId));
 
+            if (planExist != null && planExist.RemainTicket + oldTotalTicket >= receiptModel.TotalTicket)
+            {
+                planExist.RemainTicket = planExist.RemainTicket + oldTotalTicket - receiptModel.TotalTicket;
+
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                return new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "C515",
+                    returnId = receipt.TotalReceiptId,
+                    // Out of ticket              
+                };
+            }
 
             var totalReceiptComplete = await _context.TotalReceiptList.Where(receipt => receipt.TotalReceiptId == receiptModel.TotalReceiptId).Include(entity => entity.FullReceiptList).FirstOrDefaultAsync();
 
