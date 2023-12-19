@@ -140,8 +140,11 @@ public class ReceiptRepository : IReceiptRepository
     public Response GetAll(string? tourishPlanId, ReceiptStatus? status, string? sortBy, int page = 1, int pageSize = 5)
     {
         var receiptQuery = _context.TotalReceiptList.Include(receipt => receipt.FullReceiptList)
-            .Include(receipt => receipt.TourishPlan).
-            AsQueryable();
+            .Include(receipt => receipt.TourishPlan)
+            .Include(receipt => receipt.TourishPlan.MovingSchedules)
+            .Include(receipt => receipt.TourishPlan.EatSchedules)
+            .Include(receipt => receipt.TourishPlan.StayingSchedules)
+            .AsQueryable();
 
         #region Filtering
         if (!string.IsNullOrEmpty(tourishPlanId))
