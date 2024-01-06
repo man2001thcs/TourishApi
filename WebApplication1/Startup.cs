@@ -218,7 +218,7 @@ namespace MyWebApiApp
             app.UseHangfireServer();
             app.UseHangfireDashboard();
 
-            RecurringJob.AddOrUpdate<ScheduleDateChangeTask>("MyScheduledTask", x => x.ScheduleDateDueTask(), Cron.MinuteInterval(1));
+            RecurringJob.AddOrUpdate<ScheduleDateChangeTask>("MyScheduledTask", x => x.ScheduleDateDueTask(), Cron.MonthInterval(1));
 
             app.UseEndpoints(endpoints =>
             {
