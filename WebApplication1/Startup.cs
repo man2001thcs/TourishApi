@@ -1,4 +1,5 @@
 ﻿using Azure.Storage.Blobs;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using System.Text;
 using TourishApi.Repository.Interface.Restaurant;
 using TourishApi.Repository.Interface.Resthouse;
 using TourishApi.Repository.Interface.Transport;
+using TourishApi.Task;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
 using WebApplication1.Repository.InheritanceRepo;
@@ -177,6 +179,9 @@ namespace MyWebApiApp
 
             });
 
+            services.AddHangfire(config =>
+                config.UseSqlServerStorage(Configuration.GetConnectionString("AzureDb")));
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "MyWebApiApp", Version = "v1" });
@@ -184,6 +189,7 @@ namespace MyWebApiApp
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        [Obsolete]
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
 
@@ -207,10 +213,12 @@ namespace MyWebApiApp
             }
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
             app.UseAuthorization();
+            app.UseHangfireServer();
+            app.UseHangfireDashboard();
+
+            RecurringJob.AddOrUpdate<ScheduleDateChangeTask>("MyScheduledTask", x => x.ScheduleDateDueTask(), Cron.MinuteInterval(1));
 
             app.UseEndpoints(endpoints =>
             {
