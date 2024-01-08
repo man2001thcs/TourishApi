@@ -14,6 +14,7 @@ public class ScheduleDateChangeTask
     public async Task ScheduleDateDueTask()
     {
         var tourishPlanList = _context.TourishPlan.
+            Where(entity => entity.PlanStatus == WebApplication1.Data.PlanStatus.OnGoing).
             Include(entity => entity.EatSchedules).
             Include(entity => entity.StayingSchedules).
             Include(entity => entity.MovingSchedules).ToList();
@@ -24,7 +25,7 @@ public class ScheduleDateChangeTask
 
             foreach (var plan in item.EatSchedules)
             {
-                if (plan.EndDate != null && plan.Status != WebApplication1.Data.Schedule.EatScheduleStatus.Completed)
+                if (plan.EndDate != null && (int)plan.Status < (int)WebApplication1.Data.Schedule.EatScheduleStatus.Completed)
                 {
                     var endDate = plan.EndDate;
                     if (DateTime.Compare((DateTime)endDate, today) < 0)
@@ -36,7 +37,7 @@ public class ScheduleDateChangeTask
 
             foreach (var plan in item.MovingSchedules)
             {
-                if (plan.EndDate != null && plan.Status != WebApplication1.Data.Schedule.MovingScheduleStatus.Completed)
+                if (plan.EndDate != null && (int)plan.Status < (int)WebApplication1.Data.Schedule.MovingScheduleStatus.Completed)
                 {
                     var endDate = plan.EndDate;
                     if (DateTime.Compare((DateTime)endDate, today) < 0)
@@ -49,7 +50,7 @@ public class ScheduleDateChangeTask
 
             foreach (var plan in item.StayingSchedules)
             {
-                if (plan.EndDate != null && plan.Status != WebApplication1.Data.Schedule.StayingScheduleStatus.Completed)
+                if (plan.EndDate != null && (int)plan.Status < (int)WebApplication1.Data.Schedule.StayingScheduleStatus.Completed)
                 {
                     var endDate = plan.EndDate;
                     if (DateTime.Compare((DateTime)endDate, today) < 0)
@@ -62,35 +63,62 @@ public class ScheduleDateChangeTask
             await _context.SaveChangesAsync();
 
             var isScheduleCompleted = true;
+            var isAllScheduleCanceled = true;
 
             foreach (var plan in item.EatSchedules)
             {
-                if (plan.Status != WebApplication1.Data.Schedule.EatScheduleStatus.Completed)
+                if ((int)plan.Status < (int)WebApplication1.Data.Schedule.EatScheduleStatus.Completed)
                 {
+                    
                     isScheduleCompleted = false;
+                }
+
+                if ((int)plan.Status != (int)WebApplication1.Data.Schedule.EatScheduleStatus.Cancelled)
+                {
+                    
+                    isAllScheduleCanceled = false;
                 }
             }
 
             foreach (var plan in item.MovingSchedules)
             {
-                if (plan.Status != WebApplication1.Data.Schedule.MovingScheduleStatus.Completed)
+                if ((int)plan.Status < (int)WebApplication1.Data.Schedule.MovingScheduleStatus.Completed)
                 {
                     isScheduleCompleted = false;
+                }
+
+                if ((int)plan.Status != (int)WebApplication1.Data.Schedule.MovingScheduleStatus.Cancelled)
+                {
+                    
+                    isAllScheduleCanceled = false;
                 }
             }
 
             foreach (var plan in item.StayingSchedules)
             {
-                if (plan.Status != WebApplication1.Data.Schedule.StayingScheduleStatus.Completed)
+                if ((int)plan.Status < (int)WebApplication1.Data.Schedule.StayingScheduleStatus.Completed)
                 {
                     isScheduleCompleted = false;
+                }
+
+                if ((int)plan.Status != (int)WebApplication1.Data.Schedule.StayingScheduleStatus.Cancelled)
+                {
+                    
+                    isAllScheduleCanceled = false;
                 }
             }
 
             if (isScheduleCompleted)
             {
                 item.PlanStatus = WebApplication1.Data.PlanStatus.Complete;
-            }
+            } 
+
+            if (isAllScheduleCanceled && (item.StayingSchedules.Count() > 0 
+                || item.MovingSchedules.Count() > 0 
+                || item.EatSchedules.Count() > 0))
+            {
+                item.PlanStatus = WebApplication1.Data.PlanStatus.Cancel;
+            } 
             await _context.SaveChangesAsync();
 
         }
