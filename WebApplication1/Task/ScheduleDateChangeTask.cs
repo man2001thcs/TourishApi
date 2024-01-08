@@ -2,6 +2,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data.DbContextFile;
+using System.Threading.Tasks;
 
 public class ScheduleDateChangeTask
 {
@@ -10,7 +11,7 @@ public class ScheduleDateChangeTask
     {
         this._context = _context;
     }
-    public async void ScheduleDateDueTask()
+    public async Task ScheduleDateDueTask()
     {
         var tourishPlanList = _context.TourishPlan.
             Include(entity => entity.EatSchedules).
@@ -23,7 +24,7 @@ public class ScheduleDateChangeTask
 
             foreach (var plan in item.EatSchedules)
             {
-                if (plan.EndDate != null)
+                if (plan.EndDate != null && plan.Status != WebApplication1.Data.Schedule.EatScheduleStatus.Completed)
                 {
                     var endDate = plan.EndDate;
                     if (DateTime.Compare((DateTime)endDate, today) < 0)
@@ -35,7 +36,7 @@ public class ScheduleDateChangeTask
 
             foreach (var plan in item.MovingSchedules)
             {
-                if (plan.EndDate != null)
+                if (plan.EndDate != null && plan.Status != WebApplication1.Data.Schedule.MovingScheduleStatus.Completed)
                 {
                     var endDate = plan.EndDate;
                     if (DateTime.Compare((DateTime)endDate, today) < 0)
@@ -48,7 +49,7 @@ public class ScheduleDateChangeTask
 
             foreach (var plan in item.StayingSchedules)
             {
-                if (plan.EndDate != null)
+                if (plan.EndDate != null && plan.Status != WebApplication1.Data.Schedule.StayingScheduleStatus.Completed)
                 {
                     var endDate = plan.EndDate;
                     if (DateTime.Compare((DateTime)endDate, today) < 0)
