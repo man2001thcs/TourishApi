@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SignalR.Hub.Client;
 using System.Security.Claims;
-using TourishApi.Data.Chat;
+using WebApplication1.Data.Chat;
 using WebApplication1.Data;
 using WebApplication1.Data.Connection;
 using WebApplication1.Data.DbContextFile;
@@ -13,23 +13,23 @@ using WebApplication1.Model;
 namespace SignalR.Hub
 {
     [Authorize]
-    public class MessageHub : Hub<IMessageHubClient>
+    public class UserMessageHub : Hub<IMessageHubClient>
     {
         private readonly MyDbContext _context;
 
-        public MessageHub(MyDbContext context, IOptionsMonitor<AppSetting> optionsMonitor)
+        public UserMessageHub(MyDbContext context, IOptionsMonitor<AppSetting> optionsMonitor)
         {
             _context = context;
         }
 
-        public async Task SendMessageToAll(MessageModel message)
+        public async Task SendMessageToAll(UserMessageModel message)
         {
             await Clients.All.SendMessageToAll(message);
         }
 
         public async Task ReceiveTotalNumber(Guid userId)
         {
-            var messageCount = _context.Messages.Where(u => u.UserReceiveId == userId && !u.IsRead && !u.IsDeleted).Count();
+            var messageCount = _context.UserMessages.Where(u => u.UserReceiveId == userId && !u.IsRead && !u.IsDeleted).Count();
             await Clients.All.SendString(messageCount.ToString());
         }
 
@@ -38,7 +38,7 @@ namespace SignalR.Hub
             await Clients.All.SendString(a);
         }
 
-        public async Task SendMessageToUser(Guid userSentId, Guid userReceiveId, MessageModel message)
+        public async Task SendMessageToUser(Guid userSentId, Guid userReceiveId, UserMessageModel message)
         {
             try
             {
@@ -69,7 +69,7 @@ namespace SignalR.Hub
                 _context.Add(messageEntity);
 
 
-                var connection = _context.MessageConList
+                var connection = _context.UserMessageConList
                     .OrderByDescending(connection => connection.CreateDate)
                     .FirstOrDefault(u => u.UserId == userReceiveId && u.Connected);
                 if (connection != null)
@@ -80,7 +80,7 @@ namespace SignalR.Hub
             }
             catch (Exception ex)
             {
-                var connection = _context.MessageConList
+                var connection = _context.UserMessageConList
                     .OrderByDescending(connection => connection.CreateDate)
                     .FirstOrDefault(u => u.UserId == userSentId && u.Connected);
 
@@ -103,7 +103,7 @@ namespace SignalR.Hub
         {
             var userId = Context.User.FindFirstValue("Id");
 
-            var user = _context.Users.Include(u => u.MessageConList)
+            var user = _context.Users.Include(u => u.UserMessageConList)
                 .SingleOrDefault(u => u.Id.ToString() == userId);
 
             if (user != null)
@@ -130,7 +130,7 @@ namespace SignalR.Hub
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
 
-            var connection = _context.MessageConList.FirstOrDefault(u => u.ConnectionID == Context.ConnectionId);
+            var connection = _context.UserMessageConList.FirstOrDefault(u => u.ConnectionID == Context.ConnectionId);
             if (connection != null)
                 connection.Connected = false;
             await _context.SaveChangesAsync();

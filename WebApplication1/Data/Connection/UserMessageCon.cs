@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApplication1.Data.Connection
 {
-    [Table("MessageCon")]
-    public class MessageCon
+    [Table("UserMessageCon")]
+    public class UserMessageCon
     {
         [Key]
         public Guid Id { get; set; }

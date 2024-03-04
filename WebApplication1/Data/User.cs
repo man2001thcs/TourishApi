@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using TourishApi.Data.Chat;
 using WebApplication1.Data.Authentication;
+using WebApplication1.Data.Chat;
 using WebApplication1.Data.Connection;
 
 namespace WebApplication1.Data
@@ -31,12 +31,14 @@ namespace WebApplication1.Data
         public DateTime UpdateDate { get; set; }
 
         public ICollection<RefreshToken> RefreshTokenList { get; set; }
-        public ICollection<UserMessage> MessageSentList { get; set; }
-        public ICollection<UserMessage> MessageReceiveList { get; set; }
+        public ICollection<UserMessage> UserMessageSentList { get; set; }
+        public ICollection<UserMessage> UserMessageReceiveList { get; set; }
         public ICollection<Notification> NotificationList { get; set; }
 
         public ICollection<NotificationCon> NotificationConList { get; set; }
-        public ICollection<UserMessageCon> MessageConList { get; set; }
+        public ICollection<UserMessageCon> UserMessageConList { get; set; }
+
+        public ICollection<GuestMessageCon>? GuestMessageConList { get; set; }
 
         public User()
         {

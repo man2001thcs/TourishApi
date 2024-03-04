@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TourishApi.Data.Chat;
 using WebApplication1.Data.Authentication;
 using WebApplication1.Data.Connection;
 using WebApplication1.Data.Receipt;
@@ -7,6 +6,7 @@ using WebApplication1.Data.RestaurantPlace;
 using WebApplication1.Data.RestHouse;
 using WebApplication1.Data.Schedule;
 using WebApplication1.Data.Transport;
+using WebApplication1.Data.Chat;
 
 namespace WebApplication1.Data.DbContextFile
 {
@@ -34,11 +34,13 @@ namespace WebApplication1.Data.DbContextFile
         public DbSet<FullReceipt> FullReceiptList { get; set; }
 
         //
-        public DbSet<UserMessage> Messages { get; set; }
+        public DbSet<UserMessage> UserMessages { get; set; }
+        public DbSet<GuestMessage> GuestMessages { get; set; }
         public DbSet<Notification> Notifications { get; set; }
 
         public DbSet<NotificationCon> NotificationConList { get; set; }
-        public DbSet<UserMessageCon> MessageConList { get; set; }
+        public DbSet<UserMessageCon> UserMessageConList { get; set; }
+        public DbSet<GuestMessageCon> GuestMessageConList { get; set; }
 
         public DbSet<SaveFile> SaveFileList { get; set; }
 
@@ -122,15 +124,29 @@ namespace WebApplication1.Data.DbContextFile
                 entity.Property(message => message.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
 
                 entity.HasOne(e => e.UserSent)
-                .WithMany(e => e.MessageSentList)
+                .WithMany(e => e.UserMessageSentList)
                 .HasForeignKey(e => e.UserSentId)
                 .HasConstraintName("FK_User_SentMessage")
                 .OnDelete(DeleteBehavior.ClientSetNull);
 
                 entity.HasOne(e => e.UserReceive)
-                .WithMany(e => e.MessageReceiveList)
+                .WithMany(e => e.UserMessageReceiveList)
                 .HasForeignKey(e => e.UserReceiveId)
                 .HasConstraintName("FK_User_ReceiveMessage")
+                .OnDelete(DeleteBehavior.ClientSetNull);
+            });
+
+            modelBuilder.Entity<GuestMessage>(entity =>
+            {
+                entity.ToTable(nameof(UserMessage));
+                entity.HasKey(message => message.Id);
+                entity.Property(message => message.UpdateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+                entity.Property(message => message.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+                entity.HasOne(e => e.GuestMessageCon)
+                .WithMany(e => e.GuestMessages)
+                .HasForeignKey(e => e.GuestMessageConId)
+                .HasConstraintName("FK_GuestCon_ReceiveMessage")
                 .OnDelete(DeleteBehavior.ClientSetNull);
             });
 
@@ -166,9 +182,21 @@ namespace WebApplication1.Data.DbContextFile
                 entity.Property(message => message.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
 
                 entity.HasOne(e => e.User)
-                .WithMany(e => e.MessageConList)
+                .WithMany(e => e.UserMessageConList)
                 .HasForeignKey(e => e.UserId)
                 .HasConstraintName("FK_User_MessageCon");
+            });
+
+            modelBuilder.Entity<GuestMessageCon>(entity =>
+            {
+                entity.ToTable(nameof(GuestMessageCon));
+                entity.HasKey(message => message.Id);
+                entity.Property(message => message.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+                entity.HasOne(e => e.Admin)
+                .WithMany(e => e.GuestMessageConList)
+                .HasForeignKey(e => e.AdminId)
+                .HasConstraintName("FK_Guest_MessageCon");
             });
 
             modelBuilder.Entity<SaveFile>(entity =>

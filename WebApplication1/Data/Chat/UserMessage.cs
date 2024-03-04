@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using WebApplication1.Data;
 
-namespace TourishApi.Data.Chat
+namespace WebApplication1.Data.Chat
 {
-    [Table("Message")]
-    public class Message
+    [Table("UserMessage")]
+    public class UserMessage
     {
         public Guid Id { get; set; }
         public required Guid UserSentId { get; set; }
@@ -21,7 +20,7 @@ namespace TourishApi.Data.Chat
         public User UserReceive { get; set; }
         public ICollection<SaveFile>? Files { get; set; }
 
-        public Message()
+        public UserMessage()
         {
             Content = "";
             IsRead = false;

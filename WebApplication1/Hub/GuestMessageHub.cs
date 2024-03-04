@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SignalR.Hub.Client;
 using System.Security.Claims;
-using TourishApi.Data.Chat;
+using WebApplication1.Data.Chat;
 using WebApplication1.Data;
 using WebApplication1.Data.Connection;
 using WebApplication1.Data.DbContextFile;
@@ -12,8 +12,7 @@ using WebApplication1.Model;
 
 namespace SignalR.Hub
 {
-    [Authorize]
-    public class GuestMessageHub : Hub<IMessageHubClient>
+    public class GuestMessageHub : Hub<IGuestMessageHubClient>
     {
         private readonly MyDbContext _context;
 
@@ -27,39 +26,14 @@ namespace SignalR.Hub
             await Clients.All.SendMessageToAll(message);
         }
 
-        public async Task ReceiveTotalNumber(Guid userId)
-        {
-            var messageCount = _context.Messages.Where(u => u.UserReceiveId == userId && !u.IsRead && !u.IsDeleted).Count();
-            await Clients.All.SendString(messageCount.ToString());
-        }
-
-        public async Task SendString(String a)
-        {
-            await Clients.All.SendString(a);
-        }
-
-        public async Task SendMessageToUser(Guid userSentId, Guid userReceiveId, GuestMessageModel message)
+        public async Task SendMessageToUser(Guid adminId, string email, GuestMessageModel message)
         {
             try
             {
-                var fileSave = new List<SaveFile>();
 
-                foreach (var file in message.Files)
-                {
-                    fileSave.Add(new SaveFile
-                    {
-                        FileType = file.FileType,
-                        ResourceType = ResourceTypeEnum.Message,
-                        CreatedDate = DateTime.UtcNow,
-                    });
-                }
-
-                var messageEntity = new UserMessage
-                {
-                    UserSentId = userSentId,
-                    UserReceiveId = userReceiveId,
+                var messageEntity = new GuestMessage
+                {        
                     Content = message.Content,
-                    Files = fileSave,
                     IsRead = false,
                     IsDeleted = false,
                     CreateDate = DateTime.UtcNow,
@@ -69,30 +43,40 @@ namespace SignalR.Hub
                 _context.Add(messageEntity);
 
 
-                var connection = _context.MessageConList
+                var connection = _context.GuestMessageConList
                     .OrderByDescending(connection => connection.CreateDate)
-                    .FirstOrDefault(u => u.UserId == userReceiveId && u.Connected);
+                    .FirstOrDefault(u => u.AdminId == adminId && u.GuestEmail == email && u.Connected);
                 if (connection != null)
                 {
-                    await Clients.Client(connection.ConnectionID).SendMessageToUser(userSentId, message);
-                    await Clients.Client(connection.ConnectionID).SendMessageToUser(userReceiveId, message);
+                    await Clients.Client(connection.ConnectionID).SendMessageToAdmin(adminId, message);
+                    await Clients.Client(connection.ConnectionID).SendMessageToGuest(email, message);
                 }
             }
             catch (Exception ex)
             {
-                var connection = _context.MessageConList
+                var connectionAdmin = _context.GuestMessageConList
                     .OrderByDescending(connection => connection.CreateDate)
-                    .FirstOrDefault(u => u.UserId == userSentId && u.Connected);
+                    .FirstOrDefault(u => u.AdminId == adminId  && u.Connected);
 
-                if (connection != null)
+                if (connectionAdmin != null)
                 {
-                    await Clients.Client(connection.ConnectionID).SendError(userSentId, "Lỗi xảy ra: " + ex.ToString());
+                    await Clients.Client(connectionAdmin.ConnectionID).SendAdminError(adminId, "Lỗi xảy ra: " + ex.ToString());
+                }
+
+                var connectionGuest = _context.GuestMessageConList
+                   .OrderByDescending(connection => connection.CreateDate)
+                   .FirstOrDefault(u => u.GuestEmail == email && u.Connected);
+
+                if (connectionGuest != null)
+                {
+                    await Clients.Client(connectionGuest.ConnectionID).SendGuestError(email, "Lỗi xảy ra: " + ex.ToString());
                 }
                 //await Clients.Client(connection.ConnectionID).SendOffersToUser(userId, null);
 
             }
 
         }
+
 
         //public Task SendMessageToGroup(Guid userId, string message)
         //{
@@ -101,16 +85,22 @@ namespace SignalR.Hub
 
         public override async Task OnConnectedAsync()
         {
-            var userId = Context.User.FindFirstValue("Id");
+            var adminId = Context.GetHttpContext().Request.Query["adminId"];
+            var guestEmail = Context.GetHttpContext().Request.Query["guestEmail"];
+            var guestName = Context.GetHttpContext().Request.Query["guestName"];
+            var guestPhoneNumber = Context.GetHttpContext().Request.Query["guestPhoneNumber"];
 
-            var user = _context.Users.Include(u => u.MessageConList)
-                .SingleOrDefault(u => u.Id.ToString() == userId);
+            var admin = _context.Users.Include(u => u.NotificationConList)
+               .SingleOrDefault(u => u.Id.ToString() == adminId);
 
-            if (user != null)
+            if (admin != null)
             {
-                var notifyCon = new UserMessageCon
+                var notifyCon = new GuestMessageCon
                 {
-                    UserId = user.Id,
+                    AdminId = new Guid(adminId),
+                    GuestEmail = guestEmail,
+                    GuestName = guestName,
+                    GuestPhoneNumber = guestPhoneNumber,
                     ConnectionID = Context.ConnectionId,
                     UserAgent = Context.GetHttpContext().Request.Headers["User-Agent"].ToString(),
                     Connected = true,
@@ -123,14 +113,13 @@ namespace SignalR.Hub
                 await _context.SaveChangesAsync();
             }
 
-
             await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
 
-            var connection = _context.MessageConList.FirstOrDefault(u => u.ConnectionID == Context.ConnectionId);
+            var connection = _context.GuestMessageConList.FirstOrDefault(u => u.ConnectionID == Context.ConnectionId);
             if (connection != null)
                 connection.Connected = false;
             await _context.SaveChangesAsync();

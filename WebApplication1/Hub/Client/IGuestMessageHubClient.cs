@@ -5,9 +5,12 @@ namespace SignalR.Hub.Client
 {
     public interface IGuestMessageHubClient
     {
-        Task SendMessageToUser(Guid userId, UserMessageModel notification);
-        Task SendMessageToAll(UserMessageModel notification);
+        Task SendMessageToAdmin(Guid userId, GuestMessageModel message);
+        Task SendMessageToGuest(String email, GuestMessageModel message);
+        Task SendMessageToAll(GuestMessageModel message);
         Task SendString(String stringA);
-        Task SendError(Guid userId, string error);
+        Task SendAdminError(Guid userId, string error);
+
+        Task SendGuestError(String email, string error);
     }
 }
