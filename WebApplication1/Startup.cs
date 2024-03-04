@@ -223,7 +223,7 @@ namespace MyWebApiApp
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<NotificationHub>("api/user/notify");
-                endpoints.MapHub<MessageHub>("api/user/message");
+                endpoints.MapHub<UserMessageHub>("api/user/message");
 
                 endpoints.MapControllers();
             });

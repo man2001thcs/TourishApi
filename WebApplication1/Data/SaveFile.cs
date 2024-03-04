@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using TourishApi.Data.Chat;
 
 namespace WebApplication1.Data
 {
@@ -17,7 +18,7 @@ namespace WebApplication1.Data
         public ResourceTypeEnum ResourceType { get; set; }
         public required string FileType { get; set; }
         public DateTime CreatedDate { get; set; }
-        public Message? Message { get; set; }
+        public UserMessage? Message { get; set; }
         public TourishPlan? TourishPlan { get; set; }
     }
 }

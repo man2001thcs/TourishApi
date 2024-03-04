@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SignalR.Hub.Client;
 using System.Security.Claims;
+using TourishApi.Data.Chat;
 using WebApplication1.Data;
 using WebApplication1.Data.Connection;
 using WebApplication1.Data.DbContextFile;
@@ -53,7 +54,7 @@ namespace SignalR.Hub
                     });
                 }
 
-                var messageEntity = new Message
+                var messageEntity = new UserMessage
                 {
                     UserSentId = userSentId,
                     UserReceiveId = userReceiveId,
@@ -107,7 +108,7 @@ namespace SignalR.Hub
 
             if (user != null)
             {
-                var notifyCon = new MessageCon
+                var notifyCon = new UserMessageCon
                 {
                     UserId = user.Id,
                     ConnectionID = Context.ConnectionId,

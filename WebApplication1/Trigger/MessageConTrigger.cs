@@ -5,7 +5,7 @@ using WebApplication1.Data.DbContextFile;
 
 namespace WebApplication1.Trigger
 {
-    public class MessageConTrigger : IAfterSaveTrigger<MessageCon>
+    public class MessageConTrigger : IAfterSaveTrigger<UserMessageCon>
     {
 
         private readonly MyDbContext _dbContext;
@@ -15,7 +15,7 @@ namespace WebApplication1.Trigger
             this._dbContext = dbContext;
         }
 
-        public Task AfterSave(ITriggerContext<MessageCon> context, CancellationToken cancellationToken)
+        public Task AfterSave(ITriggerContext<UserMessageCon> context, CancellationToken cancellationToken)
         {
             if (context.ChangeType == ChangeType.Added)
             {

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using WebApplication1.Data;
 
-namespace WebApplication1.Data
+namespace TourishApi.Data.Chat
 {
     [Table("Message")]
     public class Message
@@ -10,8 +11,8 @@ namespace WebApplication1.Data
         public Guid UserReceiveId { get; set; }
         public Guid? GroupId { get; set; }
         public string Content { get; set; }
-        public Boolean IsRead { get; set; }
-        public Boolean IsDeleted { get; set; }
+        public bool IsRead { get; set; }
+        public bool IsDeleted { get; set; }
         public DateTime? CreateDate { get; set; }
         public DateTime? UpdateDate { get; set; }
 
@@ -22,9 +23,9 @@ namespace WebApplication1.Data
 
         public Message()
         {
-            this.Content = "";
-            this.IsRead = false;
-            this.IsDeleted = false;
+            Content = "";
+            IsRead = false;
+            IsDeleted = false;
         }
     }
 }

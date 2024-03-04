@@ -1,8 +1,8 @@
 ﻿namespace TourishApi.Task;
 
 using Microsoft.EntityFrameworkCore;
-using WebApplication1.Data.DbContextFile;
 using System.Threading.Tasks;
+using WebApplication1.Data.DbContextFile;
 
 public class ScheduleDateChangeTask
 {
@@ -69,13 +69,13 @@ public class ScheduleDateChangeTask
             {
                 if ((int)plan.Status < (int)WebApplication1.Data.Schedule.EatScheduleStatus.Completed)
                 {
-                    
+
                     isScheduleCompleted = false;
                 }
 
                 if ((int)plan.Status != (int)WebApplication1.Data.Schedule.EatScheduleStatus.Cancelled)
                 {
-                    
+
                     isAllScheduleCanceled = false;
                 }
             }
@@ -89,7 +89,7 @@ public class ScheduleDateChangeTask
 
                 if ((int)plan.Status != (int)WebApplication1.Data.Schedule.MovingScheduleStatus.Cancelled)
                 {
-                    
+
                     isAllScheduleCanceled = false;
                 }
             }
@@ -103,7 +103,7 @@ public class ScheduleDateChangeTask
 
                 if ((int)plan.Status != (int)WebApplication1.Data.Schedule.StayingScheduleStatus.Cancelled)
                 {
-                    
+
                     isAllScheduleCanceled = false;
                 }
             }
@@ -111,14 +111,14 @@ public class ScheduleDateChangeTask
             if (isScheduleCompleted)
             {
                 item.PlanStatus = WebApplication1.Data.PlanStatus.Complete;
-            } 
+            }
 
-            if (isAllScheduleCanceled && (item.StayingSchedules.Count() > 0 
-                || item.MovingSchedules.Count() > 0 
+            if (isAllScheduleCanceled && (item.StayingSchedules.Count() > 0
+                || item.MovingSchedules.Count() > 0
                 || item.EatSchedules.Count() > 0))
             {
                 item.PlanStatus = WebApplication1.Data.PlanStatus.Cancel;
-            } 
+            }
             await _context.SaveChangesAsync();
 
         }

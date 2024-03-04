@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TourishApi.Data.Chat;
 using WebApplication1.Data.Authentication;
 using WebApplication1.Data.Connection;
 using WebApplication1.Data.Receipt;
@@ -33,11 +34,11 @@ namespace WebApplication1.Data.DbContextFile
         public DbSet<FullReceipt> FullReceiptList { get; set; }
 
         //
-        public DbSet<Message> Messages { get; set; }
+        public DbSet<UserMessage> Messages { get; set; }
         public DbSet<Notification> Notifications { get; set; }
 
         public DbSet<NotificationCon> NotificationConList { get; set; }
-        public DbSet<MessageCon> MessageConList { get; set; }
+        public DbSet<UserMessageCon> MessageConList { get; set; }
 
         public DbSet<SaveFile> SaveFileList { get; set; }
 
@@ -113,9 +114,9 @@ namespace WebApplication1.Data.DbContextFile
             });
 
 
-            modelBuilder.Entity<Message>(entity =>
+            modelBuilder.Entity<UserMessage>(entity =>
             {
-                entity.ToTable(nameof(Message));
+                entity.ToTable(nameof(UserMessage));
                 entity.HasKey(message => message.Id);
                 entity.Property(message => message.UpdateDate).IsRequired().HasDefaultValueSql("getutcdate()");
                 entity.Property(message => message.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
@@ -158,9 +159,9 @@ namespace WebApplication1.Data.DbContextFile
                 .HasConstraintName("FK_User_NotificationCon");
             });
 
-            modelBuilder.Entity<MessageCon>(entity =>
+            modelBuilder.Entity<UserMessageCon>(entity =>
             {
-                entity.ToTable(nameof(MessageCon));
+                entity.ToTable(nameof(UserMessageCon));
                 entity.HasKey(message => message.Id);
                 entity.Property(message => message.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
 
