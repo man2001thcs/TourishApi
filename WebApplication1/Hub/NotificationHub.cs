@@ -54,7 +54,7 @@ namespace SignalR.Hub
                 _context.Add(notificationEntity);
 
 
-                var connection = _context.NotificationConList.FirstOrDefault(u => u.UserId == userId && u.Connected);
+                var connection = _context.NotificationConList.OrderByDescending(connection => connection.CreateDate).FirstOrDefault(u => u.UserId == userId && u.Connected);
                 if (connection != null)
                 {
                     await Clients.Client(connection.ConnectionID).SendOffersToUser(userId, notification);

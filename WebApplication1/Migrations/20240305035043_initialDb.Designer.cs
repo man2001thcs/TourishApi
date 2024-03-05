@@ -12,8 +12,8 @@ using WebApplication1.Data.DbContextFile;
 namespace TourishApi.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20231209122822_addStatusForSchedule")]
-    partial class addStatusForSchedule
+    [Migration("20240305035043_initialDb")]
+    partial class initialDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -61,71 +61,48 @@ namespace TourishApi.Migrations
                     b.ToTable("RefreshToken", (string)null);
                 });
 
-            modelBuilder.Entity("WebApplication1.Data.Connection.MessageCon", b =>
+            modelBuilder.Entity("WebApplication1.Data.Chat.GuestMessage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("Connected")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ConnectionID")
+                    b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreateDate")
+                    b.Property<DateTime?>("CreateDate")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("getutcdate()");
 
-                    b.Property<string>("UserAgent")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid?>("GroupId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("MessageCon", (string)null);
-                });
-
-            modelBuilder.Entity("WebApplication1.Data.Connection.NotificationCon", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("GuestMessageConId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("Connected")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ConnectionID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
 
-                    b.Property<DateTime>("CreateDate")
+                    b.Property<DateTime?>("UpdateDate")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("getutcdate()");
 
-                    b.Property<string>("UserAgent")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("GuestMessageConId");
 
-                    b.ToTable("NotificationCon", (string)null);
+                    b.ToTable("GuestMessage", (string)null);
                 });
 
-            modelBuilder.Entity("WebApplication1.Data.Message", b =>
+            modelBuilder.Entity("WebApplication1.Data.Chat.UserMessage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -168,7 +145,142 @@ namespace TourishApi.Migrations
 
                     b.HasIndex("UserSentId");
 
-                    b.ToTable("Message", (string)null);
+                    b.ToTable("UserMessage", (string)null);
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.Connection.GuestMessageCon", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Connected")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ConnectionID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getutcdate()");
+
+                    b.Property<Guid>("GuestConHisId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("GuestEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GuestName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GuestPhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserAgent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdminId");
+
+                    b.HasIndex("GuestConHisId")
+                        .IsUnique();
+
+                    b.ToTable("GuestMessageCon", (string)null);
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.Connection.GuestMessageConHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AdminConId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getutcdate()");
+
+                    b.Property<Guid>("GuestConId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdminConId");
+
+                    b.ToTable("GuestMessageConHistory", (string)null);
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.Connection.NotificationCon", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Connected")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ConnectionID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getutcdate()");
+
+                    b.Property<string>("UserAgent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("NotificationCon", (string)null);
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.Connection.UserMessageCon", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Connected")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ConnectionID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getutcdate()");
+
+                    b.Property<string>("UserAgent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserMessageCon", (string)null);
                 });
 
             modelBuilder.Entity("WebApplication1.Data.Notification", b =>
@@ -840,16 +952,65 @@ namespace TourishApi.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("WebApplication1.Data.Connection.MessageCon", b =>
+            modelBuilder.Entity("WebApplication1.Data.Chat.GuestMessage", b =>
                 {
-                    b.HasOne("WebApplication1.Data.User", "User")
-                        .WithMany("MessageConList")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("WebApplication1.Data.Connection.GuestMessageCon", "GuestMessageCon")
+                        .WithMany("GuestMessages")
+                        .HasForeignKey("GuestMessageConId")
                         .IsRequired()
-                        .HasConstraintName("FK_User_MessageCon");
+                        .HasConstraintName("FK_GuestCon_GuestMessage");
 
-                    b.Navigation("User");
+                    b.Navigation("GuestMessageCon");
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.Chat.UserMessage", b =>
+                {
+                    b.HasOne("WebApplication1.Data.User", "UserReceive")
+                        .WithMany("UserMessageReceiveList")
+                        .HasForeignKey("UserReceiveId")
+                        .IsRequired()
+                        .HasConstraintName("FK_UserCon_UserMessage");
+
+                    b.HasOne("WebApplication1.Data.User", "UserSent")
+                        .WithMany("UserMessageSentList")
+                        .HasForeignKey("UserSentId")
+                        .IsRequired()
+                        .HasConstraintName("FK_User_SentMessage");
+
+                    b.Navigation("UserReceive");
+
+                    b.Navigation("UserSent");
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.Connection.GuestMessageCon", b =>
+                {
+                    b.HasOne("WebApplication1.Data.User", "Admin")
+                        .WithMany("GuestMessageConList")
+                        .HasForeignKey("AdminId")
+                        .HasConstraintName("FK_Guest_MessageCon");
+
+                    b.HasOne("WebApplication1.Data.Connection.GuestMessageConHistory", "GuestMessageConHis")
+                        .WithOne("GuestCon")
+                        .HasForeignKey("WebApplication1.Data.Connection.GuestMessageCon", "GuestConHisId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_GuestMessageCon_GuestMessageConHis_Guest");
+
+                    b.Navigation("Admin");
+
+                    b.Navigation("GuestMessageConHis");
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.Connection.GuestMessageConHistory", b =>
+                {
+                    b.HasOne("WebApplication1.Data.Connection.GuestMessageCon", "AdminCon")
+                        .WithMany()
+                        .HasForeignKey("AdminConId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_GuestMessageCon_GuestMessageConHis_Admin");
+
+                    b.Navigation("AdminCon");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.Connection.NotificationCon", b =>
@@ -864,23 +1025,16 @@ namespace TourishApi.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("WebApplication1.Data.Message", b =>
+            modelBuilder.Entity("WebApplication1.Data.Connection.UserMessageCon", b =>
                 {
-                    b.HasOne("WebApplication1.Data.User", "UserReceive")
-                        .WithMany("MessageReceiveList")
-                        .HasForeignKey("UserReceiveId")
+                    b.HasOne("WebApplication1.Data.User", "User")
+                        .WithMany("UserMessageConList")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_User_ReceiveMessage");
+                        .HasConstraintName("FK_User_MessageCon");
 
-                    b.HasOne("WebApplication1.Data.User", "UserSent")
-                        .WithMany("MessageSentList")
-                        .HasForeignKey("UserSentId")
-                        .IsRequired()
-                        .HasConstraintName("FK_User_SentMessage");
-
-                    b.Navigation("UserReceive");
-
-                    b.Navigation("UserSent");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.Notification", b =>
@@ -921,7 +1075,7 @@ namespace TourishApi.Migrations
 
             modelBuilder.Entity("WebApplication1.Data.SaveFile", b =>
                 {
-                    b.HasOne("WebApplication1.Data.Message", "Message")
+                    b.HasOne("WebApplication1.Data.Chat.UserMessage", "Message")
                         .WithMany("Files")
                         .HasForeignKey("MessageId");
 
@@ -970,9 +1124,20 @@ namespace TourishApi.Migrations
                     b.Navigation("TourishPlan");
                 });
 
-            modelBuilder.Entity("WebApplication1.Data.Message", b =>
+            modelBuilder.Entity("WebApplication1.Data.Chat.UserMessage", b =>
                 {
                     b.Navigation("Files");
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.Connection.GuestMessageCon", b =>
+                {
+                    b.Navigation("GuestMessages");
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.Connection.GuestMessageConHistory", b =>
+                {
+                    b.Navigation("GuestCon")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("WebApplication1.Data.Receipt.TotalReceipt", b =>
@@ -994,17 +1159,19 @@ namespace TourishApi.Migrations
 
             modelBuilder.Entity("WebApplication1.Data.User", b =>
                 {
-                    b.Navigation("MessageConList");
-
-                    b.Navigation("MessageReceiveList");
-
-                    b.Navigation("MessageSentList");
+                    b.Navigation("GuestMessageConList");
 
                     b.Navigation("NotificationConList");
 
                     b.Navigation("NotificationList");
 
                     b.Navigation("RefreshTokenList");
+
+                    b.Navigation("UserMessageConList");
+
+                    b.Navigation("UserMessageReceiveList");
+
+                    b.Navigation("UserMessageSentList");
                 });
 #pragma warning restore 612, 618
         }

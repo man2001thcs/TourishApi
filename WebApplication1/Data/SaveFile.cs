@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using TourishApi.Data.Chat;
+using WebApplication1.Data.Chat;
 
 namespace WebApplication1.Data
 {

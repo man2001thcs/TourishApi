@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using SignalR.Hub.Client;
-using System.Security.Claims;
 using WebApplication1.Data.Chat;
-using WebApplication1.Data;
 using WebApplication1.Data.Connection;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
@@ -32,7 +30,7 @@ namespace SignalR.Hub
             {
 
                 var messageEntity = new GuestMessage
-                {        
+                {
                     Content = message.Content,
                     IsRead = false,
                     IsDeleted = false,
@@ -56,7 +54,7 @@ namespace SignalR.Hub
             {
                 var connectionAdmin = _context.GuestMessageConList
                     .OrderByDescending(connection => connection.CreateDate)
-                    .FirstOrDefault(u => u.AdminId == adminId  && u.Connected);
+                    .FirstOrDefault(u => u.AdminId == adminId && u.Connected);
 
                 if (connectionAdmin != null)
                 {
@@ -77,27 +75,44 @@ namespace SignalR.Hub
 
         }
 
-
-        //public Task SendMessageToGroup(Guid userId, string message)
-        //{
-        //    return Clients.Group("SignalR Users").SendAsync("ReceiveMessage", user, message);
-        //}
-
         public override async Task OnConnectedAsync()
         {
             var adminId = Context.GetHttpContext().Request.Query["adminId"];
+
             var guestEmail = Context.GetHttpContext().Request.Query["guestEmail"];
             var guestName = Context.GetHttpContext().Request.Query["guestName"];
             var guestPhoneNumber = Context.GetHttpContext().Request.Query["guestPhoneNumber"];
 
-            var admin = _context.Users.Include(u => u.NotificationConList)
-               .SingleOrDefault(u => u.Id.ToString() == adminId);
-
-            if (admin != null)
+            if (!adminId.IsNullOrEmpty())
             {
-                var notifyCon = new GuestMessageCon
+                var admin = _context.Users.Include(u => u.NotificationConList)
+                    .SingleOrDefault(u => u.Id.ToString() == adminId);
+
+                if (admin != null)
                 {
-                    AdminId = new Guid(adminId),
+                    var adminCon = new GuestMessageCon
+                    {
+                        AdminId = new Guid(adminId),
+                        ConnectionID = Context.ConnectionId,
+                        UserAgent = Context.GetHttpContext().Request.Headers["User-Agent"].ToString(),
+                        Connected = true,
+                        CreateDate = DateTime.UtcNow
+                    };
+
+                    await _context.AddAsync(adminCon);
+
+                    var conHis = _context.GuestMessageConHisList.Include(u => u.GuestCon).OrderByDescending(connection => connection.CreateDate)
+                                        .SingleOrDefault(u => u.GuestCon.GuestEmail == guestEmail && u.GuestCon.Connected);
+
+                    conHis.AdminCon = adminCon;
+
+                    await _context.SaveChangesAsync();
+                }
+            }
+            else if (!guestEmail.IsNullOrEmpty())
+            {
+                var guestCon = new GuestMessageCon
+                {
                     GuestEmail = guestEmail,
                     GuestName = guestName,
                     GuestPhoneNumber = guestPhoneNumber,
@@ -107,10 +122,15 @@ namespace SignalR.Hub
                     CreateDate = DateTime.UtcNow
                 };
 
-                _context.Add(notifyCon);
+                var hisCon = new GuestMessageConHistory
+                {
+                    GuestCon = guestCon,
+                    CreateDate = DateTime.UtcNow
+                };
 
-
+                await _context.AddAsync(hisCon);
                 await _context.SaveChangesAsync();
+
             }
 
             await base.OnConnectedAsync();
