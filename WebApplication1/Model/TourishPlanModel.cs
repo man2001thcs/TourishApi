@@ -24,6 +24,7 @@ namespace WebApplication1.Model
     public class TourishPlanInsertModel
     {
         public Guid Id { get; set; }
+        public Guid? CreatorId { get; set; }
         public string? TourName { get; set; }
         public string StartingPoint { get; set; }
         public string EndPoint { get; set; }
@@ -44,6 +45,7 @@ namespace WebApplication1.Model
     public class TourishPlanUpdateModel
     {
         public Guid Id { get; set; }
+        public Guid? ModifierId { get; set; }
         public string? TourName { get; set; }
         public string StartingPoint { get; set; }
         public string EndPoint { get; set; }

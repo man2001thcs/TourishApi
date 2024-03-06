@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
@@ -27,9 +28,15 @@ namespace WebApplication1.Controllers.TourishPlan
             {
                 var entityExist = _entityRepository.getByName(entityModel.TourName);
 
+
+                // Lấy ID từ token                    
+                // Tiếp tục xử lý logic của bạn ở đây với userId đã lấy được
                 if (entityExist.Data == null)
                 {
-                    var response = await _entityRepository.Add(entityModel);
+                    string userId = User.FindFirstValue("Id");
+                    var passAwayEntity = entityModel;
+                    passAwayEntity.CreatorId = new Guid(userId);
+                    var response = await _entityRepository.Add(passAwayEntity);
 
                     return Ok(response);
                 }
@@ -42,7 +49,6 @@ namespace WebApplication1.Controllers.TourishPlan
                     };
                     return StatusCode(StatusCodes.Status200OK, response);
                 }
-
             }
 
             catch (Exception ex)

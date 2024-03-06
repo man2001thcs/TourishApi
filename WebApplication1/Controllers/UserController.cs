@@ -565,7 +565,7 @@ namespace WebApplication1.Controllers
 
                 }),
 
-                Expires = DateTime.UtcNow.AddMinutes(20),
+                Expires = DateTime.UtcNow.AddHours(12),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha512Signature)
             };
 
@@ -749,7 +749,7 @@ namespace WebApplication1.Controllers
                 }
 
                 // Check 4: Check expired
-                var expiredDateExt = expiredDate.AddHours(24);
+                var expiredDateExt = expiredDate.AddHours(1);
                 if (expiredDateExt < DateTime.UtcNow)
                 {
                     return Ok(new Response

@@ -38,6 +38,20 @@ public class TourishPlanRepository : ITourishPlanRepository
             UpdateDate = DateTime.UtcNow,
         };
 
+        var tourishInterest = new TourishInterest
+        {
+            InterestStatus = InterestStatus.Creator,
+            UserId = entityModel.CreatorId,
+            UpdateDate = DateTime.UtcNow
+        };
+
+        var tourishInterestList = new List<TourishInterest>
+        {
+            tourishInterest
+        };
+
+        tourishPlan.TourishInterests = tourishInterestList;
+
         if (!String.IsNullOrEmpty(entityModel.EatingScheduleString))
         {
             tourishPlan.EatSchedules = this.AddEatSchedule(entityModel.EatingScheduleString);
@@ -198,6 +212,15 @@ public class TourishPlanRepository : ITourishPlanRepository
                 await _context.EatSchedules.Where(a => a.TourishPlanId == entityModel.Id).ExecuteDeleteAsync();
                 entity.EatSchedules = AddEatSchedule(entityModel.EatingScheduleString);
             }
+
+            var tourishInterest = new TourishInterest
+            {
+                InterestStatus = InterestStatus.Modifier,
+                UserId = entityModel.ModifierId,
+                UpdateDate = DateTime.UtcNow
+            };
+
+            entity.TourishInterests.Add(tourishInterest);
 
             entity.UpdateDate = DateTime.UtcNow;
 

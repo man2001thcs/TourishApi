@@ -30,6 +30,7 @@ namespace WebApplication1.Data.DbContextFile
         public DbSet<StayingSchedule> StayingSchedules { get; set; }
 
         public DbSet<TourishPlan> TourishPlan { get; set; }
+        public DbSet<TourishInterest> TourishInterests { get; set; }
         public DbSet<TotalReceipt> TotalReceiptList { get; set; }
         public DbSet<FullReceipt> FullReceiptList { get; set; }
 
@@ -78,6 +79,22 @@ namespace WebApplication1.Data.DbContextFile
                 .WithOne(e => e.TourishPlan)
                 .HasForeignKey<TotalReceipt>(e => e.TourishPlanId)
                 .HasConstraintName("FK_TourishPlan_TotalReceipt");
+            });
+
+            modelBuilder.Entity<TourishInterest>(entity =>
+            {
+                entity.ToTable(nameof(TourishInterest));
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.TourishPlan)
+                .WithMany(e => e.TourishInterests)
+                .HasForeignKey(e => e.TourishPlanId)
+                .HasConstraintName("FK_TourishPlan_TourishInterest");
+
+                entity.HasOne(e => e.User)
+                .WithMany(e => e.TourishInterests)
+                .HasForeignKey(e => e.UserId)
+                .HasConstraintName("FK_User_TourishInterest");
             });
 
             modelBuilder.Entity<TotalReceipt>(entity =>

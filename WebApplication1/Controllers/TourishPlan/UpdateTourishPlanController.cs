@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
@@ -21,12 +22,15 @@ namespace WebApplication1.Controllers.TourishPlan
 
         [HttpPut("{id}")]
         [Authorize(Policy = "UpdateTourishPlanAccess")]
-        public async Task<IActionResult> UpdateTourishPlanById(TourishPlanUpdateModel TourishPlanModel)
+        public async Task<IActionResult> UpdateTourishPlanById(TourishPlanUpdateModel entityModel)
         {
 
             try
             {
-                var response = await _entityRepository.Update(TourishPlanModel);
+                string userId = User.FindFirstValue("Id");
+                var passAwayEntity = entityModel;
+                passAwayEntity.ModifierId = new Guid(userId);
+                var response = await _entityRepository.Update(passAwayEntity);
 
                 return Ok(response);
             }
