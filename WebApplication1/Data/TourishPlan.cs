@@ -39,7 +39,7 @@ namespace WebApplication1.Data
         public ICollection<EatSchedule> EatSchedules { get; set; }
         public ICollection<MovingSchedule> MovingSchedules { get; set; }
         public ICollection<StayingSchedule> StayingSchedules { get; set; }
-        public ICollection<TourishInterest> TourishInterests { get; set; }
+        public ICollection<TourishInterest> TourishInterestList { get; set; }
 
         public TourishPlan()
         {

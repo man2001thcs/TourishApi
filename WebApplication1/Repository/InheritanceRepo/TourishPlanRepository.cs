@@ -16,11 +16,7 @@ public class TourishPlanRepository : ITourishPlanRepository
         this._context = _context;
     }
 
-<<<<<<< HEAD
     public async Task<Response> Add(TourishPlanInsertModel entityModel, String id)
-=======
-    public async Task<Response> Add(TourishPlanInsertModel entityModel, Guid id)
->>>>>>> a3c0c39 (Add migration)
     {
 
         var tourishPlan = new TourishPlan
@@ -46,21 +42,15 @@ public class TourishPlanRepository : ITourishPlanRepository
 
         if (id != null)
         {
-<<<<<<< HEAD
-            InterestStatus = InterestStatus.Creator,
-            UserId = new Guid(id),
-            UpdateDate = DateTime.UtcNow
-        };
-=======
+
             tourishInterest = new TourishInterest
             {
                 InterestStatus = InterestStatus.Creator,
-                UserId = id,
+                UserId = new Guid(id),
                 UpdateDate = DateTime.UtcNow
             };
         }
 
->>>>>>> a3c0c39 (Add migration)
 
         var tourishInterestList = new List<TourishInterest>
         {
@@ -190,11 +180,7 @@ public class TourishPlanRepository : ITourishPlanRepository
         };
     }
 
-<<<<<<< HEAD
     public async Task<Response> Update(TourishPlanUpdateModel entityModel, String id)
-=======
-    public async Task<Response> Update(TourishPlanUpdateModel entityModel, Guid id)
->>>>>>> a3c0c39 (Add migration)
     {
         var entity = _context.TourishPlan.FirstOrDefault((entity
             => entity.Id == entityModel.Id));
@@ -238,34 +224,36 @@ public class TourishPlanRepository : ITourishPlanRepository
 
             if (id != null)
             {
-<<<<<<< HEAD
-                InterestStatus = InterestStatus.Modifier,
-                UserId = new Guid(id),
-                UpdateDate = DateTime.UtcNow
-            };
-=======
                 tourishInterest = new TourishInterest
                 {
                     InterestStatus = InterestStatus.Modifier,
-                    UserId = id,
+                    UserId = new Guid(id),
                     UpdateDate = DateTime.UtcNow
                 };
+
+
+                entity.TourishInterests.Add(tourishInterest);
+
+                entity.UpdateDate = DateTime.UtcNow;
+
+                _context.SaveChanges();
             }
->>>>>>> a3c0c39 (Add migration)
 
-            entity.TourishInterests.Add(tourishInterest);
-
-            entity.UpdateDate = DateTime.UtcNow;
-
-            _context.SaveChanges();
+            return new Response
+            {
+                resultCd = 0,
+                MessageCode = "I412",
+                // Update type success               
+            };
         }
-
-        return new Response
+        else
         {
-            resultCd = 0,
-            MessageCode = "I412",
-            // Update type success               
-        };
+            return new Response
+            {
+                resultCd = 0,
+                MessageCode = "C412",
+            };
+        }
     }
 
     private List<EatSchedule> AddEatSchedule(string FullScheduleString)

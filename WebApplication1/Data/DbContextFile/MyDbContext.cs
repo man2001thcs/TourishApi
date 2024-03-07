@@ -87,7 +87,7 @@ namespace WebApplication1.Data.DbContextFile
                 entity.HasKey(e => e.Id);
 
                 entity.HasOne(e => e.TourishPlan)
-                .WithMany(e => e.TourishInterests)
+                .WithMany(e => e.TourishInterestList)
                 .HasForeignKey(e => e.TourishPlanId)
                 .HasConstraintName("FK_TourishPlan_TourishInterest");
 
