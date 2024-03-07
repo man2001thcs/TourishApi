@@ -30,9 +30,8 @@ namespace WebApplication1.Data.Schedule
         public Guid RestHouseBranchId { get; set; }
         public double? SinglePrice { get; set; }
         public StayingScheduleStatus Status { get; set; }
-
         [Required]
-        [MaxLength(600)]
+        [Column(TypeName = "ntext")]
         public string? Description { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }

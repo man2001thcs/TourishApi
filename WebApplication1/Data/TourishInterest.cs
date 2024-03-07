@@ -14,8 +14,8 @@ namespace WebApplication1.Data
         public Guid TourishPlanId { get; set; }
         public Guid UserId { get; set; }
         public InterestStatus InterestStatus { get; set; }
-        public DateTime UpdateDate
-        { get; set; }
+        public DateTime UpdateDate { get; set; }
+        public TourishPlan TourishPlan { get; set; }
         public User User { get; set; }
     }
 }

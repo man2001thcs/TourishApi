@@ -28,9 +28,7 @@ namespace WebApplication1.Controllers.TourishPlan
             try
             {
                 string userId = User.FindFirstValue("Id");
-                var passAwayEntity = entityModel;
-                passAwayEntity.ModifierId = new Guid(userId);
-                var response = await _entityRepository.Update(passAwayEntity);
+                var response = await _entityRepository.Update(entityModel, userId);
 
                 return Ok(response);
             }

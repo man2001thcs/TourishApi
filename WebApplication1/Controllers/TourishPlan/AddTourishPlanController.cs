@@ -34,9 +34,7 @@ namespace WebApplication1.Controllers.TourishPlan
                 if (entityExist.Data == null)
                 {
                     string userId = User.FindFirstValue("Id");
-                    var passAwayEntity = entityModel;
-                    passAwayEntity.CreatorId = new Guid(userId);
-                    var response = await _entityRepository.Add(passAwayEntity);
+                    var response = await _entityRepository.Add(entityModel, userId);
 
                     return Ok(response);
                 }

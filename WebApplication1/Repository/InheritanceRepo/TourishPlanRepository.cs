@@ -16,7 +16,7 @@ public class TourishPlanRepository : ITourishPlanRepository
         this._context = _context;
     }
 
-    public async Task<Response> Add(TourishPlanInsertModel entityModel)
+    public async Task<Response> Add(TourishPlanInsertModel entityModel, String id)
     {
 
         var tourishPlan = new TourishPlan
@@ -41,7 +41,7 @@ public class TourishPlanRepository : ITourishPlanRepository
         var tourishInterest = new TourishInterest
         {
             InterestStatus = InterestStatus.Creator,
-            UserId = entityModel.CreatorId,
+            UserId = new Guid(id),
             UpdateDate = DateTime.UtcNow
         };
 
@@ -173,7 +173,7 @@ public class TourishPlanRepository : ITourishPlanRepository
         };
     }
 
-    public async Task<Response> Update(TourishPlanUpdateModel entityModel)
+    public async Task<Response> Update(TourishPlanUpdateModel entityModel, String id)
     {
         var entity = _context.TourishPlan.FirstOrDefault((entity
             => entity.Id == entityModel.Id));
@@ -216,7 +216,7 @@ public class TourishPlanRepository : ITourishPlanRepository
             var tourishInterest = new TourishInterest
             {
                 InterestStatus = InterestStatus.Modifier,
-                UserId = entityModel.ModifierId,
+                UserId = new Guid(id),
                 UpdateDate = DateTime.UtcNow
             };
 
