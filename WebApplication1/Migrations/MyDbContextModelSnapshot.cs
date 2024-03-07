@@ -749,6 +749,33 @@ namespace TourishApi.Migrations
                     b.ToTable("StayingSchedule");
                 });
 
+            modelBuilder.Entity("WebApplication1.Data.TourishInterest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("InterestStatus")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TourishPlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TourishPlanId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TourishInterest", (string)null);
+                });
+
             modelBuilder.Entity("WebApplication1.Data.TourishPlan", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1121,6 +1148,27 @@ namespace TourishApi.Migrations
                     b.Navigation("TourishPlan");
                 });
 
+            modelBuilder.Entity("WebApplication1.Data.TourishInterest", b =>
+                {
+                    b.HasOne("WebApplication1.Data.TourishPlan", "TourishPlan")
+                        .WithMany("TourishInterests")
+                        .HasForeignKey("TourishPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_TourishPlan_TourishInterest");
+
+                    b.HasOne("WebApplication1.Data.User", "User")
+                        .WithMany("TourishInterests")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_User_TourishInterest");
+
+                    b.Navigation("TourishPlan");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("WebApplication1.Data.Chat.UserMessage", b =>
                 {
                     b.Navigation("Files");
@@ -1152,6 +1200,8 @@ namespace TourishApi.Migrations
 
                     b.Navigation("TotalReceipt")
                         .IsRequired();
+
+                    b.Navigation("TourishInterests");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.User", b =>
@@ -1163,6 +1213,8 @@ namespace TourishApi.Migrations
                     b.Navigation("NotificationList");
 
                     b.Navigation("RefreshTokenList");
+
+                    b.Navigation("TourishInterests");
 
                     b.Navigation("UserMessageConList");
 

@@ -16,7 +16,11 @@ public class TourishPlanRepository : ITourishPlanRepository
         this._context = _context;
     }
 
+<<<<<<< HEAD
     public async Task<Response> Add(TourishPlanInsertModel entityModel, String id)
+=======
+    public async Task<Response> Add(TourishPlanInsertModel entityModel, Guid id)
+>>>>>>> a3c0c39 (Add migration)
     {
 
         var tourishPlan = new TourishPlan
@@ -38,12 +42,25 @@ public class TourishPlanRepository : ITourishPlanRepository
             UpdateDate = DateTime.UtcNow,
         };
 
-        var tourishInterest = new TourishInterest
+        var tourishInterest = new TourishInterest();
+
+        if (id != null)
         {
+<<<<<<< HEAD
             InterestStatus = InterestStatus.Creator,
             UserId = new Guid(id),
             UpdateDate = DateTime.UtcNow
         };
+=======
+            tourishInterest = new TourishInterest
+            {
+                InterestStatus = InterestStatus.Creator,
+                UserId = id,
+                UpdateDate = DateTime.UtcNow
+            };
+        }
+
+>>>>>>> a3c0c39 (Add migration)
 
         var tourishInterestList = new List<TourishInterest>
         {
@@ -173,7 +190,11 @@ public class TourishPlanRepository : ITourishPlanRepository
         };
     }
 
+<<<<<<< HEAD
     public async Task<Response> Update(TourishPlanUpdateModel entityModel, String id)
+=======
+    public async Task<Response> Update(TourishPlanUpdateModel entityModel, Guid id)
+>>>>>>> a3c0c39 (Add migration)
     {
         var entity = _context.TourishPlan.FirstOrDefault((entity
             => entity.Id == entityModel.Id));
@@ -213,12 +234,24 @@ public class TourishPlanRepository : ITourishPlanRepository
                 entity.EatSchedules = AddEatSchedule(entityModel.EatingScheduleString);
             }
 
-            var tourishInterest = new TourishInterest
+            var tourishInterest = new TourishInterest();
+
+            if (id != null)
             {
+<<<<<<< HEAD
                 InterestStatus = InterestStatus.Modifier,
                 UserId = new Guid(id),
                 UpdateDate = DateTime.UtcNow
             };
+=======
+                tourishInterest = new TourishInterest
+                {
+                    InterestStatus = InterestStatus.Modifier,
+                    UserId = id,
+                    UpdateDate = DateTime.UtcNow
+                };
+            }
+>>>>>>> a3c0c39 (Add migration)
 
             entity.TourishInterests.Add(tourishInterest);
 
