@@ -57,7 +57,7 @@ public class TourishPlanRepository : ITourishPlanRepository
             tourishInterest
         };
 
-        tourishPlan.TourishInterests = tourishInterestList;
+        tourishPlan.TourishInterestList = tourishInterestList;
 
         if (!String.IsNullOrEmpty(entityModel.EatingScheduleString))
         {
@@ -232,7 +232,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                 };
 
 
-                entity.TourishInterests.Add(tourishInterest);
+                entity.TourishInterestList.Add(tourishInterest);
 
                 entity.UpdateDate = DateTime.UtcNow;
 
