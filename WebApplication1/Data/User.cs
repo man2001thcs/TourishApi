@@ -39,6 +39,7 @@ namespace WebApplication1.Data
         public ICollection<UserMessageCon> UserMessageConList { get; set; }
 
         public ICollection<GuestMessageCon>? GuestMessageConList { get; set; }
+        public ICollection<TourishComment> TourishCommentList { get; set; }
 
         public User()
         {

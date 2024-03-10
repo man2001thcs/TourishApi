@@ -1,33 +1,27 @@
-﻿using TourishApi.Repository.Interface.Restaurant;
+﻿using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
-using WebApplication1.Data.RestaurantPlace;
 using WebApplication1.Model;
-using WebApplication1.Model.Restaurant;
 using WebApplication1.Model.VirtualModel;
+using WebApplication1.Repository.Interface;
 
 namespace WebApplication1.Repository.InheritanceRepo.RestaurantPlace
 {
-    public class RestaurantRepository : IRestaurantRepository
+    public class TourishCommentRepository : ITourishCommentRepository
     {
         private readonly MyDbContext _context;
         public static int PAGE_SIZE { get; set; } = 5;
-        public RestaurantRepository(MyDbContext _context)
+        public TourishCommentRepository(MyDbContext _context)
         {
             this._context = _context;
         }
 
-        public Response Add(RestaurantModel addModel)
+        public Response Add(TourishCommentModel addModel)
         {
 
-            var addValue = new Restaurant
+            var addValue = new TourishComment
             {
-                PlaceBranch = addModel.PlaceBranch,
-                HotlineNumber = addModel.HotlineNumber,
-                SupportEmail = addModel.SupportEmail,
-                HeadQuarterAddress = addModel.HeadQuarterAddress,
-                Description = addModel.Description,
-                DiscountAmount = addModel.DiscountAmount,
-                DiscountFloat = addModel.DiscountFloat,
+                Content = addModel.Content,
+                UserId = addModel.UserId,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
@@ -37,7 +31,7 @@ namespace WebApplication1.Repository.InheritanceRepo.RestaurantPlace
             return new Response
             {
                 resultCd = 0,
-                MessageCode = "I311",
+                MessageCode = "I611",
                 // Create type success               
             };
 
@@ -45,7 +39,7 @@ namespace WebApplication1.Repository.InheritanceRepo.RestaurantPlace
 
         public Response Delete(Guid id)
         {
-            var deleteEntity = _context.RestaurantList.FirstOrDefault((entity
+            var deleteEntity = _context.TourishComments.FirstOrDefault((entity
                => entity.Id == id));
             if (deleteEntity != null)
             {
@@ -56,31 +50,31 @@ namespace WebApplication1.Repository.InheritanceRepo.RestaurantPlace
             return new Response
             {
                 resultCd = 0,
-                MessageCode = "I313",
+                MessageCode = "I613",
                 // Delete type success               
             };
         }
 
         public Response GetAll(string? search, string? sortBy, int page = 1, int pageSize = 5)
         {
-            var entityQuery = _context.RestaurantList.AsQueryable();
+            var entityQuery = _context.TourishComments.AsQueryable();
 
             #region Filtering
             if (!string.IsNullOrEmpty(search))
             {
-                entityQuery = entityQuery.Where(entity => entity.PlaceBranch.Contains(search));
+                entityQuery = entityQuery.Where(entity => entity.Content.Contains(search));
             }
             #endregion
 
             #region Sorting
-            entityQuery = entityQuery.OrderBy(entity => entity.PlaceBranch);
+            entityQuery = entityQuery.OrderBy(entity => entity.UpdateDate);
 
             if (!string.IsNullOrEmpty(sortBy))
             {
                 switch (sortBy)
                 {
                     case "name_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.PlaceBranch);
+                        entityQuery = entityQuery.OrderByDescending(entity => entity.Content);
                         break;
                     case "updateDate_asc":
                         entityQuery = entityQuery.OrderBy(entity => entity.UpdateDate);
@@ -93,7 +87,7 @@ namespace WebApplication1.Repository.InheritanceRepo.RestaurantPlace
             #endregion
 
             #region Paging
-            var result = PaginatorModel<Restaurant>.Create(entityQuery, page, pageSize);
+            var result = PaginatorModel<TourishComment>.Create(entityQuery, page, pageSize);
             #endregion
 
             var entityVM = new Response
@@ -108,7 +102,7 @@ namespace WebApplication1.Repository.InheritanceRepo.RestaurantPlace
 
         public Response getById(Guid id)
         {
-            var entity = _context.RestaurantList.FirstOrDefault((entity
+            var entity = _context.TourishComments.FirstOrDefault((entity
                 => entity.Id == id));
 
             return new Response
@@ -120,8 +114,8 @@ namespace WebApplication1.Repository.InheritanceRepo.RestaurantPlace
 
         public Response getByName(String name)
         {
-            var entity = _context.RestaurantList.FirstOrDefault((entity
-                => entity.PlaceBranch == name));
+            var entity = _context.TourishComments.FirstOrDefault((entity
+                => entity.Content == name));
 
             return new Response
             {
@@ -130,27 +124,21 @@ namespace WebApplication1.Repository.InheritanceRepo.RestaurantPlace
             };
         }
 
-        public Response Update(RestaurantModel entityModel)
+        public Response Update(TourishCommentModel entityModel)
         {
-            var entity = _context.RestaurantList.FirstOrDefault((entity
+            var entity = _context.TourishComments.FirstOrDefault((entity
                 => entity.Id == entityModel.Id));
             if (entity != null)
             {
                 entity.UpdateDate = DateTime.UtcNow;
-                entity.PlaceBranch = entityModel.PlaceBranch;
-                entity.HotlineNumber = entityModel.HotlineNumber;
-                entity.SupportEmail = entityModel.SupportEmail;
-                entity.HeadQuarterAddress = entityModel.HeadQuarterAddress;
-                entity.Description = entityModel.Description;
-                entity.DiscountAmount = entityModel.DiscountAmount;
-                entity.DiscountFloat = entityModel.DiscountFloat;
+                entity.Content = entityModel.Content;
                 _context.SaveChanges();
             }
 
             return new Response
             {
                 resultCd = 0,
-                MessageCode = "I312",
+                MessageCode = "I612",
                 // Update type success               
             };
         }

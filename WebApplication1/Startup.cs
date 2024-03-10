@@ -78,6 +78,7 @@ namespace MyWebApiApp
             services.AddScoped<IReceiptRepository, ReceiptRepository>();
 
             services.AddScoped<ITourishPlanRepository, TourishPlanRepository>();
+            services.AddScoped<ITourishCommentRepository, TourishCommentRepository>();
 
             services.AddScoped(x => new BlobServiceClient(Configuration.GetValue<string>("AzureBlobStorage")));
             services.AddScoped<IBlobService, BlobService>();

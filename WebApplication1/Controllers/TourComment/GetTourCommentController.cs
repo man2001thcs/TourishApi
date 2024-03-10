@@ -1,20 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using System.Security.Claims;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.TourishPlan
+namespace WebApplication1.Controllers.TourComment
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GetTourishPlanController : ControllerBase
+    public class GetTourCommentController : ControllerBase
     {
-        private readonly ITourishPlanRepository _entityRepository;
+        private readonly ITourishCommentRepository _entityRepository;
 
-        public GetTourishPlanController(ITourishPlanRepository entityRepository)
+        public GetTourCommentController(ITourishCommentRepository entityRepository)
         {
             _entityRepository = entityRepository;
         }
@@ -25,8 +23,6 @@ namespace WebApplication1.Controllers.TourishPlan
         {
             try
             {
-                string userId = User.FindFirstValue("Id");
-                Debug.WriteLine(userId);
                 var entityList = _entityRepository.GetAll(search, sortBy, page, pageSize);
                 return Ok(entityList);
             }
@@ -35,7 +31,7 @@ namespace WebApplication1.Controllers.TourishPlan
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C414",
+                    MessageCode = "C614",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
@@ -54,7 +50,7 @@ namespace WebApplication1.Controllers.TourishPlan
                     var response = new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C410",
+                        MessageCode = "C610",
                     };
                     return NotFound(response);
                 }
@@ -68,7 +64,7 @@ namespace WebApplication1.Controllers.TourishPlan
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C414",
+                    MessageCode = "C614",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);

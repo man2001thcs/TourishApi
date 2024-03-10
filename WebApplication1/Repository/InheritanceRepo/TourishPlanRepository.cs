@@ -39,23 +39,25 @@ public class TourishPlanRepository : ITourishPlanRepository
         };
 
         var tourishInterest = new TourishInterest();
+        var tourishInterestList = new List<TourishInterest>();
 
         if (id != null)
         {
+            var user = _context.Users
+                .SingleOrDefault(u => u.Id.ToString() == id);
 
             tourishInterest = new TourishInterest
             {
                 InterestStatus = InterestStatus.Creator,
-                UserId = new Guid(id),
+                User = user,
+                TourishPlan = tourishPlan,
                 UpdateDate = DateTime.UtcNow
             };
+
+            tourishInterestList.Add(tourishInterest);
+
+            tourishPlan.TourishInterestList = tourishInterestList;
         }
-
-
-        var tourishInterestList = new List<TourishInterest>
-        {
-            tourishInterest
-        };
 
         tourishPlan.TourishInterestList = tourishInterestList;
 
@@ -224,20 +226,30 @@ public class TourishPlanRepository : ITourishPlanRepository
 
             if (id != null)
             {
-                tourishInterest = new TourishInterest
+                var user = _context.Users
+                .SingleOrDefault(u => u.Id.ToString() == id);
+
+                if (user != null)
                 {
-                    InterestStatus = InterestStatus.Modifier,
-                    UserId = new Guid(id),
-                    UpdateDate = DateTime.UtcNow
-                };
+                    tourishInterest = new TourishInterest
+                    {
+                        InterestStatus = InterestStatus.Modifier,
+                        User = user,
+                        TourishPlan = entity,
+                        UpdateDate = DateTime.UtcNow
+                    };
 
+                    if (entity.TourishInterestList == null)
+                    {
+                        entity.TourishInterestList = new List<TourishInterest>();
+                    }
 
-                entity.TourishInterestList.Add(tourishInterest);
-
-                entity.UpdateDate = DateTime.UtcNow;
-
-                _context.SaveChanges();
+                    entity.TourishInterestList.Add(tourishInterest);
+                }
             }
+
+            _context.SaveChanges();
+            entity.UpdateDate = DateTime.UtcNow;
 
             return new Response
             {
