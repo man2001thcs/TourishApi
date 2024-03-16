@@ -5,21 +5,21 @@ using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.TourComment
+namespace WebApplication1.Controllers.TourCategory
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DeleteTourCommentController : ControllerBase
+    public class DeleteTourCategoryController : ControllerBase
     {
-        private readonly ITourishCommentRepository _entityRepository;
+        private readonly ITourishCategoryRepository _entityRepository;
 
-        public DeleteTourCommentController(ITourishCommentRepository entityRepository)
+        public DeleteTourCategoryController(ITourishCategoryRepository entityRepository)
         {
             _entityRepository = entityRepository;
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Policy = "DeleteTourishCommentAccess")]
+        [Authorize(Policy = "DeleteTourishCategoryAccess")]
         public IActionResult DeleteById(Guid id)
         {
             {
@@ -29,7 +29,7 @@ namespace WebApplication1.Controllers.TourComment
                     var response = new Response
                     {
                         resultCd = 0,
-                        MessageCode = "I813",
+                        MessageCode = "I423",
                     };
                     return Ok(response);
                 }
@@ -38,7 +38,7 @@ namespace WebApplication1.Controllers.TourComment
                     var response = new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C814",
+                        MessageCode = "C424",
                     };
                     return StatusCode(StatusCodes.Status500InternalServerError, response);
                 }

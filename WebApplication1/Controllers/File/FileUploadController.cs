@@ -40,11 +40,11 @@ namespace WebApplication1.Controllers.File
                     FileInfo fi = new FileInfo(fileNameOld);
                     string ext = fi.Extension;
 
-                    var productTypeValue = ResourceTypeEnum.Product;
+                    var productTypeValue = ResourceTypeEnum.Tour;
 
                     if (productType == "1")
                     {
-                        productTypeValue = ResourceTypeEnum.Product;
+                        productTypeValue = ResourceTypeEnum.Tour;
                     }
                     else if (productType == "0")
                     {
@@ -77,7 +77,7 @@ namespace WebApplication1.Controllers.File
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "I106",
+                    MessageCode = "I912",
                 };
 
                 return Ok(response);
@@ -89,7 +89,7 @@ namespace WebApplication1.Controllers.File
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C106",
+                    MessageCode = "C914",
                     Data = ex
                 };
                 return StatusCode(500, response);

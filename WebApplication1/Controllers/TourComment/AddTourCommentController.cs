@@ -9,11 +9,11 @@ namespace WebApplication1.Controllers.TourComment
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AddTourCommentCtroller : ControllerBase
+    public class AddTourCommentController : ControllerBase
     {
         private readonly ITourishCommentRepository _entityRepository;
 
-        public AddTourCommentCtroller(ITourishCommentRepository entityRepository)
+        public AddTourCommentController(ITourishCommentRepository entityRepository)
         {
             _entityRepository = entityRepository;
         }

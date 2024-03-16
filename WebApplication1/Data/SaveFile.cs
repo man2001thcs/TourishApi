@@ -6,7 +6,7 @@ namespace WebApplication1.Data
 {
     public enum ResourceTypeEnum
     {
-        Avatar = 0, Product = 1, Message = 2
+        Avatar = 0, Tour = 1, Partner = 2, Message = 3
     }
 
     [Table("SaveFile")]

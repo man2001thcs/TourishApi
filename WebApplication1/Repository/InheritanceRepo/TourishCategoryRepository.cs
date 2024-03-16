@@ -6,22 +6,21 @@ using WebApplication1.Repository.Interface;
 
 namespace WebApplication1.Repository.InheritanceRepo
 {
-    public class TourishCommentRepository : ITourishCommentRepository
+    public class TourishCategoryRepository : ITourishCategoryRepository
     {
         private readonly MyDbContext _context;
         public static int PAGE_SIZE { get; set; } = 5;
-        public TourishCommentRepository(MyDbContext _context)
+        public TourishCategoryRepository(MyDbContext _context)
         {
             this._context = _context;
         }
 
-        public Response Add(TourishCommentModel addModel)
+        public Response Add(TourishCategoryModel addModel)
         {
 
-            var addValue = new TourishComment
+            var addValue = new TourishCategory
             {
-                Content = addModel.Content,
-                UserId = addModel.UserId,
+                Name = addModel.Name,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
@@ -31,7 +30,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             return new Response
             {
                 resultCd = 0,
-                MessageCode = "I811",
+                MessageCode = "I421",
                 // Create type success               
             };
 
@@ -39,7 +38,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response Delete(Guid id)
         {
-            var deleteEntity = _context.TourishComments.FirstOrDefault((entity
+            var deleteEntity = _context.TourishCategories.FirstOrDefault((entity
                => entity.Id == id));
             if (deleteEntity != null)
             {
@@ -50,19 +49,19 @@ namespace WebApplication1.Repository.InheritanceRepo
             return new Response
             {
                 resultCd = 0,
-                MessageCode = "I813",
+                MessageCode = "I423",
                 // Delete type success               
             };
         }
 
         public Response GetAll(string? search, string? sortBy, int page = 1, int pageSize = 5)
         {
-            var entityQuery = _context.TourishComments.AsQueryable();
+            var entityQuery = _context.TourishCategories.AsQueryable();
 
             #region Filtering
             if (!string.IsNullOrEmpty(search))
             {
-                entityQuery = entityQuery.Where(entity => entity.Content.Contains(search));
+                entityQuery = entityQuery.Where(entity => entity.Name.Contains(search));
             }
             #endregion
 
@@ -74,7 +73,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 switch (sortBy)
                 {
                     case "name_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.Content);
+                        entityQuery = entityQuery.OrderByDescending(entity => entity.Name);
                         break;
                     case "updateDate_asc":
                         entityQuery = entityQuery.OrderBy(entity => entity.UpdateDate);
@@ -87,7 +86,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             #endregion
 
             #region Paging
-            var result = PaginatorModel<TourishComment>.Create(entityQuery, page, pageSize);
+            var result = PaginatorModel<TourishCategory>.Create(entityQuery, page, pageSize);
             #endregion
 
             var entityVM = new Response
@@ -102,7 +101,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response getById(Guid id)
         {
-            var entity = _context.TourishComments.FirstOrDefault((entity
+            var entity = _context.TourishCategories.FirstOrDefault((entity
                 => entity.Id == id));
 
             return new Response
@@ -114,8 +113,8 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response getByName(String name)
         {
-            var entity = _context.TourishComments.FirstOrDefault((entity
-                => entity.Content == name));
+            var entity = _context.TourishCategories.FirstOrDefault((entity
+                => entity.Name == name));
 
             return new Response
             {
@@ -124,21 +123,21 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response Update(TourishCommentModel entityModel)
+        public Response Update(TourishCategoryModel entityModel)
         {
-            var entity = _context.TourishComments.FirstOrDefault((entity
+            var entity = _context.TourishCategories.FirstOrDefault((entity
                 => entity.Id == entityModel.Id));
             if (entity != null)
             {
                 entity.UpdateDate = DateTime.UtcNow;
-                entity.Content = entityModel.Content;
+                entity.Name = entityModel.Name;
                 _context.SaveChanges();
             }
 
             return new Response
             {
                 resultCd = 0,
-                MessageCode = "I812",
+                MessageCode = "I422",
                 // Update type success               
             };
         }

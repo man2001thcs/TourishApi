@@ -7,6 +7,14 @@
         public const string DELETE_TOURISH_PLAN = "deleteTourishPlan:term";
         public const string UPDATE_TOURISH_PLAN = "updateTourishPlan:term";
 
+        public const string CREATE_TOURISH_CATEGORY = "createTourishCategory:term";
+        public const string DELETE_TOURISH_CATEGORY = "deleteTourishCategory:term";
+        public const string UPDATE_TOURISH_CATEGORY = "updateTourishCategory:term";
+
+        public const string CREATE_TOURISH_COMMENT = "createTourishComment:term";
+        public const string DELETE_TOURISH_COMMENT = "deleteTourishComment:term";
+        public const string UPDATE_TOURISH_COMMENT = "updateTourishComment:term";
+
         // Category policies
         public const string CREATE_AIRPLANE = "createAirPlane:term";
         public const string DELETE_AIRPLANE = "deleteAirPlane:term";

@@ -610,6 +610,9 @@ namespace WebApplication1.Controllers
                 permissions.Add(PolicyTerm.UPDATE_PASSENGER_CAR);
                 permissions.Add(PolicyTerm.DELETE_PASSENGER_CAR);
 
+                permissions.Add(PolicyTerm.CREATE_TOURISH_COMMENT);
+                permissions.Add(PolicyTerm.UPDATE_TOURISH_COMMENT);
+                permissions.Add(PolicyTerm.DELETE_TOURISH_COMMENT);
 
                 permissions.Add(PolicyTerm.CREATE_AIRPLANE);
                 permissions.Add(PolicyTerm.UPDATE_AIRPLANE);
@@ -643,6 +646,14 @@ namespace WebApplication1.Controllers
                 permissions.Add(PolicyTerm.CREATE_TOURISH_PLAN);
                 permissions.Add(PolicyTerm.UPDATE_TOURISH_PLAN);
                 permissions.Add(PolicyTerm.DELETE_TOURISH_PLAN);
+
+                permissions.Add(PolicyTerm.CREATE_TOURISH_CATEGORY);
+                permissions.Add(PolicyTerm.UPDATE_TOURISH_CATEGORY);
+                permissions.Add(PolicyTerm.DELETE_TOURISH_CATEGORY);
+
+                permissions.Add(PolicyTerm.CREATE_TOURISH_COMMENT);
+                permissions.Add(PolicyTerm.UPDATE_TOURISH_COMMENT);
+                permissions.Add(PolicyTerm.DELETE_TOURISH_COMMENT);
 
                 permissions.Add(PolicyTerm.CREATE_PASSENGER_CAR);
                 permissions.Add(PolicyTerm.UPDATE_PASSENGER_CAR);

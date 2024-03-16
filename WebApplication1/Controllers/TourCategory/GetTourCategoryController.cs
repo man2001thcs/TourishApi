@@ -4,15 +4,15 @@ using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.TourComment
+namespace WebApplication1.Controllers.TourCategory
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GetTourCommentController : ControllerBase
+    public class GetTourCategoryController : ControllerBase
     {
-        private readonly ITourishCommentRepository _entityRepository;
+        private readonly ITourishCategoryRepository _entityRepository;
 
-        public GetTourCommentController(ITourishCommentRepository entityRepository)
+        public GetTourCategoryController(ITourishCategoryRepository entityRepository)
         {
             _entityRepository = entityRepository;
         }
@@ -31,7 +31,7 @@ namespace WebApplication1.Controllers.TourComment
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C814",
+                    MessageCode = "C424",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
@@ -50,7 +50,7 @@ namespace WebApplication1.Controllers.TourComment
                     var response = new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C810",
+                        MessageCode = "C420",
                     };
                     return NotFound(response);
                 }
@@ -64,7 +64,7 @@ namespace WebApplication1.Controllers.TourComment
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C814",
+                    MessageCode = "C424",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);

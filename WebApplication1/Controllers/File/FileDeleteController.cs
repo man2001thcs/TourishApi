@@ -50,7 +50,7 @@ namespace WebApplication1.Controllers.File
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "I107",
+                    MessageCode = "I913",
                 };
 
                 return Ok(response);
@@ -62,7 +62,7 @@ namespace WebApplication1.Controllers.File
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C107",
+                    MessageCode = "C914",
                     Data = ex.Message
                 };
                 return StatusCode(500, response);

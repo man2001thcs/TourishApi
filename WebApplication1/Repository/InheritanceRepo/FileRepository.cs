@@ -31,7 +31,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             return new Response
             {
                 resultCd = 0,
-                MessageCode = "I106",
+                MessageCode = "I912",
                 returnId = file.Id
                 // Create type success               
             };
@@ -54,7 +54,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             return new Response
             {
                 resultCd = 0,
-                MessageCode = "I107",
+                MessageCode = "I913",
                 returnId = returnId
                 // Delete type success               
             };

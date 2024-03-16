@@ -38,6 +38,11 @@ public class TourishPlanRepository : ITourishPlanRepository
             UpdateDate = DateTime.UtcNow,
         };
 
+        if (entityModel.TourishRelation != null)
+        {
+            tourishPlan.TourishCategoryRelations = entityModel.TourishRelation;
+        }
+
         var tourishInterest = new TourishInterest();
         var tourishInterestList = new List<TourishInterest>();
 
@@ -220,6 +225,11 @@ public class TourishPlanRepository : ITourishPlanRepository
             {
                 await _context.EatSchedules.Where(a => a.TourishPlanId == entityModel.Id).ExecuteDeleteAsync();
                 entity.EatSchedules = AddEatSchedule(entityModel.EatingScheduleString);
+            }
+
+            if (entityModel.TourishRelation != null)
+            {
+                entity.TourishCategoryRelations = entityModel.TourishRelation;
             }
 
             var tourishInterest = new TourishInterest();

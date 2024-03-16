@@ -30,6 +30,8 @@ namespace WebApplication1.Data.DbContextFile
         public DbSet<StayingSchedule> StayingSchedules { get; set; }
 
         public DbSet<TourishPlan> TourishPlan { get; set; }
+        public DbSet<TourishCategory> TourishCategories { get; set; }
+        public DbSet<TourishCategoryRelation> TourishCategoryRelations { get; set; }
         public DbSet<TourishInterest> TourishInterests { get; set; }
         public DbSet<TourishComment> TourishComments { get; set; }
         public DbSet<TotalReceipt> TotalReceiptList { get; set; }
@@ -80,6 +82,29 @@ namespace WebApplication1.Data.DbContextFile
                 .WithOne(e => e.TourishPlan)
                 .HasForeignKey<TotalReceipt>(e => e.TourishPlanId)
                 .HasConstraintName("FK_TourishPlan_TotalReceipt");
+            });
+
+            modelBuilder.Entity<TourishCategory>(entity =>
+            {
+                entity.ToTable(nameof(TourishCategory));
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+            });
+            
+            modelBuilder.Entity<TourishCategoryRelation>(entity =>
+            {
+                entity.ToTable(nameof(TourishCategoryRelation));
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.TourishPlan)
+                .WithMany(e => e.TourishCategoryRelations)
+                .HasForeignKey(e => e.TourishPlanId)
+                .HasConstraintName("FK_TourishPlan_TourishCategoryRelation");
+
+                entity.HasOne(e => e.TourishCategory)
+                .WithMany(e => e.TourishCategoryRelations)
+                .HasForeignKey(e => e.TourishCategoryId)
+                .HasConstraintName("FK_TourishCategory_TourishCategoryRelation");
             });
 
             modelBuilder.Entity<TourishInterest>(entity =>

@@ -32,7 +32,7 @@ namespace WebApplication1.Controllers.File
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C204",
+                    MessageCode = "C910",
                     Error = ex.Message
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, response);
