@@ -17,7 +17,7 @@ namespace WebApplication1.Data
         public Guid Id { get; set; }
 
         [Required]
-        [MaxLength(50)]
+        [MaxLength(300)]
         public string? TourName { get; set; }
         public string StartingPoint { get; set; }
         public string EndPoint { get; set; }

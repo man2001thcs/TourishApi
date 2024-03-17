@@ -90,7 +90,7 @@ namespace WebApplication1.Data.DbContextFile
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
             });
-            
+
             modelBuilder.Entity<TourishCategoryRelation>(entity =>
             {
                 entity.ToTable(nameof(TourishCategoryRelation));

@@ -21,13 +21,13 @@ namespace WebApplication1.Controllers.TourishPlan
 
         // GET: api/<ValuesController>
         [HttpGet]
-        public IActionResult GetAll(string? search, string? sortBy, int page = 1, int pageSize = 5)
+        public IActionResult GetAll(string? search, string? category, string? sortBy, int page = 1, int pageSize = 5)
         {
             try
             {
                 string userId = User.FindFirstValue("Id");
                 Debug.WriteLine(userId);
-                var entityList = _entityRepository.GetAll(search, sortBy, page, pageSize);
+                var entityList = _entityRepository.GetAll(search, category, sortBy, page, pageSize);
                 return Ok(entityList);
             }
             catch (Exception ex)

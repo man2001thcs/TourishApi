@@ -155,6 +155,13 @@ namespace MyWebApiApp
                 options.AddPolicy("DeleteTourishPlanAccess", policy =>
                                   policy.RequireClaim("Permissions", PolicyTerm.DELETE_TOURISH_PLAN));
 
+                options.AddPolicy("CreateTourishCategoryAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.CREATE_TOURISH_CATEGORY));
+                options.AddPolicy("UpdateTourishCategoryAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_TOURISH_CATEGORY));
+                options.AddPolicy("DeleteTourishCategoryAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_TOURISH_CATEGORY));
+
                 options.AddPolicy("CreateReceiptAccess", policy =>
                                   policy.RequireClaim("Permissions", PolicyTerm.CREATE_RECEIPT));
                 options.AddPolicy("UpdateReceiptAccess", policy =>

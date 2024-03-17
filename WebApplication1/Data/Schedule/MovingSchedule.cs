@@ -21,7 +21,7 @@ namespace WebApplication1.Data.Schedule
         public Guid TourishPlanId { get; set; }
 
         [Required]
-        [MaxLength(70)]
+        [MaxLength(200)]
         public string? DriverName { get; set; }
         public string? VehiclePlate { get; set; }
         public string? PhoneNumber { get; set; }

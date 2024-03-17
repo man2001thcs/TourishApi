@@ -21,6 +21,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             var addValue = new TourishCategory
             {
                 Name = addModel.Name,
+                Description = addModel.Description,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
@@ -130,6 +131,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             if (entity != null)
             {
                 entity.UpdateDate = DateTime.UtcNow;
+                entity.Description = entityModel.Description;
                 entity.Name = entityModel.Name;
                 _context.SaveChanges();
             }

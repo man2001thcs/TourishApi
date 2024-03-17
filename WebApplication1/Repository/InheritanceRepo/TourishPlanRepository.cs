@@ -38,11 +38,6 @@ public class TourishPlanRepository : ITourishPlanRepository
             UpdateDate = DateTime.UtcNow,
         };
 
-        if (entityModel.TourishRelation != null)
-        {
-            tourishPlan.TourishCategoryRelations = entityModel.TourishRelation;
-        }
-
         var tourishInterest = new TourishInterest();
         var tourishInterestList = new List<TourishInterest>();
 
@@ -64,8 +59,6 @@ public class TourishPlanRepository : ITourishPlanRepository
             tourishPlan.TourishInterestList = tourishInterestList;
         }
 
-        tourishPlan.TourishInterestList = tourishInterestList;
-
         if (!String.IsNullOrEmpty(entityModel.EatingScheduleString))
         {
             tourishPlan.EatSchedules = this.AddEatSchedule(entityModel.EatingScheduleString);
@@ -81,7 +74,16 @@ public class TourishPlanRepository : ITourishPlanRepository
             tourishPlan.StayingSchedules = this.AddStayingSchedule(entityModel.StayingScheduleString);
         }
 
-        _context.Add(tourishPlan);
+        await _context.AddAsync(tourishPlan);
+        await _context.SaveChangesAsync();
+
+        tourishPlan.TourishInterestList = tourishInterestList;
+
+        if (entityModel.TourishCategoryRelations != null)
+        {
+            tourishPlan.TourishCategoryRelations = entityModel.TourishCategoryRelations;
+        }
+
         await _context.SaveChangesAsync();
 
         return new Response
@@ -112,11 +114,13 @@ public class TourishPlanRepository : ITourishPlanRepository
         };
     }
 
-    public Response GetAll(string? search, string? sortBy, int page = 1, int pageSize = 5)
+    public Response GetAll(string? search, string? category, string? sortBy, int page = 1, int pageSize = 5)
     {
         var entityQuery = _context.TourishPlan.Include(entity => entity.MovingSchedules).
             Include(entity => entity.EatSchedules).
             Include(entity => entity.StayingSchedules).
+            Include(entity => entity.TourishCategoryRelations).
+            ThenInclude(entity => entity.TourishCategory).
              Include(entity => entity.TotalReceipt).
              ThenInclude(entity => entity.FullReceiptList).
             AsQueryable();
@@ -125,6 +129,12 @@ public class TourishPlanRepository : ITourishPlanRepository
         if (!string.IsNullOrEmpty(search))
         {
             entityQuery = entityQuery.Where(entity => entity.TourName.Contains(search));
+        }
+
+        if (!string.IsNullOrEmpty(category))
+        {
+            entityQuery = entityQuery.Where(entity => entity.TourishCategoryRelations
+            .Count(categoryRelation => (categoryRelation.TourishCategory != null) ? categoryRelation.TourishCategory.Name.Contains(category) : false) >= 1);
         }
 
         #endregion
@@ -163,6 +173,8 @@ public class TourishPlanRepository : ITourishPlanRepository
         var entity = _context.TourishPlan.Where(entity => entity.Id == id).Include(entity => entity.EatSchedules).
             Include(entity => entity.StayingSchedules).
             Include(entity => entity.MovingSchedules).
+            Include(entity => entity.TourishCategoryRelations).
+            ThenInclude(entity => entity.TourishCategory).
              Include(entity => entity.TotalReceipt).
              ThenInclude(entity => entity.FullReceiptList)
            .FirstOrDefault();
@@ -227,11 +239,6 @@ public class TourishPlanRepository : ITourishPlanRepository
                 entity.EatSchedules = AddEatSchedule(entityModel.EatingScheduleString);
             }
 
-            if (entityModel.TourishRelation != null)
-            {
-                entity.TourishCategoryRelations = entityModel.TourishRelation;
-            }
-
             var tourishInterest = new TourishInterest();
 
             if (id != null)
@@ -258,8 +265,16 @@ public class TourishPlanRepository : ITourishPlanRepository
                 }
             }
 
-            _context.SaveChanges();
+            if (entityModel.TourishCategoryRelations != null)
+            {
+                await _context.TourishCategoryRelations.Where(a => a.TourishPlanId == entityModel.Id).ExecuteDeleteAsync();
+                await _context.SaveChangesAsync();
+                entity.TourishCategoryRelations = entityModel.TourishCategoryRelations;
+            }
+
             entity.UpdateDate = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
 
             return new Response
             {
