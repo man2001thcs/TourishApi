@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1.Model.VirtualModel;
-using WebApplication1.Repository.Interface;
+using TourishApi.Service.InheritanceService;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -11,11 +10,11 @@ namespace WebApplication1.Controllers.TourComment
     [ApiController]
     public class DeleteTourCommentController : ControllerBase
     {
-        private readonly ITourishCommentRepository _entityRepository;
+        private readonly TourishCommentService _entityService;
 
-        public DeleteTourCommentController(ITourishCommentRepository entityRepository)
+        public DeleteTourCommentController(TourishCommentService entityService)
         {
-            _entityRepository = entityRepository;
+            _entityService = entityService;
         }
 
         [HttpDelete("{id}")]
@@ -23,26 +22,7 @@ namespace WebApplication1.Controllers.TourComment
         public IActionResult DeleteById(Guid id)
         {
             {
-                try
-                {
-                    _entityRepository.Delete(id);
-                    var response = new Response
-                    {
-                        resultCd = 0,
-                        MessageCode = "I813",
-                    };
-                    return Ok(response);
-                }
-                catch
-                {
-                    var response = new Response
-                    {
-                        resultCd = 1,
-                        MessageCode = "C814",
-                    };
-                    return StatusCode(StatusCodes.Status500InternalServerError, response);
-                }
-
+                return Ok(_entityService.DeleteById(id));
             }
         }
     }

@@ -3,19 +3,21 @@ using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SignalR.Hub;
 using System.Text;
-using TourishApi.Repository.Interface.Restaurant;
-using TourishApi.Repository.Interface.Resthouse;
-using TourishApi.Repository.Interface.Transport;
+using TourishApi.Repository.Interface;
+using TourishApi.Service.InheritanceService;
+using TourishApi.Service.Interface;
 using TourishApi.Task;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
+using WebApplication1.Model.RestHouse;
+using WebApplication1.Model.Transport;
 using WebApplication1.Repository.InheritanceRepo;
 using WebApplication1.Repository.InheritanceRepo.Receipt;
-using WebApplication1.Repository.InheritanceRepo.RestaurantPlace;
 using WebApplication1.Repository.InheritanceRepo.RestHoouse;
 using WebApplication1.Repository.InheritanceRepo.Transport;
 using WebApplication1.Repository.Interface;
@@ -67,25 +69,32 @@ namespace MyWebApiApp
                 });
             });
 
-            services.AddScoped<IPassengerCarRepository, PassengerCarRepository>();
-            services.AddScoped<IAirPlaneRepository, AirPlaneRepository>();
+            services.AddScoped(x => new BlobServiceClient(Configuration.GetValue<string>("AzureBlobStorage")));
 
-            services.AddScoped<IHotelRepository, HotelRepository>();
-            services.AddScoped<IHomeStayRepository, HomeStayRepository>();
+            // Repo
+            services.AddScoped<HomeStayRepository>();
+            services.AddScoped<HotelRepository>();
+            services.AddScoped<AirPlaneRepository>();
+            services.AddScoped<PassengerCarRepository>();
+            services.AddScoped<TourishPlanRepository>();
+            services.AddScoped<TourishCommentRepository>();
+            services.AddScoped<TourishCategoryRepository>();
 
-            services.AddScoped<IRestaurantRepository, RestaurantRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IReceiptRepository, ReceiptRepository>();
-
             services.AddScoped<ITourishPlanRepository, TourishPlanRepository>();
-            services.AddScoped<ITourishCommentRepository, TourishCommentRepository>();
-            services.AddScoped<ITourishCategoryRepository, TourishCategoryRepository>();
-
             services.AddScoped<IFileRepository, FileRepository>();
 
-            services.AddScoped(x => new BlobServiceClient(Configuration.GetValue<string>("AzureBlobStorage")));
-            services.AddScoped<IBlobService, BlobService>();
+            // Service
+            services.AddScoped<HomeStayService>();
+            services.AddScoped<HotelService>();
+            services.AddScoped<AirPlaneService>();
+            services.AddScoped<PassengerCarService>();
+            services.AddScoped<TourishPlanService>();
+            services.AddScoped<TourishCommentService>();
+            services.AddScoped<TourishCategoryService>();
 
+            services.AddScoped<IBlobService, BlobService>();
             services.AddSingleton<IUserIdProvider, IdBasedUserIdProvider>();
 
             services.Configure<AppSetting>(Configuration.GetSection("AppSettings"));

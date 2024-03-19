@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TourishApi.Repository.Interface.Transport;
+using TourishApi.Service.InheritanceService;
 using WebApplication1.Model.Transport;
-using WebApplication1.Model.VirtualModel;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,43 +11,18 @@ namespace WebApplication1.Controllers.Transport.PassengerCar
     [ApiController]
     public class AddPassengerCarController : ControllerBase
     {
-        private readonly IPassengerCarRepository _entityRepository;
+        private readonly PassengerCarService _entityService;
 
-        public AddPassengerCarController(IPassengerCarRepository airPlaneRepository)
+        public AddPassengerCarController(PassengerCarService airPlaneService)
         {
-            _entityRepository = airPlaneRepository;
+            _entityService = airPlaneService;
         }
 
         [HttpPost]
         [Authorize(Policy = "CreatePassengerCarAccess")]
         public IActionResult CreateNew(PassengerCarModel entityModel)
         {
-            try
-            {
-                var entityExist = _entityRepository.getByName(entityModel.BranchName);
-
-                if (entityExist.Data == null)
-                {
-                    var response = _entityRepository.Add(entityModel);
-
-                    return Ok(response);
-                }
-                else
-                {
-                    var response = new Response
-                    {
-                        resultCd = 1,
-                        MessageCode = "C111",
-                    };
-                    return StatusCode(StatusCodes.Status200OK, response);
-                }
-
-            }
-
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
+            return Ok(_entityService.CreateNew(entityModel));
         }
     }
 }

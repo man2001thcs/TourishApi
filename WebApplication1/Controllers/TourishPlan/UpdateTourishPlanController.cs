@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using TourishApi.Service.InheritanceService;
 using WebApplication1.Model;
-using WebApplication1.Model.VirtualModel;
-using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,38 +12,20 @@ namespace WebApplication1.Controllers.TourishPlan
     [ApiController]
     public class UpdateTourishPlanController : ControllerBase
     {
-        private readonly ITourishPlanRepository _entityRepository;
+        private readonly TourishPlanService _entityService;
 
-        public UpdateTourishPlanController(ITourishPlanRepository entityRepository)
+        public UpdateTourishPlanController(TourishPlanService entityService)
         {
-            _entityRepository = entityRepository;
+            _entityService = entityService;
         }
 
         [HttpPut("{id}")]
         [Authorize(Policy = "UpdateTourishPlanAccess")]
         public async Task<IActionResult> UpdateTourishPlanById(TourishPlanUpdateModel entityModel)
         {
-
-            try
-            {
-                string userId = User.FindFirstValue("Id");
-                var response = await _entityRepository.Update(entityModel, userId);
-
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                var response = new Response
-                {
-                    resultCd = 1,
-                    MessageCode = "C414",
-                    Error = ex.Message
-                };
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
-            }
-
-
-
+            string userId = User.FindFirstValue("Id");
+            var response = _entityService.UpdateEntityById(userId, entityModel);
+            return Ok(response);
         }
     }
 }

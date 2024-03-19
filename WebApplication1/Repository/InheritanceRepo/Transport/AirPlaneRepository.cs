@@ -1,4 +1,4 @@
-﻿using TourishApi.Repository.Interface.Transport;
+﻿using TourishApi.Repository.Interface;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Transport;
 using WebApplication1.Model;
@@ -7,7 +7,7 @@ using WebApplication1.Model.VirtualModel;
 
 namespace WebApplication1.Repository.InheritanceRepo.Transport
 {
-    public class AirPlaneRepository : IAirPlaneRepository
+    public class AirPlaneRepository : IBaseRepository<AirPlaneModel>
     {
         private readonly MyDbContext _context;
         public static int PAGE_SIZE { get; set; } = 5;

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TourishApi.Repository.Interface.Transport;
-using WebApplication1.Model.VirtualModel;
+using TourishApi.Service.InheritanceService;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -11,39 +10,18 @@ namespace WebApplication1.Controllers.Transport.AirPlane
     [ApiController]
     public class DeleteAirPlaneController : ControllerBase
     {
-        private readonly IAirPlaneRepository _entityRepository;
+        private readonly AirPlaneService _entityService;
 
-        public DeleteAirPlaneController(IAirPlaneRepository entityRepository)
+        public DeleteAirPlaneController(AirPlaneService entityService)
         {
-            _entityRepository = entityRepository;
+            _entityService = entityService;
         }
 
         [HttpDelete("{id}")]
         [Authorize(Policy = "DeleteAirPlaneAccess")]
         public IActionResult DeleteById(Guid id)
         {
-            {
-                try
-                {
-                    _entityRepository.Delete(id);
-                    var response = new Response
-                    {
-                        resultCd = 0,
-                        MessageCode = "I123",
-                    };
-                    return Ok(response);
-                }
-                catch
-                {
-                    var response = new Response
-                    {
-                        resultCd = 1,
-                        MessageCode = "C124",
-                    };
-                    return StatusCode(StatusCodes.Status500InternalServerError, response);
-                }
-
-            }
+            return Ok(_entityService.DeleteById(id));
         }
     }
 }

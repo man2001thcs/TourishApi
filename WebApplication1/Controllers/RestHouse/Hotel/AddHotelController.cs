@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TourishApi.Repository.Interface.Resthouse;
+using TourishApi.Service.InheritanceService;
 using WebApplication1.Model.RestHouse;
-using WebApplication1.Model.VirtualModel;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,43 +11,18 @@ namespace WebApplication1.Controllers.RestHouse.Hotel
     [ApiController]
     public class AddHotelController : ControllerBase
     {
-        private readonly IHotelRepository _entityRepository;
+        private readonly HotelService _entityService;
 
-        public AddHotelController(IHotelRepository airPlaneRepository)
+        public AddHotelController(HotelService airPlaneService)
         {
-            _entityRepository = airPlaneRepository;
+            _entityService = airPlaneService;
         }
 
         [HttpPost]
         [Authorize(Policy = "CreateHotelAccess")]
         public IActionResult CreateNew(HotelModel entityModel)
         {
-            try
-            {
-                var entityExist = _entityRepository.getByName(entityModel.PlaceBranch);
-
-                if (entityExist.Data == null)
-                {
-                    var response = _entityRepository.Add(entityModel);
-
-                    return Ok(response);
-                }
-                else
-                {
-                    var response = new Response
-                    {
-                        resultCd = 1,
-                        MessageCode = "C211",
-                    };
-                    return StatusCode(StatusCodes.Status200OK, response);
-                }
-
-            }
-
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
+            return Ok(_entityService.CreateNew(entityModel));
         }
     }
 }

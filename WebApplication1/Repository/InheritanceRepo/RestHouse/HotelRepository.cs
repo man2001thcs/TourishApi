@@ -1,4 +1,4 @@
-﻿using TourishApi.Repository.Interface.Resthouse;
+﻿using TourishApi.Repository.Interface;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.RestHouse;
 using WebApplication1.Model;
@@ -7,7 +7,7 @@ using WebApplication1.Model.VirtualModel;
 
 namespace WebApplication1.Repository.InheritanceRepo.RestHoouse
 {
-    public class HotelRepository : IHotelRepository
+    public class HotelRepository : IBaseRepository<HotelModel>
     {
         private readonly MyDbContext _context;
         public static int PAGE_SIZE { get; set; } = 5;

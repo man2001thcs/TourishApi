@@ -1,4 +1,4 @@
-﻿using TourishApi.Repository.Interface.Restaurant;
+﻿using TourishApi.Repository.Interface;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.RestaurantPlace;
 using WebApplication1.Model;
@@ -7,7 +7,7 @@ using WebApplication1.Model.VirtualModel;
 
 namespace WebApplication1.Repository.InheritanceRepo.RestaurantPlace
 {
-    public class RestaurantRepository : IRestaurantRepository
+    public class RestaurantRepository : IBaseRepository<RestaurantModel>
     {
         private readonly MyDbContext _context;
         public static int PAGE_SIZE { get; set; } = 5;

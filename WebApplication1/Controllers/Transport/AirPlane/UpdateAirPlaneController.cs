@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TourishApi.Repository.Interface.Transport;
+using TourishApi.Service.InheritanceService;
 using WebApplication1.Model.Transport;
-using WebApplication1.Model.VirtualModel;
+
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,11 +12,11 @@ namespace WebApplication1.Controllers.AirPlane
     [ApiController]
     public class UpdateAirPlaneController : ControllerBase
     {
-        private readonly IAirPlaneRepository _entityRepository;
+        private readonly AirPlaneService _entityService;
 
-        public UpdateAirPlaneController(IAirPlaneRepository entityRepository)
+        public UpdateAirPlaneController(AirPlaneService entityService)
         {
-            _entityRepository = entityRepository;
+            _entityService = entityService;
         }
 
         [HttpPut("{id}")]
@@ -24,25 +24,7 @@ namespace WebApplication1.Controllers.AirPlane
         public IActionResult UpdateAirPlaneById(Guid id, AirPlaneModel AirPlaneModel)
         {
 
-            try
-            {
-                var response = _entityRepository.Update(AirPlaneModel);
-
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                var response = new Response
-                {
-                    resultCd = 1,
-                    MessageCode = "C124",
-                    Error = ex.Message
-                };
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
-            }
-
-
-
+            return Ok(_entityService.UpdateEntityById(id, AirPlaneModel));
         }
     }
 }

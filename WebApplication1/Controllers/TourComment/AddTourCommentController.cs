@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TourishApi.Service.InheritanceService;
 using WebApplication1.Model;
-using WebApplication1.Repository.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -11,27 +11,18 @@ namespace WebApplication1.Controllers.TourComment
     [ApiController]
     public class AddTourCommentController : ControllerBase
     {
-        private readonly ITourishCommentRepository _entityRepository;
+        private readonly TourishCommentService _entityService;
 
-        public AddTourCommentController(ITourishCommentRepository entityRepository)
+        public AddTourCommentController(TourishCommentService entityService)
         {
-            _entityRepository = entityRepository;
+            _entityService = entityService;
         }
 
         [HttpPost]
         [Authorize(Policy = "CreateTourishCommentAccess")]
         public IActionResult CreateNew(TourishCommentModel entityModel)
         {
-            try
-            {
-                var response = _entityRepository.Add(entityModel);
-                return Ok(response);
-            }
-
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
+            return Ok(_entityService.CreateNew(entityModel));
         }
     }
 }

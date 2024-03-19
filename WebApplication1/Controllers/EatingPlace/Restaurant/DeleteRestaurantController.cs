@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TourishApi.Repository.Interface.Restaurant;
-using WebApplication1.Model.VirtualModel;
+using TourishApi.Service.InheritanceService;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -11,39 +10,18 @@ namespace WebApplication1.Controllers.EatingPlace.Restaurant
     [ApiController]
     public class DeleteRestaurantController : ControllerBase
     {
-        private readonly IRestaurantRepository _entityRepository;
+        private readonly RestaurantService _entityService;
 
-        public DeleteRestaurantController(IRestaurantRepository entityRepository)
+        public DeleteRestaurantController(RestaurantService entityService)
         {
-            _entityRepository = entityRepository;
+            _entityService = entityService;
         }
 
         [HttpDelete("{id}")]
         [Authorize(Policy = "DeleteRestaurantAccess")]
         public IActionResult DeleteById(Guid id)
         {
-            {
-                try
-                {
-                    _entityRepository.Delete(id);
-                    var response = new Response
-                    {
-                        resultCd = 0,
-                        MessageCode = "I313",
-                    };
-                    return Ok(response);
-                }
-                catch
-                {
-                    var response = new Response
-                    {
-                        resultCd = 1,
-                        MessageCode = "C314",
-                    };
-                    return StatusCode(StatusCodes.Status500InternalServerError, response);
-                }
-
-            }
+            return Ok(_entityService.DeleteById(id));
         }
     }
 }

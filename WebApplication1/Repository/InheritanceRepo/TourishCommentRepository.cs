@@ -1,12 +1,12 @@
-﻿using WebApplication1.Data;
+﻿using TourishApi.Repository.Interface;
+using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
-using WebApplication1.Repository.Interface;
 
 namespace WebApplication1.Repository.InheritanceRepo
 {
-    public class TourishCommentRepository : ITourishCommentRepository
+    public class TourishCommentRepository : IBaseRepository<TourishCommentModel>
     {
         private readonly MyDbContext _context;
         public static int PAGE_SIZE { get; set; } = 5;
