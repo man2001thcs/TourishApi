@@ -24,7 +24,7 @@ namespace WebApplication1.Controllers.TourishPlan
         public async Task<IActionResult> UpdateTourishPlanById(TourishPlanUpdateModel entityModel)
         {
             string userId = User.FindFirstValue("Id");
-            var response = _entityService.UpdateEntityById(userId, entityModel);
+            var response = await _entityService.UpdateEntityById(userId, entityModel);
             return Ok(response);
         }
     }

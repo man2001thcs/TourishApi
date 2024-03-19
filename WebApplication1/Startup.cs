@@ -3,21 +3,17 @@ using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SignalR.Hub;
 using System.Text;
-using TourishApi.Repository.Interface;
 using TourishApi.Service.InheritanceService;
-using TourishApi.Service.Interface;
 using TourishApi.Task;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
-using WebApplication1.Model.RestHouse;
-using WebApplication1.Model.Transport;
 using WebApplication1.Repository.InheritanceRepo;
 using WebApplication1.Repository.InheritanceRepo.Receipt;
+using WebApplication1.Repository.InheritanceRepo.RestaurantPlace;
 using WebApplication1.Repository.InheritanceRepo.RestHoouse;
 using WebApplication1.Repository.InheritanceRepo.Transport;
 using WebApplication1.Repository.Interface;
@@ -76,9 +72,11 @@ namespace MyWebApiApp
             services.AddScoped<HotelRepository>();
             services.AddScoped<AirPlaneRepository>();
             services.AddScoped<PassengerCarRepository>();
+            services.AddScoped<RestaurantRepository>();
             services.AddScoped<TourishPlanRepository>();
             services.AddScoped<TourishCommentRepository>();
             services.AddScoped<TourishCategoryRepository>();
+            services.AddScoped<NotificationRepository>();
 
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IReceiptRepository, ReceiptRepository>();
@@ -90,9 +88,11 @@ namespace MyWebApiApp
             services.AddScoped<HotelService>();
             services.AddScoped<AirPlaneService>();
             services.AddScoped<PassengerCarService>();
+            services.AddScoped<RestaurantService>();
             services.AddScoped<TourishPlanService>();
             services.AddScoped<TourishCommentService>();
             services.AddScoped<TourishCategoryService>();
+            services.AddScoped<NotificationService>();
 
             services.AddScoped<IBlobService, BlobService>();
             services.AddSingleton<IUserIdProvider, IdBasedUserIdProvider>();

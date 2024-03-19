@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Http.Features;
 using MyWebApiApp;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 

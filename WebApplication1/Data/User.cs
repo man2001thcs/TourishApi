@@ -33,7 +33,8 @@ namespace WebApplication1.Data
         public ICollection<RefreshToken> RefreshTokenList { get; set; }
         public ICollection<UserMessage> UserMessageSentList { get; set; }
         public ICollection<UserMessage> UserMessageReceiveList { get; set; }
-        public ICollection<Notification> NotificationList { get; set; }
+        public ICollection<Notification> NotificationCreateList { get; set; }
+        public ICollection<Notification>? NotificationReceiveList { get; set; }
         public ICollection<TourishInterest> TourishInterests { get; set; }
         public ICollection<NotificationCon> NotificationConList { get; set; }
         public ICollection<UserMessageCon> UserMessageConList { get; set; }

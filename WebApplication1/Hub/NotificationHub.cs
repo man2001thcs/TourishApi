@@ -28,7 +28,7 @@ namespace SignalR.Hub
 
         public async Task SendTotalNumber(Guid userId)
         {
-            var notificationCount = _context.Notifications.Where(u => u.UserId == userId && !u.IsRead && !u.IsDeleted).Count();
+            var notificationCount = _context.Notifications.Where(u => (u.UserReceiveId == userId || u.UserReceiveId == null) && !u.IsRead && !u.IsDeleted).Count();
             await Clients.All.SendString(notificationCount.ToString());
         }
 
@@ -37,45 +37,48 @@ namespace SignalR.Hub
             await Clients.All.SendString(a);
         }
 
-        public async Task SendOffersToUser(Guid userId, NotificationModel notification)
+        public async Task SendOffersToUser(Guid userReceiveId, NotificationModel notification)
         {
             try
             {
-                var notificationEntity = new Notification
+                var userSendId = Context.User.FindFirstValue("Id");
+
+                if (userSendId != null && userSendId.Length > 0)
                 {
-                    UserId = userId,
-                    Content = notification.Content,
-                    IsRead = false,
-                    IsDeleted = false,
-                    CreateDate = DateTime.UtcNow,
-                    UpdateDate = DateTime.UtcNow,
+                    var notificationEntity = new Notification
+                    {
+                        UserCreateId = new Guid(userSendId),
+                        UserReceiveId = userReceiveId,
+                        Content = notification.Content,
+                        IsRead = false,
+                        IsDeleted = false,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow,
 
-                };
-                _context.Add(notificationEntity);
+                    };
+                    _context.Add(notificationEntity);
 
 
-                var connection = _context.NotificationConList.OrderByDescending(connection => connection.CreateDate).FirstOrDefault(u => u.UserId == userId && u.Connected);
-                if (connection != null)
-                {
-                    await Clients.Client(connection.ConnectionID).SendOffersToUser(userId, notification);
+                    var connection = _context.NotificationConList.OrderByDescending(connection => connection.CreateDate).FirstOrDefault(u => u.UserId == userReceiveId && u.Connected);
+                    if (connection != null)
+                    {
+                        await Clients.Client(connection.ConnectionID).SendOffersToUser(userReceiveId, notification);
+                    }
+
                 }
             }
             catch (Exception ex)
             {
-                var connection = _context.NotificationConList.FirstOrDefault(u => u.UserId == userId && u.Connected);
+                var userSendId = Context.User.FindFirstValue("Id");
+                var connection = _context.NotificationConList.OrderByDescending(connection => connection.CreateDate).FirstOrDefault(u => u.UserId.ToString() == userSendId && u.Connected);
                 //await Clients.Client(connection.ConnectionID).SendOffersToUser(userId, null);
                 if (connection != null)
                 {
-                    await Clients.Client(connection.ConnectionID).SendError(userId, "Lỗi xảy ra: " + ex.ToString());
+                    await Clients.Client(connection.ConnectionID).SendError(new Guid(userSendId), "Lỗi xảy ra: " + ex.ToString());
                 }
             }
 
         }
-
-        //public Task SendMessageToGroup(Guid userId, string message)
-        //{
-        //    return Clients.Group("SignalR Users").SendAsync("ReceiveMessage", user, message);
-        //}
 
         public override async Task OnConnectedAsync()
         {

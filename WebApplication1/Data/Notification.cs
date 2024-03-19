@@ -6,7 +6,8 @@ namespace WebApplication1.Data
     public class Notification
     {
         public Guid Id { get; set; }
-        public Guid? UserId { get; set; }
+        public Guid UserCreateId { get; set; }
+        public Guid? UserReceiveId { get; set; }
         public string Content { get; set; }
         public Boolean IsRead { get; set; }
         public Boolean IsDeleted { get; set; }
@@ -14,6 +15,7 @@ namespace WebApplication1.Data
         public DateTime? UpdateDate { get; set; }
 
         // Relationship
-        public User User { get; set; }
+        public User UserCreator { get; set; }
+        public User UserReceiver { get; set; }
     }
 }

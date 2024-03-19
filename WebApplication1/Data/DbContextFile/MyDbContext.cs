@@ -211,10 +211,15 @@ namespace WebApplication1.Data.DbContextFile
                 entity.Property(notification => notification.UpdateDate).IsRequired().HasDefaultValueSql("getutcdate()");
                 entity.Property(notification => notification.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
 
-                entity.HasOne(e => e.User)
-                .WithMany(e => e.NotificationList)
-                .HasForeignKey(e => e.UserId)
-                .HasConstraintName("FK_User_Notification");
+                entity.HasOne(e => e.UserCreator)
+                .WithMany(e => e.NotificationCreateList)
+                .HasForeignKey(e => e.UserCreateId)
+                .HasConstraintName("FK_UserCreate_Notification");
+
+                entity.HasOne(e => e.UserReceiver)
+               .WithMany(e => e.NotificationReceiveList)
+               .HasForeignKey(e => e.UserReceiveId)
+               .HasConstraintName("FK_UserReceive_Notification");
             });
 
             modelBuilder.Entity<NotificationCon>(entity =>
