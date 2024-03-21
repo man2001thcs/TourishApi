@@ -261,7 +261,12 @@ public class TourishPlanRepository : ITourishPlanRepository
                         entity.TourishInterestList = new List<TourishInterest>();
                     }
 
-                    entity.TourishInterestList.Add(tourishInterest);
+                    if (entity.TourishInterestList.Count(interest => interest.UserId.ToString() == id) <= 0)
+                    {
+                        entity.TourishInterestList.Add(tourishInterest);
+                    }
+
+
                 }
             }
 
@@ -291,6 +296,16 @@ public class TourishPlanRepository : ITourishPlanRepository
                 MessageCode = "C412",
             };
         }
+    }
+
+
+    public List<TourishInterest> getTourInterest(Guid id)
+    {
+        var entity = _context.TourishPlan.Where(entity => entity.Id == id).Include(tour=> tour.TourishInterestList)
+           .FirstOrDefault();
+        if (entity == null) { return null; }
+
+        return entity.TourishInterestList.ToList();
     }
 
     private List<EatSchedule> AddEatSchedule(string FullScheduleString)

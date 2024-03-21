@@ -21,6 +21,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             var addValue = new Notification
             {
                 Content = addModel.Content,
+                ContentCode = addModel.ContentCode,
                 UserCreateId = addModel.UserCreateId,
                 UserReceiveId = addModel.UserReceiveId,
                 CreateDate = DateTime.UtcNow,
@@ -133,6 +134,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 entity.UpdateDate = DateTime.UtcNow;
                 entity.Content = entityModel.Content;
+                entity.ContentCode = entityModel.ContentCode;
                 _context.SaveChanges();
             }
 

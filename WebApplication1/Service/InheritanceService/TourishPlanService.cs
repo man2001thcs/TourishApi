@@ -1,4 +1,5 @@
 ﻿using TourishApi.Service.Interface;
+using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
@@ -8,10 +9,12 @@ namespace TourishApi.Service.InheritanceService
     public class TourishPlanService : ITourishPlanService
     {
         private readonly ITourishPlanRepository _entityRepository;
+        private readonly NotificationService _notificationService;
 
-        public TourishPlanService(ITourishPlanRepository tourishPlanRepository)
+        public TourishPlanService(ITourishPlanRepository tourishPlanRepository, NotificationService notificationService)
         {
             _entityRepository = tourishPlanRepository;
+            _notificationService = notificationService; 
         }
 
         public async Task<Response> CreateNew(string userId, TourishPlanInsertModel entityModel)
@@ -25,6 +28,24 @@ namespace TourishApi.Service.InheritanceService
                 if (entityExist.Data == null)
                 {
                     var response = await _entityRepository.Add(entityModel, userId);
+
+                    if (response.resultCd == 0)
+                    {
+                        var notification = new NotificationModel
+                        {
+                            UserCreateId = new Guid(userId),
+                            UserReceiveId = new Guid(userId),
+                            Content = "",
+                            ContentCode = "I411",
+                            IsRead = false,
+                            IsDeleted = false,
+                            CreateDate = DateTime.Now,
+                            UpdateDate = DateTime.Now
+
+                        };
+
+                        _notificationService.CreateNew(notification);
+                    }
 
                     return response;
                 }
@@ -129,6 +150,28 @@ namespace TourishApi.Service.InheritanceService
             {
                 var response = await _entityRepository.Update(entityModel, userId);
 
+                if (response.resultCd == 0)
+                {
+                    var interestList = _entityRepository.getTourInterest(entityModel.Id);
+
+                    interestList.ForEach(interest =>
+                    {
+                        var notification = new NotificationModel
+                        {
+                            UserCreateId = new Guid(userId),
+                            UserReceiveId = interest.UserId,
+                            Content = "",
+                            ContentCode = "I412",
+                            IsRead = false,
+                            IsDeleted = false,
+                            CreateDate = DateTime.Now,
+                            UpdateDate = DateTime.Now
+                        };
+
+                        _notificationService.CreateNew(notification);
+                    });
+                    
+                }
                 return response;
             }
             catch (Exception ex)
