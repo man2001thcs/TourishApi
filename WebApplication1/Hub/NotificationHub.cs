@@ -45,18 +45,22 @@ namespace SignalR.Hub
 
                 if (userSendId != null && userSendId.Length > 0)
                 {
-                    var notificationEntity = new Notification
+                    if (notification.Id == null)
                     {
-                        UserCreateId = new Guid(userSendId),
-                        UserReceiveId = userReceiveId,
-                        Content = notification.Content,
-                        IsRead = false,
-                        IsDeleted = false,
-                        CreateDate = DateTime.UtcNow,
-                        UpdateDate = DateTime.UtcNow,
+                        var notificationEntity = new Notification
+                        {
+                            UserCreateId = new Guid(userSendId),
+                            UserReceiveId = userReceiveId,
+                            Content = notification.Content,
+                            IsRead = false,
+                            IsDeleted = false,
+                            CreateDate = DateTime.UtcNow,
+                            UpdateDate = DateTime.UtcNow,
 
-                    };
-                    _context.Add(notificationEntity);
+                        };
+                        _context.Add(notificationEntity);
+                    }
+
 
 
                     var connection = _context.NotificationConList.OrderByDescending(connection => connection.CreateDate).FirstOrDefault(u => u.UserId == userReceiveId && u.Connected);
@@ -77,7 +81,6 @@ namespace SignalR.Hub
                     await Clients.Client(connection.ConnectionID).SendError(new Guid(userSendId), "Lỗi xảy ra: " + ex.ToString());
                 }
             }
-
         }
 
         public override async Task OnConnectedAsync()

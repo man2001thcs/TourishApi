@@ -24,6 +24,20 @@ namespace WebApplication1.Controllers.Notification
 
         }
 
+        [HttpGet("creator")]
+        public IActionResult GetForCreator(string? creatorId, string? sortBy, int page = 1, int pageSize = 5)
+        {
+            return Ok(_entityService.GetAllForCreator(creatorId, sortBy, page, pageSize));
+
+        }
+
+        [HttpGet("receiver")]
+        public IActionResult GetForReceiver(string? receiverId, string? sortBy, int page = 1, int pageSize = 5)
+        {
+            return Ok(_entityService.GetAllForReceiver(receiverId, sortBy, page, pageSize));
+
+        }
+
         [HttpGet("{id}")]
         public IActionResult GetById(Guid id)
         {

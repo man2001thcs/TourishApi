@@ -1,43 +1,38 @@
-﻿using TourishApi.Service.Interface;
-using WebApplication1.Model.Restaurant;
+﻿using Microsoft.EntityFrameworkCore;
+using SignalR.Hub;
+using TourishApi.Service.Interface;
+using WebApplication1.Data;
+using WebApplication1.Data.Connection;
+using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
-using WebApplication1.Repository.InheritanceRepo.RestaurantPlace;
+using WebApplication1.Repository.InheritanceRepo;
+
 
 namespace TourishApi.Service.InheritanceService
 {
-    public class RestaurantService : IBaseService<RestaurantRepository, RestaurantModel>
+    public class NotificationService : IBaseService<NotificationRepository, NotificationModel>
     {
-        private readonly RestaurantRepository _entityRepository;
+        private readonly NotificationRepository _entityRepository;
 
-        public RestaurantService(RestaurantRepository airPlaneRepository)
+        public NotificationService(NotificationRepository airPlaneRepository)
         {
             _entityRepository = airPlaneRepository;
         }
 
-        public Response CreateNew(RestaurantModel entityModel)
+        public Response CreateNew(NotificationModel entityModel)
         {
             try
             {
-                var entityExist = _entityRepository.getByName(entityModel.PlaceBranch);
+                var response = _entityRepository.Add(entityModel);
 
-                if (entityExist.Data == null)
-                {
-                    var response = _entityRepository.Add(entityModel);
-
-                    return (response);
-                }
-                else
-                {
-                    var response = new Response { resultCd = 1, MessageCode = "C311", };
-                    return response;
-                }
+                return (response);
             }
             catch (Exception ex)
             {
                 return new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C314",
+                    MessageCode = "C704",
                     Error = ex.Message
                 };
             }
@@ -48,7 +43,7 @@ namespace TourishApi.Service.InheritanceService
             try
             {
                 _entityRepository.Delete(id);
-                var response = new Response { resultCd = 0, MessageCode = "I313" };
+                var response = new Response { resultCd = 0, MessageCode = "I703" };
                 return response;
             }
             catch (Exception ex)
@@ -56,7 +51,7 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C314",
+                    MessageCode = "C704",
                     Error = ex.Message
                 };
                 return response;
@@ -75,12 +70,56 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
+                    MessageCode = "C704",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+
+        public Response GetAllForReceiver(string? userId, string? sortBy, int page = 1, int pageSize = 5)
+        {
+            try
+            {
+                var entityList = _entityRepository.GetAllForReceiver(userId, sortBy, page, pageSize);
+                return entityList;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
                     MessageCode = "C314",
                     Error = ex.Message
                 };
                 return response;
             }
+        }
 
+        public Response GetAllForCreator(string? userId, string? sortBy, int page = 1, int pageSize = 5)
+        {
+            try
+            {
+                var entityList = _entityRepository.GetAllForCreator(userId, sortBy, page, pageSize);
+                return entityList;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C314",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public List<Notification> getByTourRecentUpdate(Guid tourId, Guid modifiedId)
+        {
+            var entity = _entityRepository.getByTourRecentUpdate(tourId, modifiedId);
+            return entity;
         }
 
         public Response GetById(Guid id)
@@ -93,7 +132,7 @@ namespace TourishApi.Service.InheritanceService
                     var response = new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C310",
+                        MessageCode = "C700",
                     };
                     return response;
                 }
@@ -107,18 +146,23 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C314",
+                    MessageCode = "C704",
                     Error = ex.Message
                 };
                 return response;
             }
         }
 
-        public Response UpdateEntityById(Guid id, RestaurantModel RestaurantModel)
+        public NotificationCon getNotificationCon(Guid userReceiveId)
+        {
+            return _entityRepository.getNotificationCon(userReceiveId);
+        }
+
+        public Response UpdateEntityById(Guid id, NotificationModel NotificationModel)
         {
             try
             {
-                var response = _entityRepository.Update(RestaurantModel);
+                var response = _entityRepository.Update(NotificationModel);
 
                 return response;
             }
@@ -127,7 +171,7 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C314",
+                    MessageCode = "C704",
                     Error = ex.Message
                 };
                 return response;

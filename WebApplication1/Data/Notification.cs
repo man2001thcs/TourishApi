@@ -15,8 +15,11 @@ namespace WebApplication1.Data
         public DateTime? CreateDate { get; set; }
         public DateTime? UpdateDate { get; set; }
 
+        public Guid? TourishPlanId { get; set; }
+
         // Relationship
         public User UserCreator { get; set; }
         public User UserReceiver { get; set; }
+        public TourishPlan? TourishPlan { get; set; }
     }
 }

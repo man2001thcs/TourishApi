@@ -73,7 +73,7 @@ namespace WebApplication1.Repository.InheritanceRepo.RestaurantPlace
             #endregion
 
             #region Sorting
-            entityQuery = entityQuery.OrderBy(entity => entity.PlaceBranch);
+            entityQuery = entityQuery.OrderByDescending(entity => entity.PlaceBranch);
 
             if (!string.IsNullOrEmpty(sortBy))
             {

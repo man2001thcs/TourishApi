@@ -141,7 +141,7 @@ public class TourishPlanRepository : ITourishPlanRepository
 
         #region Sorting
         //Default sort by Name (TenHh)
-        entityQuery = entityQuery.OrderBy(entity => entity.TourName);
+        entityQuery = entityQuery.OrderByDescending(entity => entity.TourName);
 
         if (!string.IsNullOrEmpty(sortBy))
         {
@@ -201,7 +201,7 @@ public class TourishPlanRepository : ITourishPlanRepository
 
     public async Task<Response> Update(TourishPlanUpdateModel entityModel, String id)
     {
-        var entity = _context.TourishPlan.FirstOrDefault((entity
+        var entity = _context.TourishPlan.Include(entity => entity.TourishInterestList).FirstOrDefault((entity
             => entity.Id == entityModel.Id));
         if (entity != null)
         {
@@ -301,7 +301,7 @@ public class TourishPlanRepository : ITourishPlanRepository
 
     public List<TourishInterest> getTourInterest(Guid id)
     {
-        var entity = _context.TourishPlan.Where(entity => entity.Id == id).Include(tour=> tour.TourishInterestList)
+        var entity = _context.TourishPlan.Where(entity => entity.Id == id).Include(tour => tour.TourishInterestList)
            .FirstOrDefault();
         if (entity == null) { return null; }
 

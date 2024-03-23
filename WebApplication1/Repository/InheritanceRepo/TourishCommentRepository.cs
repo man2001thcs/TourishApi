@@ -67,7 +67,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             #endregion
 
             #region Sorting
-            entityQuery = entityQuery.OrderBy(entity => entity.UpdateDate);
+            entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
 
             if (!string.IsNullOrEmpty(sortBy))
             {

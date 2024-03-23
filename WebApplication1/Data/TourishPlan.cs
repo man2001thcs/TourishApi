@@ -36,6 +36,7 @@ namespace WebApplication1.Data
         public DateTime EndDate { get; set; }
 
         public TotalReceipt TotalReceipt { get; set; }
+        public Notification Notification { get; set; }
 
         public ICollection<TourishCategoryRelation> TourishCategoryRelations { get; set; }
         public ICollection<EatSchedule> EatSchedules { get; set; }

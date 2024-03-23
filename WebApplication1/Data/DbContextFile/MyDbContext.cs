@@ -82,6 +82,11 @@ namespace WebApplication1.Data.DbContextFile
                 .WithOne(e => e.TourishPlan)
                 .HasForeignKey<TotalReceipt>(e => e.TourishPlanId)
                 .HasConstraintName("FK_TourishPlan_TotalReceipt");
+
+                entity.HasOne(e => e.Notification)
+                .WithOne(e => e.TourishPlan)
+                .HasForeignKey<Notification>(e => e.TourishPlanId)
+                .HasConstraintName("FK_TourishPlan_Notification");
             });
 
             modelBuilder.Entity<TourishCategory>(entity =>

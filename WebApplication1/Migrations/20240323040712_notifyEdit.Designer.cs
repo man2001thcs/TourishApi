@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data.DbContextFile;
 
@@ -11,9 +12,11 @@ using WebApplication1.Data.DbContextFile;
 namespace TourishApi.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240323040712_notifyEdit")]
+    partial class notifyEdit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -305,9 +308,6 @@ namespace TourishApi.Migrations
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("TourishPlanId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime?>("UpdateDate")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -321,10 +321,6 @@ namespace TourishApi.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TourishPlanId")
-                        .IsUnique()
-                        .HasFilter("[TourishPlanId] IS NOT NULL");
 
                     b.HasIndex("UserCreateId");
 
@@ -1150,11 +1146,6 @@ namespace TourishApi.Migrations
 
             modelBuilder.Entity("WebApplication1.Data.Notification", b =>
                 {
-                    b.HasOne("WebApplication1.Data.TourishPlan", "TourishPlan")
-                        .WithOne("Notification")
-                        .HasForeignKey("WebApplication1.Data.Notification", "TourishPlanId")
-                        .HasConstraintName("FK_TourishPlan_Notification");
-
                     b.HasOne("WebApplication1.Data.User", "UserCreator")
                         .WithMany("NotificationCreateList")
                         .HasForeignKey("UserCreateId")
@@ -1166,8 +1157,6 @@ namespace TourishApi.Migrations
                         .WithMany("NotificationReceiveList")
                         .HasForeignKey("UserReceiveId")
                         .HasConstraintName("FK_UserReceive_Notification");
-
-                    b.Navigation("TourishPlan");
 
                     b.Navigation("UserCreator");
 
@@ -1334,9 +1323,6 @@ namespace TourishApi.Migrations
                     b.Navigation("EatSchedules");
 
                     b.Navigation("MovingSchedules");
-
-                    b.Navigation("Notification")
-                        .IsRequired();
 
                     b.Navigation("StayingSchedules");
 

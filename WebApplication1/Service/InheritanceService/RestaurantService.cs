@@ -1,34 +1,43 @@
 ﻿using TourishApi.Service.Interface;
-using WebApplication1.Model;
+using WebApplication1.Model.Restaurant;
 using WebApplication1.Model.VirtualModel;
-using WebApplication1.Repository.InheritanceRepo;
-
+using WebApplication1.Repository.InheritanceRepo.RestaurantPlace;
 
 namespace TourishApi.Service.InheritanceService
 {
-    public class NotificationService : IBaseService<NotificationRepository, NotificationModel>
+    public class RestaurantService : IBaseService<RestaurantRepository, RestaurantModel>
     {
-        private readonly NotificationRepository _entityRepository;
+        private readonly RestaurantRepository _entityRepository;
 
-        public NotificationService(NotificationRepository airPlaneRepository)
+        public RestaurantService(RestaurantRepository airPlaneRepository)
         {
             _entityRepository = airPlaneRepository;
         }
 
-        public Response CreateNew(NotificationModel entityModel)
+        public Response CreateNew(RestaurantModel entityModel)
         {
             try
             {
-                var response = _entityRepository.Add(entityModel);
+                var entityExist = _entityRepository.getByName(entityModel.PlaceBranch);
 
-                return (response);
+                if (entityExist.Data == null)
+                {
+                    var response = _entityRepository.Add(entityModel);
+
+                    return (response);
+                }
+                else
+                {
+                    var response = new Response { resultCd = 1, MessageCode = "C311", };
+                    return response;
+                }
             }
             catch (Exception ex)
             {
                 return new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C704",
+                    MessageCode = "C314",
                     Error = ex.Message
                 };
             }
@@ -39,7 +48,7 @@ namespace TourishApi.Service.InheritanceService
             try
             {
                 _entityRepository.Delete(id);
-                var response = new Response { resultCd = 0, MessageCode = "I703" };
+                var response = new Response { resultCd = 0, MessageCode = "I313" };
                 return response;
             }
             catch (Exception ex)
@@ -47,7 +56,7 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C704",
+                    MessageCode = "C314",
                     Error = ex.Message
                 };
                 return response;
@@ -66,12 +75,11 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C704",
+                    MessageCode = "C314",
                     Error = ex.Message
                 };
                 return response;
             }
-
         }
 
         public Response GetById(Guid id)
@@ -84,7 +92,7 @@ namespace TourishApi.Service.InheritanceService
                     var response = new Response
                     {
                         resultCd = 1,
-                        MessageCode = "C700",
+                        MessageCode = "C310",
                     };
                     return response;
                 }
@@ -98,18 +106,18 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C704",
+                    MessageCode = "C314",
                     Error = ex.Message
                 };
                 return response;
             }
         }
 
-        public Response UpdateEntityById(Guid id, NotificationModel NotificationModel)
+        public Response UpdateEntityById(Guid id, RestaurantModel RestaurantModel)
         {
             try
             {
-                var response = _entityRepository.Update(NotificationModel);
+                var response = _entityRepository.Update(RestaurantModel);
 
                 return response;
             }
@@ -118,7 +126,7 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C704",
+                    MessageCode = "C314",
                     Error = ex.Message
                 };
                 return response;

@@ -456,6 +456,11 @@ namespace WebApplication1.Controllers
                     var entityList = this._userRepository.getById(id);
                     return Ok(entityList);
                 }
+                if (role == "Staff")
+                {
+                    var entityList = this._userRepository.getById(id);
+                    return Ok(entityList);
+                }
                 else
                 {
                     return Ok(new Response

@@ -73,7 +73,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Transport
             #endregion
 
             #region Sorting
-            entityQuery = entityQuery.OrderBy(entity => entity.BranchName);
+            entityQuery = entityQuery.OrderByDescending(entity => entity.BranchName);
 
             if (!string.IsNullOrEmpty(sortBy))
             {

@@ -74,7 +74,7 @@ namespace WebApplication1.Repository.InheritanceRepo.RestHoouse
             #endregion
 
             #region Sorting
-            entityQuery = entityQuery.OrderBy(entity => entity.PlaceBranch);
+            entityQuery = entityQuery.OrderByDescending(entity => entity.PlaceBranch);
 
             if (!string.IsNullOrEmpty(sortBy))
             {
