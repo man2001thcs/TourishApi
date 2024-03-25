@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SignalR.Hub;
 using TourishApi.Repository.Interface;
-using WebApplication1.Controllers.Notification;
 using WebApplication1.Data;
 using WebApplication1.Data.Connection;
 using WebApplication1.Data.DbContextFile;
@@ -38,7 +36,33 @@ namespace WebApplication1.Repository.InheritanceRepo
             return new Response
             {
                 resultCd = 0,
+                MessageCode = "I701"
+                // Create type success               
+            };
+
+        }
+
+        public async Task<Response> AddNotifyAsync(NotificationModel addModel)
+        {
+
+            var addValue = new Notification
+            {
+                Content = addModel.Content,
+                ContentCode = addModel.ContentCode,
+                UserCreateId = addModel.UserCreateId,
+                UserReceiveId = addModel.UserReceiveId,
+                TourishPlanId = addModel.TourishPlanId,
+                CreateDate = DateTime.UtcNow,
+                UpdateDate = DateTime.UtcNow,
+            };
+            await _context.AddAsync(addValue);
+            await _context.SaveChangesAsync();
+
+            return new Response
+            {
+                resultCd = 0,
                 MessageCode = "I701",
+                returnId = addValue.Id
                 // Create type success               
             };
 

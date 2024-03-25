@@ -21,7 +21,7 @@ namespace SignalR.Hub
             _context = context;
         }
 
-        public async Task SendOffersToAll(NotificationModel notification)
+        public async Task SendOffersToAll(NotificationDTOModel notification)
         {
             await Clients.All.SendOffersToAll(notification);
         }
@@ -37,7 +37,7 @@ namespace SignalR.Hub
             await Clients.All.SendString(a);
         }
 
-        public async Task SendOffersToUser(Guid userReceiveId, NotificationModel notification)
+        public async Task SendOffersToUser(Guid userReceiveId, NotificationDTOModel notification)
         {
             try
             {

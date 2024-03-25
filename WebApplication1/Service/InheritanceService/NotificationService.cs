@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SignalR.Hub;
-using TourishApi.Service.Interface;
+﻿using TourishApi.Service.Interface;
 using WebApplication1.Data;
 using WebApplication1.Data.Connection;
 using WebApplication1.Model;
@@ -24,6 +22,24 @@ namespace TourishApi.Service.InheritanceService
             try
             {
                 var response = _entityRepository.Add(entityModel);
+
+                return (response);
+            }
+            catch (Exception ex)
+            {
+                return new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C704",
+                    Error = ex.Message
+                };
+            }
+        }
+        public async Task<Response> CreateNewAsync(NotificationModel entityModel)
+        {
+            try
+            {
+                var response = await _entityRepository.AddNotifyAsync(entityModel);
 
                 return (response);
             }
@@ -177,5 +193,6 @@ namespace TourishApi.Service.InheritanceService
                 return response;
             }
         }
+
     }
 }
