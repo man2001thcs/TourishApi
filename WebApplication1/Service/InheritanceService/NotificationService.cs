@@ -1,5 +1,8 @@
-using Azure.Core;
 using FirebaseAdmin.Messaging;
+using Microsoft.AspNetCore.SignalR;
+using SignalR.Hub;
+using SignalR.Hub.Client;
+using System.Diagnostics;
 using TourishApi.Service.Interface;
 using WebApplication1.Data.Connection;
 using WebApplication1.Model;
@@ -12,10 +15,12 @@ namespace TourishApi.Service.InheritanceService
     public class NotificationService : IBaseService<NotificationRepository, NotificationModel>
     {
         private readonly NotificationRepository _entityRepository;
+        private IHubContext<NotificationHub, INotificationHubClient> _notificationHub;
 
-        public NotificationService(NotificationRepository airPlaneRepository)
+        public NotificationService(NotificationRepository airPlaneRepository, IHubContext<NotificationHub, INotificationHubClient> notificationHub)
         {
             _entityRepository = airPlaneRepository;
+            _notificationHub = notificationHub;
         }
 
         public Response CreateNew(NotificationModel entityModel)
@@ -36,11 +41,36 @@ namespace TourishApi.Service.InheritanceService
                 };
             }
         }
-        public async Task<Response> CreateNewAsync(NotificationModel entityModel)
+        public async Task<Response> CreateNewAsync(Guid userReceiveId,NotificationModel entityModel)
         {
             try
             {
                 var response = await _entityRepository.AddNotifyAsync(entityModel);
+
+                if (response.MessageCode == "I701")
+                {
+                    await sendNotify(userReceiveId, response.returnId ?? new Guid());
+                }
+
+
+                //var notificationDTOUpdate = new NotificationDTOModel
+                //{
+                //    UserCreateId = entityModel.UserCreateId,
+                //    UserReceiveId = entityModel.UserReceiveId,
+                //    Content = entityModel.Content,
+                //    ContentCode = entityModel.ContentCode,
+                //    IsRead = entityModel.IsRead,
+                //    IsDeleted = entityModel.IsDeleted,
+                //    CreateDate = entityModel.CreateDate,
+                //    UpdateDate = entityModel.UpdateDate
+                //};
+
+                //Debug.WriteLine("Here");
+                //var connection = await _entityRepository.getNotificationConAsync(userReceiveId);
+
+                //await _notificationHub
+                //    .Clients.Client(connection.ConnectionID)
+                //    .SendOffersToUser(userReceiveId, notificationDTOUpdate);
 
                 return (response);
             }
@@ -53,6 +83,43 @@ namespace TourishApi.Service.InheritanceService
                     Error = ex.Message
                 };
             }
+        }
+
+        private async System.Threading.Tasks.Task sendNotify(Guid userReceiveId, Guid notifyId)
+        {
+            var connection = await _entityRepository.getNotificationConAsync(userReceiveId);
+            var fullDetailNotification = await _entityRepository.getByIdAsync(notifyId);
+
+            if (connection != null)
+            {
+                if (fullDetailNotification != null)
+                {
+                    var notificationDTOUpdate = new NotificationDTOModel
+                    {
+                        Id = fullDetailNotification.Id,
+                        UserCreateId = fullDetailNotification.UserCreateId,
+                        UserReceiveId = fullDetailNotification.UserReceiveId,
+                        TourName = fullDetailNotification.TourishPlan.TourName,
+                        CreatorFullName = fullDetailNotification.UserCreator.FullName,
+                        Content = fullDetailNotification.Content,
+                        ContentCode = fullDetailNotification.ContentCode,
+                        IsRead = fullDetailNotification.IsRead,
+                        IsDeleted = fullDetailNotification.IsDeleted,
+                        CreateDate = fullDetailNotification.CreateDate,
+                        UpdateDate = fullDetailNotification.UpdateDate
+                    };
+
+                    Debug.WriteLine("Here");
+                    Debug.WriteLine(fullDetailNotification.ToString());
+
+                    await _notificationHub
+                        .Clients.Client(connection.ConnectionID)
+                        .SendOffersToUser(userReceiveId, notificationDTOUpdate);
+                }
+            }
+
+            // await sendFcmNotificationAsync(fullDetailNotification);
+ 
         }
 
         public Response DeleteById(Guid id)
@@ -195,14 +262,65 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
+        public async Task<Response> UpdateEntityByIdAsync(Guid id, NotificationModel NotificationModel)
+        {
+            try
+            {
+                var response = await _entityRepository.UpdateAsync(NotificationModel);
+
+                var connection = getNotificationCon(
+                                NotificationModel.UserReceiveId ?? new Guid()
+                            );
+
+                var fullDetailNotification = (WebApplication1.Data.Notification)
+                       GetById(NotificationModel.Id ?? new Guid()).Data;
+
+                if (connection != null)
+                {
+                    var notificationDTOUpdate = new NotificationDTOModel
+                    {
+                        Id = fullDetailNotification.Id,
+                        UserCreateId = fullDetailNotification.UserCreateId,
+                        UserReceiveId = fullDetailNotification.UserReceiveId,
+                        TourName = fullDetailNotification.TourishPlan.TourName,
+                        CreatorFullName = fullDetailNotification.UserCreator.FullName,
+                        Content = fullDetailNotification.Content,
+                        ContentCode = fullDetailNotification.ContentCode,
+                        IsRead = fullDetailNotification.IsRead,
+                        IsDeleted = fullDetailNotification.IsDeleted,
+                        CreateDate = fullDetailNotification.CreateDate,
+                        UpdateDate = fullDetailNotification.UpdateDate
+                    };
+
+                    _notificationHub
+                        .Clients.Client(connection.ConnectionID)
+                        .SendOffersToUser(NotificationModel.UserReceiveId ?? new Guid(), notificationDTOUpdate);
+                }
+
+                sendFcmNotificationAsync(fullDetailNotification);
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C704",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
         public Response saveFcmToken(NotificationFcmTokenModel notificationFcmTokenModel)
         {
             return _entityRepository.saveFcmToken(notificationFcmTokenModel);
         }
 
-        public async System.Threading.Tasks.Task sendFcmNotificationAsync(NotificationModel notificationModel)
+        public async System.Threading.Tasks.Task sendFcmNotificationAsync(WebApplication1.Data.Notification notification)
         {
-            var fcmToken = _entityRepository.GetFcmToken(notificationModel.UserReceiveId ?? new Guid());
+            var fcmToken = _entityRepository.GetFcmToken(notification.UserReceiveId ?? new Guid());
 
             if (fcmToken != null)
             {
@@ -211,32 +329,31 @@ namespace TourishApi.Service.InheritanceService
                     Notification = new FirebaseAdmin.Messaging.Notification
                     {
                         Title = "Roxanne thông báo",
-                        Body = getContent(notificationModel),
+                        Body = getContent(notification),
                     },
                     Token = fcmToken.DeviceToken
                 };
 
                 var messaging = FirebaseMessaging.DefaultInstance;
                 var result = await messaging.SendAsync(message);
-            }  
+            }
         }
 
-        public string getContent(NotificationModel notification)
+        public string getContent(WebApplication1.Data.Notification notification)
         {
-            var notify = (WebApplication1.Data.Notification)_entityRepository.getById(notification.Id ?? new Guid()).Data;
 
-            if (notify != null)
+
+            if (notification.Content != null)
             {
-                if (notification.Content != null) {
-                    return notify.Content; 
-                }
-
-                if (notify.ContentCode != null)
-                {
-                   
-                      return Constant.NotificationCode.NOTIFI_CODE_VI[notify.ContentCode] + notify.TourishPlan.TourName;
-                }
+                return notification.Content;
             }
+
+            if (notification.ContentCode != null)
+            {
+
+                return Constant.NotificationCode.NOTIFI_CODE_VI[notification.ContentCode] + notification.TourishPlan.TourName;
+            }
+
 
             return "";
         }

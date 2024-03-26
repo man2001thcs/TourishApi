@@ -299,10 +299,10 @@ public class TourishPlanRepository : ITourishPlanRepository
     }
 
 
-    public List<TourishInterest> getTourInterest(Guid id)
+    public async Task<List<TourishInterest>> getTourInterest(Guid id)
     {
-        var entity = _context.TourishPlan.Where(entity => entity.Id == id).Include(tour => tour.TourishInterestList)
-           .FirstOrDefault();
+        var entity = await _context.TourishPlan.Where(entity => entity.Id == id).Include(tour => tour.TourishInterestList)
+           .FirstOrDefaultAsync();
         if (entity == null) { return null; }
 
         return entity.TourishInterestList.ToList();

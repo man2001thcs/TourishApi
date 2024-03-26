@@ -20,9 +20,9 @@ namespace WebApplication1.Controllers.Notification
 
         [HttpPost]
         [Authorize(Policy = "CreateNotificationAccess")]
-        public IActionResult CreateNew(NotificationModel entityModel)
+        public async Task<IActionResult> CreateNew(NotificationModel entityModel)
         {
-            return Ok(_entityService.CreateNew(entityModel));
+            return Ok(_entityService.CreateNewAsync(entityModel.UserCreateId , entityModel));
         }
     }
 }

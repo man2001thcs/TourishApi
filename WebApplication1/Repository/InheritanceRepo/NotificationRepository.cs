@@ -238,6 +238,15 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
+        public async Task<Notification> getByIdAsync(Guid id)
+        {
+            var entity = await _context.Notifications.Include(entity => entity.UserCreator)
+                .Include(entity => entity.UserReceiver).Include(entity => entity.TourishPlan).FirstOrDefaultAsync((entity
+                => entity.Id == id));
+
+            return entity;
+        }
+
         public Response getByName(String name)
         {
             var entity = _context.Notifications.Include(entity => entity.UserCreator)
@@ -254,6 +263,12 @@ namespace WebApplication1.Repository.InheritanceRepo
         public NotificationCon getNotificationCon(Guid userReceiveId)
         {
             var connection = _context.NotificationConList.OrderByDescending(connection => connection.CreateDate).FirstOrDefault(u => u.UserId == userReceiveId && u.Connected);
+            return connection;
+        }
+
+        public async Task<NotificationCon> getNotificationConAsync(Guid userReceiveId)
+        {
+            var connection = await _context.NotificationConList.FirstOrDefaultAsync(u => u.UserId == userReceiveId && u.Connected);
             return connection;
         }
 
@@ -281,6 +296,27 @@ namespace WebApplication1.Repository.InheritanceRepo
                 entity.Content = entityModel.Content;
                 entity.ContentCode = entityModel.ContentCode;
                 _context.SaveChanges();
+            }
+
+            return new Response
+            {
+                resultCd = 0,
+                MessageCode = "I702",
+                // Update type success               
+            };
+        }
+
+        public async Task<Response> UpdateAsync(NotificationModel entityModel)
+        {
+            var entity = _context.Notifications.FirstOrDefault((entity
+                => entity.Id == entityModel.Id));
+            if (entity != null)
+            {
+                entity.UpdateDate = DateTime.UtcNow;
+                entity.TourishPlanId = entityModel.TourishPlanId;
+                entity.Content = entityModel.Content;
+                entity.ContentCode = entityModel.ContentCode;
+                await _context.SaveChangesAsync();
             }
 
             return new Response

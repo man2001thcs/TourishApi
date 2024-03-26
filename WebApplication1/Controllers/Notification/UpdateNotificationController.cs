@@ -20,9 +20,10 @@ namespace WebApplication1.Controllers.Notification
 
         [HttpPut("{id}")]
         [Authorize(Policy = "UpdateNotificationAccess")]
-        public IActionResult UpdateNotificationById(Guid id, NotificationModel NotificationModel)
+        public async Task<IActionResult> UpdateNotificationById(Guid id, NotificationModel NotificationModel)
         {
-            return Ok(_entityService.UpdateEntityById(id, NotificationModel));
+            var response = await _entityService.UpdateEntityByIdAsync(id, NotificationModel);
+            return Ok(response);
         }
     }
 }

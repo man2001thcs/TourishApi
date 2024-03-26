@@ -83,9 +83,9 @@ namespace WebApplication1.Data.DbContextFile
                 .HasForeignKey<TotalReceipt>(e => e.TourishPlanId)
                 .HasConstraintName("FK_TourishPlan_TotalReceipt");
 
-                entity.HasOne(e => e.Notification)
+                entity.HasMany(e => e.NotificationList)
                 .WithOne(e => e.TourishPlan)
-                .HasForeignKey<Notification>(e => e.TourishPlanId)
+                .HasForeignKey(e => e.TourishPlanId)
                 .HasConstraintName("FK_TourishPlan_Notification");
             });
 

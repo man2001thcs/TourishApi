@@ -2,7 +2,6 @@
 using SignalR.Hub;
 using SignalR.Hub.Client;
 using TourishApi.Service.Interface;
-using WebApplication1.Data;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
@@ -13,17 +12,13 @@ namespace TourishApi.Service.InheritanceService
     {
         private readonly ITourishPlanRepository _entityRepository;
         private readonly NotificationService _notificationService;
-        private IHubContext<NotificationHub, INotificationHubClient> _notificationHub;
 
         public TourishPlanService(
             ITourishPlanRepository tourishPlanRepository,
-            NotificationService notificationService,
-            IHubContext<NotificationHub, INotificationHubClient> notificationHub
-        )
+            NotificationService notificationService)
         {
             _entityRepository = tourishPlanRepository;
             _notificationService = notificationService;
-            _notificationHub = notificationHub;
         }
 
         public async Task<Response> CreateNew(string userId, TourishPlanInsertModel entityModel)
@@ -38,8 +33,6 @@ namespace TourishApi.Service.InheritanceService
                 {
                     var response = await _entityRepository.Add(entityModel, userId);
 
-                    var connection = _notificationService.getNotificationCon(new Guid(userId));
-
                     var notification = new NotificationModel
                     {
                         UserCreateId = new Guid(userId),
@@ -51,37 +44,10 @@ namespace TourishApi.Service.InheritanceService
                         IsDeleted = false,
                         CreateDate = DateTime.UtcNow,
                         UpdateDate = DateTime.UtcNow
-                    };
+                    };                
 
-                    var responseNotify = await _notificationService.CreateNewAsync(notification);
+                    await _notificationService.CreateNewAsync(notification.UserCreateId, notification);
 
-                    if (connection != null)
-                    {
-                        var fullDetailNotification = (Notification)
-                            _notificationService
-                                .GetById(responseNotify.returnId ?? new Guid())
-                                .Data;
-                        if (fullDetailNotification != null)
-                        {
-                            var notificationDTOUpdate = new NotificationDTOModel
-                            {
-                                Id = fullDetailNotification.Id,
-                                UserCreateId = fullDetailNotification.UserCreateId,
-                                UserReceiveId = fullDetailNotification.UserReceiveId,
-                                TourName = fullDetailNotification.TourishPlan.TourName,
-                                CreatorFullName = fullDetailNotification.UserCreator.FullName,
-                                Content = fullDetailNotification.Content,
-                                ContentCode = fullDetailNotification.ContentCode,
-                                IsRead = fullDetailNotification.IsRead,
-                                IsDeleted = fullDetailNotification.IsDeleted,
-                                CreateDate = fullDetailNotification.CreateDate,
-                                UpdateDate = fullDetailNotification.UpdateDate
-                            };
-                            _notificationHub
-                                .Clients.Client(connection.ConnectionID)
-                                .SendOffersToUser(new Guid(userId), notificationDTOUpdate);
-                        }
-                    }
                     return response;
                 }
                 else
@@ -184,118 +150,30 @@ namespace TourishApi.Service.InheritanceService
             try
             {
                 var response = await _entityRepository.Update(entityModel, userId);
-                var interestList = _entityRepository.getTourInterest(entityModel.Id);
+                var interestList = await _entityRepository.getTourInterest(entityModel.Id);
 
                 interestList.ForEach(async interest =>
                 {
-                    var recentNotification = _notificationService.getByTourRecentUpdate(
-                        interest.TourishPlanId,
-                        new Guid(userId)
-                    );
 
-                    if (recentNotification.Count > 0)
+                    var notification = new NotificationModel
                     {
-                        foreach (var notification in recentNotification)
-                        {
-                            var notificationUpdate = new NotificationModel
-                            {
-                                Id = notification.Id,
-                                UserCreateId = notification.UserCreateId,
-                                UserReceiveId = notification.UserReceiveId,
-                                TourishPlanId = notification.TourishPlanId,
-                                Content = notification.Content,
-                                ContentCode = notification.ContentCode,
-                                IsRead = notification.IsRead,
-                                IsDeleted = notification.IsDeleted,
-                                CreateDate = notification.CreateDate,
-                                UpdateDate = DateTime.UtcNow
-                            };
+                        UserCreateId = new Guid(userId),
+                        UserReceiveId = interest.UserId,
+                        TourishPlanId = entityModel.Id,
+                        Content = "",
+                        ContentCode = "I412",
+                        IsRead = false,
+                        IsDeleted = false,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow
+                    };
 
-                            _notificationService.UpdateEntityById(
-                                notification.Id,
-                                notificationUpdate
-                            );
+                    // _notificationService.CreateNew(notification);
 
-                            var connection = _notificationService.getNotificationCon(
-                                interest.UserId
-                            );
+                    await _notificationService.CreateNewAsync(interest.UserId, notification);
 
-                            if (connection != null)
-                            {
-                                var fullDetailNotification = (Notification)
-                                    _notificationService.GetById(notification.Id).Data;
-                                var notificationDTOUpdate = new NotificationDTOModel
-                                {
-                                    Id = fullDetailNotification.Id,
-                                    UserCreateId = fullDetailNotification.UserCreateId,
-                                    UserReceiveId = fullDetailNotification.UserReceiveId,
-                                    TourName = fullDetailNotification.TourishPlan.TourName,
-                                    CreatorFullName = fullDetailNotification.UserCreator.FullName,
-                                    Content = fullDetailNotification.Content,
-                                    ContentCode = fullDetailNotification.ContentCode,
-                                    IsRead = fullDetailNotification.IsRead,
-                                    IsDeleted = fullDetailNotification.IsDeleted,
-                                    CreateDate = fullDetailNotification.CreateDate,
-                                    UpdateDate = fullDetailNotification.UpdateDate
-                                };
-                                _notificationHub
-                                    .Clients.Client(connection.ConnectionID)
-                                    .SendOffersToUser(interest.UserId, notificationDTOUpdate);
-                            }
-                        }
-                    }
-
-                    if (recentNotification.Count == 0 || recentNotification == null)
-                    {
-                        var notification = new NotificationModel
-                        {
-                            UserCreateId = new Guid(userId),
-                            UserReceiveId = interest.UserId,
-                            TourishPlanId = interest.TourishPlanId,
-                            Content = "",
-                            ContentCode = "I412",
-                            IsRead = false,
-                            IsDeleted = false,
-                            CreateDate = DateTime.UtcNow,
-                            UpdateDate = DateTime.UtcNow
-                        };
-
-                        var responseNotify = await _notificationService.CreateNewAsync(
-                            notification
-                        );
-
-                        var connection = _notificationService.getNotificationCon(interest.UserId);
-
-                        if (connection != null)
-                        {
-                            var fullDetailNotification = (Notification)
-                                _notificationService
-                                    .GetById(responseNotify.returnId ?? new Guid())
-                                    .Data;
-
-                            if (fullDetailNotification != null)
-                            {
-                                var notificationDTOUpdate = new NotificationDTOModel
-                                {
-                                    Id = fullDetailNotification.Id,
-                                    UserCreateId = fullDetailNotification.UserCreateId,
-                                    UserReceiveId = fullDetailNotification.UserReceiveId,
-                                    TourName = fullDetailNotification.TourishPlan.TourName,
-                                    CreatorFullName = fullDetailNotification.UserCreator.FullName,
-                                    Content = fullDetailNotification.Content,
-                                    ContentCode = fullDetailNotification.ContentCode,
-                                    IsRead = fullDetailNotification.IsRead,
-                                    IsDeleted = fullDetailNotification.IsDeleted,
-                                    CreateDate = fullDetailNotification.CreateDate,
-                                    UpdateDate = fullDetailNotification.UpdateDate
-                                };
-                                _notificationHub
-                                    .Clients.Client(connection.ConnectionID)
-                                    .SendOffersToUser(interest.UserId, notificationDTOUpdate);
-                            }
-                        }
-                    }
                 });
+
                 return response;
             }
             catch (Exception ex)

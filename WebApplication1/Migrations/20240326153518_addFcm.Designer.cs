@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data.DbContextFile;
 
@@ -11,9 +12,11 @@ using WebApplication1.Data.DbContextFile;
 namespace TourishApi.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240326153518_addFcm")]
+    partial class addFcm
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -322,7 +325,9 @@ namespace TourishApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TourishPlanId");
+                    b.HasIndex("TourishPlanId")
+                        .IsUnique()
+                        .HasFilter("[TourishPlanId] IS NOT NULL");
 
                     b.HasIndex("UserCreateId");
 
@@ -1182,8 +1187,8 @@ namespace TourishApi.Migrations
             modelBuilder.Entity("WebApplication1.Data.Notification", b =>
                 {
                     b.HasOne("WebApplication1.Data.TourishPlan", "TourishPlan")
-                        .WithMany("NotificationList")
-                        .HasForeignKey("TourishPlanId")
+                        .WithOne("Notification")
+                        .HasForeignKey("WebApplication1.Data.Notification", "TourishPlanId")
                         .HasConstraintName("FK_TourishPlan_Notification");
 
                     b.HasOne("WebApplication1.Data.User", "UserCreator")
@@ -1378,7 +1383,8 @@ namespace TourishApi.Migrations
 
                     b.Navigation("MovingSchedules");
 
-                    b.Navigation("NotificationList");
+                    b.Navigation("Notification")
+                        .IsRequired();
 
                     b.Navigation("StayingSchedules");
 
