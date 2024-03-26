@@ -1,5 +1,6 @@
-﻿using TourishApi.Service.Interface;
-using WebApplication1.Data;
+using Azure.Core;
+using FirebaseAdmin.Messaging;
+using TourishApi.Service.Interface;
 using WebApplication1.Data.Connection;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
@@ -132,7 +133,7 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public List<Notification> getByTourRecentUpdate(Guid tourId, Guid modifiedId)
+        public List<WebApplication1.Data.Notification> getByTourRecentUpdate(Guid tourId, Guid modifiedId)
         {
             var entity = _entityRepository.getByTourRecentUpdate(tourId, modifiedId);
             return entity;
@@ -194,5 +195,50 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
+        public Response saveFcmToken(NotificationFcmTokenModel notificationFcmTokenModel)
+        {
+            return _entityRepository.saveFcmToken(notificationFcmTokenModel);
+        }
+
+        public async System.Threading.Tasks.Task sendFcmNotificationAsync(NotificationModel notificationModel)
+        {
+            var fcmToken = _entityRepository.GetFcmToken(notificationModel.UserReceiveId ?? new Guid());
+
+            if (fcmToken != null)
+            {
+                var message = new FirebaseAdmin.Messaging.Message()
+                {
+                    Notification = new FirebaseAdmin.Messaging.Notification
+                    {
+                        Title = "Roxanne thông báo",
+                        Body = getContent(notificationModel),
+                    },
+                    Token = fcmToken.DeviceToken
+                };
+
+                var messaging = FirebaseMessaging.DefaultInstance;
+                var result = await messaging.SendAsync(message);
+            }  
+        }
+
+        public string getContent(NotificationModel notification)
+        {
+            var notify = (WebApplication1.Data.Notification)_entityRepository.getById(notification.Id ?? new Guid()).Data;
+
+            if (notify != null)
+            {
+                if (notification.Content != null) {
+                    return notify.Content; 
+                }
+
+                if (notify.ContentCode != null)
+                {
+                   
+                      return Constant.NotificationCode.NOTIFI_CODE_VI[notify.ContentCode] + notify.TourishPlan.TourName;
+                }
+            }
+
+            return "";
+        }
     }
 }

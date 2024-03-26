@@ -290,5 +290,43 @@ namespace WebApplication1.Repository.InheritanceRepo
                 // Update type success               
             };
         }
+
+        public Response saveFcmToken(NotificationFcmTokenModel notificationFcmTokenModel)
+        {
+            var existToken = _context.NotificationFcmTokens.FirstOrDefault(fcm => fcm.UserId == notificationFcmTokenModel.UserId);
+
+            if (existToken == null)
+            {
+                var notificationFcm = new NotificationFcmToken
+                {
+                    CreateDate = DateTime.UtcNow,
+                    UpdateDate = DateTime.UtcNow,
+                    UserId = notificationFcmTokenModel.UserId,
+                    DeviceToken = notificationFcmTokenModel.DeviceToken
+                };
+
+                _context.NotificationFcmTokens.Add(notificationFcm);
+                _context.SaveChanges();
+            }
+            else
+            {
+                existToken.DeviceToken = notificationFcmTokenModel.DeviceToken;
+                existToken.UpdateDate = DateTime.UtcNow;
+
+                _context.SaveChanges();
+            }
+
+            return new Response
+            {
+                resultCd = 0,
+                MessageCode = "I704",
+                // Update type success               
+            };
+        }
+
+        public NotificationFcmToken GetFcmToken(Guid userId)
+        {
+            return _context.NotificationFcmTokens.OrderByDescending(fcm => fcm.UpdateDate).FirstOrDefault(fcm => fcm.UserId == userId);
+        }
     }
 }

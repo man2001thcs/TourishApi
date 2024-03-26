@@ -30,6 +30,8 @@ namespace WebApplication1.Data
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
 
+        public NotificationFcmToken FcmToken { get; set; }
+
         public ICollection<RefreshToken> RefreshTokenList { get; set; }
         public ICollection<UserMessage> UserMessageSentList { get; set; }
         public ICollection<UserMessage> UserMessageReceiveList { get; set; }

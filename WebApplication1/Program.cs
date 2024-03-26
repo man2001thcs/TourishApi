@@ -1,3 +1,5 @@
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Http.Features;
 using MyWebApiApp;
 
@@ -42,6 +44,11 @@ var app = builder.Build();
 app.UseCors("AllowAngularOrigins");
 
 startup.Configure(app, builder.Environment); // calling Configure method
+
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tourishproj-firebase-adminsdk.json")),
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

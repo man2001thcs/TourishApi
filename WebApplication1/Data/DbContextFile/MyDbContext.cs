@@ -41,7 +41,7 @@ namespace WebApplication1.Data.DbContextFile
         public DbSet<UserMessage> UserMessages { get; set; }
         public DbSet<GuestMessage> GuestMessages { get; set; }
         public DbSet<Notification> Notifications { get; set; }
-
+        public DbSet<NotificationFcmToken> NotificationFcmTokens { get; set; }
         public DbSet<NotificationCon> NotificationConList { get; set; }
         public DbSet<UserMessageCon> UserMessageConList { get; set; }
         public DbSet<GuestMessageCon> GuestMessageConList { get; set; }
@@ -225,6 +225,20 @@ namespace WebApplication1.Data.DbContextFile
                .WithMany(e => e.NotificationReceiveList)
                .HasForeignKey(e => e.UserReceiveId)
                .HasConstraintName("FK_UserReceive_Notification");
+            });
+
+            modelBuilder.Entity<NotificationFcmToken>(entity =>
+            {
+                entity.ToTable(nameof(NotificationFcmToken));
+                entity.HasKey(notification => notification.Id);
+                entity.Property(notification => notification.UpdateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+                entity.Property(notification => notification.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+                entity.HasOne(e => e.User)
+                .WithOne(e => e.FcmToken)
+                .HasForeignKey<NotificationFcmToken>(e => e.UserId)
+                .HasConstraintName("FK_UserCreate_NotificationFcmToken");
+
             });
 
             modelBuilder.Entity<NotificationCon>(entity =>
