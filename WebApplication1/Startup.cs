@@ -77,7 +77,6 @@ namespace MyWebApiApp
             services.AddScoped<TourishCommentRepository>();
             services.AddScoped<TourishCategoryRepository>();
             services.AddScoped<NotificationRepository>();
-            services.AddScoped<NotificationConRepository>();
 
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IReceiptRepository, ReceiptRepository>();

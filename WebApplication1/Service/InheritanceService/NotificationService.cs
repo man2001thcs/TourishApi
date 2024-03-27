@@ -57,7 +57,7 @@ namespace TourishApi.Service.InheritanceService
 
                 if (response.MessageCode.IndexOf("I701") > -1)
                 {
-                    await sendNotify(userReceiveId, response.returnId.Value);                  
+                    await sendNotify(userReceiveId, response.returnId.Value);
                 }
 
                 return (response);
@@ -75,9 +75,7 @@ namespace TourishApi.Service.InheritanceService
 
         private async Task<Boolean> sendNotify(Guid userReceiveId, Guid notifyId)
         {
-            var connection = await _entityRepository.getNotificationConAsync(
-                userReceiveId
-            );
+            var connection = await _entityRepository.getNotificationConAsync(userReceiveId);
             var fullDetailNotification = await _entityRepository.getByIdAsync(notifyId);
 
             if (connection != null)
@@ -107,10 +105,9 @@ namespace TourishApi.Service.InheritanceService
                         .SendOffersToUser(userReceiveId, notificationDTOUpdate);
                 }
             }
+            await sendFcmNotificationAsync(fullDetailNotification);
 
             return true;
-
-            // await sendFcmNotificationAsync(fullDetailNotification);
         }
 
         public Response DeleteById(Guid id)
@@ -345,7 +342,7 @@ namespace TourishApi.Service.InheritanceService
                 };
 
                 var messaging = FirebaseMessaging.DefaultInstance;
-                var result = await messaging.SendAsync(message);
+                await messaging.SendAsync(message);
             }
         }
 
@@ -362,7 +359,7 @@ namespace TourishApi.Service.InheritanceService
                     + notification.TourishPlan.TourName;
             }
 
-            return "";
+            return "Không có nội dung";
         }
     }
 }
