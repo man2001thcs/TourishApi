@@ -167,10 +167,26 @@ namespace WebApplication1.Repository.InheritanceRepo
             var result = PaginatorModel<Notification>.Create(entityQuery, page, pageSize);
             #endregion
 
+            var resultDto = result.Select(notification => new NotificationDTOModel
+            {
+                Id = notification.Id,
+                Content = notification.Content,
+                ContentCode = notification.ContentCode,
+                UserCreateId = notification.UserCreateId,
+                UserReceiveId = notification.UserReceiveId,
+                TourishPlanId = notification.TourishPlanId,
+                IsDeleted = notification.IsDeleted,
+                IsRead = notification.IsRead,
+                CreateDate = DateTime.UtcNow,
+                UpdateDate = DateTime.UtcNow,
+                TourName = notification.TourishPlan.TourName,
+                CreatorFullName = notification.UserCreator.FullName,
+            }).ToList();
+
             var entityVM = new Response
             {
                 resultCd = 0,
-                Data = result.ToList(),
+                Data = resultDto,
                 count = result.TotalCount,
             };
             return entityVM;
@@ -214,10 +230,25 @@ namespace WebApplication1.Repository.InheritanceRepo
             var result = PaginatorModel<Notification>.Create(entityQuery, page, pageSize);
             #endregion
 
+            var resultDto = result.Select(notification => new NotificationDTOModel {
+                Id = notification.Id,
+                Content = notification.Content,
+                ContentCode = notification.ContentCode,
+                UserCreateId = notification.UserCreateId,
+                UserReceiveId = notification.UserReceiveId,
+                TourishPlanId = notification.TourishPlanId,
+                IsDeleted = notification.IsDeleted,
+                IsRead = notification.IsRead,
+                CreateDate = DateTime.UtcNow,
+                UpdateDate = DateTime.UtcNow,
+                TourName = notification.TourishPlan.TourName,
+                CreatorFullName = notification.UserCreator.FullName,
+            }).ToList();
+
             var entityVM = new Response
             {
                 resultCd = 0,
-                Data = result.ToList(),
+                Data = resultDto,
                 count = result.TotalCount,
             };
             return entityVM;
