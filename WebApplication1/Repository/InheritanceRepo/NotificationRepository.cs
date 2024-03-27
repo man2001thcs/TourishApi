@@ -177,8 +177,8 @@ namespace WebApplication1.Repository.InheritanceRepo
                 TourishPlanId = notification.TourishPlanId,
                 IsDeleted = notification.IsDeleted,
                 IsRead = notification.IsRead,
-                CreateDate = DateTime.UtcNow,
-                UpdateDate = DateTime.UtcNow,
+                CreateDate = notification.CreateDate,
+                UpdateDate = notification.UpdateDate,
                 TourName = notification.TourishPlan.TourName,
                 CreatorFullName = notification.UserCreator.FullName,
             }).ToList();
@@ -239,8 +239,8 @@ namespace WebApplication1.Repository.InheritanceRepo
                 TourishPlanId = notification.TourishPlanId,
                 IsDeleted = notification.IsDeleted,
                 IsRead = notification.IsRead,
-                CreateDate = DateTime.UtcNow,
-                UpdateDate = DateTime.UtcNow,
+                CreateDate = notification.CreateDate,
+                UpdateDate = notification.UpdateDate,
                 TourName = notification.TourishPlan.TourName,
                 CreatorFullName = notification.UserCreator.FullName,
             }).ToList();
