@@ -44,6 +44,10 @@
         public const string DELETE_MESSAGE = "deleteMessage:term";
         public const string UPDATE_MESSAGE = "updateMessage:term";
 
+        public const string CREATE_NOTIFICATION = "createNotification:term";
+        public const string DELETE_NOTIFICATION = "deleteNotification:term";
+        public const string UPDATE_NOTIFICATION = "updateNotification:term";
+
         public const string DELETE_USER = "deleteUser:term";
         public const string UPDATE_INFO_USER = "updateInfoUser:term";
         public const string UPDATE_PASSWORD_USER = "updatePasswordUser:term";

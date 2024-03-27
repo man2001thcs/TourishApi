@@ -77,6 +77,7 @@ namespace MyWebApiApp
             services.AddScoped<TourishCommentRepository>();
             services.AddScoped<TourishCategoryRepository>();
             services.AddScoped<NotificationRepository>();
+            services.AddScoped<NotificationConRepository>();
 
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IReceiptRepository, ReceiptRepository>();
@@ -185,6 +186,13 @@ namespace MyWebApiApp
                                   policy.RequireClaim("Permissions", PolicyTerm.UPDATE_MESSAGE));
                 options.AddPolicy("DeleteMessageAccess", policy =>
                                   policy.RequireClaim("Permissions", PolicyTerm.DELETE_MESSAGE));
+
+                options.AddPolicy("CreateNotificationAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.CREATE_NOTIFICATION));
+                options.AddPolicy("UpdateNotificationAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_NOTIFICATION));
+                options.AddPolicy("DeleteNotificationAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_NOTIFICATION));
 
                 options.AddPolicy("UpdateUserPasswordAccess", policy =>
                                   policy.RequireClaim("Permissions", PolicyTerm.UPDATE_PASSWORD_USER));

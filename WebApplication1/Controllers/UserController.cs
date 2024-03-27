@@ -639,6 +639,10 @@ namespace WebApplication1.Controllers
                 permissions.Add(PolicyTerm.UPDATE_RESTAURANT);
                 permissions.Add(PolicyTerm.DELETE_RESTAURANT);
 
+                permissions.Add(PolicyTerm.CREATE_NOTIFICATION);
+                permissions.Add(PolicyTerm.UPDATE_NOTIFICATION);
+                permissions.Add(PolicyTerm.DELETE_NOTIFICATION);
+
                 permissions.Add(PolicyTerm.CREATE_RECEIPT);
                 permissions.Add(PolicyTerm.UPDATE_RECEIPT);
                 permissions.Add(PolicyTerm.DELETE_RECEIPT);
@@ -684,6 +688,10 @@ namespace WebApplication1.Controllers
                 permissions.Add(PolicyTerm.CREATE_RESTAURANT);
                 permissions.Add(PolicyTerm.UPDATE_RESTAURANT);
                 permissions.Add(PolicyTerm.DELETE_RESTAURANT);
+
+                permissions.Add(PolicyTerm.CREATE_NOTIFICATION);
+                permissions.Add(PolicyTerm.UPDATE_NOTIFICATION);
+                permissions.Add(PolicyTerm.DELETE_NOTIFICATION);
 
                 permissions.Add(PolicyTerm.CREATE_RECEIPT);
                 permissions.Add(PolicyTerm.UPDATE_RECEIPT);

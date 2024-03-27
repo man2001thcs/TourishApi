@@ -1,23 +1,27 @@
+using System.Diagnostics;
 using FirebaseAdmin.Messaging;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using SignalR.Hub;
 using SignalR.Hub.Client;
-using System.Diagnostics;
 using TourishApi.Service.Interface;
 using WebApplication1.Data.Connection;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.InheritanceRepo;
 
-
 namespace TourishApi.Service.InheritanceService
 {
     public class NotificationService : IBaseService<NotificationRepository, NotificationModel>
     {
         private readonly NotificationRepository _entityRepository;
+
         private IHubContext<NotificationHub, INotificationHubClient> _notificationHub;
 
-        public NotificationService(NotificationRepository airPlaneRepository, IHubContext<NotificationHub, INotificationHubClient> notificationHub)
+        public NotificationService(
+            NotificationRepository airPlaneRepository,
+            IHubContext<NotificationHub, INotificationHubClient> notificationHub
+        )
         {
             _entityRepository = airPlaneRepository;
             _notificationHub = notificationHub;
@@ -41,36 +45,20 @@ namespace TourishApi.Service.InheritanceService
                 };
             }
         }
-        public async Task<Response> CreateNewAsync(Guid userReceiveId,NotificationModel entityModel)
+
+        public async Task<Response> CreateNewAsync(
+            Guid userReceiveId,
+            NotificationModel entityModel
+        )
         {
             try
             {
                 var response = await _entityRepository.AddNotifyAsync(entityModel);
 
-                if (response.MessageCode == "I701")
+                if (response.MessageCode.IndexOf("I701") > -1)
                 {
-                    await sendNotify(userReceiveId, response.returnId ?? new Guid());
+                    await sendNotify(userReceiveId, response.returnId.Value);                  
                 }
-
-
-                //var notificationDTOUpdate = new NotificationDTOModel
-                //{
-                //    UserCreateId = entityModel.UserCreateId,
-                //    UserReceiveId = entityModel.UserReceiveId,
-                //    Content = entityModel.Content,
-                //    ContentCode = entityModel.ContentCode,
-                //    IsRead = entityModel.IsRead,
-                //    IsDeleted = entityModel.IsDeleted,
-                //    CreateDate = entityModel.CreateDate,
-                //    UpdateDate = entityModel.UpdateDate
-                //};
-
-                //Debug.WriteLine("Here");
-                //var connection = await _entityRepository.getNotificationConAsync(userReceiveId);
-
-                //await _notificationHub
-                //    .Clients.Client(connection.ConnectionID)
-                //    .SendOffersToUser(userReceiveId, notificationDTOUpdate);
 
                 return (response);
             }
@@ -85,9 +73,11 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        private async System.Threading.Tasks.Task sendNotify(Guid userReceiveId, Guid notifyId)
+        private async Task<Boolean> sendNotify(Guid userReceiveId, Guid notifyId)
         {
-            var connection = await _entityRepository.getNotificationConAsync(userReceiveId);
+            var connection = await _entityRepository.getNotificationConAsync(
+                userReceiveId
+            );
             var fullDetailNotification = await _entityRepository.getByIdAsync(notifyId);
 
             if (connection != null)
@@ -118,8 +108,9 @@ namespace TourishApi.Service.InheritanceService
                 }
             }
 
+            return true;
+
             // await sendFcmNotificationAsync(fullDetailNotification);
- 
         }
 
         public Response DeleteById(Guid id)
@@ -161,12 +152,21 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-
-        public Response GetAllForReceiver(string? userId, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAllForReceiver(
+            string? userId,
+            string? sortBy,
+            int page = 1,
+            int pageSize = 5
+        )
         {
             try
             {
-                var entityList = _entityRepository.GetAllForReceiver(userId, sortBy, page, pageSize);
+                var entityList = _entityRepository.GetAllForReceiver(
+                    userId,
+                    sortBy,
+                    page,
+                    pageSize
+                );
                 return entityList;
             }
             catch (Exception ex)
@@ -181,7 +181,12 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response GetAllForCreator(string? userId, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAllForCreator(
+            string? userId,
+            string? sortBy,
+            int page = 1,
+            int pageSize = 5
+        )
         {
             try
             {
@@ -200,7 +205,10 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public List<WebApplication1.Data.Notification> getByTourRecentUpdate(Guid tourId, Guid modifiedId)
+        public List<WebApplication1.Data.Notification> getByTourRecentUpdate(
+            Guid tourId,
+            Guid modifiedId
+        )
         {
             var entity = _entityRepository.getByTourRecentUpdate(tourId, modifiedId);
             return entity;
@@ -213,11 +221,7 @@ namespace TourishApi.Service.InheritanceService
                 var entity = _entityRepository.getById(id);
                 if (entity.Data == null)
                 {
-                    var response = new Response
-                    {
-                        resultCd = 1,
-                        MessageCode = "C700",
-                    };
+                    var response = new Response { resultCd = 1, MessageCode = "C700", };
                     return response;
                 }
                 else
@@ -262,18 +266,19 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public async Task<Response> UpdateEntityByIdAsync(Guid id, NotificationModel NotificationModel)
+        public async Task<Response> UpdateEntityByIdAsync(
+            Guid id,
+            NotificationModel NotificationModel
+        )
         {
             try
             {
                 var response = await _entityRepository.UpdateAsync(NotificationModel);
 
-                var connection = getNotificationCon(
-                                NotificationModel.UserReceiveId ?? new Guid()
-                            );
+                var connection = getNotificationCon(NotificationModel.UserReceiveId ?? new Guid());
 
                 var fullDetailNotification = (WebApplication1.Data.Notification)
-                       GetById(NotificationModel.Id ?? new Guid()).Data;
+                    GetById(NotificationModel.Id ?? new Guid()).Data;
 
                 if (connection != null)
                 {
@@ -294,7 +299,10 @@ namespace TourishApi.Service.InheritanceService
 
                     _notificationHub
                         .Clients.Client(connection.ConnectionID)
-                        .SendOffersToUser(NotificationModel.UserReceiveId ?? new Guid(), notificationDTOUpdate);
+                        .SendOffersToUser(
+                            NotificationModel.UserReceiveId ?? new Guid(),
+                            notificationDTOUpdate
+                        );
                 }
 
                 sendFcmNotificationAsync(fullDetailNotification);
@@ -318,7 +326,9 @@ namespace TourishApi.Service.InheritanceService
             return _entityRepository.saveFcmToken(notificationFcmTokenModel);
         }
 
-        public async System.Threading.Tasks.Task sendFcmNotificationAsync(WebApplication1.Data.Notification notification)
+        public async System.Threading.Tasks.Task sendFcmNotificationAsync(
+            WebApplication1.Data.Notification notification
+        )
         {
             var fcmToken = _entityRepository.GetFcmToken(notification.UserReceiveId ?? new Guid());
 
@@ -341,8 +351,6 @@ namespace TourishApi.Service.InheritanceService
 
         public string getContent(WebApplication1.Data.Notification notification)
         {
-
-
             if (notification.Content != null)
             {
                 return notification.Content;
@@ -350,10 +358,9 @@ namespace TourishApi.Service.InheritanceService
 
             if (notification.ContentCode != null)
             {
-
-                return Constant.NotificationCode.NOTIFI_CODE_VI[notification.ContentCode] + notification.TourishPlan.TourName;
+                return Constant.NotificationCode.NOTIFI_CODE_VI[notification.ContentCode]
+                    + notification.TourishPlan.TourName;
             }
-
 
             return "";
         }

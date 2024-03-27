@@ -150,29 +150,31 @@ namespace TourishApi.Service.InheritanceService
             try
             {
                 var response = await _entityRepository.Update(entityModel, userId);
-                var interestList = await _entityRepository.getTourInterest(entityModel.Id);
-
-                interestList.ForEach(async interest =>
+                if (response.MessageCode =="I412")
                 {
+                    var interestList = await _entityRepository.getTourInterest(entityModel.Id);
 
-                    var notification = new NotificationModel
+                    foreach(var interest in interestList)
                     {
-                        UserCreateId = new Guid(userId),
-                        UserReceiveId = interest.UserId,
-                        TourishPlanId = entityModel.Id,
-                        Content = "",
-                        ContentCode = "I412",
-                        IsRead = false,
-                        IsDeleted = false,
-                        CreateDate = DateTime.UtcNow,
-                        UpdateDate = DateTime.UtcNow
+                        var notification = new NotificationModel
+                        {
+                            UserCreateId = new Guid(userId),
+                            UserReceiveId = interest.UserId,
+                            TourishPlanId = entityModel.Id,
+                            Content = "",
+                            ContentCode = "I412",
+                            IsRead = false,
+                            IsDeleted = false,
+                            CreateDate = DateTime.UtcNow,
+                            UpdateDate = DateTime.UtcNow
+                        };
+
+                        // _notificationService.CreateNew(notification);
+
+                        await _notificationService.CreateNewAsync(interest.UserId, notification);
                     };
-
-                    // _notificationService.CreateNew(notification);
-
-                    await _notificationService.CreateNewAsync(interest.UserId, notification);
-
-                });
+                }
+                
 
                 return response;
             }

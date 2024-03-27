@@ -8,11 +8,11 @@ using WebApplication1.Model.VirtualModel;
 
 namespace WebApplication1.Repository.InheritanceRepo
 {
-    public class NotificationRepository : IBaseRepository<NotificationModel>
+    public class NotificationConRepository : IBaseRepository<NotificationModel>
     {
         private MyDbContext _context;
         public static int PAGE_SIZE { get; set; } = 5;
-        public NotificationRepository(MyDbContext _context)
+        public NotificationConRepository(MyDbContext _context)
         {
             this._context = _context;
         }
@@ -40,31 +40,6 @@ namespace WebApplication1.Repository.InheritanceRepo
                 // Create type success               
             };
 
-        }
-
-        public async Task<Response> AddNotifyAsync(NotificationModel addModel)
-        {
-
-            var addValue = new Notification
-            {
-                Content = addModel.Content,
-                ContentCode = addModel.ContentCode,
-                UserCreateId = addModel.UserCreateId,
-                UserReceiveId = addModel.UserReceiveId,
-                TourishPlanId = addModel.TourishPlanId,
-                CreateDate = DateTime.UtcNow,
-                UpdateDate = DateTime.UtcNow,
-            };
-            _context.Add(addValue);
-            await _context.SaveChangesAsync();
-
-            return new Response
-            {
-                resultCd = 0,
-                MessageCode = "I701",
-                returnId = addValue.Id
-                // Create type success               
-            };
         }
 
         public Response Delete(Guid id)
