@@ -7,26 +7,23 @@ namespace WebApplication1.Controllers.TourishPlan
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GetTourishPlanController : ControllerBase
+    public class GetTourishPlanDescriptionController : ControllerBase
     {
         private readonly TourishPlanService _entityService;
 
-        public GetTourishPlanController(TourishPlanService entityService)
+        public GetTourishPlanDescriptionController(TourishPlanService entityService)
         {
             _entityService = entityService;
         }
 
         // GET: api/<ValuesController>
         [HttpGet]
-        public IActionResult GetAll(string? search, string? category, string? sortBy, int page = 1, int pageSize = 5)
+        public async Task<IActionResult> GetDescription(string containerName, string blobName)
         {
-            return Ok(_entityService.GetAll(search, category, sortBy, page, pageSize));
-        }
-
-        [HttpGet("{id}")]
-        public IActionResult GetById(Guid id)
-        {
-            return Ok(_entityService.GetById(id));
+            return Ok(await _entityService.getDescription(containerName, blobName));
         }
     }
 }
+
+
+

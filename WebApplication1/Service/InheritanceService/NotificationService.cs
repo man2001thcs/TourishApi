@@ -1,9 +1,8 @@
-using System.Diagnostics;
 using FirebaseAdmin.Messaging;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using SignalR.Hub;
 using SignalR.Hub.Client;
+using System.Diagnostics;
 using TourishApi.Service.Interface;
 using WebApplication1.Data.Connection;
 using WebApplication1.Model;

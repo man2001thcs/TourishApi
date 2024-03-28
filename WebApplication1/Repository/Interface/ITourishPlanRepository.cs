@@ -12,6 +12,7 @@ namespace WebApplication1.Repository.Interface
         Task<List<TourishInterest>> getTourInterest(Guid id);
         Task<Response> Add(TourishPlanInsertModel entityModel, String id);
         Task<Response> Update(TourishPlanUpdateModel entityModel, String id);
+        Task<string> getDescription(string containerName, string blobName);
         Response Delete(Guid id);
     }
 }

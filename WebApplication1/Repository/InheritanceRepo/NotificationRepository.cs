@@ -230,7 +230,8 @@ namespace WebApplication1.Repository.InheritanceRepo
             var result = PaginatorModel<Notification>.Create(entityQuery, page, pageSize);
             #endregion
 
-            var resultDto = result.Select(notification => new NotificationDTOModel {
+            var resultDto = result.Select(notification => new NotificationDTOModel
+            {
                 Id = notification.Id,
                 Content = notification.Content,
                 ContentCode = notification.ContentCode,

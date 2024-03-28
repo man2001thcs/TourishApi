@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using SignalR.Hub;
-using SignalR.Hub.Client;
-using TourishApi.Service.Interface;
+﻿using TourishApi.Service.Interface;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
@@ -44,7 +41,7 @@ namespace TourishApi.Service.InheritanceService
                         IsDeleted = false,
                         CreateDate = DateTime.UtcNow,
                         UpdateDate = DateTime.UtcNow
-                    };                
+                    };
 
                     await _notificationService.CreateNewAsync(notification.UserCreateId, notification);
 
@@ -150,11 +147,11 @@ namespace TourishApi.Service.InheritanceService
             try
             {
                 var response = await _entityRepository.Update(entityModel, userId);
-                if (response.MessageCode =="I412")
+                if (response.MessageCode == "I412")
                 {
                     var interestList = await _entityRepository.getTourInterest(entityModel.Id);
 
-                    foreach(var interest in interestList)
+                    foreach (var interest in interestList)
                     {
                         var notification = new NotificationModel
                         {
@@ -174,7 +171,7 @@ namespace TourishApi.Service.InheritanceService
                         await _notificationService.CreateNewAsync(interest.UserId, notification);
                     };
                 }
-                
+
 
                 return response;
             }
@@ -189,6 +186,17 @@ namespace TourishApi.Service.InheritanceService
                 };
                 return response;
             }
+        }
+
+        public async Task<Response> getDescription(string containerName, string blobName)
+        {
+            var response = new Response
+            {
+                resultCd = 0,
+                Data = await _entityRepository.getDescription(containerName, blobName)
+        };
+            return response;
+            
         }
     }
 }

@@ -23,7 +23,6 @@ namespace WebApplication1.Data.Schedule
         public Guid RestaurantId { get; set; }
         public double? SinglePrice { get; set; }
         public EatScheduleStatus Status { get; set; }
-        [Required]
         [Column(TypeName = "ntext")]
         public string? Description { get; set; }
         public DateTime? StartDate { get; set; }

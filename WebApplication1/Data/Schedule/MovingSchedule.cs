@@ -34,7 +34,6 @@ namespace WebApplication1.Data.Schedule
         public string StartingPlace { get; set; }
         public string HeadingPlace { get; set; }
         public MovingScheduleStatus Status { get; set; }
-        [Required]
         [Column(TypeName = "ntext")]
         public string? Description { get; set; }
         public DateTime? StartDate { get; set; }

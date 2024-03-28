@@ -26,7 +26,6 @@ namespace WebApplication1.Data
         public int RemainTicket { get; set; }
         public PlanStatus PlanStatus { get; set; }
 
-        [Required]
         [Column(TypeName = "ntext")]
         public string? Description { get; set; }
         public DateTime CreateDate { get; set; }
