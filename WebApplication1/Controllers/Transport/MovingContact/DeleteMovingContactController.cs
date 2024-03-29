@@ -4,21 +4,21 @@ using TourishApi.Service.InheritanceService;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.RestHouse.Hotel
+namespace WebApplication1.Controllers.Transport.MovingContact
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DeleteHotelController : ControllerBase
+    public class DeleteMovingContactController : ControllerBase
     {
-        private readonly HotelService _entityService;
+        private readonly MovingContactService _entityService;
 
-        public DeleteHotelController(HotelService entityService)
+        public DeleteMovingContactController(MovingContactService entityService)
         {
             _entityService = entityService;
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Policy = "DeleteHotelAccess")]
+        [Authorize(Policy = "DeleteMovingContactAccess")]
         public IActionResult DeleteById(Guid id)
         {
             return Ok(_entityService.DeleteById(id));

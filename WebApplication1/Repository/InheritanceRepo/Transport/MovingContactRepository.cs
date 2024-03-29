@@ -7,19 +7,19 @@ using WebApplication1.Model.VirtualModel;
 
 namespace WebApplication1.Repository.InheritanceRepo.Transport
 {
-    public class PassengerCarRepository : IBaseRepository<PassengerCarModel>
+    public class MovingContactRepository : IBaseRepository<MovingContactModel>
     {
         private readonly MyDbContext _context;
         public static int PAGE_SIZE { get; set; } = 5;
-        public PassengerCarRepository(MyDbContext _context)
+        public MovingContactRepository(MyDbContext _context)
         {
             this._context = _context;
         }
 
-        public Response Add(PassengerCarModel addModel)
+        public Response Add(MovingContactModel addModel)
         {
 
-            var addValue = new PassengerCar
+            var addValue = new MovingContact
             {
                 BranchName = addModel.BranchName,
                 HotlineNumber = addModel.HotlineNumber,
@@ -45,7 +45,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Transport
 
         public Response Delete(Guid id)
         {
-            var deleteEntity = _context.PassengerCarList.FirstOrDefault((entity
+            var deleteEntity = _context.MovingContactList.FirstOrDefault((entity
                => entity.Id == id));
             if (deleteEntity != null)
             {
@@ -61,11 +61,13 @@ namespace WebApplication1.Repository.InheritanceRepo.Transport
             };
         }
 
-        public Response GetAll(string? search, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
         {
-            var entityQuery = _context.PassengerCarList.AsQueryable();
+            var entityQuery = _context.MovingContactList.AsQueryable();
 
             #region Filtering
+            entityQuery.Where(entity => (int)entity.VehicleType == type);
+
             if (!string.IsNullOrEmpty(search))
             {
                 entityQuery = entityQuery.Where(entity => entity.BranchName.Contains(search));
@@ -93,7 +95,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Transport
             #endregion
 
             #region Paging
-            var result = PaginatorModel<PassengerCar>.Create(entityQuery, page, pageSize);
+            var result = PaginatorModel<MovingContact>.Create(entityQuery, page, pageSize);
             #endregion
 
             var entityVM = new Response
@@ -108,7 +110,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Transport
 
         public Response getById(Guid id)
         {
-            var entity = _context.PassengerCarList.FirstOrDefault((entity
+            var entity = _context.MovingContactList.FirstOrDefault((entity
                 => entity.Id == id));
 
             return new Response
@@ -120,7 +122,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Transport
 
         public Response getByName(String name)
         {
-            var entity = _context.PassengerCarList.FirstOrDefault((entity
+            var entity = _context.MovingContactList.FirstOrDefault((entity
                 => entity.BranchName == name));
 
             return new Response
@@ -130,9 +132,9 @@ namespace WebApplication1.Repository.InheritanceRepo.Transport
             };
         }
 
-        public Response Update(PassengerCarModel entityModel)
+        public Response Update(MovingContactModel entityModel)
         {
-            var entity = _context.PassengerCarList.FirstOrDefault((entity
+            var entity = _context.MovingContactList.FirstOrDefault((entity
                 => entity.Id == entityModel.Id));
             if (entity != null)
             {

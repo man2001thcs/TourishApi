@@ -5,22 +5,22 @@ using WebApplication1.Model.Transport;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.Transport.AirPlane
+namespace WebApplication1.Controllers.Transport.MovingContact
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AddAirPlaneController : ControllerBase
+    public class AddMovingContactController : ControllerBase
     {
-        private readonly AirPlaneService _entityService;
+        private readonly MovingContactService _entityService;
 
-        public AddAirPlaneController(AirPlaneService airPlaneService)
+        public AddMovingContactController(MovingContactService airPlaneService)
         {
             _entityService = airPlaneService;
         }
 
         [HttpPost]
-        [Authorize(Policy = "CreateAirPlaneAccess")]
-        public IActionResult CreateNew(AirPlaneModel entityModel)
+        [Authorize(Policy = "CreateMovingContactAccess")]
+        public IActionResult CreateNew(MovingContactModel entityModel)
         {
             return Ok(_entityService.CreateNew(entityModel));
         }

@@ -17,14 +17,9 @@ namespace WebApplication1.Data.DbContextFile
         }
 
         #region DbSet
-        public DbSet<PlaneAirline> PlaneAirlineList { get; set; }
-        public DbSet<PassengerCar> PassengerCarList { get; set; }
-
+        public DbSet<MovingContact> MovingContactList { get; set; }
         public DbSet<Restaurant> RestaurantList { get; set; }
-
-        public DbSet<Hotel> HotelList { get; set; }
-        public DbSet<HomeStay> HomeStayList { get; set; }
-
+        public DbSet<RestHouseContact> RestHouseContactList { get; set; }
         public DbSet<EatSchedule> EatSchedules { get; set; }
         public DbSet<MovingSchedule> MovingSchedules { get; set; }
         public DbSet<StayingSchedule> StayingSchedules { get; set; }

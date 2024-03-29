@@ -16,21 +16,13 @@
         public const string UPDATE_TOURISH_COMMENT = "updateTourishComment:term";
 
         // Category policies
-        public const string CREATE_AIRPLANE = "createAirPlane:term";
-        public const string DELETE_AIRPLANE = "deleteAirPlane:term";
-        public const string UPDATE_AIRPLANE = "updateAirPlane:term";
+        public const string CREATE_MOVING_CONTACT = "createMovingContact:term";
+        public const string DELETE_MOVING_CONTACT = "deleteMovingContact:term";
+        public const string UPDATE_MOVING_CONTACT = "updateMovingContact:term";
 
-        public const string CREATE_PASSENGER_CAR = "createPassengerCar:term";
-        public const string DELETE_PASSENGER_CAR = "deletePassengerCar:term";
-        public const string UPDATE_PASSENGER_CAR = "updatePassengerCar:term";
-
-        public const string CREATE_HOTEL = "createHotel:term";
-        public const string DELETE_HOTEL = "deleteHotel:term";
-        public const string UPDATE_HOTEL = "updateHotel:term";
-
-        public const string CREATE_HOME_STAY = "createHomeStay:term";
-        public const string DELETE_HOME_STAY = "deleteHomeStay:term";
-        public const string UPDATE_HOME_STAY = "updateHomeStay:term";
+        public const string CREATE_RESTHOUSE_CONTACT = "createResthouseContact:term";
+        public const string DELETE_RESTHOUSE_CONTACT = "deleteResthouseContact:term";
+        public const string UPDATE_RESTHOUSE_CONTACT = "updateResthouseContact:term";
 
         public const string CREATE_RESTAURANT = "createRestaurant:term";
         public const string DELETE_RESTAURANT = "deleteRestaurant:term";

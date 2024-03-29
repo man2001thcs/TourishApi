@@ -18,9 +18,9 @@ namespace WebApplication1.Controllers.TourComment
 
         // GET: api/<ValuesController>
         [HttpGet]
-        public IActionResult GetAll(string? search, string? sortBy, int page = 1, int pageSize = 5)
+        public IActionResult GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
         {
-            return Ok(_entityService.GetAll(search, sortBy, page, pageSize));
+            return Ok(_entityService.GetAll(search, type, sortBy, page, pageSize));
 
         }
 

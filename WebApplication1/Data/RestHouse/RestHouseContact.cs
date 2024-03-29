@@ -3,8 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApplication1.Data.RestHouse
 {
-    [Table("Hotel")]
-    public class Hotel
+    public enum RestHouseType
+    {
+        HomeStay = 0, Hotel = 1
+    }
+
+    [Table("RestHouseContact")]
+    public class RestHouseContact
     {
         [Key]
         public Guid Id { get; set; }
@@ -12,6 +17,7 @@ namespace WebApplication1.Data.RestHouse
         [Required]
         [MaxLength(100)]
         public required string PlaceBranch { get; set; }
+        public RestHouseType RestHouseType { get; set; }
         public string? HotlineNumber { get; set; }
         public string? SupportEmail { get; set; }
         public string? HeadQuarterAddress { get; set; }

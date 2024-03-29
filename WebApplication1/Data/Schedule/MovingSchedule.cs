@@ -1,13 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using WebApplication1.Data.Transport;
 
 namespace WebApplication1.Data.Schedule
 {
-    public enum VehicleType
-    {
-        PassengerCar = 0, Plane = 1, Train = 2
-    }
-
     public enum MovingScheduleStatus
     {
         Created = 0, OnGoing = 1, Completed = 2, Cancelled = 3

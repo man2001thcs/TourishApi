@@ -4,7 +4,7 @@ namespace TourishApi.Repository.Interface
 {
     public interface IBaseRepository<T>
     {
-        Response GetAll(string? search, string? sortBy, int page = 1, int pageSize = 5);
+        Response GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5);
         Response getById(Guid id);
         Response getByName(string name);
         Response Add(T addModel);

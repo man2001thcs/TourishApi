@@ -68,10 +68,8 @@ namespace MyWebApiApp
             services.AddScoped(x => new BlobServiceClient(Configuration.GetValue<string>("AzureBlobStorage")));
 
             // Repo
-            services.AddScoped<HomeStayRepository>();
-            services.AddScoped<HotelRepository>();
-            services.AddScoped<AirPlaneRepository>();
-            services.AddScoped<PassengerCarRepository>();
+            services.AddScoped<RestHouseContactRepository>();
+            services.AddScoped<MovingContactRepository>();
             services.AddScoped<RestaurantRepository>();
             services.AddScoped<TourishPlanRepository>();
             services.AddScoped<TourishCommentRepository>();
@@ -84,10 +82,8 @@ namespace MyWebApiApp
             services.AddScoped<IFileRepository, FileRepository>();
 
             // Service
-            services.AddScoped<HomeStayService>();
-            services.AddScoped<HotelService>();
-            services.AddScoped<AirPlaneService>();
-            services.AddScoped<PassengerCarService>();
+            services.AddScoped<RestHouseContactService>();
+            services.AddScoped<MovingContactService>();
             services.AddScoped<RestaurantService>();
             services.AddScoped<TourishPlanService>();
             services.AddScoped<TourishCommentService>();
@@ -122,33 +118,20 @@ namespace MyWebApiApp
             // Book permission
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("CreateAirPlaneAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.CREATE_AIRPLANE));
-                options.AddPolicy("UpdateAirPlaneAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_AIRPLANE));
-                options.AddPolicy("DeleteAirPlaneAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_AIRPLANE));
 
-                options.AddPolicy("CreatePassengerCarAccess", policy =>
-                                 policy.RequireClaim("Permissions", PolicyTerm.CREATE_PASSENGER_CAR));
-                options.AddPolicy("UpdatePassengerCarAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_PASSENGER_CAR));
-                options.AddPolicy("DeletePassengerCarAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_PASSENGER_CAR));
+                options.AddPolicy("CreateMovingContactAccess", policy =>
+                                 policy.RequireClaim("Permissions", PolicyTerm.CREATE_MOVING_CONTACT));
+                options.AddPolicy("UpdateMovingContactAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_MOVING_CONTACT));
+                options.AddPolicy("DeleteMovingContactAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_MOVING_CONTACT));
 
-                options.AddPolicy("CreateHotelAccess", policy =>
-                              policy.RequireClaim("Permissions", PolicyTerm.CREATE_HOTEL));
-                options.AddPolicy("UpdateHotelAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_HOTEL));
-                options.AddPolicy("DeleteHotelAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_HOTEL));
-
-                options.AddPolicy("CreateHomeStayAccess", policy =>
-                          policy.RequireClaim("Permissions", PolicyTerm.CREATE_HOME_STAY));
-                options.AddPolicy("UpdateHomeStayAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_HOME_STAY));
-                options.AddPolicy("DeleteHomeStayAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_HOME_STAY));
+                options.AddPolicy("CreateRestHouseContactAccess", policy =>
+                          policy.RequireClaim("Permissions", PolicyTerm.CREATE_RESTHOUSE_CONTACT));
+                options.AddPolicy("UpdateRestHouseContactAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_RESTHOUSE_CONTACT));
+                options.AddPolicy("DeleteRestHouseContactAccess", policy =>
+                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_RESTHOUSE_CONTACT));
 
                 options.AddPolicy("CreateRestaurantAccess", policy =>
                        policy.RequireClaim("Permissions", PolicyTerm.CREATE_RESTAURANT));

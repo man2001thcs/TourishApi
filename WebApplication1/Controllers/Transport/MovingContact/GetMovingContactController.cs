@@ -3,24 +3,25 @@ using TourishApi.Service.InheritanceService;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.Transport.RestHouse.Hotel
+namespace WebApplication1.Controllers.Transport.MovingContact
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GetHotelController : ControllerBase
+    public class GetMovingContactController : ControllerBase
     {
-        private readonly HotelService _entityService;
+        private readonly MovingContactService _entityService;
 
-        public GetHotelController(HotelService entityService)
+        public GetMovingContactController(MovingContactService entityService)
         {
             _entityService = entityService;
         }
 
         // GET: api/<ValuesController>
         [HttpGet]
-        public IActionResult GetAll(string? search, string? sortBy, int page = 1, int pageSize = 5)
+        public IActionResult GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
         {
-            return Ok(_entityService.GetAll(search, sortBy, page, pageSize));
+            return Ok(_entityService.GetAll(search, type, sortBy, page, pageSize));
+
         }
 
         [HttpGet("{id}")]

@@ -3,8 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApplication1.Data.Transport
 {
-    [Table("PlaneAirline")]
-    public class PlaneAirline
+    public enum VehicleType
+    {
+        PassengerCar = 0, Plane = 1, Train = 2
+    }
+
+    [Table("MovingContact")]
+    public class MovingContact
     {
         [Key]
         public Guid Id { get; set; }
@@ -12,6 +17,7 @@ namespace WebApplication1.Data.Transport
         [Required]
         [MaxLength(100)]
         public required string BranchName { get; set; }
+        public VehicleType VehicleType { get; set; }
         public string? HotlineNumber { get; set; }
         public string? SupportEmail { get; set; }
         public string? HeadQuarterAddress { get; set; }

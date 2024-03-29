@@ -1,24 +1,24 @@
 ﻿using TourishApi.Service.Interface;
-using WebApplication1.Model.RestHouse;
+using WebApplication1.Model.Transport;
 using WebApplication1.Model.VirtualModel;
-using WebApplication1.Repository.InheritanceRepo.RestHoouse;
+using WebApplication1.Repository.InheritanceRepo.Transport;
 
 namespace TourishApi.Service.InheritanceService
 {
-    public class HomeStayService : IBaseService<HomeStayRepository, HomeStayModel>
+    public class MovingContactService : IBaseService<MovingContactRepository, MovingContactModel>
     {
-        private readonly HomeStayRepository _entityRepository;
+        private readonly MovingContactRepository _entityRepository;
 
-        public HomeStayService(HomeStayRepository airPlaneRepository)
+        public MovingContactService(MovingContactRepository airPlaneRepository)
         {
             _entityRepository = airPlaneRepository;
         }
 
-        public Response CreateNew(HomeStayModel entityModel)
+        public Response CreateNew(MovingContactModel entityModel)
         {
             try
             {
-                var entityExist = _entityRepository.getByName(entityModel.PlaceBranch);
+                var entityExist = _entityRepository.getByName(entityModel.BranchName);
 
                 if (entityExist.Data == null)
                 {
@@ -28,7 +28,7 @@ namespace TourishApi.Service.InheritanceService
                 }
                 else
                 {
-                    var response = new Response { resultCd = 1, MessageCode = "C221", };
+                    var response = new Response { resultCd = 1, MessageCode = "C111", };
                     return response;
                 }
             }
@@ -37,7 +37,7 @@ namespace TourishApi.Service.InheritanceService
                 return new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C224",
+                    MessageCode = "C114",
                     Error = ex.Message
                 };
             }
@@ -48,7 +48,7 @@ namespace TourishApi.Service.InheritanceService
             try
             {
                 _entityRepository.Delete(id);
-                var response = new Response { resultCd = 0, MessageCode = "I223" };
+                var response = new Response { resultCd = 0, MessageCode = "I113" };
                 return response;
             }
             catch (Exception ex)
@@ -56,18 +56,18 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C224",
+                    MessageCode = "C114",
                     Error = ex.Message
                 };
                 return response;
             }
         }
 
-        public Response GetAll(string? search, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
         {
             try
             {
-                var entityList = _entityRepository.GetAll(search, sortBy, page, pageSize);
+                var entityList = _entityRepository.GetAll(search, type, sortBy, page, pageSize);
                 return entityList;
             }
             catch (Exception ex)
@@ -75,12 +75,11 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C224",
+                    MessageCode = "C114",
                     Error = ex.Message
                 };
                 return response;
             }
-
         }
 
         public Response GetById(Guid id)
@@ -90,11 +89,7 @@ namespace TourishApi.Service.InheritanceService
                 var entity = _entityRepository.getById(id);
                 if (entity.Data == null)
                 {
-                    var response = new Response
-                    {
-                        resultCd = 1,
-                        MessageCode = "C220",
-                    };
+                    var response = new Response { resultCd = 1, MessageCode = "C110", };
                     return response;
                 }
                 else
@@ -107,19 +102,18 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C224",
+                    MessageCode = "C114",
                     Error = ex.Message
                 };
                 return response;
             }
         }
 
-        public Response UpdateEntityById(Guid id, HomeStayModel HomeStayModel)
+        public Response UpdateEntityById(Guid id, MovingContactModel MovingContactModel)
         {
-
             try
             {
-                var response = _entityRepository.Update(HomeStayModel);
+                var response = _entityRepository.Update(MovingContactModel);
 
                 return response;
             }
@@ -128,14 +122,11 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C224",
+                    MessageCode = "C114",
                     Error = ex.Message
                 };
                 return response;
             }
-
-
-
         }
     }
 }

@@ -61,7 +61,7 @@ namespace WebApplication1.Repository.InheritanceRepo.RestaurantPlace
             };
         }
 
-        public Response GetAll(string? search, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
         {
             var entityQuery = _context.RestaurantList.AsQueryable();
 

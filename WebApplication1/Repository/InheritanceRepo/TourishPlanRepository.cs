@@ -85,7 +85,7 @@ public class TourishPlanRepository : ITourishPlanRepository
         if (!String.IsNullOrEmpty(entityModel.StayingScheduleString))
         {
             await AddStayingSchedule(tourishPlan.Id, entityModel.StayingScheduleString);
-        }     
+        }
 
         return new Response
         {
@@ -344,7 +344,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                     await _context.AddAsync(eatSchedule);
                     await _context.SaveChangesAsync();
 
-                    await blobService.UploadStringBlobAsync("eatschedule-content-container", (String) schedule.description ?? "Không có thông tin", "text/plain", eatSchedule.Id.ToString() ?? "" + ".txt");
+                    await blobService.UploadStringBlobAsync("eatschedule-content-container", (String)schedule.description ?? "Không có thông tin", "text/plain", eatSchedule.Id.ToString() ?? "" + ".txt");
                 }
             }
         }
@@ -385,7 +385,7 @@ public class TourishPlanRepository : ITourishPlanRepository
 
                     await _context.AddAsync(movingSchedule);
                     await _context.SaveChangesAsync();
-                    await blobService.UploadStringBlobAsync("movingschedule-content-container", (String) schedule.description ?? "Không có thông tin", "text/plain", movingSchedule.Id.ToString() ?? "" + ".txt");
+                    await blobService.UploadStringBlobAsync("movingschedule-content-container", (String)schedule.description ?? "Không có thông tin", "text/plain", movingSchedule.Id.ToString() ?? "" + ".txt");
                 }
 
             }
@@ -425,9 +425,9 @@ public class TourishPlanRepository : ITourishPlanRepository
                     await _context.AddAsync(stayingSchedule);
                     await _context.SaveChangesAsync();
 
-                    await blobService.UploadStringBlobAsync("movingschedule-content-container", (String) schedule.description ?? "Không có thông tin", "text/plain", stayingSchedule.Id.ToString() ?? "" + ".txt");
+                    await blobService.UploadStringBlobAsync("movingschedule-content-container", (String)schedule.description ?? "Không có thông tin", "text/plain", stayingSchedule.Id.ToString() ?? "" + ".txt");
                 }
             }
         }
-    } 
+    }
 }

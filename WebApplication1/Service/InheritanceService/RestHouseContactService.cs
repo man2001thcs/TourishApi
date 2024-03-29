@@ -5,16 +5,16 @@ using WebApplication1.Repository.InheritanceRepo.RestHoouse;
 
 namespace TourishApi.Service.InheritanceService
 {
-    public class HotelService : IBaseService<HotelRepository, HotelModel>
+    public class RestHouseContactService : IBaseService<RestHouseContactRepository, RestHouseContactModel>
     {
-        private readonly HotelRepository _entityRepository;
+        private readonly RestHouseContactRepository _entityRepository;
 
-        public HotelService(HotelRepository airPlaneRepository)
+        public RestHouseContactService(RestHouseContactRepository airPlaneRepository)
         {
             _entityRepository = airPlaneRepository;
         }
 
-        public Response CreateNew(HotelModel entityModel)
+        public Response CreateNew(RestHouseContactModel entityModel)
         {
             try
             {
@@ -63,11 +63,11 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response GetAll(string? search, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
         {
             try
             {
-                var entityList = _entityRepository.GetAll(search, sortBy, page, pageSize);
+                var entityList = _entityRepository.GetAll(search, type, sortBy, page, pageSize);
                 return entityList;
             }
             catch (Exception ex)
@@ -114,12 +114,12 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response UpdateEntityById(Guid id, HotelModel HotelModel)
+        public Response UpdateEntityById(Guid id, RestHouseContactModel RestHouseContactModel)
         {
 
             try
             {
-                var response = _entityRepository.Update(HotelModel);
+                var response = _entityRepository.Update(RestHouseContactModel);
 
                 return response;
             }
