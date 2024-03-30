@@ -67,7 +67,11 @@ namespace WebApplication1.Repository.InheritanceRepo.RestHoouse
             var entityQuery = _context.RestHouseContactList.AsQueryable();
 
             #region Filtering
-            entityQuery.Where(entity => (int)entity.RestHouseType == type);
+            if (type != null)
+            {
+                entityQuery = entityQuery.Where(entity => (int)entity.RestHouseType == type);
+            }
+
             if (!string.IsNullOrEmpty(search))
             {
                 entityQuery = entityQuery.Where(entity => entity.PlaceBranch.Contains(search));

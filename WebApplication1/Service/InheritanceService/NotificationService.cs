@@ -334,8 +334,8 @@ namespace TourishApi.Service.InheritanceService
                 {
                     Notification = new FirebaseAdmin.Messaging.Notification
                     {
+                        Body = getContent(notification).Length > 0 ? getContent(notification) : "Không có nội dung",
                         Title = "Roxanne thông báo",
-                        Body = getContent(notification),
                     },
                     Token = fcmToken.DeviceToken
                 };
@@ -349,12 +349,13 @@ namespace TourishApi.Service.InheritanceService
         {
             if (notification.Content != null)
             {
-                return notification.Content;
+                if (notification.Content.Length > 0)
+                    return notification.Content;
             }
 
             if (notification.ContentCode != null)
             {
-                return Constant.NotificationCode.NOTIFI_CODE_VI[notification.ContentCode]
+                return notification.UserCreator.FullName + Constant.NotificationCode.NOTIFI_CODE_VI[notification.ContentCode]
                     + notification.TourishPlan.TourName;
             }
 

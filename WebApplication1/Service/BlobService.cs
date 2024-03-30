@@ -35,25 +35,32 @@ namespace WebApplication1.Service
 
         public async Task<string> GetBlobContentAsync(string blobContainerName, string blobName)
         {
-            // Get a reference to the container client
-            BlobContainerClient containerClient = GetContainerClient(blobContainerName);
-
-            // Get a reference to the blob client
-            BlobClient blobClient = containerClient.GetBlobClient(blobName);
-
-            // Check if the blob exists
-            if (!await blobClient.ExistsAsync())
+            try
             {
-                throw new InvalidOperationException($"Blob '{blobName}' does not exist in container '{blobContainerName}'.");
+                // Get a reference to the container client
+                BlobContainerClient containerClient = GetContainerClient(blobContainerName);
+
+                // Get a reference to the blob client
+                BlobClient blobClient = containerClient.GetBlobClient(blobName);
+
+                // Check if the blob exists
+                if (!await blobClient.ExistsAsync())
+                {
+                    throw new InvalidOperationException($"Blob '{blobName}' does not exist in container '{blobContainerName}'.");
+                }
+
+                // Download the blob content
+                BlobDownloadInfo download = await blobClient.DownloadAsync();
+
+                // Read the blob content into a string
+                using (StreamReader reader = new StreamReader(download.Content))
+                {
+                    return await reader.ReadToEndAsync();
+                }
             }
-
-            // Download the blob content
-            BlobDownloadInfo download = await blobClient.DownloadAsync();
-
-            // Read the blob content into a string
-            using (StreamReader reader = new StreamReader(download.Content))
+            catch (Exception ex)
             {
-                return await reader.ReadToEndAsync();
+                return "";
             }
         }
 
@@ -65,6 +72,45 @@ namespace WebApplication1.Service
                 var blobClient = containerClient.GetBlobClient(fileName);
 
                 await blobClient.DeleteIfExistsAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public async Task<Boolean> RenameFileBlobAsync(string blobContainerName, string fileNameOld, string fileNameNew)
+        {
+            try
+            {
+                var containerClient = GetContainerClient(blobContainerName);
+                var sourceBlobClient = containerClient.GetBlobClient(fileNameOld);
+                var destinationBlobClient = containerClient.GetBlobClient(fileNameNew);
+
+                var isOldBlobExist = await sourceBlobClient.ExistsAsync();
+
+                if (!isOldBlobExist)
+                {
+                    return false;
+                }
+
+                await destinationBlobClient.StartCopyFromUriAsync(sourceBlobClient.Uri);
+
+                // Check if the copy operation is completed
+                while (true)
+                {
+                    BlobProperties properties = await destinationBlobClient.GetPropertiesAsync();
+                    if (properties.CopyStatus != CopyStatus.Pending)
+                    {
+                        break;
+                    }
+                    await Task.Delay(1000); // wait for 1 second before checking again
+                }
+
+                // If the copy operation is successful, delete the source blob
+                await sourceBlobClient.DeleteIfExistsAsync();
+
                 return true;
             }
             catch (Exception ex)

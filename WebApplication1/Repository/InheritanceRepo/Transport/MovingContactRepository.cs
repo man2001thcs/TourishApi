@@ -66,7 +66,11 @@ namespace WebApplication1.Repository.InheritanceRepo.Transport
             var entityQuery = _context.MovingContactList.AsQueryable();
 
             #region Filtering
-            entityQuery.Where(entity => (int)entity.VehicleType == type);
+            if (type != null)
+            {
+                entityQuery = entityQuery.Where(entity => (int)entity.VehicleType == type);
+            }
+
 
             if (!string.IsNullOrEmpty(search))
             {

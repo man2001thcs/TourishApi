@@ -6,5 +6,6 @@
         Task<Boolean> DeleteFileBlobAsync(string blobContainerName, string fileName);
         Task<Uri> UploadStringBlobAsync(string blobContainerName, string content, string contentType, string fileName);
         Task<string> GetBlobContentAsync(string blobContainerName, string blobName);
+        Task<Boolean> RenameFileBlobAsync(string blobContainerName, string fileNameOld, string fileNameNew);
     }
 }

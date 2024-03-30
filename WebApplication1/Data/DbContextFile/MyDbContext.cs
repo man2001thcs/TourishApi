@@ -58,6 +58,8 @@ namespace WebApplication1.Data.DbContextFile
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
 
+                entity.Property(e => e.Description).HasDefaultValueSql("''");
+
                 entity.HasMany(e => e.MovingSchedules)
                 .WithOne(e => e.TourishPlan)
                 .HasForeignKey(e => e.TourishPlanId)
@@ -82,6 +84,33 @@ namespace WebApplication1.Data.DbContextFile
                 .WithOne(e => e.TourishPlan)
                 .HasForeignKey(e => e.TourishPlanId)
                 .HasConstraintName("FK_TourishPlan_Notification");
+            });
+
+            modelBuilder.Entity<MovingSchedule>(entity =>
+            {
+                entity.ToTable(nameof(MovingSchedule));
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+                entity.Property(e => e.Description).HasDefaultValueSql("''");
+            });
+
+            modelBuilder.Entity<EatSchedule>(entity =>
+            {
+                entity.ToTable(nameof(EatSchedule));
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+                entity.Property(e => e.Description).HasDefaultValueSql("''");
+            });
+
+            modelBuilder.Entity<StayingSchedule>(entity =>
+            {
+                entity.ToTable(nameof(StayingSchedule));
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+                entity.Property(e => e.Description).HasDefaultValueSql("''");
             });
 
             modelBuilder.Entity<TourishCategory>(entity =>

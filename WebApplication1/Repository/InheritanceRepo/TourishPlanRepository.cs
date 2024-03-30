@@ -202,8 +202,11 @@ public class TourishPlanRepository : ITourishPlanRepository
 
     public async Task<Response> Update(TourishPlanUpdateModel entityModel, String id)
     {
-        var entity = _context.TourishPlan.Include(entity => entity.TourishInterestList).FirstOrDefault((entity
-            => entity.Id == entityModel.Id));
+        var entity = _context.TourishPlan.Include(entity => entity.EatSchedules).
+            Include(entity => entity.StayingSchedules).
+            Include(entity => entity.MovingSchedules).
+            Include(entity => entity.TourishInterestList).
+            FirstOrDefault((entity => entity.Id == entityModel.Id));
         if (entity != null)
         {
 
@@ -305,6 +308,11 @@ public class TourishPlanRepository : ITourishPlanRepository
         return await blobService.GetBlobContentAsync(containerName, blobName);
     }
 
+    public async Task<bool> deleteDescription(string containerName, string blobName)
+    {
+        return await blobService.DeleteFileBlobAsync(containerName, blobName);
+    }
+
 
     public async Task<List<TourishInterest>> getTourInterest(Guid id)
     {
@@ -344,7 +352,23 @@ public class TourishPlanRepository : ITourishPlanRepository
                     await _context.AddAsync(eatSchedule);
                     await _context.SaveChangesAsync();
 
-                    await blobService.UploadStringBlobAsync("eatschedule-content-container", (String)schedule.description ?? "Không có thông tin", "text/plain", eatSchedule.Id.ToString() ?? "" + ".txt");
+                    var insertString = (String)schedule.description;
+                    var oldId = (String)schedule.id;
+
+
+                    if (oldId.Length > 0)
+                    {
+                        await blobService.RenameFileBlobAsync("eatschedule-content-container", oldId, eatSchedule.Id.ToString());
+
+                        if (insertString.Length > 0)
+                        {
+                            await blobService.UploadStringBlobAsync("eatschedule-content-container", (String)schedule.description ?? "Không có thông tin", "text/plain", eatSchedule.Id.ToString() ?? "" + ".txt");
+                        }
+                    }
+                    else
+                    {
+                        await blobService.UploadStringBlobAsync("eatschedule-content-container", "Không có thông tin", "text/plain", eatSchedule.Id.ToString() ?? "" + ".txt");
+                    }
                 }
             }
         }
@@ -385,7 +409,23 @@ public class TourishPlanRepository : ITourishPlanRepository
 
                     await _context.AddAsync(movingSchedule);
                     await _context.SaveChangesAsync();
-                    await blobService.UploadStringBlobAsync("movingschedule-content-container", (String)schedule.description ?? "Không có thông tin", "text/plain", movingSchedule.Id.ToString() ?? "" + ".txt");
+
+                    var insertString = (String)schedule.description;
+                    var oldId = (String)schedule.id;
+
+                    if (oldId.Length > 0)
+                    {
+                        await blobService.RenameFileBlobAsync("movingschedule-content-container", oldId, movingSchedule.Id.ToString());
+
+                        if (insertString.Length > 0)
+                        {
+                            await blobService.UploadStringBlobAsync("movingschedule-content-container", (String)schedule.description ?? "Không có thông tin", "text/plain", movingSchedule.Id.ToString() ?? "" + ".txt");
+                        }
+                    }
+                    else
+                    {
+                        await blobService.UploadStringBlobAsync("movingschedule-content-container", "Không có thông tin", "text/plain", movingSchedule.Id.ToString() ?? "" + ".txt");
+                    }
                 }
 
             }
@@ -425,7 +465,22 @@ public class TourishPlanRepository : ITourishPlanRepository
                     await _context.AddAsync(stayingSchedule);
                     await _context.SaveChangesAsync();
 
-                    await blobService.UploadStringBlobAsync("movingschedule-content-container", (String)schedule.description ?? "Không có thông tin", "text/plain", stayingSchedule.Id.ToString() ?? "" + ".txt");
+                    var insertString = (String)schedule.description;
+                    var oldId = (String)schedule.id;
+
+                    if (oldId.Length > 0)
+                    {
+                        await blobService.RenameFileBlobAsync("stayingschedule-content-container", oldId, stayingSchedule.Id.ToString());
+
+                        if (insertString.Length > 0)
+                        {
+                            await blobService.UploadStringBlobAsync("stayingschedule-content-container", (String)schedule.description ?? "Không có thông tin", "text/plain", stayingSchedule.Id.ToString() ?? "" + ".txt");
+                        }
+                    }
+                    else
+                    {
+                        await blobService.UploadStringBlobAsync("stayingschedule-content-container", "Không có thông tin", "text/plain", stayingSchedule.Id.ToString() ?? "" + ".txt");
+                    }
                 }
             }
         }
