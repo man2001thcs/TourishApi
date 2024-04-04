@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -24,6 +25,7 @@ namespace SignalR.Hub
             await Clients.All.SendMessageToAll(message);
         }
 
+        [Authorize]
         public async Task SendMessageToUser(Guid adminId, string email, GuestMessageModel message)
         {
             try
@@ -38,16 +40,17 @@ namespace SignalR.Hub
                     UpdateDate = DateTime.UtcNow,
 
                 };
-                _context.Add(messageEntity);
+                await _context.AddAsync(messageEntity);
+                await _context.SaveChangesAsync();
 
 
                 var connection = _context.GuestMessageConList
-                    .OrderByDescending(connection => connection.CreateDate)
-                    .FirstOrDefault(u => u.AdminId == adminId && u.GuestEmail == email && u.Connected);
+                   .OrderByDescending(connection => connection.CreateDate)
+                   .FirstOrDefault(u => u.GuestEmail == email && u.Connected);
                 if (connection != null)
                 {
-                    await Clients.Client(connection.ConnectionID).SendMessageToAdmin(adminId, message);
-                    await Clients.Client(connection.ConnectionID).SendMessageToGuest(email, message);
+                    await Clients.Client(connection.ConnectionID).SendMessageToGuest(message);
+                    await Clients.Client(Context.ConnectionId).SendMessageToAdmin(message);
                 }
             }
             catch (Exception ex)
@@ -60,7 +63,40 @@ namespace SignalR.Hub
                 {
                     await Clients.Client(connectionAdmin.ConnectionID).SendAdminError(adminId, "Lỗi xảy ra: " + ex.ToString());
                 }
+                //await Clients.Client(connection.ConnectionID).SendOffersToUser(userId, null);
 
+            }
+        }
+
+        public async Task SendMessageToAdmin(Guid adminId, String email, GuestMessageModel message)
+        {
+            try
+            {
+
+                var messageEntity = new GuestMessage
+                {
+                    Content = message.Content,
+                    IsRead = false,
+                    IsDeleted = false,
+                    CreateDate = DateTime.UtcNow,
+                    UpdateDate = DateTime.UtcNow,
+
+                };
+
+                await _context.AddAsync(messageEntity);
+                await _context.SaveChangesAsync();
+
+                var connection = _context.GuestMessageConList
+                    .OrderByDescending(connection => connection.CreateDate)
+                    .FirstOrDefault(u => u.AdminId == adminId && u.Connected);
+                if (connection != null)
+                {
+                    await Clients.Client(connection.ConnectionID).SendMessageToAdmin(message);
+                    await Clients.Client(Context.ConnectionId).SendMessageToGuest(message);
+                }
+            }
+            catch (Exception ex)
+            {
                 var connectionGuest = _context.GuestMessageConList
                    .OrderByDescending(connection => connection.CreateDate)
                    .FirstOrDefault(u => u.GuestEmail == email && u.Connected);
@@ -102,7 +138,7 @@ namespace SignalR.Hub
                     await _context.AddAsync(adminCon);
 
                     var conHis = _context.GuestMessageConHisList.Include(u => u.GuestCon).OrderByDescending(connection => connection.CreateDate)
-                                        .SingleOrDefault(u => u.GuestCon.GuestEmail == guestEmail && u.GuestCon.Connected);
+                                        .SingleOrDefault(u => u.GuestCon.GuestEmail == guestEmail && u.GuestCon.GuestPhoneNumber == guestPhoneNumber && u.GuestCon.Connected);
 
                     conHis.AdminCon = adminCon;
 
@@ -131,6 +167,11 @@ namespace SignalR.Hub
                 await _context.AddAsync(hisCon);
                 await _context.SaveChangesAsync();
 
+                var adminConList = await _context.GuestMessageConList.Where(entity => entity.AdminId != null && entity.Connected).ToListAsync();
+                foreach (var adminCon in adminConList)
+                {
+                    await Clients.Client(adminCon.ConnectionID).NotifyNewCon(adminId, hisCon);
+                }
             }
 
             await base.OnConnectedAsync();

@@ -1,6 +1,5 @@
 ﻿using TourishApi.Service.Interface;
 using WebApplication1.Model;
-using WebApplication1.Model.Connection;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.InheritanceRepo.Connect;
 

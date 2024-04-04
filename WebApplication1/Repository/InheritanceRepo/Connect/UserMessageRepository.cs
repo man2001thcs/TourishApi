@@ -1,13 +1,8 @@
-﻿using FirebaseAdmin.Messaging;
-using Microsoft.EntityFrameworkCore;
-using System.IO;
-using System.Threading;
+﻿using Microsoft.EntityFrameworkCore;
 using TourishApi.Repository.Interface;
 using WebApplication1.Data.Chat;
-using WebApplication1.Data.Connection;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
-using WebApplication1.Model.Connection;
 using WebApplication1.Model.VirtualModel;
 
 namespace WebApplication1.Repository.InheritanceRepo.Connect
@@ -25,7 +20,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
         {
 
             var addValue = new UserMessage
-            {             
+            {
                 UserReceiveId = addModel.UserReceiveId,
                 UserSentId = addModel.UserSentId,
                 UpdateDate = addModel.UpdateDate,
@@ -106,7 +101,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
             #region Sorting
             entityQuery = entityQuery.OrderByDescending(entity => entity.CreateDate);
             #endregion
-       
+
             #region Paging
             var result = PaginatorModel<UserMessage>.Create(entityQuery, page, pageSize);
             #endregion
