@@ -41,7 +41,7 @@ namespace WebApplication1.Data
         public ICollection<NotificationCon> NotificationConList { get; set; }
         public ICollection<UserMessageCon> UserMessageConList { get; set; }
 
-        public ICollection<GuestMessageCon>? GuestMessageConList { get; set; }
+        public ICollection<AdminMessageCon> AdminMessageConList { get; set; }
         public ICollection<TourishComment> TourishCommentList { get; set; }
 
         public User()

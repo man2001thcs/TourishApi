@@ -40,6 +40,7 @@ namespace WebApplication1.Data.DbContextFile
         public DbSet<NotificationCon> NotificationConList { get; set; }
         public DbSet<UserMessageCon> UserMessageConList { get; set; }
         public DbSet<GuestMessageCon> GuestMessageConList { get; set; }
+        public DbSet<AdminMessageCon> AdminMessageConList { get; set; }
         public DbSet<GuestMessageConHistory> GuestMessageConHisList { get; set; }
         public DbSet<SaveFile> SaveFileList { get; set; }
 
@@ -295,10 +296,29 @@ namespace WebApplication1.Data.DbContextFile
                 entity.HasKey(message => message.Id);
                 entity.Property(message => message.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
 
-                entity.HasOne(e => e.Admin)
-                .WithMany(e => e.GuestMessageConList)
-                .HasForeignKey(e => e.AdminId)
+                entity.HasMany(e => e.GuestMessages)
+                .WithOne(e => e.GuestMessageCon)
+                .HasForeignKey(e => e.GuestMessageConId)
                 .HasConstraintName("FK_Guest_MessageCon");
+
+            });
+
+            modelBuilder.Entity<AdminMessageCon>(entity =>
+            {
+                entity.ToTable(nameof(AdminMessageCon));
+                entity.HasKey(message => message.Id);
+                entity.Property(message => message.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+                entity.HasOne(e => e.Admin)
+                .WithMany(e => e.AdminMessageConList)
+                .HasForeignKey(e => e.AdminId)
+                .HasConstraintName("FK_User_AdminMessageCon");
+
+                entity.HasMany(e => e.GuestMessages)
+               .WithOne(e => e.AdminMessageCon)
+               .HasForeignKey(e => e.AdminMessageConId)
+               .HasConstraintName("FK_Admin_MessageCon");
+
 
             });
 
@@ -310,17 +330,15 @@ namespace WebApplication1.Data.DbContextFile
 
                 // Remove the existing relationship with AdminCon
                 entity.HasOne(e => e.AdminCon)
-                    .WithMany() // Assuming AdminCon has a collection navigation property
-                    .HasForeignKey(e => e.AdminConId)
-                    .HasConstraintName("FK_GuestMessageCon_GuestMessageConHis_Admin")
-                    .OnDelete(DeleteBehavior.Restrict); // Adjust delete behavior as per your requirement
+                    .WithOne(e => e.GuestMessageConHis)
+                    .HasForeignKey<GuestMessageConHistory>(e => e.AdminConId)
+                    .HasConstraintName("FK_GuestMessageCon_GuestMessageConHis_Admin").OnDelete(DeleteBehavior.ClientSetNull);
 
                 // Define the new relationship with GuestCon
                 entity.HasOne(e => e.GuestCon)
                     .WithOne(e => e.GuestMessageConHis)
-                    .HasForeignKey<GuestMessageCon>(e => e.GuestConHisId)
-                    .HasConstraintName("FK_GuestMessageCon_GuestMessageConHis_Guest")
-                    .OnDelete(DeleteBehavior.Restrict); // Adjust delete behavior as per your requirement
+                    .HasForeignKey<GuestMessageConHistory>(e => e.GuestConId)
+                    .HasConstraintName("FK_GuestMessageCon_GuestMessageConHis_Guest").OnDelete(DeleteBehavior.ClientSetNull); ;
             });
 
             modelBuilder.Entity<SaveFile>(entity =>

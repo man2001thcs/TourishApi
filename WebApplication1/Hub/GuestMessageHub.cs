@@ -55,7 +55,7 @@ namespace SignalR.Hub
             }
             catch (Exception ex)
             {
-                var connectionAdmin = _context.GuestMessageConList
+                var connectionAdmin = _context.AdminMessageConList
                     .OrderByDescending(connection => connection.CreateDate)
                     .FirstOrDefault(u => u.AdminId == adminId && u.Connected);
 
@@ -86,7 +86,7 @@ namespace SignalR.Hub
                 await _context.AddAsync(messageEntity);
                 await _context.SaveChangesAsync();
 
-                var connection = _context.GuestMessageConList
+                var connection = _context.AdminMessageConList
                     .OrderByDescending(connection => connection.CreateDate)
                     .FirstOrDefault(u => u.AdminId == adminId && u.Connected);
                 if (connection != null)
@@ -126,7 +126,7 @@ namespace SignalR.Hub
 
                 if (admin != null)
                 {
-                    var adminCon = new GuestMessageCon
+                    var adminCon = new AdminMessageCon
                     {
                         AdminId = new Guid(adminId),
                         ConnectionID = Context.ConnectionId,
@@ -167,7 +167,7 @@ namespace SignalR.Hub
                 await _context.AddAsync(hisCon);
                 await _context.SaveChangesAsync();
 
-                var adminConList = await _context.GuestMessageConList.Where(entity => entity.AdminId != null && entity.Connected).ToListAsync();
+                var adminConList = await _context.AdminMessageConList.Where(entity => entity.AdminId != null && entity.Connected).ToListAsync();
                 foreach (var adminCon in adminConList)
                 {
                     await Clients.Client(adminCon.ConnectionID).NotifyNewCon(adminId, hisCon);
