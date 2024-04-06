@@ -4,20 +4,25 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SignalR.Hub.Client;
+using TourishApi.Service.InheritanceService;
+using WebApplication1.Data;
 using WebApplication1.Data.Chat;
 using WebApplication1.Data.Connection;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
+using WebApplication1.Model.Connection;
 
 namespace SignalR.Hub
 {
     public class GuestMessageHub : Hub<IGuestMessageHubClient>
     {
         private readonly MyDbContext _context;
+        private readonly NotificationService _notificationService;
 
-        public GuestMessageHub(MyDbContext context, IOptionsMonitor<AppSetting> optionsMonitor)
+        public GuestMessageHub(MyDbContext context, IOptionsMonitor<AppSetting> optionsMonitor, NotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public async Task SendMessageToAll(GuestMessageModel message)
@@ -113,11 +118,11 @@ namespace SignalR.Hub
 
         public override async Task OnConnectedAsync()
         {
-            var adminId = Context.GetHttpContext().Request.Query["adminId"];
+            var adminId = (string)Context.GetHttpContext().Request.Query["adminId"];
 
-            var guestEmail = Context.GetHttpContext().Request.Query["guestEmail"];
-            var guestName = Context.GetHttpContext().Request.Query["guestName"];
-            var guestPhoneNumber = Context.GetHttpContext().Request.Query["guestPhoneNumber"];
+            var guestEmail = (string)Context.GetHttpContext().Request.Query["guestEmail"];
+            var guestName = (string)Context.GetHttpContext().Request.Query["guestName"];
+            var guestPhoneNumber = (string)Context.GetHttpContext().Request.Query["guestPhoneNumber"];
 
             if (!adminId.IsNullOrEmpty())
             {
@@ -141,10 +146,18 @@ namespace SignalR.Hub
                                         .SingleOrDefault(u => u.GuestCon.GuestEmail == guestEmail && u.GuestCon.GuestPhoneNumber == guestPhoneNumber && u.GuestCon.Connected);
 
                     conHis.AdminCon = adminCon;
-
+                    var adminInfo = new AdminMessageConDTOModel
+                    {
+                        AdminId = adminCon.AdminId,
+                        ConnectionID = Context.ConnectionId,
+                        AdminFullName = admin.FullName,
+                        Connected = true
+                    };
+                    await Clients.Client(conHis.GuestCon.ConnectionID).NotifyNewCon(conHis.GuestCon.GuestEmail, adminInfo);
                     await _context.SaveChangesAsync();
                 }
             }
+
             else if (!guestEmail.IsNullOrEmpty())
             {
                 var guestCon = new GuestMessageCon
@@ -167,23 +180,49 @@ namespace SignalR.Hub
                 await _context.AddAsync(hisCon);
                 await _context.SaveChangesAsync();
 
-                var adminConList = await _context.AdminMessageConList.Where(entity => entity.AdminId != null && entity.Connected).ToListAsync();
+                var adminConList = await _context.NotificationConList.Where(entity => entity.User.Role == UserRole.Admin && entity.Connected).ToListAsync();
                 foreach (var adminCon in adminConList)
                 {
-                    await Clients.Client(adminCon.ConnectionID).NotifyNewCon(adminId, hisCon);
-                }
-            }
+                    var notification = new NotificationModel
+                    {
+                        UserCreateId = null,
+                        UserReceiveId = adminCon.UserId,
+                        TourishPlanId = null,
+                        Content = "Hệ thống nhận được yêu cầu tư vấn mới",
+                        ContentCode = "",
+                        IsRead = false,
+                        IsDeleted = false,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow
+                    };
 
+                    await _notificationService.CreateNewAsync(adminCon.UserId, notification);
+                }
+
+
+            }
             await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
 
-            var connection = _context.GuestMessageConList.FirstOrDefault(u => u.ConnectionID == Context.ConnectionId);
-            if (connection != null)
-                connection.Connected = false;
-            await _context.SaveChangesAsync();
+            var connectionAdmin = _context.AdminMessageConList.Include(entity => entity.GuestMessageConHis).OrderByDescending(entity => entity.CreateDate).FirstOrDefault(u => u.ConnectionID == Context.ConnectionId);
+            if (connectionAdmin != null)
+            {
+                connectionAdmin.Connected = false;
+                connectionAdmin.GuestMessageConHis.CloseDate = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+            }
+
+            var guestConnection = _context.GuestMessageConList.Include(entity => entity.GuestMessageConHis).OrderByDescending(entity => entity.CreateDate).FirstOrDefault(u => u.ConnectionID == Context.ConnectionId);
+            if (guestConnection != null)
+            {
+                guestConnection.Connected = false;
+                guestConnection.GuestMessageConHis.CloseDate = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
 
             await base.OnDisconnectedAsync(exception);
         }

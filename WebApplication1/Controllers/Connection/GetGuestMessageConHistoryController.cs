@@ -23,6 +23,22 @@ public class GetGuestMessageConHistoryController : ControllerBase
 
     }
 
+    // GET: api/<ValuesController>
+    [HttpGet("admin")]
+    public IActionResult GetAllForAdmin(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+    {
+        return Ok(_entityService.GetAllForAdmin(search, type, sortBy, page, pageSize));
+
+    }
+
+    // GET: api/<ValuesController>
+    [HttpGet("guest-connection")]
+    public IActionResult GetByGuestConId(string connectionId)
+    {
+        return Ok(_entityService.getByGuestConId(connectionId));
+
+    }
+
     [HttpGet("{id}")]
     public IActionResult GetById(Guid id)
     {

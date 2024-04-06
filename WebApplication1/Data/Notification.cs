@@ -6,7 +6,7 @@ namespace WebApplication1.Data
     public class Notification
     {
         public Guid Id { get; set; }
-        public Guid UserCreateId { get; set; }
+        public Guid? UserCreateId { get; set; }
         public Guid? UserReceiveId { get; set; }
         public string Content { get; set; }
         public string? ContentCode { get; set; }

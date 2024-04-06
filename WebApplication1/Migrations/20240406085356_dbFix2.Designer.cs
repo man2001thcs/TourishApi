@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data.DbContextFile;
 
@@ -11,9 +12,11 @@ using WebApplication1.Data.DbContextFile;
 namespace TourishApi.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240406085356_dbFix2")]
+    partial class dbFix2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -355,7 +358,7 @@ namespace TourishApi.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("getutcdate()");
 
-                    b.Property<Guid?>("UserCreateId")
+                    b.Property<Guid>("UserCreateId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("UserReceiveId")
@@ -1170,6 +1173,8 @@ namespace TourishApi.Migrations
                     b.HasOne("WebApplication1.Data.User", "UserCreator")
                         .WithMany("NotificationCreateList")
                         .HasForeignKey("UserCreateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("FK_UserCreate_Notification");
 
                     b.HasOne("WebApplication1.Data.User", "UserReceiver")

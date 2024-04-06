@@ -179,8 +179,8 @@ namespace WebApplication1.Repository.InheritanceRepo
                 IsRead = notification.IsRead,
                 CreateDate = notification.CreateDate,
                 UpdateDate = notification.UpdateDate,
-                TourName = notification.TourishPlan.TourName,
-                CreatorFullName = notification.UserCreator.FullName,
+                TourName = notification.TourishPlan != null ? notification.TourishPlan.TourName : "",
+                CreatorFullName = notification.UserCreator != null ? notification.UserCreator.FullName : "",
             }).ToList();
 
             var entityVM = new Response
@@ -242,8 +242,8 @@ namespace WebApplication1.Repository.InheritanceRepo
                 IsRead = notification.IsRead,
                 CreateDate = notification.CreateDate,
                 UpdateDate = notification.UpdateDate,
-                TourName = notification.TourishPlan.TourName,
-                CreatorFullName = notification.UserCreator.FullName,
+                TourName = notification.TourishPlan != null ? notification.TourishPlan.TourName : "",
+                CreatorFullName = notification.UserCreator != null ? notification.UserCreator.FullName : "",
             }).ToList();
 
             var entityVM = new Response

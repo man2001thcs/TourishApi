@@ -12,6 +12,7 @@ using TourishApi.Task;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
 using WebApplication1.Repository.InheritanceRepo;
+using WebApplication1.Repository.InheritanceRepo.Connect;
 using WebApplication1.Repository.InheritanceRepo.Receipt;
 using WebApplication1.Repository.InheritanceRepo.RestaurantPlace;
 using WebApplication1.Repository.InheritanceRepo.RestHoouse;
@@ -75,6 +76,7 @@ namespace MyWebApiApp
             services.AddScoped<TourishCommentRepository>();
             services.AddScoped<TourishCategoryRepository>();
             services.AddScoped<NotificationRepository>();
+            services.AddScoped<GuestMessageConHistoryRepository>();
 
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IReceiptRepository, ReceiptRepository>();
@@ -89,6 +91,7 @@ namespace MyWebApiApp
             services.AddScoped<TourishCommentService>();
             services.AddScoped<TourishCategoryService>();
             services.AddScoped<NotificationService>();
+            services.AddScoped<GuestMessageConHistoryService>();
 
             services.AddScoped<IBlobService, BlobService>();
             services.AddSingleton<IUserIdProvider, IdBasedUserIdProvider>();

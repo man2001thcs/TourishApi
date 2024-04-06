@@ -43,7 +43,7 @@ namespace TourishApi.Service.InheritanceService
                         UpdateDate = DateTime.UtcNow
                     };
 
-                    await _notificationService.CreateNewAsync(notification.UserCreateId, notification);
+                    await _notificationService.CreateNewAsync(new Guid(userId), notification);
 
                     return response;
                 }

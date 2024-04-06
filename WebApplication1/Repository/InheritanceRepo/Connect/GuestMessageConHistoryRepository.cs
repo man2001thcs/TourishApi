@@ -1,4 +1,5 @@
-﻿using TourishApi.Repository.Interface;
+﻿using Microsoft.EntityFrameworkCore;
+using TourishApi.Repository.Interface;
 using WebApplication1.Data.Connection;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
@@ -57,7 +58,8 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
 
         public Response GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
         {
-            var entityQuery = _context.GuestMessageConHisList.AsQueryable();
+            var entityQuery = _context.GuestMessageConHisList.Include(entity => entity.GuestCon)
+                .Include(entity => entity.AdminCon).ThenInclude(entity => entity.Admin).AsQueryable();
 
             #region Filtering
             if (!string.IsNullOrEmpty(search))
@@ -74,10 +76,100 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
             var result = PaginatorModel<GuestMessageConHistory>.Create(entityQuery, page, pageSize);
             #endregion
 
+            var resultDto = result.Select(guestConHis => new GuestMessageConHistoryDTOModel
+            {
+                Id = guestConHis.Id,
+                GuestMessageCon = new GuestMessageConDTOModel
+                {
+                    Id = guestConHis.GuestCon.Id,
+                    Connected = guestConHis.GuestCon.Connected,
+                    GuestEmail = guestConHis.GuestCon.GuestEmail,
+                    GuestName = guestConHis.GuestCon.GuestName,
+                    GuestPhoneNumber = guestConHis.GuestCon.GuestPhoneNumber,
+                    ConnectionID = guestConHis.GuestCon.ConnectionID,
+                    UserAgent = guestConHis.GuestCon.UserAgent,
+                    CreateDate = guestConHis.GuestCon.CreateDate
+                },
+                AdminMessageCon = guestConHis.AdminCon != null ? new AdminMessageConDTOModel
+                {
+                    Id = guestConHis.AdminCon.Id,
+                    Connected = guestConHis.AdminCon.Connected,
+                    ConnectionID = guestConHis.AdminCon.ConnectionID,
+                    AdminFullName = guestConHis.AdminCon.Admin.FullName,
+                    AdminId = guestConHis.AdminCon.AdminId.Value,
+                    UserAgent = guestConHis.AdminCon.UserAgent,
+                    CreateDate = guestConHis.AdminCon.CreateDate
+                } : null,
+                Status = guestConHis.GuestCon.Connected ? (guestConHis.AdminCon != null ? 1 : 2) : 0,
+                CreateDate = guestConHis.CreateDate,
+                CloseDate = guestConHis.CloseDate,
+            }).OrderByDescending(entity => entity.Status).ToList();
+
             var entityVM = new Response
             {
                 resultCd = 0,
-                Data = result.ToList(),
+                Data = resultDto,
+                count = result.TotalCount,
+            };
+            return entityVM;
+
+        }
+
+        public Response GetAllForAdmin(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        {
+            var entityQuery = _context.GuestMessageConHisList.Include(entity => entity.GuestCon)
+                .Include(entity => entity.AdminCon).ThenInclude(entity => entity.Admin).AsQueryable();
+
+            #region Filtering
+            entityQuery = entityQuery.Where(entity => entity.AdminCon != null);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                entityQuery = entityQuery.Where(entity => entity.AdminConId.ToString().Contains(search));
+            }
+            #endregion
+
+            #region Sorting
+            entityQuery = entityQuery.OrderByDescending(entity => entity.CreateDate);
+            #endregion
+
+            #region Paging
+            var result = PaginatorModel<GuestMessageConHistory>.Create(entityQuery, page, pageSize);
+            #endregion
+
+            var resultDto = result.Select(guestConHis => new GuestMessageConHistoryDTOModel
+            {
+                Id = guestConHis.Id,
+                GuestMessageCon = new GuestMessageConDTOModel
+                {
+                    Id = guestConHis.GuestCon.Id,
+                    Connected = guestConHis.GuestCon.Connected,
+                    GuestEmail = guestConHis.GuestCon.GuestEmail,
+                    GuestName = guestConHis.GuestCon.GuestName,
+                    GuestPhoneNumber = guestConHis.GuestCon.GuestPhoneNumber,
+                    ConnectionID = guestConHis.GuestCon.ConnectionID,
+                    UserAgent = guestConHis.GuestCon.UserAgent,
+                    CreateDate = guestConHis.GuestCon.CreateDate
+                },
+                AdminMessageCon = guestConHis.AdminCon != null ? new AdminMessageConDTOModel
+                {
+                    Id = guestConHis.AdminCon.Id,
+                    Connected = guestConHis.AdminCon.Connected,
+                    ConnectionID = guestConHis.AdminCon.ConnectionID,
+                    AdminFullName = guestConHis.AdminCon.Admin.FullName,
+                    AdminId = guestConHis.AdminCon.AdminId.Value,
+                    UserAgent = guestConHis.AdminCon.UserAgent,
+                    CreateDate = guestConHis.AdminCon.CreateDate
+                } : null,
+                Status = guestConHis.GuestCon.Connected ? (guestConHis.AdminCon != null ? 1 : 2) : 0,
+                CreateDate = guestConHis.CreateDate,
+                CloseDate = guestConHis.CloseDate,
+            }).OrderByDescending(entity => entity.Status).ToList();
+
+            var entityVM = new Response
+            {
+                resultCd = 0,
+                Data = resultDto,
                 count = result.TotalCount,
             };
             return entityVM;
@@ -93,6 +185,52 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
             {
                 resultCd = 0,
                 Data = entity
+            };
+        }
+
+        public Response getByGuestConId(string connectionId)
+        {
+            var entity = _context.GuestMessageConHisList.Include(entity => entity.GuestCon)
+                .ThenInclude(entity => entity.GuestMessages)
+                .Include(entity => entity.AdminCon).ThenInclude(entity => entity.Admin)
+                .Include(entity => entity.AdminCon).ThenInclude(entity => entity.GuestMessages).Where(entity
+                => entity.GuestCon.ConnectionID == connectionId);
+
+            var resultDto = entity.Select(guestConHis => new GuestMessageConHistoryDTOModel
+            {
+                Id = guestConHis.Id,
+                GuestMessageCon = new GuestMessageConDTOModel
+                {
+                    Id = guestConHis.GuestCon.Id,
+                    Connected = guestConHis.GuestCon.Connected,
+                    GuestEmail = guestConHis.GuestCon.GuestEmail,
+                    GuestName = guestConHis.GuestCon.GuestName,
+                    GuestPhoneNumber = guestConHis.GuestCon.GuestPhoneNumber,
+                    GuestMessages = guestConHis.GuestCon.GuestMessages,
+                    ConnectionID = guestConHis.GuestCon.ConnectionID,
+                    UserAgent = guestConHis.GuestCon.UserAgent,
+                    CreateDate = guestConHis.GuestCon.CreateDate
+                },
+                AdminMessageCon = guestConHis.AdminCon != null ? new AdminMessageConDTOModel
+                {
+                    Id = guestConHis.AdminCon.Id,
+                    Connected = guestConHis.AdminCon.Connected,
+                    ConnectionID = guestConHis.AdminCon.ConnectionID,
+                    AdminFullName = guestConHis.AdminCon.Admin.FullName,
+                    GuestMessages = guestConHis.AdminCon.GuestMessages,
+                    AdminId = guestConHis.AdminCon.AdminId.Value,
+                    UserAgent = guestConHis.AdminCon.UserAgent,
+                    CreateDate = guestConHis.AdminCon.CreateDate
+                } : null,
+                Status = guestConHis.GuestCon.Connected ? (guestConHis.AdminCon != null ? 1 : 2) : 0,
+                CreateDate = guestConHis.CreateDate,
+                CloseDate = guestConHis.CloseDate,
+            }).FirstOrDefault();
+
+            return new Response
+            {
+                resultCd = 0,
+                Data = resultDto
             };
         }
 

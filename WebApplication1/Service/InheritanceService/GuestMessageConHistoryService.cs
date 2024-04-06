@@ -71,6 +71,52 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
+        public Response GetAllForAdmin(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        {
+            try
+            {
+                var entityList = _entityRepository.GetAllForAdmin(search, type, sortBy, page, pageSize);
+                return entityList;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C1114",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public Response getByGuestConId(string connectionId)
+        {
+            try
+            {
+                var entity = _entityRepository.getByGuestConId(connectionId);
+                if (entity.Data == null)
+                {
+                    var response = new Response { resultCd = 1, MessageCode = "C1110", };
+                    return response;
+                }
+                else
+                {
+                    return entity;
+                }
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C1114",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
         public Response GetById(Guid id)
         {
             try

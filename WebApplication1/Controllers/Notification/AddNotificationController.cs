@@ -22,7 +22,7 @@ namespace WebApplication1.Controllers.Notification
         [Authorize(Policy = "CreateNotificationAccess")]
         public async Task<IActionResult> CreateNew(NotificationModel entityModel)
         {
-            return Ok(_entityService.CreateNewAsync(entityModel.UserCreateId, entityModel));
+            return Ok(_entityService.CreateNewAsync(entityModel.UserCreateId.Value, entityModel));
         }
     }
 }

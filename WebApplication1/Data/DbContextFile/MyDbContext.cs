@@ -243,12 +243,12 @@ namespace WebApplication1.Data.DbContextFile
 
                 entity.HasOne(e => e.UserCreator)
                 .WithMany(e => e.NotificationCreateList)
-                .HasForeignKey(e => e.UserCreateId)
+                .HasForeignKey(e => e.UserCreateId).IsRequired(false)
                 .HasConstraintName("FK_UserCreate_Notification");
 
                 entity.HasOne(e => e.UserReceiver)
                .WithMany(e => e.NotificationReceiveList)
-               .HasForeignKey(e => e.UserReceiveId)
+               .HasForeignKey(e => e.UserReceiveId).IsRequired(false)
                .HasConstraintName("FK_UserReceive_Notification");
             });
 
@@ -331,7 +331,7 @@ namespace WebApplication1.Data.DbContextFile
                 // Remove the existing relationship with AdminCon
                 entity.HasOne(e => e.AdminCon)
                     .WithOne(e => e.GuestMessageConHis)
-                    .HasForeignKey<GuestMessageConHistory>(e => e.AdminConId)
+                    .HasForeignKey<GuestMessageConHistory>(e => e.AdminConId).IsRequired(false)
                     .HasConstraintName("FK_GuestMessageCon_GuestMessageConHis_Admin").OnDelete(DeleteBehavior.ClientSetNull);
 
                 // Define the new relationship with GuestCon

@@ -1,6 +1,7 @@
 ﻿
 using WebApplication1.Data.Connection;
 using WebApplication1.Model;
+using WebApplication1.Model.Connection;
 
 namespace SignalR.Hub.Client
 {
@@ -10,7 +11,7 @@ namespace SignalR.Hub.Client
         Task SendMessageToGuest(GuestMessageModel message);
         Task SendMessageToAll(GuestMessageModel message);
         Task SendString(String stringA);
-        Task NotifyNewCon(String adminId, GuestMessageConHistory guestMessageConHistory);
+        Task NotifyNewCon(String adminId, AdminMessageConDTOModel adminMessageConDTO);
         Task SendAdminError(Guid userId, string error);
 
         Task SendGuestError(String email, string error);
