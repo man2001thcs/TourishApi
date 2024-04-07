@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data.DbContextFile;
 
@@ -11,9 +12,11 @@ using WebApplication1.Data.DbContextFile;
 namespace TourishApi.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240407151020_removeGroupId")]
+    partial class removeGroupId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -65,6 +68,7 @@ namespace TourishApi.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("AdminMessageConId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
@@ -78,6 +82,7 @@ namespace TourishApi.Migrations
                         .HasDefaultValueSql("getutcdate()");
 
                     b.Property<Guid?>("GuestMessageConId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
@@ -1067,11 +1072,13 @@ namespace TourishApi.Migrations
                     b.HasOne("WebApplication1.Data.Connection.AdminMessageCon", "AdminMessageCon")
                         .WithMany("GuestMessages")
                         .HasForeignKey("AdminMessageConId")
+                        .IsRequired()
                         .HasConstraintName("FK_Admin_MessageCon");
 
                     b.HasOne("WebApplication1.Data.Connection.GuestMessageCon", "GuestMessageCon")
                         .WithMany("GuestMessages")
                         .HasForeignKey("GuestMessageConId")
+                        .IsRequired()
                         .HasConstraintName("FK_Guest_MessageCon");
 
                     b.Navigation("AdminMessageCon");

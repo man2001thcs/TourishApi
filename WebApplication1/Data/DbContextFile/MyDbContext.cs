@@ -230,7 +230,13 @@ namespace WebApplication1.Data.DbContextFile
                 entity.HasOne(e => e.GuestMessageCon)
                 .WithMany(e => e.GuestMessages)
                 .HasForeignKey(e => e.GuestMessageConId)
-                .HasConstraintName("FK_GuestCon_GuestMessage")
+                .HasConstraintName("FK_GuestCon_GuestMessage").IsRequired(false)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+                entity.HasOne(e => e.AdminMessageCon)
+                .WithMany(e => e.GuestMessages)
+                .HasForeignKey(e => e.AdminMessageConId)
+                .HasConstraintName("FK_AdminCon_GuestMessage").IsRequired(false)
                 .OnDelete(DeleteBehavior.ClientSetNull);
             });
 

@@ -7,7 +7,6 @@ namespace WebApplication1.Data.Chat
     public class GuestMessage
     {
         public Guid Id { get; set; }
-        public Guid? GroupId { get; set; }
         public string Content { get; set; }
         public bool IsRead { get; set; }
         public bool IsDeleted { get; set; }

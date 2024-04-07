@@ -30,32 +30,40 @@ namespace SignalR.Hub
             await Clients.All.SendMessageToAll(message);
         }
 
-        [Authorize]
         public async Task SendMessageToUser(Guid adminId, string email, GuestMessageModel message)
         {
             try
             {
-
-                var messageEntity = new GuestMessage
+                var conHis = _context.GuestMessageConHisList.Include(u => u.GuestCon).Include(u => u.AdminCon).ThenInclude(u => u.Admin).
+                    OrderByDescending(connection => connection.CreateDate).
+                    Where(u => u.GuestCon.GuestEmail == email && u.GuestCon.Connected && u.AdminCon.Connected && u.AdminCon.Admin.Id == adminId)
+                                        .FirstOrDefault();
+                if (conHis != null)
                 {
-                    Content = message.Content,
-                    IsRead = false,
-                    IsDeleted = false,
-                    CreateDate = DateTime.UtcNow,
-                    UpdateDate = DateTime.UtcNow,
+                    var messageEntity = new GuestMessage
+                    {
+                        Content = message.Content,
+                        IsRead = false,
+                        IsDeleted = false,
+                        AdminMessageConId = conHis.AdminConId,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow,
+                    };
 
-                };
-                await _context.AddAsync(messageEntity);
-                await _context.SaveChangesAsync();
+                    await _context.AddAsync(messageEntity);
+                    await _context.SaveChangesAsync();
 
 
-                var connection = _context.GuestMessageConList
-                   .OrderByDescending(connection => connection.CreateDate)
-                   .FirstOrDefault(u => u.GuestEmail == email && u.Connected);
-                if (connection != null)
-                {
-                    await Clients.Client(connection.ConnectionID).SendMessageToGuest(message);
-                    await Clients.Client(Context.ConnectionId).SendMessageToAdmin(message);
+                    var connection = conHis.GuestCon;
+                    if (connection != null)
+                    {
+                        var returnMess = message;
+                        returnMess.State = 1;
+                        returnMess.Id = messageEntity.Id;
+                        returnMess.CreateDate = messageEntity.CreateDate;
+                        await Clients.Client(connection.ConnectionID).SendMessageToUser(adminId, email, returnMess);                      
+                        await Clients.Client(Context.ConnectionId).SendMessageToAdmin(adminId, email, returnMess);
+                    }
                 }
             }
             catch (Exception ex)
@@ -66,7 +74,9 @@ namespace SignalR.Hub
 
                 if (connectionAdmin != null)
                 {
-                    await Clients.Client(connectionAdmin.ConnectionID).SendAdminError(adminId, "Lỗi xảy ra: " + ex.ToString());
+                    var returnMess = message;
+                    returnMess.State = 2;
+                    await Clients.Client(Context.ConnectionId).SendMessageToUser(adminId, email, returnMess);
                 }
                 //await Clients.Client(connection.ConnectionID).SendOffersToUser(userId, null);
 
@@ -77,27 +87,36 @@ namespace SignalR.Hub
         {
             try
             {
+                var conHis = _context.GuestMessageConHisList.Include(u => u.GuestCon).Include(u => u.AdminCon).ThenInclude(u => u.Admin).
+                    OrderByDescending(connection => connection.CreateDate).
+                    Where(u => u.GuestCon.GuestEmail == email && u.GuestCon.Connected && u.AdminCon.Connected && u.AdminCon.Admin.Id == adminId)
+                                        .FirstOrDefault();
 
-                var messageEntity = new GuestMessage
+                if (conHis != null)
                 {
-                    Content = message.Content,
-                    IsRead = false,
-                    IsDeleted = false,
-                    CreateDate = DateTime.UtcNow,
-                    UpdateDate = DateTime.UtcNow,
+                    var messageEntity = new GuestMessage
+                    {
+                        Content = message.Content,
+                        IsRead = false,
+                        IsDeleted = false,
+                        GuestMessageConId = conHis.GuestConId,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow,
+                    };
 
-                };
+                    await _context.AddAsync(messageEntity);
+                    await _context.SaveChangesAsync();
 
-                await _context.AddAsync(messageEntity);
-                await _context.SaveChangesAsync();
-
-                var connection = _context.AdminMessageConList
-                    .OrderByDescending(connection => connection.CreateDate)
-                    .FirstOrDefault(u => u.AdminId == adminId && u.Connected);
-                if (connection != null)
-                {
-                    await Clients.Client(connection.ConnectionID).SendMessageToAdmin(message);
-                    await Clients.Client(Context.ConnectionId).SendMessageToGuest(message);
+                    var connection = conHis.AdminCon;
+                    if (connection != null)
+                    {
+                        var returnMess = message;
+                        returnMess.State = 1;
+                        returnMess.Id = messageEntity.Id;
+                        returnMess.CreateDate = messageEntity.CreateDate;
+                        await Clients.Client(connection.ConnectionID).SendMessageToAdmin(adminId, email, returnMess);
+                        await Clients.Client(Context.ConnectionId).SendMessageToUser(adminId, email, returnMess);
+                    }
                 }
             }
             catch (Exception ex)
@@ -108,7 +127,9 @@ namespace SignalR.Hub
 
                 if (connectionGuest != null)
                 {
-                    await Clients.Client(connectionGuest.ConnectionID).SendGuestError(email, "Lỗi xảy ra: " + ex.ToString());
+                    var returnMess = message;
+                    returnMess.State = 2;
+                    await Clients.Client(Context.ConnectionId).SendMessageToUser(adminId, email, returnMess);
                 }
                 //await Clients.Client(connection.ConnectionID).SendOffersToUser(userId, null);
 
@@ -143,7 +164,7 @@ namespace SignalR.Hub
                     await _context.AddAsync(adminCon);
 
                     var conHis = _context.GuestMessageConHisList.Include(u => u.GuestCon).OrderByDescending(connection => connection.CreateDate)
-                                        .SingleOrDefault(u => u.GuestCon.GuestEmail == guestEmail && u.GuestCon.GuestPhoneNumber == guestPhoneNumber && u.GuestCon.Connected);
+                                        .FirstOrDefault(u => u.GuestCon.GuestEmail == guestEmail && u.GuestCon.GuestPhoneNumber == guestPhoneNumber && u.GuestCon.Connected);
 
                     conHis.AdminCon = adminCon;
                     var adminInfo = new AdminMessageConDTOModel
@@ -153,7 +174,7 @@ namespace SignalR.Hub
                         AdminFullName = admin.FullName,
                         Connected = true
                     };
-                    await Clients.Client(conHis.GuestCon.ConnectionID).NotifyNewCon(conHis.GuestCon.GuestEmail, adminInfo);
+                    await Clients.Client(conHis.GuestCon.ConnectionID).NotifyNewCon(adminId, adminInfo);
                     await _context.SaveChangesAsync();
                 }
             }
@@ -198,8 +219,6 @@ namespace SignalR.Hub
 
                     await _notificationService.CreateNewAsync(adminCon.UserId, notification);
                 }
-
-
             }
             await base.OnConnectedAsync();
         }
