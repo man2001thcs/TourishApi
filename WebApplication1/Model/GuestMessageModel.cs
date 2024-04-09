@@ -7,6 +7,7 @@
         public string Content { get; set; }
         public Boolean? IsRead { get; set; }
         public Boolean? IsDeleted { get; set; }
+        public int? Side { get; set; }
         public DateTime? CreateDate { get; set; }
         public DateTime? UpdateDate { get; set; }
     }

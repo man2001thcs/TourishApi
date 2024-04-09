@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TourishApi.Repository.Interface;
+using WebApplication1.Data.Chat;
 using WebApplication1.Data.Connection;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
@@ -117,7 +118,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
 
         public Response GetAllForAdmin(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
         {
-            var entityQuery = _context.GuestMessageConHisList.Include(entity => entity.GuestCon)
+            var entityQuery = _context.GuestMessageConHisList.Include(entity => entity.GuestCon).ThenInclude(entity => entity.GuestMessages)
                 .Include(entity => entity.AdminCon).ThenInclude(entity => entity.Admin).AsQueryable();
 
             #region Filtering
@@ -149,7 +150,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                     GuestPhoneNumber = guestConHis.GuestCon.GuestPhoneNumber,
                     ConnectionID = guestConHis.GuestCon.ConnectionID,
                     UserAgent = guestConHis.GuestCon.UserAgent,
-                    CreateDate = guestConHis.GuestCon.CreateDate
+                    CreateDate = guestConHis.GuestCon.CreateDate,                   
                 },
                 AdminMessageCon = guestConHis.AdminCon != null ? new AdminMessageConDTOModel
                 {
@@ -159,7 +160,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                     AdminFullName = guestConHis.AdminCon.Admin.FullName,
                     AdminId = guestConHis.AdminCon.AdminId.Value,
                     UserAgent = guestConHis.AdminCon.UserAgent,
-                    CreateDate = guestConHis.AdminCon.CreateDate
+                    CreateDate = guestConHis.AdminCon.CreateDate                  
                 } : null,
                 Status = guestConHis.GuestCon.Connected ? (guestConHis.AdminCon != null ? 1 : 2) : 0,
                 CreateDate = guestConHis.CreateDate,
@@ -196,7 +197,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                 .Include(entity => entity.AdminCon).ThenInclude(entity => entity.GuestMessages).Where(entity
                 => entity.GuestCon.ConnectionID == connectionId);
 
-            var resultDto = entity.Select(guestConHis => new GuestMessageConHistoryDTOModel
+            var resultDtoQuery = entity.Select(guestConHis => new GuestMessageConHistoryDTOModel
             {
                 Id = guestConHis.Id,
                 GuestMessageCon = new GuestMessageConDTOModel
@@ -205,8 +206,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                     Connected = guestConHis.GuestCon.Connected,
                     GuestEmail = guestConHis.GuestCon.GuestEmail,
                     GuestName = guestConHis.GuestCon.GuestName,
-                    GuestPhoneNumber = guestConHis.GuestCon.GuestPhoneNumber,
-                    GuestMessages = guestConHis.GuestCon.GuestMessages,
+                    GuestPhoneNumber = guestConHis.GuestCon.GuestPhoneNumber,                  
                     ConnectionID = guestConHis.GuestCon.ConnectionID,
                     UserAgent = guestConHis.GuestCon.UserAgent,
                     CreateDate = guestConHis.GuestCon.CreateDate
@@ -216,8 +216,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                     Id = guestConHis.AdminCon.Id,
                     Connected = guestConHis.AdminCon.Connected,
                     ConnectionID = guestConHis.AdminCon.ConnectionID,
-                    AdminFullName = guestConHis.AdminCon.Admin.FullName,
-                    GuestMessages = guestConHis.AdminCon.GuestMessages,
+                    AdminFullName = guestConHis.AdminCon.Admin.FullName,                   
                     AdminId = guestConHis.AdminCon.AdminId.Value,
                     UserAgent = guestConHis.AdminCon.UserAgent,
                     CreateDate = guestConHis.AdminCon.CreateDate
@@ -225,7 +224,25 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                 Status = guestConHis.GuestCon.Connected ? (guestConHis.AdminCon != null ? 1 : 2) : 0,
                 CreateDate = guestConHis.CreateDate,
                 CloseDate = guestConHis.CloseDate,
-            }).FirstOrDefault();
+            });
+
+            var resultDto = resultDtoQuery.FirstOrDefault();
+            var messageList = _context.GuestMessages.Include(entity => entity.AdminMessageCon).Include(entity => entity.GuestMessageCon)
+                .Where(entity => entity.GuestMessageCon.ConnectionID == resultDto.GuestMessageCon.ConnectionID || entity.AdminMessageCon.ConnectionID == resultDto.AdminMessageCon.ConnectionID)
+                .Select(element => new GuestMessageModel
+                {
+                    Content = element.Content,
+                    CreateDate = element.CreateDate,
+                    UpdateDate = element.UpdateDate,
+                    Id = element.Id,
+                    IsDeleted = element.IsDeleted,
+                    IsRead = element.IsRead,
+                    Side = element.AdminMessageCon != null ? 1: 2,
+                    State = 2
+                }).ToList();
+
+            resultDto.GuestMessages = messageList;
+
 
             return new Response
             {

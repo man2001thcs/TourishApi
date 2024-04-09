@@ -61,8 +61,13 @@ namespace SignalR.Hub
                         returnMess.State = 1;
                         returnMess.Id = messageEntity.Id;
                         returnMess.CreateDate = messageEntity.CreateDate;
-                        await Clients.Client(connection.ConnectionID).SendMessageToUser(adminId, email, returnMess);                      
+                        returnMess.Side = 1;
                         await Clients.Client(Context.ConnectionId).SendMessageToAdmin(adminId, email, returnMess);
+                        returnMess.State = 2;
+                        returnMess.Side = 2;
+                        await Clients.Client(connection.ConnectionID).SendMessageToUser(adminId, email, returnMess);
+                        
+                       
                     }
                 }
             }
@@ -75,7 +80,7 @@ namespace SignalR.Hub
                 if (connectionAdmin != null)
                 {
                     var returnMess = message;
-                    returnMess.State = 2;
+                    returnMess.State = 3;
                     await Clients.Client(Context.ConnectionId).SendMessageToUser(adminId, email, returnMess);
                 }
                 //await Clients.Client(connection.ConnectionID).SendOffersToUser(userId, null);
@@ -114,8 +119,13 @@ namespace SignalR.Hub
                         returnMess.State = 1;
                         returnMess.Id = messageEntity.Id;
                         returnMess.CreateDate = messageEntity.CreateDate;
-                        await Clients.Client(connection.ConnectionID).SendMessageToAdmin(adminId, email, returnMess);
+                        returnMess.Side = 1;
                         await Clients.Client(Context.ConnectionId).SendMessageToUser(adminId, email, returnMess);
+                        returnMess.State = 2;
+                        returnMess.Side = 2;
+                        await Clients.Client(connection.ConnectionID).SendMessageToAdmin(adminId, email, returnMess);
+                       
+                        
                     }
                 }
             }
@@ -128,7 +138,7 @@ namespace SignalR.Hub
                 if (connectionGuest != null)
                 {
                     var returnMess = message;
-                    returnMess.State = 2;
+                    returnMess.State = 3;
                     await Clients.Client(Context.ConnectionId).SendMessageToUser(adminId, email, returnMess);
                 }
                 //await Clients.Client(connection.ConnectionID).SendOffersToUser(userId, null);

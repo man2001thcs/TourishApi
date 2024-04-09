@@ -23,7 +23,7 @@ namespace WebApplication1.Model.Connection
         public required string ConnectionID { get; set; }
         public string UserAgent { get; set; }
         public bool Connected { get; set; }
-        public ICollection<GuestMessage>? GuestMessages { get; set; }
+        public ICollection<GuestMessageModel>? GuestMessages { get; set; }
         public DateTime CreateDate { get; set; }
     }
 
@@ -36,7 +36,7 @@ namespace WebApplication1.Model.Connection
         public required string ConnectionID { get; set; }
         public string UserAgent { get; set; }
         public bool Connected { get; set; }
-        public ICollection<GuestMessage>? GuestMessages { get; set; }
+        public ICollection<GuestMessageModel>? GuestMessages { get; set; }
         public DateTime CreateDate { get; set; }
     }
 }

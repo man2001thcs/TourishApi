@@ -13,6 +13,7 @@
         public Guid Id { get; set; }
         public GuestMessageConDTOModel GuestMessageCon { get; set; }
         public AdminMessageConDTOModel? AdminMessageCon { get; set; }
+        public List<GuestMessageModel>? GuestMessages { get; set; }
         public int Status { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime CloseDate { get; set; }
