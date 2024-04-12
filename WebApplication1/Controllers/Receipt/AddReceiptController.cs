@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+using TourishApi.Service.InheritanceService;
 using WebApplication1.Model.Receipt;
-using WebApplication1.Model.VirtualModel;
-using WebApplication1.Repository.Interface.Receipt;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,50 +11,27 @@ namespace WebApplication1.Controllers.Receipt
     [ApiController]
     public class AddReceiptController : ControllerBase
     {
-        private readonly IReceiptRepository _receiptRepository;
+        private readonly ReceiptService _receiptService;
 
         private readonly char[] delimiter = new char[] { ';' };
 
-        public AddReceiptController(IReceiptRepository receiptRepository
+        public AddReceiptController(ReceiptService receiptService
             )
         {
-            _receiptRepository = receiptRepository;
+            _receiptService = receiptService;
         }
 
         [HttpPost]
         [Authorize(Policy = "CreateReceiptAccess")]
         public async Task<IActionResult> CreateNew(FullReceiptInsertModel receiptInsertModel)
         {
-            try
-            {
+            return Ok(await _receiptService.CreateNew(receiptInsertModel));
+        }
 
-                var receiptReturn = await _receiptRepository.Add(receiptInsertModel);
-
-                var receiptReturnId = (Guid)receiptReturn.returnId;
-
-                Debug.Write(receiptReturnId);
-
-                var response = new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "I511",
-                };
-                return Ok(response);
-
-
-            }
-            catch (Exception ex)
-            {
-                var response = new Response
-                {
-                    resultCd = 1,
-                    MessageCode = "C515",
-                    Error = ex.Message,
-                    Data = ex
-
-                };
-                return BadRequest(response);
-            }
+        [HttpPost("client")]
+        public async Task<IActionResult> CreateNewForClient(FullReceiptClientInsertModel receiptInsertModel)
+        {
+            return Ok(await _receiptService.CreateNewForClient(receiptInsertModel));
         }
     }
 }

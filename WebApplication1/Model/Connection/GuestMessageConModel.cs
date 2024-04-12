@@ -1,6 +1,4 @@
-﻿using WebApplication1.Data.Chat;
-
-namespace WebApplication1.Model.Connection
+﻿namespace WebApplication1.Model.Connection
 {
     public class GuestMessageConModel
     {

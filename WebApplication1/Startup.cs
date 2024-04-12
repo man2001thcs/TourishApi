@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Hangfire;
+using MailKit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using SignalR.Hub;
 using System.Text;
 using TourishApi.Service.InheritanceService;
+using TourishApi.Service.InheritanceService.Schedule;
 using TourishApi.Task;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
@@ -36,6 +38,8 @@ namespace MyWebApiApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
+
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAngularOrigins",
@@ -77,6 +81,7 @@ namespace MyWebApiApp
             services.AddScoped<TourishCategoryRepository>();
             services.AddScoped<NotificationRepository>();
             services.AddScoped<GuestMessageConHistoryRepository>();
+            services.AddScoped<TourishOuterScheduleRepository>();
 
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IReceiptRepository, ReceiptRepository>();
@@ -92,11 +97,17 @@ namespace MyWebApiApp
             services.AddScoped<TourishCategoryService>();
             services.AddScoped<NotificationService>();
             services.AddScoped<GuestMessageConHistoryService>();
+            services.AddScoped<ReceiptService>();
+            services.AddScoped<MailService>();
+            services.AddScoped<MovingScheduleService>();
+            services.AddScoped<EatScheduleService>();
+            services.AddScoped<StayingScheduleService>();
 
             services.AddScoped<IBlobService, BlobService>();
             services.AddSingleton<IUserIdProvider, IdBasedUserIdProvider>();
 
             services.Configure<AppSetting>(Configuration.GetSection("AppSettings"));
+            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
 
             var secretKey = Configuration["AppSettings:SecretKey"];
             var secretKeyBytes = Encoding.UTF8.GetBytes(secretKey);

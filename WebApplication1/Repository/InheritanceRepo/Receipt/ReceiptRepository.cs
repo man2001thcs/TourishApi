@@ -82,9 +82,73 @@ public class ReceiptRepository : IReceiptRepository
                 // Out of ticket              
             };
         }
+    }
+
+    public async Task<Response> AddForClient(FullReceiptClientInsertModel receiptModel)
+    {
+        var totalReceipt = _context.TotalReceiptList.FirstOrDefault(entity => entity.TourishPlanId == receiptModel.TourishPlanId);
+
+        if (totalReceipt == null)
+        {
+            totalReceipt = new TotalReceipt
+            {
+                TourishPlanId = receiptModel.TourishPlanId,
+                Status = ReceiptStatus.Created,
+                Description = "",
+
+                CreatedDate = DateTime.UtcNow,
+                UpdateDate = DateTime.UtcNow
+            };
+
+            await _context.AddAsync(totalReceipt);
+            await _context.SaveChangesAsync();
+        }
 
 
+        var fullReceipt = new FullReceipt
+        {
+            TotalReceiptId = totalReceipt.TotalReceiptId,
+            OriginalPrice = receiptModel.OriginalPrice,
+            GuestName = receiptModel.GuestName,
+            Description = "",
+            PhoneNumber = receiptModel.PhoneNumber,
+            Email = receiptModel.Email,
+            TotalTicket = receiptModel.TotalTicket,
+            DiscountAmount = 0,
+            DiscountFloat = 0,
+            Status = FullReceiptStatus.Created,
+            CreatedDate = DateTime.UtcNow,
+            UpdateDate = DateTime.UtcNow
+        };
 
+        var planExist = _context.TourishPlan.FirstOrDefault((plan
+              => plan.Id == totalReceipt.TourishPlanId));
+
+        if (planExist != null && planExist.RemainTicket >= receiptModel.TotalTicket)
+        {
+            planExist.RemainTicket = planExist.RemainTicket - receiptModel.TotalTicket;
+            _context.Add(fullReceipt);
+
+            await _context.SaveChangesAsync();
+
+            return new Response
+            {
+                resultCd = 0,
+                MessageCode = "I511",
+                returnId = fullReceipt.FullReceiptId,
+                // Create type success               
+            };
+        }
+        else
+        {
+            return new Response
+            {
+                resultCd = 0,
+                MessageCode = "C515",
+                returnId = fullReceipt.FullReceiptId,
+                // Out of ticket              
+            };
+        }
     }
 
     public Response Delete(Guid id)
@@ -290,4 +354,5 @@ public class ReceiptRepository : IReceiptRepository
             // Update type success               
         };
     }
+
 }

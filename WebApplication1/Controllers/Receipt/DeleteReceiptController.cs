@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1.Model.VirtualModel;
-using WebApplication1.Repository.Interface.Receipt;
+using TourishApi.Service.InheritanceService;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -11,39 +10,21 @@ namespace WebApplication1.Controllers.Receipt
     [ApiController]
     public class DeleteReceiptController : ControllerBase
     {
-        private readonly IReceiptRepository _receiptRepository;
+        private readonly ReceiptService _receiptService;
 
-        public DeleteReceiptController(IReceiptRepository receiptRepository)
+        private readonly char[] delimiter = new char[] { ';' };
+
+        public DeleteReceiptController(ReceiptService receiptService
+            )
         {
-            _receiptRepository = receiptRepository;
+            _receiptService = receiptService;
         }
 
         [HttpDelete("{id}")]
         [Authorize(Policy = "DeleteReceiptAccess")]
         public IActionResult DeleteById(Guid id)
         {
-
-            try
-            {
-                _receiptRepository.Delete(id);
-                var response = new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "I513",
-                };
-                return Ok(response);
-            }
-            catch
-            {
-                var response = new Response
-                {
-                    resultCd = 1,
-                    MessageCode = "C514",
-                };
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
-            }
-
-
+            return Ok(_receiptService.DeleteById(id));
         }
     }
 }

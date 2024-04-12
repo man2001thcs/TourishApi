@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebApplication1.Model.VirtualModel;
-using WebApplication1.Repository.Interface.Receipt;
+using TourishApi.Service.InheritanceService;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -10,43 +9,21 @@ namespace WebApplication1.Controllers.Receipt
     [ApiController]
     public class GetFullReceiptController : ControllerBase
     {
-        private readonly IReceiptRepository _receiptRepository;
+        private readonly ReceiptService _receiptService;
 
-        public GetFullReceiptController(IReceiptRepository receiptRepository)
+        private readonly char[] delimiter = new char[] { ';' };
+
+        public GetFullReceiptController(ReceiptService receiptService
+            )
         {
-            _receiptRepository = receiptRepository;
+            _receiptService = receiptService;
         }
+
 
         [HttpGet("{id}")]
         public IActionResult GetById(Guid id)
         {
-            try
-            {
-                var receipt = _receiptRepository.getFullReceiptById(id);
-                if (receipt.Data == null)
-                {
-                    var response = new Response
-                    {
-                        resultCd = 1,
-                        MessageCode = "C510",
-                    };
-                    return NotFound(response);
-                }
-                else
-                {
-                    return Ok(receipt);
-                }
-            }
-            catch (Exception ex)
-            {
-                var response = new Response
-                {
-                    resultCd = 1,
-                    MessageCode = "C514",
-                    Error = ex.Message
-                };
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
-            }
+            return Ok(_receiptService.GetFullReceiptById(id));
         }
     }
 }

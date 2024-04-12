@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TourishApi.Repository.Interface;
-using WebApplication1.Data.Chat;
 using WebApplication1.Data.Connection;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
@@ -150,7 +149,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                     GuestPhoneNumber = guestConHis.GuestCon.GuestPhoneNumber,
                     ConnectionID = guestConHis.GuestCon.ConnectionID,
                     UserAgent = guestConHis.GuestCon.UserAgent,
-                    CreateDate = guestConHis.GuestCon.CreateDate,                   
+                    CreateDate = guestConHis.GuestCon.CreateDate,
                 },
                 AdminMessageCon = guestConHis.AdminCon != null ? new AdminMessageConDTOModel
                 {
@@ -160,7 +159,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                     AdminFullName = guestConHis.AdminCon.Admin.FullName,
                     AdminId = guestConHis.AdminCon.AdminId.Value,
                     UserAgent = guestConHis.AdminCon.UserAgent,
-                    CreateDate = guestConHis.AdminCon.CreateDate                  
+                    CreateDate = guestConHis.AdminCon.CreateDate
                 } : null,
                 Status = guestConHis.GuestCon.Connected ? (guestConHis.AdminCon != null ? 1 : 2) : 0,
                 CreateDate = guestConHis.CreateDate,
@@ -206,7 +205,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                     Connected = guestConHis.GuestCon.Connected,
                     GuestEmail = guestConHis.GuestCon.GuestEmail,
                     GuestName = guestConHis.GuestCon.GuestName,
-                    GuestPhoneNumber = guestConHis.GuestCon.GuestPhoneNumber,                  
+                    GuestPhoneNumber = guestConHis.GuestCon.GuestPhoneNumber,
                     ConnectionID = guestConHis.GuestCon.ConnectionID,
                     UserAgent = guestConHis.GuestCon.UserAgent,
                     CreateDate = guestConHis.GuestCon.CreateDate
@@ -216,7 +215,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                     Id = guestConHis.AdminCon.Id,
                     Connected = guestConHis.AdminCon.Connected,
                     ConnectionID = guestConHis.AdminCon.ConnectionID,
-                    AdminFullName = guestConHis.AdminCon.Admin.FullName,                   
+                    AdminFullName = guestConHis.AdminCon.Admin.FullName,
                     AdminId = guestConHis.AdminCon.AdminId.Value,
                     UserAgent = guestConHis.AdminCon.UserAgent,
                     CreateDate = guestConHis.AdminCon.CreateDate
@@ -237,7 +236,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                     Id = element.Id,
                     IsDeleted = element.IsDeleted,
                     IsRead = element.IsRead,
-                    Side = element.AdminMessageCon != null ? 1: 2,
+                    Side = element.AdminMessageCon != null ? 1 : 2,
                     State = 2
                 }).ToList();
 

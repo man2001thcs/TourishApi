@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -66,8 +65,8 @@ namespace SignalR.Hub
                         returnMess.State = 2;
                         returnMess.Side = 2;
                         await Clients.Client(connection.ConnectionID).SendMessageToUser(adminId, email, returnMess);
-                        
-                       
+
+
                     }
                 }
             }
@@ -124,8 +123,8 @@ namespace SignalR.Hub
                         returnMess.State = 2;
                         returnMess.Side = 2;
                         await Clients.Client(connection.ConnectionID).SendMessageToAdmin(adminId, email, returnMess);
-                       
-                        
+
+
                     }
                 }
             }

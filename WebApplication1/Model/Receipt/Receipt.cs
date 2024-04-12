@@ -21,6 +21,16 @@ namespace WebApplication1.Model.Receipt
         public double DiscountAmount { get; set; }
     }
 
+    public class FullReceiptClientInsertModel
+    {
+        public Guid TourishPlanId { get; set; }
+        public string GuestName { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Email { get; set; }
+        public double OriginalPrice { get; set; }
+        public int TotalTicket { get; set; }
+    }
+
     public class FullReceiptUpdateModel
     {
         public Guid TourishPlanId { get; set; }

@@ -10,6 +10,7 @@ namespace WebApplication1.Repository.Interface.Receipt
         Response getById(Guid id);
         Response getFullReceiptById(Guid id);
         Task<Response> Add(FullReceiptInsertModel receiptModel);
+        Task<Response> AddForClient(FullReceiptClientInsertModel receiptModel);
         Task<Response> Update(FullReceiptUpdateModel receiptModel);
         Response Delete(Guid id);
     }

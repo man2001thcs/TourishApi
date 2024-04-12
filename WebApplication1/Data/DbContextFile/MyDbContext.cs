@@ -63,17 +63,17 @@ namespace WebApplication1.Data.DbContextFile
 
                 entity.HasMany(e => e.MovingSchedules)
                 .WithOne(e => e.TourishPlan)
-                .HasForeignKey(e => e.TourishPlanId)
+                .HasForeignKey(e => e.TourishPlanId).IsRequired(false)
                 .HasConstraintName("FK_TourishPlan_MovingSchedule");
 
                 entity.HasMany(e => e.EatSchedules)
                 .WithOne(e => e.TourishPlan)
-                .HasForeignKey(e => e.TourishPlanId)
+                .HasForeignKey(e => e.TourishPlanId).IsRequired(false)
                 .HasConstraintName("FK_TourishPlan_EatSchedules");
 
                 entity.HasMany(e => e.StayingSchedules)
                 .WithOne(e => e.TourishPlan)
-                .HasForeignKey(e => e.TourishPlanId)
+                .HasForeignKey(e => e.TourishPlanId).IsRequired(false)
                 .HasConstraintName("FK_TourishPlan_StayingSchedules");
 
                 entity.HasOne(e => e.TotalReceipt)
