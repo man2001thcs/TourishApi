@@ -54,7 +54,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 HeadingPlace = addModel.HeadingPlace,
                 StartingPlace = addModel.StartingPlace,
                 TransportId = addModel.TransportId,
-                VehicleType =addModel.VehicleType,
+                VehicleType = addModel.VehicleType,
                 SinglePrice = addModel.SinglePrice,
 
                 TourishPlanId = null,

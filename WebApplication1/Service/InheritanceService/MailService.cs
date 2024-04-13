@@ -1,13 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using MailKit.Security;
-using Microsoft.Extensions.Logging;
+﻿using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using WebApplication1.Model;
 namespace WebApplication1.Service.InheritanceService;
 
-public class SendMailService
+public class SendMailService : ISendMailService
 {
     private readonly MailSettings mailSettings;
 

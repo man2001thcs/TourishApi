@@ -59,11 +59,6 @@ public class ReceiptRepository : IReceiptRepository
 
         if (planExist != null && planExist.RemainTicket >= receiptModel.TotalTicket)
         {
-            planExist.RemainTicket = planExist.RemainTicket - receiptModel.TotalTicket;
-            _context.Add(fullReceipt);
-
-            await _context.SaveChangesAsync();
-
             return new Response
             {
                 resultCd = 0,
@@ -126,11 +121,6 @@ public class ReceiptRepository : IReceiptRepository
 
         if (planExist != null && planExist.RemainTicket >= receiptModel.TotalTicket)
         {
-            planExist.RemainTicket = planExist.RemainTicket - receiptModel.TotalTicket;
-            _context.Add(fullReceipt);
-
-            await _context.SaveChangesAsync();
-
             return new Response
             {
                 resultCd = 0,
@@ -300,12 +290,26 @@ public class ReceiptRepository : IReceiptRepository
             var planExist = _context.TourishPlan.FirstOrDefault((plan
               => plan.Id == receipt.TotalReceipt.TourishPlanId));
 
-            if (planExist != null && planExist.RemainTicket + oldTotalTicket >= receiptModel.TotalTicket)
+            if (receipt.Status == FullReceiptStatus.Completed)
             {
-                planExist.RemainTicket = planExist.RemainTicket + oldTotalTicket - receiptModel.TotalTicket;
+                if (planExist != null && planExist.RemainTicket  >= receiptModel.TotalTicket)
+                {
+                    planExist.RemainTicket = planExist.RemainTicket - receiptModel.TotalTicket;
 
-                await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync();
+                }
             }
+
+            if (receipt.Status == FullReceiptStatus.Cancelled)
+            {
+                if (planExist != null && planExist.RemainTicket + oldTotalTicket >= receiptModel.TotalTicket && receipt.Status == FullReceiptStatus.Completed)
+                {
+                    planExist.RemainTicket = planExist.RemainTicket + oldTotalTicket;
+
+                    await _context.SaveChangesAsync();
+                }
+            }
+
             else
             {
                 return new Response

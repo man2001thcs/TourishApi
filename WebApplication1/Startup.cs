@@ -22,6 +22,7 @@ using WebApplication1.Repository.InheritanceRepo.Transport;
 using WebApplication1.Repository.Interface;
 using WebApplication1.Repository.Interface.Receipt;
 using WebApplication1.Service;
+using WebApplication1.Service.InheritanceService;
 using WebApplication1.Trigger;
 
 namespace MyWebApiApp
@@ -38,7 +39,7 @@ namespace MyWebApiApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            
+
 
             services.AddCors(options =>
             {
@@ -98,7 +99,9 @@ namespace MyWebApiApp
             services.AddScoped<NotificationService>();
             services.AddScoped<GuestMessageConHistoryService>();
             services.AddScoped<ReceiptService>();
-            services.AddScoped<MailService>();
+
+            services.AddTransient<ISendMailService, SendMailService>();
+
             services.AddScoped<MovingScheduleService>();
             services.AddScoped<EatScheduleService>();
             services.AddScoped<StayingScheduleService>();
