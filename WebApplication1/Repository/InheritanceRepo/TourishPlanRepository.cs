@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using WebApplication1.Controllers.TourComment;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Schedule;
@@ -103,6 +104,7 @@ public class TourishPlanRepository : ITourishPlanRepository
           => entity.Id == id));
         if (entity != null)
         {
+            blobService.DeleteFileBlobAsync("tourish-content-container", entity.Id.ToString());
             _context.Remove(entity);
             _context.SaveChanges();
         }

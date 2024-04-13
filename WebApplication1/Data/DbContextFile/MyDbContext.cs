@@ -162,6 +162,11 @@ namespace WebApplication1.Data.DbContextFile
                 .WithMany(e => e.TourishCommentList)
                 .HasForeignKey(e => e.UserId)
                 .HasConstraintName("FK_User_TourishComment");
+
+                entity.HasOne(e => e.TourishPlan)
+               .WithMany(e => e.TourishCommentList)
+               .HasForeignKey(e => e.TourishPlanId)
+               .HasConstraintName("FK_TourishPlan_TourishComment");
             });
 
             modelBuilder.Entity<TotalReceipt>(entity =>

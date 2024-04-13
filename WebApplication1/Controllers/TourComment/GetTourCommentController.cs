@@ -24,6 +24,13 @@ namespace WebApplication1.Controllers.TourComment
 
         }
 
+        // GET: api/<ValuesController>
+        [HttpGet("tourishplan")]
+        public IActionResult GetAllByTourishPlanId(Guid tourishPlanId, string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        {
+            return Ok(_entityService.GetAllByTourishPlanId(tourishPlanId, search, type, sortBy, page, pageSize));
+        }
+
         [HttpGet("{id}")]
         public IActionResult GetById(Guid id)
         {

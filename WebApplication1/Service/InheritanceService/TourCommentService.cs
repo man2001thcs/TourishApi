@@ -72,6 +72,25 @@ namespace TourishApi.Service.InheritanceService
                 return response;
             }
         }
+        public Response GetAllByTourishPlanId(Guid tourishPlanId,string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        {
+            try
+            {
+                var entityList = _entityRepository.GetAllByTourishPlanId(tourishPlanId,search, type, sortBy, page, pageSize);
+                return entityList;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C814",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
 
         public Response GetById(Guid id)
         {

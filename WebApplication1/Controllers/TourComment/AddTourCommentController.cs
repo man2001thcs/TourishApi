@@ -19,7 +19,7 @@ namespace WebApplication1.Controllers.TourComment
         }
 
         [HttpPost]
-        [Authorize(Policy = "CreateTourishCommentAccess")]
+        [Authorize]
         public IActionResult CreateNew(TourishCommentModel entityModel)
         {
             return Ok(_entityService.CreateNew(entityModel));

@@ -3,16 +3,19 @@ using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
+using WebApplication1.Service;
 
 namespace WebApplication1.Repository.InheritanceRepo
 {
     public class TourishCommentRepository : IBaseRepository<TourishCommentModel>
     {
         private readonly MyDbContext _context;
+        private readonly IBlobService blobService;
         public static int PAGE_SIZE { get; set; } = 5;
-        public TourishCommentRepository(MyDbContext _context)
+        public TourishCommentRepository(MyDbContext _context, IBlobService blobService)
         {
             this._context = _context;
+            this.blobService = blobService;
         }
 
         public Response Add(TourishCommentModel addModel)
@@ -20,14 +23,38 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             var addValue = new TourishComment
             {
-                Content = addModel.Content,
                 UserId = addModel.UserId,
+                TourishPlanId = addModel.TourishPlanId,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
+          
             _context.Add(addValue);
             _context.SaveChanges();
 
+            return new Response
+            {
+                resultCd = 0,
+                MessageCode = "I811",
+                // Create type success               
+            };
+        }
+
+        public async Task<Response> AddAsync(TourishCommentModel addModel)
+        {
+
+            var addValue = new TourishComment
+            {
+                UserId = addModel.UserId,
+                TourishPlanId = addModel.TourishPlanId,
+                CreateDate = DateTime.UtcNow,
+                UpdateDate = DateTime.UtcNow,
+            };
+
+            await _context.AddAsync(addValue);
+            await _context.SaveChangesAsync();
+            await blobService.UploadStringBlobAsync("tourish-comment-container", addModel.Content ?? "", "text/plain", addValue.Id.ToString() ?? "" + ".txt");
+            
             return new Response
             {
                 resultCd = 0,
@@ -44,6 +71,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             if (deleteEntity != null)
             {
                 _context.Remove(deleteEntity);
+                blobService.DeleteFileBlobAsync("tourish-comment-container", id.ToString());
                 _context.SaveChanges();
             }
 
@@ -60,10 +88,6 @@ namespace WebApplication1.Repository.InheritanceRepo
             var entityQuery = _context.TourishComments.AsQueryable();
 
             #region Filtering
-            if (!string.IsNullOrEmpty(search))
-            {
-                entityQuery = entityQuery.Where(entity => entity.Content.Contains(search));
-            }
             #endregion
 
             #region Sorting
@@ -73,9 +97,45 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 switch (sortBy)
                 {
-                    case "name_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.Content);
+                    case "updateDate_asc":
+                        entityQuery = entityQuery.OrderBy(entity => entity.UpdateDate);
                         break;
+                    case "updateDate_desc":
+                        entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
+                        break;
+                }
+            }
+            #endregion
+
+            #region Paging
+            var result = PaginatorModel<TourishComment>.Create(entityQuery, page, pageSize);
+            #endregion
+
+            var entityVM = new Response
+            {
+                resultCd = 0,
+                Data = result.ToList(),
+                count = result.TotalCount,
+            };
+            return entityVM;
+
+        }
+
+        public Response GetAllByTourishPlanId(Guid tourishPlanId, string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        {
+            var entityQuery = _context.TourishComments.AsQueryable();
+
+            #region Filtering
+            entityQuery = entityQuery.Where(entity => entity.TourishPlanId == tourishPlanId);
+            #endregion
+
+            #region Sorting
+            entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
+
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                switch (sortBy)
+                {
                     case "updateDate_asc":
                         entityQuery = entityQuery.OrderBy(entity => entity.UpdateDate);
                         break;
@@ -114,13 +174,11 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response getByName(String name)
         {
-            var entity = _context.TourishComments.FirstOrDefault((entity
-                => entity.Content == name));
 
             return new Response
             {
                 resultCd = 0,
-                Data = entity
+                Data = null
             };
         }
 
@@ -130,8 +188,11 @@ namespace WebApplication1.Repository.InheritanceRepo
                 => entity.Id == entityModel.Id));
             if (entity != null)
             {
+                if (entityModel.Content != null && entityModel.Content.Length > 0) {
+                    blobService.UploadStringBlobAsync("tourish-comment-container", entityModel.Content ?? "", "text/plain", entityModel.Id.ToString() ?? "" + ".txt");
+                }
+               
                 entity.UpdateDate = DateTime.UtcNow;
-                entity.Content = entityModel.Content;
                 _context.SaveChanges();
             }
 

@@ -1,6 +1,5 @@
 ﻿using Azure.Storage.Blobs;
 using Hangfire;
-using MailKit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;

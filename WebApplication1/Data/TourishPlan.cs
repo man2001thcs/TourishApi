@@ -42,7 +42,7 @@ namespace WebApplication1.Data
         public ICollection<MovingSchedule> MovingSchedules { get; set; }
         public ICollection<StayingSchedule> StayingSchedules { get; set; }
         public ICollection<TourishInterest> TourishInterestList { get; set; }
-
+        public ICollection<TourishComment> TourishCommentList { get; set; }
         public TourishPlan()
         {
             PlanStatus = PlanStatus.Waiting;
