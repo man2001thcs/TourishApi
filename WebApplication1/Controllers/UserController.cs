@@ -645,46 +645,6 @@ namespace WebApplication1.Controllers
                 permissions.Add(PolicyTerm.UPDATE_PASSWORD_USER);
             }
 
-            if (role == UserRole.Staff)
-            {
-                //BOOK policy
-                permissions.Add(PolicyTerm.CREATE_TOURISH_PLAN);
-                permissions.Add(PolicyTerm.UPDATE_TOURISH_PLAN);
-                permissions.Add(PolicyTerm.DELETE_TOURISH_PLAN);
-
-                permissions.Add(PolicyTerm.CREATE_TOURISH_CATEGORY);
-                permissions.Add(PolicyTerm.UPDATE_TOURISH_CATEGORY);
-                permissions.Add(PolicyTerm.DELETE_TOURISH_CATEGORY);
-
-                permissions.Add(PolicyTerm.CREATE_TOURISH_COMMENT);
-                permissions.Add(PolicyTerm.UPDATE_TOURISH_COMMENT);
-                permissions.Add(PolicyTerm.DELETE_TOURISH_COMMENT);
-
-                permissions.Add(PolicyTerm.CREATE_MOVING_CONTACT);
-                permissions.Add(PolicyTerm.UPDATE_MOVING_CONTACT);
-                permissions.Add(PolicyTerm.DELETE_MOVING_CONTACT);
-
-                permissions.Add(PolicyTerm.CREATE_RESTHOUSE_CONTACT);
-                permissions.Add(PolicyTerm.UPDATE_RESTHOUSE_CONTACT);
-                permissions.Add(PolicyTerm.DELETE_RESTHOUSE_CONTACT);
-
-                permissions.Add(PolicyTerm.CREATE_RESTAURANT);
-                permissions.Add(PolicyTerm.UPDATE_RESTAURANT);
-                permissions.Add(PolicyTerm.DELETE_RESTAURANT);
-
-                permissions.Add(PolicyTerm.CREATE_NOTIFICATION);
-                permissions.Add(PolicyTerm.UPDATE_NOTIFICATION);
-                permissions.Add(PolicyTerm.DELETE_NOTIFICATION);
-
-                permissions.Add(PolicyTerm.CREATE_RECEIPT);
-                permissions.Add(PolicyTerm.UPDATE_RECEIPT);
-                permissions.Add(PolicyTerm.DELETE_RECEIPT);
-
-                permissions.Add(PolicyTerm.SELF_GET_USER);
-                permissions.Add(PolicyTerm.UPDATE_INFO_USER);
-                permissions.Add(PolicyTerm.UPDATE_PASSWORD_USER);
-            }
-
             return permissions.ToArray();
         }
 

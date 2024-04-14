@@ -1,7 +1,9 @@
-﻿using TourishApi.Repository.Interface;
+﻿using Microsoft.EntityFrameworkCore;
+using TourishApi.Repository.Interface;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
+using WebApplication1.Model.Connection;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Service;
 
@@ -123,7 +125,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response GetAllByTourishPlanId(Guid tourishPlanId, string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
         {
-            var entityQuery = _context.TourishComments.AsQueryable();
+            var entityQuery = _context.TourishComments.Include(entityQuery => entityQuery.User).AsQueryable();
 
             #region Filtering
             entityQuery = entityQuery.Where(entity => entity.TourishPlanId == tourishPlanId);
@@ -150,10 +152,21 @@ namespace WebApplication1.Repository.InheritanceRepo
             var result = PaginatorModel<TourishComment>.Create(entityQuery, page, pageSize);
             #endregion
 
+
+            var resultDto = result.Select(tourComment => new TourishCommentDTOModel
+            {
+                Id = tourComment.Id,
+               UserId = tourComment.UserId,
+               UserName = tourComment.User.UserName,
+               TourishPlanId = tourComment.TourishPlanId,
+                CreateDate = tourComment.CreateDate,
+                UpdateDate = tourComment.UpdateDate,
+            }).OrderByDescending(entity => entity.CreateDate).ToList();
+
             var entityVM = new Response
             {
                 resultCd = 0,
-                Data = result.ToList(),
+                Data = resultDto,
                 count = result.TotalCount,
             };
             return entityVM;

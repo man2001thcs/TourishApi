@@ -8,7 +8,7 @@ namespace WebApplication1.Data
 {
     public enum UserRole
     {
-        New = 0, Staff = 1, Admin = 2,
+        New = 0, User = 1, Admin = 2,
     }
 
     [Table("User")]
