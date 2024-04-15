@@ -4,13 +4,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace WebApplication1.Data
 {
 
-    [Table("TourishComment")]
-    public class TourishComment
+    [Table("TourishRating")]
+    public class TourishRating
     {
         [Key]
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
         public Guid TourishPlanId { get; set; }
+        public int Rating { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
         public User User { get; set; }
@@ -18,3 +19,4 @@ namespace WebApplication1.Data
         public TourishPlan TourishPlan { get; set; }
     }
 }
+

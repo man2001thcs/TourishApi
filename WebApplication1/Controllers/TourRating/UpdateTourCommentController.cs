@@ -5,24 +5,24 @@ using WebApplication1.Model;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication1.Controllers.TourComment
+namespace WebApplication1.Controllers.TourRating
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AddTourCommentController : ControllerBase
+    public class UpdateTourRatingController : ControllerBase
     {
         private readonly TourishCommentService _entityService;
 
-        public AddTourCommentController(TourishCommentService entityService)
+        public UpdateTourRatingController(TourishCommentService entityService)
         {
             _entityService = entityService;
         }
 
-        [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> CreateNew(TourishCommentModel entityModel)
+        [HttpPut("{id}")]
+        [Authorize(Policy = "UpdateTourishCommentAccess")]
+        public IActionResult UpdateTourishCommentById(Guid id, TourishCommentModel TourishCommentModel)
         {
-            return Ok(await _entityService.CreateNewAsync(entityModel));
+            return Ok(_entityService.UpdateEntityById(id, TourishCommentModel));
         }
     }
 }

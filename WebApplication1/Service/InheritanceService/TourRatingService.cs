@@ -5,17 +5,17 @@ using WebApplication1.Repository.InheritanceRepo;
 
 namespace TourishApi.Service.InheritanceService
 {
-    public class TourishCommentService
-        : IBaseService<TourishCommentRepository, TourishCommentModel>
+    public class TourishRatingService
+        : IBaseService<TourishRatingRepository, TourishRatingModel>
     {
-        private readonly TourishCommentRepository _entityRepository;
+        private readonly TourishRatingRepository _entityRepository;
 
-        public TourishCommentService(TourishCommentRepository airPlaneRepository)
+        public TourishRatingService(TourishRatingRepository airPlaneRepository)
         {
             _entityRepository = airPlaneRepository;
         }
 
-        public Response CreateNew(TourishCommentModel entityModel)
+        public Response CreateNew(TourishRatingModel entityModel)
         {
             try
             {
@@ -28,26 +28,7 @@ namespace TourishApi.Service.InheritanceService
                 return new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C814",
-                    Error = ex.Message
-                };
-            }
-        }
-
-        public async Task<Response> CreateNewAsync(TourishCommentModel entityModel)
-        {
-            try
-            {
-                var response = await _entityRepository.AddAsync(entityModel);
-
-                return (response);
-            }
-            catch (Exception ex)
-            {
-                return new Response
-                {
-                    resultCd = 1,
-                    MessageCode = "C814",
+                    MessageCode = "C824",
                     Error = ex.Message
                 };
             }
@@ -58,7 +39,7 @@ namespace TourishApi.Service.InheritanceService
             try
             {
                 _entityRepository.Delete(id);
-                var response = new Response { resultCd = 0, MessageCode = "I813" };
+                var response = new Response { resultCd = 0, MessageCode = "I823" };
                 return response;
             }
             catch (Exception ex)
@@ -66,7 +47,7 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C814",
+                    MessageCode = "C824",
                     Error = ex.Message
                 };
                 return response;
@@ -85,7 +66,7 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C814",
+                    MessageCode = "C824",
                     Error = ex.Message
                 };
                 return response;
@@ -103,7 +84,7 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C814",
+                    MessageCode = "C824",
                     Error = ex.Message
                 };
                 return response;
@@ -118,7 +99,7 @@ namespace TourishApi.Service.InheritanceService
                 var entity = _entityRepository.getById(id);
                 if (entity.Data == null)
                 {
-                    var response = new Response { resultCd = 1, MessageCode = "C810", };
+                    var response = new Response { resultCd = 1, MessageCode = "C820", };
                     return response;
                 }
                 else
@@ -131,18 +112,18 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C814",
+                    MessageCode = "C824",
                     Error = ex.Message
                 };
                 return response;
             }
         }
 
-        public Response UpdateEntityById(Guid id, TourishCommentModel TourishCommentModel)
+        public Response UpdateEntityById(Guid id, TourishRatingModel TourishRatingModel)
         {
             try
             {
-                var response = _entityRepository.Update(TourishCommentModel);
+                var response = _entityRepository.Update(TourishRatingModel);
 
                 return response;
             }
@@ -151,7 +132,7 @@ namespace TourishApi.Service.InheritanceService
                 var response = new Response
                 {
                     resultCd = 1,
-                    MessageCode = "C814",
+                    MessageCode = "C824",
                     Error = ex.Message
                 };
                 return response;
