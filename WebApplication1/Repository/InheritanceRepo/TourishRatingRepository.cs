@@ -150,6 +150,14 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
+        public TourishRating getByUserIdAndTourId(Guid UserId, Guid TourId)
+        {
+            var entity = _context.TourishRatings.FirstOrDefault((entity
+                => entity.UserId == UserId && entity.TourishPlanId == TourId));
+
+            return entity;
+        }
+
         public Response getByName(String name)
         {
 
@@ -166,8 +174,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 => entity.Id == entityModel.Id));
             if (entity != null)
             {
-                entity.Rating = entityModel.Rating;
-               
+                entity.Rating = entityModel.Rating;          
                 entity.UpdateDate = DateTime.UtcNow;
                 _context.SaveChanges();
             }

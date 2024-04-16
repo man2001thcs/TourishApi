@@ -78,6 +78,7 @@ namespace MyWebApiApp
             services.AddScoped<RestaurantRepository>();
             services.AddScoped<TourishPlanRepository>();
             services.AddScoped<TourishCommentRepository>();
+            services.AddScoped<TourishRatingRepository>();
             services.AddScoped<TourishCategoryRepository>();
             services.AddScoped<NotificationRepository>();
             services.AddScoped<GuestMessageConHistoryRepository>();
@@ -94,6 +95,7 @@ namespace MyWebApiApp
             services.AddScoped<RestaurantService>();
             services.AddScoped<TourishPlanService>();
             services.AddScoped<TourishCommentService>();
+            services.AddScoped<TourishRatingService>();
             services.AddScoped<TourishCategoryService>();
             services.AddScoped<NotificationService>();
             services.AddScoped<GuestMessageConHistoryService>();

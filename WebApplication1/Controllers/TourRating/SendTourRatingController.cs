@@ -9,20 +9,20 @@ namespace WebApplication1.Controllers.TourRating
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AddTourRatingController : ControllerBase
+    public class SendTourRatingController : ControllerBase
     {
-        private readonly TourishCommentService _entityService;
+        private readonly TourishRatingService _entityService;
 
-        public AddTourRatingController(TourishCommentService entityService)
+        public SendTourRatingController(TourishRatingService entityService)
         {
             _entityService = entityService;
         }
 
         [HttpPost]
         [Authorize]
-        public IActionResult CreateNew(TourishCommentModel entityModel)
+        public IActionResult SendNotify(TourishRatingModel entityModel)
         {
-            return Ok(_entityService.CreateNew(entityModel));
+            return Ok(_entityService.SendRating(entityModel));
         }
     }
 }

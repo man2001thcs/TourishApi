@@ -34,6 +34,35 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
+        public Response SendRating(TourishRatingModel entityModel)
+        {
+            try
+            {
+                var existRating = _entityRepository.getByUserIdAndTourId(entityModel.UserId, entityModel.TourishPlanId);
+                if (existRating == null)
+                {
+                    var response = _entityRepository.Add(entityModel);
+
+                    return (response);
+                } else
+                {
+                    existRating.Rating = entityModel.Rating;
+                    entityModel.Id = existRating.Id;
+                    return _entityRepository.Update(entityModel);
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                return new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C824",
+                    Error = ex.Message
+                };
+            }
+        }
+
         public Response DeleteById(Guid id)
         {
             try

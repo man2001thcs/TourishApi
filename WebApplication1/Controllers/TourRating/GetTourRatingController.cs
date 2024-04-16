@@ -7,11 +7,11 @@ namespace WebApplication1.Controllers.TourRating
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GetTourRatingController : ControllerBase
+    public class GetTourCommentController : ControllerBase
     {
         private readonly TourishCommentService _entityService;
 
-        public GetTourRatingController(TourishCommentService entityService)
+        public GetTourCommentController(TourishCommentService entityService)
         {
             _entityService = entityService;
         }

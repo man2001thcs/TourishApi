@@ -38,6 +38,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 resultCd = 0,
                 MessageCode = "I811",
+                Data = addValue
                 // Create type success               
             };
         }
@@ -61,6 +62,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 resultCd = 0,
                 MessageCode = "I811",
+                Data = addValue
                 // Create type success               
             };
 
