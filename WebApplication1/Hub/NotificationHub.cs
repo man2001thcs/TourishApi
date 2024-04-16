@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SignalR.Hub.Client;
@@ -11,7 +10,6 @@ using WebApplication1.Model;
 
 namespace SignalR.Hub
 {
-    [Authorize]
     public class NotificationHub : Hub<INotificationHubClient>
     {
         private readonly MyDbContext _context;
@@ -87,26 +85,36 @@ namespace SignalR.Hub
         {
             var userId = Context.User.FindFirstValue("Id");
 
-            var user = _context.Users.Include(u => u.NotificationConList)
-                .SingleOrDefault(u => u.Id.ToString() == userId);
-
-            if (user != null)
+            var userRole = Context.User.FindFirstValue("Role");
+            if (userRole != "Admin" && userRole != "User")
             {
-
-                var notifyCon = new NotificationCon
-                {
-                    UserId = user.Id,
-                    ConnectionID = Context.ConnectionId,
-                    UserAgent = Context.GetHttpContext().Request.Headers["User-Agent"].ToString(),
-                    Connected = true,
-                    CreateDate = DateTime.UtcNow
-                };
-
-                _context.Add(notifyCon);
-
-
-                await _context.SaveChangesAsync();
+                Context.Abort();
             }
+            else
+            {
+                var user = _context.Users.Include(u => u.NotificationConList)
+               .SingleOrDefault(u => u.Id.ToString() == userId);
+
+                if (user != null)
+                {
+
+                    var notifyCon = new NotificationCon
+                    {
+                        UserId = user.Id,
+                        ConnectionID = Context.ConnectionId,
+                        UserAgent = Context.GetHttpContext().Request.Headers["User-Agent"].ToString(),
+                        Connected = true,
+                        CreateDate = DateTime.UtcNow
+                    };
+
+                    _context.Add(notifyCon);
+
+
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+
 
 
             await base.OnConnectedAsync();

@@ -44,13 +44,14 @@ namespace TourishApi.Service.InheritanceService
                     var response = _entityRepository.Add(entityModel);
 
                     return (response);
-                } else
+                }
+                else
                 {
                     existRating.Rating = entityModel.Rating;
                     entityModel.Id = existRating.Id;
                     return _entityRepository.Update(entityModel);
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -101,11 +102,11 @@ namespace TourishApi.Service.InheritanceService
                 return response;
             }
         }
-        public Response GetAllByTourishPlanId(Guid tourishPlanId,string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAllByTourishPlanId(Guid tourishPlanId)
         {
             try
             {
-                var entityList = _entityRepository.GetAllByTourishPlanId(tourishPlanId,search, type, sortBy, page, pageSize);
+                var entityList = _entityRepository.GetAllByTourishPlanId(tourishPlanId);
                 return entityList;
             }
             catch (Exception ex)
@@ -119,6 +120,30 @@ namespace TourishApi.Service.InheritanceService
                 return response;
             }
         }
+        public Response getByUserIdAndTourId(Guid UserId, Guid TourId)
+        {
+            var entity = _entityRepository.getByUserIdAndTourId(UserId, TourId);
+
+            if (entity == null)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C820"
+                };
+                return response;
+            }
+            else
+            {
+                var response = new Response
+                {
+                    resultCd = 0,
+                    Data = entity
+                };
+                return response;
+            }
+        }
+
 
 
         public Response GetById(Guid id)

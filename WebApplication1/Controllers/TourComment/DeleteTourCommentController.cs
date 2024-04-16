@@ -18,7 +18,7 @@ namespace WebApplication1.Controllers.TourComment
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Policy = "DeleteTourishCommentAccess")]
+        [Authorize]
         public IActionResult DeleteById(Guid id)
         {
             {

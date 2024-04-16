@@ -8,6 +8,8 @@
 
         public object? Data { get; set; }
 
+        public int? AveragePoint { get; set; }
+
         public Guid? returnId { get; set; }
 
         public string? type { get; set; }

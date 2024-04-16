@@ -1,6 +1,4 @@
-﻿using WebApplication1.Data;
-
-namespace WebApplication1.Model
+﻿namespace WebApplication1.Model
 {
     public class TourishRatingModel
     {

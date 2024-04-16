@@ -3,7 +3,6 @@ using TourishApi.Repository.Interface;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
-using WebApplication1.Model.Connection;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Service;
 
@@ -30,7 +29,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
-          
+
             _context.Add(addValue);
             _context.SaveChanges();
 
@@ -57,7 +56,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             await _context.AddAsync(addValue);
             await _context.SaveChangesAsync();
             await blobService.UploadStringBlobAsync("tourish-comment-container", addModel.Content ?? "", "text/plain", addValue.Id.ToString() ?? "" + ".txt");
-            
+
             return new Response
             {
                 resultCd = 0,
@@ -158,9 +157,9 @@ namespace WebApplication1.Repository.InheritanceRepo
             var resultDto = result.Select(tourComment => new TourishCommentDTOModel
             {
                 Id = tourComment.Id,
-               UserId = tourComment.UserId,
-               UserName = tourComment.User.UserName,
-               TourishPlanId = tourComment.TourishPlanId,
+                UserId = tourComment.UserId,
+                UserName = tourComment.User.UserName,
+                TourishPlanId = tourComment.TourishPlanId,
                 CreateDate = tourComment.CreateDate,
                 UpdateDate = tourComment.UpdateDate,
             }).OrderByDescending(entity => entity.CreateDate).ToList();
@@ -203,10 +202,11 @@ namespace WebApplication1.Repository.InheritanceRepo
                 => entity.Id == entityModel.Id));
             if (entity != null)
             {
-                if (entityModel.Content != null && entityModel.Content.Length > 0) {
+                if (entityModel.Content != null && entityModel.Content.Length > 0)
+                {
                     blobService.UploadStringBlobAsync("tourish-comment-container", entityModel.Content ?? "", "text/plain", entityModel.Id.ToString() ?? "" + ".txt");
                 }
-               
+
                 entity.UpdateDate = DateTime.UtcNow;
                 _context.SaveChanges();
             }

@@ -19,7 +19,7 @@ namespace WebApplication1.Controllers.TourComment
         }
 
         [HttpPut("{id}")]
-        [Authorize(Policy = "UpdateTourishCommentAccess")]
+        [Authorize]
         public IActionResult UpdateTourishCommentById(Guid id, TourishCommentModel TourishCommentModel)
         {
             return Ok(_entityService.UpdateEntityById(id, TourishCommentModel));

@@ -7,11 +7,11 @@ namespace WebApplication1.Controllers.TourRating
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GetTourCommentController : ControllerBase
+    public class GetTourRatingController : ControllerBase
     {
-        private readonly TourishCommentService _entityService;
+        private readonly TourishRatingService _entityService;
 
-        public GetTourCommentController(TourishCommentService entityService)
+        public GetTourRatingController(TourishRatingService entityService)
         {
             _entityService = entityService;
         }
@@ -26,9 +26,16 @@ namespace WebApplication1.Controllers.TourRating
 
         // GET: api/<ValuesController>
         [HttpGet("tourishplan")]
-        public IActionResult GetAllByTourishPlanId(Guid tourishPlanId, string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public IActionResult GetAllByTourishPlanId(Guid tourishPlanId)
         {
-            return Ok(_entityService.GetAllByTourishPlanId(tourishPlanId, search, type, sortBy, page, pageSize));
+            return Ok(_entityService.GetAllByTourishPlanId(tourishPlanId));
+        }
+
+        // GET: api/<ValuesController>
+        [HttpGet("user")]
+        public IActionResult GetByUserIdAndTourId(Guid userId, Guid tourishPlanId)
+        {
+            return Ok(_entityService.getByUserIdAndTourId(userId, tourishPlanId));
         }
 
         [HttpGet("{id}")]

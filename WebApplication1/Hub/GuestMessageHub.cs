@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SignalR.Hub.Client;
+using System.Security.Claims;
 using TourishApi.Service.InheritanceService;
 using WebApplication1.Data;
 using WebApplication1.Data.Chat;
@@ -156,35 +157,43 @@ namespace SignalR.Hub
 
             if (!adminId.IsNullOrEmpty())
             {
-                var admin = _context.Users.Include(u => u.NotificationConList)
+                var userRole = Context.User.FindFirstValue("Role");
+                if (userRole != "Admin")
+                {
+                    Context.Abort();
+                }
+                else
+                {
+                    var admin = _context.Users.Include(u => u.NotificationConList)
                     .SingleOrDefault(u => u.Id.ToString() == adminId);
 
-                if (admin != null)
-                {
-                    var adminCon = new AdminMessageCon
+                    if (admin != null)
                     {
-                        AdminId = new Guid(adminId),
-                        ConnectionID = Context.ConnectionId,
-                        UserAgent = Context.GetHttpContext().Request.Headers["User-Agent"].ToString(),
-                        Connected = true,
-                        CreateDate = DateTime.UtcNow
-                    };
+                        var adminCon = new AdminMessageCon
+                        {
+                            AdminId = new Guid(adminId),
+                            ConnectionID = Context.ConnectionId,
+                            UserAgent = Context.GetHttpContext().Request.Headers["User-Agent"].ToString(),
+                            Connected = true,
+                            CreateDate = DateTime.UtcNow
+                        };
 
-                    await _context.AddAsync(adminCon);
+                        await _context.AddAsync(adminCon);
 
-                    var conHis = _context.GuestMessageConHisList.Include(u => u.GuestCon).OrderByDescending(connection => connection.CreateDate)
-                                        .FirstOrDefault(u => u.GuestCon.GuestEmail == guestEmail && u.GuestCon.GuestPhoneNumber == guestPhoneNumber && u.GuestCon.Connected);
+                        var conHis = _context.GuestMessageConHisList.Include(u => u.GuestCon).OrderByDescending(connection => connection.CreateDate)
+                                            .FirstOrDefault(u => u.GuestCon.GuestEmail == guestEmail && u.GuestCon.GuestPhoneNumber == guestPhoneNumber && u.GuestCon.Connected);
 
-                    conHis.AdminCon = adminCon;
-                    var adminInfo = new AdminMessageConDTOModel
-                    {
-                        AdminId = adminCon.AdminId,
-                        ConnectionID = Context.ConnectionId,
-                        AdminFullName = admin.FullName,
-                        Connected = true
-                    };
-                    await Clients.Client(conHis.GuestCon.ConnectionID).NotifyNewCon(adminId, adminInfo);
-                    await _context.SaveChangesAsync();
+                        conHis.AdminCon = adminCon;
+                        var adminInfo = new AdminMessageConDTOModel
+                        {
+                            AdminId = adminCon.AdminId,
+                            ConnectionID = Context.ConnectionId,
+                            AdminFullName = admin.FullName,
+                            Connected = true
+                        };
+                        await Clients.Client(conHis.GuestCon.ConnectionID).NotifyNewCon(adminId, adminInfo);
+                        await _context.SaveChangesAsync();
+                    }
                 }
             }
 

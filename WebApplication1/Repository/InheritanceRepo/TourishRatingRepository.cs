@@ -3,7 +3,6 @@ using TourishApi.Repository.Interface;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
-using WebApplication1.Model.Connection;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Service;
 
@@ -27,11 +26,11 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 UserId = addModel.UserId,
                 TourishPlanId = addModel.TourishPlanId,
-                Rating = addModel.Rating,   
+                Rating = addModel.Rating,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
-          
+
             _context.Add(addValue);
             _context.SaveChanges();
 
@@ -100,7 +99,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         }
 
-        public Response GetAllByTourishPlanId(Guid tourishPlanId, string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAllByTourishPlanId(Guid tourishPlanId)
         {
             var entityQuery = _context.TourishRatings.Include(entityQuery => entityQuery.User).AsQueryable();
 
@@ -108,32 +107,27 @@ namespace WebApplication1.Repository.InheritanceRepo
             entityQuery = entityQuery.Where(entity => entity.TourishPlanId == tourishPlanId);
             #endregion
 
-            #region Sorting
-            entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-
-            if (!string.IsNullOrEmpty(sortBy))
+            var mapEntityQuery = entityQuery.Select(entity => new
             {
-                switch (sortBy)
-                {
-                    case "updateDate_asc":
-                        entityQuery = entityQuery.OrderBy(entity => entity.UpdateDate);
-                        break;
-                    case "updateDate_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-                        break;
-                }
-            }
-            #endregion
+                Rating = entity.Rating,
+                UserName = entity.User.UserName
+            });
 
-            #region Paging
-            var result = PaginatorModel<TourishRating>.Create(entityQuery, page, pageSize);
-            #endregion
+            var totalPoint = 0;
+            var totalCount = entityQuery.Count();
+            var mapEntityList = mapEntityQuery.ToList();
+
+            foreach (var mapEntity in mapEntityList)
+            {
+                totalPoint += mapEntity.Rating;
+            }
 
             var entityVM = new Response
             {
                 resultCd = 0,
-                Data = result.ToList(),
-                count = result.TotalCount,
+                Data = mapEntityQuery.ToList(),
+                AveragePoint = totalCount <= 0 ? totalPoint : totalPoint / totalCount,
+                count = entityQuery.Count(),
             };
             return entityVM;
         }
@@ -174,7 +168,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 => entity.Id == entityModel.Id));
             if (entity != null)
             {
-                entity.Rating = entityModel.Rating;          
+                entity.Rating = entityModel.Rating;
                 entity.UpdateDate = DateTime.UtcNow;
                 _context.SaveChanges();
             }
