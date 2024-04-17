@@ -33,7 +33,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAll(string? search, int type, string? sortBy, int page = 1, int pageSize = 5)
         {
             var entityQuery = _context.Users.AsQueryable();
 
@@ -43,10 +43,8 @@ namespace WebApplication1.Repository.InheritanceRepo
                 entityQuery = entityQuery.Where(entity => entity.FullName.Contains(search));
             }
 
-            if (type != null)
-            {
-                entityQuery = entityQuery.Where(entity => (int)entity.Role == type);
-            }
+            entityQuery = entityQuery.Where(entity => (int)entity.Role == type);
+
             #endregion
 
             #region Sorting

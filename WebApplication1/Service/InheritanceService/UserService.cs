@@ -21,12 +21,14 @@ namespace WebApplication1.Service.InheritanceService
         private readonly MyDbContext _context;
         private readonly AppSetting _appSettings;
         private readonly IUserRepository _userRepository;
+        private readonly ISendMailService _sendMailService;
 
-        public UserService(MyDbContext context, IUserRepository userRepository, IOptionsMonitor<AppSetting> optionsMonitor)
+        public UserService(MyDbContext context, IUserRepository userRepository, IOptionsMonitor<AppSetting> optionsMonitor, ISendMailService sendMailService)
         {
             _context = context;
             _appSettings = optionsMonitor.CurrentValue;
             _userRepository = userRepository;
+            _sendMailService = sendMailService;
         }
 
         public async Task<Response> Validate(LoginModel model)
@@ -130,20 +132,38 @@ namespace WebApplication1.Service.InheritanceService
                     Email = model.Email,
                     Password = model.Password,
                     PhoneNumber = model.PhoneNumber,
-                    Role = model.Role ?? UserRole.User,
+                    Role = UserRole.New,
                     Address = model.Address,
                     FullName = model.FullName,
                     CreateDate = DateTime.UtcNow,
                     UpdateDate = DateTime.UtcNow,
                 };
-                _context.Users.Add(userInsert);
-                _context.SaveChanges();
+                await _context.Users.AddAsync(userInsert);
+                await _context.SaveChangesAsync();
 
-                return new Response
+                var signInToken = GenerateSignInToken(userInsert);
+
+                var mailContent = new MailContent
                 {
-                    resultCd = 0,
-                    MessageCode = "I010",
+                    To = model.Email,
+                    Subject = "Roxanne: Tạo tài khoản mới",
+                    Body = "Xin chào " + model.FullName + ".\n " +
+                    "Chúng tôi đã nhận được yêu cầu tạo tài khoản của bạn, vui lòng truy cập https://tourishapi20240305102130.azurewebsites.net/UserValidateSignIn?token="
+                    + signInToken + " để xác nhận tài khoản."
                 };
+
+                var mailResult = await _sendMailService.SendMail(mailContent);
+
+                if (mailResult.resultCd == 0)
+                {
+                    return new Response
+                    {
+                        resultCd = 0,
+                        MessageCode = "I010",
+                        Data = GenerateSignInToken(userInsert)
+                    };
+                }
+                else return mailResult;               
             }
             else
             {
@@ -231,7 +251,7 @@ namespace WebApplication1.Service.InheritanceService
             };
         }
 
-        public Response GetUserList(string bearer_token, string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetUserList(string bearer_token, string? search, int type, string? sortBy, int page = 1, int pageSize = 5)
         {
             Response checkResult = checkIfTokenFormIsValid(bearer_token);
             if (checkResult.resultCd != 0) return checkResult;
@@ -241,7 +261,24 @@ namespace WebApplication1.Service.InheritanceService
 
             if (role == "Admin")
             {
-                var entityList = this._userRepository.GetAll(search, type, sortBy, page = 1, pageSize = 5);
+                if (type >= 2)
+                {
+                    return new Response
+                    {
+                        resultCd = 1,
+                        MessageCode = "C015",
+                        Data = null,
+                        count = 0
+                    };
+                }
+
+                var entityList = this._userRepository.GetAll(search, type, sortBy, page, pageSize);
+                return entityList;
+            }
+
+            if (role == "AdminManager")
+            {
+                var entityList = this._userRepository.GetAll(search, type, sortBy, page, pageSize);
                 return entityList;
             }
             else
@@ -325,7 +362,7 @@ namespace WebApplication1.Service.InheritanceService
                     new Claim("Permissions", permissions != null ? JsonSerializer.Serialize(permissions) : string.Empty,JsonClaimValueTypes.JsonArray)
 
                 }),
-
+                Issuer = _appSettings.Issuer,
                 Expires = DateTime.UtcNow.AddHours(12),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha512Signature)
             };
@@ -355,6 +392,71 @@ namespace WebApplication1.Service.InheritanceService
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
             };
+        }
+
+        public async Task<TokenModel> GenerateSignInToken(User user)
+        {
+            var jwtTokenHandler = new JwtSecurityTokenHandler();
+
+            var secretKeyBytes = Encoding.UTF8.GetBytes(_appSettings.SecretKey);
+
+            var permissions = getPermission(user.Role);
+
+            var tokenDescription = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[] {
+                    new Claim(ClaimTypes.Name, user.FullName),
+                    new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim("UserName", user.UserName),
+                    new Claim("Id", user.Id.ToString()),
+                    new Claim("Purpose", "signIn"),
+                    //roles
+                    new Claim("Role", user.Role.ToString()),
+                    new Claim("Permissions", permissions != null ? JsonSerializer.Serialize(permissions) : string.Empty,JsonClaimValueTypes.JsonArray)
+
+                }),
+                Issuer = _appSettings.Issuer,
+                Expires = DateTime.UtcNow.AddHours(2),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha512Signature)
+            };
+
+            var token = jwtTokenHandler.CreateToken(tokenDescription);
+            var accessToken = jwtTokenHandler.WriteToken(token);
+
+            return new TokenModel
+            {
+                AccessToken = accessToken,
+                RefreshToken = null,
+            };
+        }
+
+        public async Task<bool> validateSignInToken(string bearerToken)
+        {
+            var checkResult = checkIfTokenFormIsValid(bearerToken);
+
+            if (checkResult.resultCd == 0)
+            {
+                var tokenInverification = (ClaimsPrincipal)checkResult.Data;
+                var purpose = tokenInverification.FindFirstValue("Purpose");
+                if (purpose == "signIn")
+                {
+                    var userName = tokenInverification.FindFirstValue("UserName");
+                    var role = tokenInverification.FindFirstValue("Role");
+                    var enumValue = (UserRole)Enum.Parse(typeof(UserRole), role);
+                    var user = await _context.Users.SingleOrDefaultAsync(user => user.UserName == userName);
+                    if (user != null)
+                    {
+                        if (enumValue == UserRole.Admin) user.Role = UserRole.AdminTemp;
+                        else if (enumValue == UserRole.User) user.Role = UserRole.User;
+
+                        await _context.SaveChangesAsync();
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private string[] getPermission(UserRole role)
@@ -463,7 +565,8 @@ namespace WebApplication1.Service.InheritanceService
             var tokenValidateParam = new TokenValidationParameters
             {
                 // Seft-supply token
-                ValidateIssuer = false,
+                ValidateIssuer = true,
+                ValidIssuer = _appSettings.Issuer,
                 ValidateAudience = false,
 
                 // Sign token
@@ -614,7 +717,8 @@ namespace WebApplication1.Service.InheritanceService
             var tokenValidateParam = new TokenValidationParameters
             {
                 // Seft-supply token
-                ValidateIssuer = false,
+                ValidateIssuer = true,
+                ValidIssuer = _appSettings.Issuer,
                 ValidateAudience = false,
 
                 // Sign token
@@ -657,6 +761,22 @@ namespace WebApplication1.Service.InheritanceService
                             MessageCode = "C008",
                         };
                     }
+                }
+
+                // Check 3: Check expired
+                var utcExpiredDate = long.Parse(tokenInverification.
+                    Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp)
+                    .Value);
+
+                var expiredDate = ConvertUnixTimeToDateTime(utcExpiredDate);
+                if (expiredDate > DateTime.UtcNow)
+                {
+                    return new Response
+                    {
+                        resultCd = 1,
+                        MessageCode = "C003",
+                        // Not expired yet
+                    };
                 }
 
                 return new Response

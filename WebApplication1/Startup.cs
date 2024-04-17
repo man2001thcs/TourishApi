@@ -123,8 +123,9 @@ namespace MyWebApiApp
                     opt.TokenValidationParameters = new TokenValidationParameters
                     {
                         //tự cấp token
-                        ValidateIssuer = false,
+                        ValidateIssuer = true,
                         ValidateAudience = false,
+                        ValidIssuer = Configuration["AppSettings:Issuer"],
 
                         //ký vào token
                         ValidateIssuerSigningKey = true,

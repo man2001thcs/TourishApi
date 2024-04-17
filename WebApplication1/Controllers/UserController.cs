@@ -59,8 +59,8 @@ namespace WebApplication1.Controllers
         }
 
         [Authorize(Policy = "GetUserListAccess")]
-        [HttpPost("GetUserList")]
-        public IActionResult GetUserList(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        [HttpGet("GetUserList")]
+        public IActionResult GetUserList(string? search, int type, string? sortBy, int page = 1, int pageSize = 5)
         {
             var bearer_token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
             return Ok(_userService.GetUserList(bearer_token, search, type, sortBy, page, pageSize));
@@ -71,7 +71,7 @@ namespace WebApplication1.Controllers
         public IActionResult GetUser(Guid id, int type)
         {
             var bearer_token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-            return Ok(_userService.GetUser( id, type, bearer_token));
+            return Ok(_userService.GetUser(id, type, bearer_token));
         }
 
         [Authorize(Policy = "SelfGetUserAccess")]
@@ -86,6 +86,18 @@ namespace WebApplication1.Controllers
         public async Task<IActionResult> RenewToken(TokenModel tokenModel)
         {
             return Ok(_userService.RenewToken(tokenModel));
+        }
+
+        [HttpGet("ValidateSignIn")]
+        public async Task<IActionResult> ValidateSignIn(string token)
+        {
+            var result = await _userService.validateSignInToken(token);
+
+            if (result)
+            {
+                return Redirect("http://localhost:4200/guest/login");
+            }
+            else return BadRequest("Token not valid");
         }
     }
 }

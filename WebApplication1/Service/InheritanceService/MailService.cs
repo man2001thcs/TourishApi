@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using MimeKit;
 using WebApplication1.Model;
+using WebApplication1.Model.VirtualModel;
 namespace WebApplication1.Service.InheritanceService;
 
 public class SendMailService : ISendMailService
@@ -21,7 +22,7 @@ public class SendMailService : ISendMailService
     }
 
     // Gửi email, theo nội dung trong mailContent
-    public async Task SendMail(MailContent mailContent)
+    public async Task<Response> SendMail(MailContent mailContent)
     {
         var email = new MimeMessage();
         email.Sender = new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail);
@@ -42,26 +43,30 @@ public class SendMailService : ISendMailService
             smtp.Connect(mailSettings.Host, mailSettings.Port, SecureSocketOptions.StartTls);
             smtp.Authenticate(mailSettings.Mail, mailSettings.Password);
             await smtp.SendAsync(email);
+
+
         }
         catch (Exception ex)
         {
-            // Gửi mail thất bại, nội dung email sẽ lưu vào thư mục mailssave
-            System.IO.Directory.CreateDirectory("mailssave");
-            var emailsavefile = string.Format(@"mailssave/{0}.eml", Guid.NewGuid());
-            await email.WriteToAsync(emailsavefile);
-
-            logger.LogInformation("Lỗi gửi mail, lưu tại - " + emailsavefile);
+            logger.LogInformation("Lỗi gửi mail, " + ex.Message);
             logger.LogError(ex.Message);
+            return new Response
+            {
+                resultCd = 1,
+                Error = ex.Message
+            };
         }
 
         smtp.Disconnect(true);
-
         logger.LogInformation("send mail to " + mailContent.To);
-
+        return new Response
+        {
+            resultCd = 0
+        };
     }
-    public async Task SendEmailAsync(string email, string subject, string htmlMessage)
+    public async Task<Response> SendEmailAsync(string email, string subject, string htmlMessage)
     {
-        await SendMail(new MailContent()
+        return await SendMail(new MailContent()
         {
             To = email,
             Subject = subject,
