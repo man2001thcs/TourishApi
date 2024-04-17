@@ -100,6 +100,7 @@ namespace MyWebApiApp
             services.AddScoped<NotificationService>();
             services.AddScoped<GuestMessageConHistoryService>();
             services.AddScoped<ReceiptService>();
+            services.AddScoped<UserService>();
 
             services.AddTransient<ISendMailService, SendMailService>();
 

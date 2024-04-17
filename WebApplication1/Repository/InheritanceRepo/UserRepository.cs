@@ -33,7 +33,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response GetAll(string? search, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
         {
             var entityQuery = _context.Users.AsQueryable();
 
@@ -41,6 +41,11 @@ namespace WebApplication1.Repository.InheritanceRepo
             if (!string.IsNullOrEmpty(search))
             {
                 entityQuery = entityQuery.Where(entity => entity.FullName.Contains(search));
+            }
+
+            if (type != null)
+            {
+                entityQuery = entityQuery.Where(entity => (int)entity.Role == type);
             }
             #endregion
 
@@ -78,10 +83,10 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         }
 
-        public Response getById(Guid id)
+        public Response getById(Guid id, int? type)
         {
             var entity = _context.Users.FirstOrDefault((entity
-                => entity.Id == id));
+                => entity.Id == id && (int)entity.Role == type));
 
             return new Response
             {
@@ -90,10 +95,10 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response getByName(String name)
+        public Response getByName(String name, int? type)
         {
             var entity = _context.Users.FirstOrDefault((entity
-                => entity.UserName == name));
+                => entity.UserName == name && (int)entity.Role == type));
 
             return new Response
             {
@@ -102,8 +107,30 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public async Task<Response> UpdateInfo(UserUpdateModel model)
+        public async Task<Response> UpdateInfo(UserRole userRoleAuthority, Boolean isSelfUpdate, UserUpdateModel model)
         {
+            if ((int)userRoleAuthority == (int)model.Role)
+            {
+                if (!isSelfUpdate)
+                {
+                    return new Response
+                    {
+                        resultCd = 1,
+                        MessageCode = "C015",
+                    };
+                }
+            }
+
+            if ((int)userRoleAuthority < (int)model.Role)
+            {
+                return new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C015",
+                };
+
+            }
+
             var userExist = _context.Users.FirstOrDefault(p => p.UserName == model.UserName);
             if (userExist != null) //không đúng
             {
