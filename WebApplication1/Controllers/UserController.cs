@@ -74,7 +74,7 @@ namespace WebApplication1.Controllers
             return Ok(_userService.GetUser(id, type, bearer_token));
         }
 
-        [Authorize(Policy = "SelfGetUserAccess")]
+        [Authorize]
         [HttpPost("SelfGetUser")]
         public IActionResult SelfGetUser()
         {
@@ -95,7 +95,7 @@ namespace WebApplication1.Controllers
 
             if (result)
             {
-                return Redirect("http://localhost:4200/guest/login");
+                return Redirect("http://localhost:4200/guest/login?activated=1");
             }
             else return BadRequest("Token not valid");
         }

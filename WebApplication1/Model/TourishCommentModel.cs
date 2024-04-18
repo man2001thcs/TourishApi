@@ -10,7 +10,7 @@ namespace WebApplication1.Model
         public string? Content { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
-        public User User { get; set; }
+        public User? User { get; set; }
 
     }
 

@@ -15,7 +15,7 @@ namespace WebApplication1.Data.Receipt
         public DateTime CreatedDate { get; set; }
         public DateTime UpdateDate { get; set; }
         public DateTime? CompleteDate { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
         public ReceiptStatus Status { get; set; }
 
         // Relationship

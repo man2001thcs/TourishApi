@@ -23,7 +23,7 @@ namespace WebApplication1.Service.InheritanceService
         private readonly IUserRepository _userRepository;
         private readonly ISendMailService _sendMailService;
 
-        public UserService(MyDbContext context, IUserRepository userRepository, IOptionsMonitor<AppSetting> optionsMonitor, ISendMailService sendMailService)
+        public UserService(MyDbContext context, IUserRepository userRepository, IOptionsMonitor<AppSetting> optionsMonitor, ISendMailService sendMailService, IOptions<AppSetting> appSettings)
         {
             _context = context;
             _appSettings = optionsMonitor.CurrentValue;
@@ -141,15 +141,37 @@ namespace WebApplication1.Service.InheritanceService
                 await _context.Users.AddAsync(userInsert);
                 await _context.SaveChangesAsync();
 
-                var signInToken = GenerateSignInToken(userInsert);
+                var userTokenSample = userInsert;
+                userTokenSample.Role = model.Role ?? UserRole.User;
+
+                var signInToken = await GenerateSignInToken(userTokenSample);
+
+                var baseUrl = _appSettings.BaseUrl;
 
                 var mailContent = new MailContent
                 {
                     To = model.Email,
                     Subject = "Roxanne: Tạo tài khoản mới",
-                    Body = "Xin chào " + model.FullName + ".\n " +
-                    "Chúng tôi đã nhận được yêu cầu tạo tài khoản của bạn, vui lòng truy cập https://tourishapi20240305102130.azurewebsites.net/UserValidateSignIn?token="
-                    + signInToken + " để xác nhận tài khoản."
+                    Body = "<html>" +
+                                "<head>" +
+                                    "<style>" +
+                                        "body { font-family: Arial, sans-serif; background-color: #f4f4f4; }" +
+                                        ".container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1); }" +
+                                        ".message { margin-bottom: 20px; }" +
+                                        ".message p { margin: 0; font-size: 16px; margin-bottom: 10px; }" +
+                                        ".btn { display: inline-block; background-color: #007bff; color: #fff !important; text-decoration: none; padding: 10px 20px; border-radius: 5px; }" +
+                                    "</style>" +
+                                "</head>" +
+                                "<body>" +
+                                    "<div class='container'>" +
+                                        "<div class='message'>" +
+                                            "<p style='font-size: 18px; margin-bottom: 10px;'>Xin chào <strong>" + model.FullName + "</strong>.</p>" +
+                                            "<p style='font-size: 18px; margin-bottom: 10px;'>Chúng tôi đã nhận được yêu cầu tạo tài khoản của bạn, vui lòng truy cập:</p>" +
+                                            "<p><a class='btn' href='" + _appSettings.BaseUrl + "/api/User/ValidateSignIn?token=" + signInToken.AccessToken + "'>Xác nhận tài khoản</a></p>" +
+                                        "</div>" +
+                                    "</div>" +
+                                "</body>" +
+                            "</html>"
                 };
 
                 var mailResult = await _sendMailService.SendMail(mailContent);
@@ -163,7 +185,7 @@ namespace WebApplication1.Service.InheritanceService
                         Data = GenerateSignInToken(userInsert)
                     };
                 }
-                else return mailResult;               
+                else return mailResult;
             }
             else
             {
@@ -418,7 +440,6 @@ namespace WebApplication1.Service.InheritanceService
 
                 }),
                 Issuer = _appSettings.Issuer,
-                Expires = DateTime.UtcNow.AddHours(2),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha512Signature)
             };
 

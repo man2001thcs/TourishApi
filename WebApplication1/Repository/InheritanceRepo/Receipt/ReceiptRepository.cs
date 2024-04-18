@@ -44,7 +44,7 @@ public class ReceiptRepository : IReceiptRepository
         {
             var fullReceipt = new FullReceipt
             {
-                TotalReceiptId = totalReceipt.TotalReceiptId,
+                TotalReceiptId = totalReceipt.TotalReceiptId,               
                 OriginalPrice = GetTotalPrice(tourishPlan),
                 GuestName = receiptModel.GuestName,
                 Description = receiptModel.Description,
@@ -63,6 +63,9 @@ public class ReceiptRepository : IReceiptRepository
 
             if (planExist != null && planExist.RemainTicket >= receiptModel.TotalTicket)
             {
+                await _context.FullReceiptList.AddAsync(fullReceipt);
+                await _context.SaveChangesAsync();
+
                 return new Response
                 {
                     resultCd = 0,
@@ -124,9 +127,9 @@ public class ReceiptRepository : IReceiptRepository
                 PhoneNumber = receiptModel.PhoneNumber,
                 Email = receiptModel.Email,
                 TotalTicket = receiptModel.TotalTicket,
-                OriginalPrice = GetTotalPrice(tourishPlan),
-                DiscountAmount = 0,
-                DiscountFloat = 0,
+                OriginalPrice = GetTotalPrice(tourishPlan),              
+                DiscountAmount = (double) 0,
+                DiscountFloat = (float) 0,
                 Status = FullReceiptStatus.Created,
                 CreatedDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow
@@ -137,11 +140,15 @@ public class ReceiptRepository : IReceiptRepository
 
             if (planExist != null && planExist.RemainTicket >= receiptModel.TotalTicket)
             {
+                await _context.FullReceiptList.AddAsync(fullReceipt);
+                await _context.SaveChangesAsync();
+
                 return new Response
                 {
                     resultCd = 0,
                     MessageCode = "I511",
                     returnId = fullReceipt.FullReceiptId,
+                    Data = fullReceipt
                     // Create type success               
                 };
             }

@@ -64,6 +64,7 @@ namespace TourishApi.Service.InheritanceService
                 {
                     resultCd = 0,
                     MessageCode = "I511",
+                    Data = receiptReturn.Data
                 };
                 return response;
 
