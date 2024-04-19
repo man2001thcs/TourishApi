@@ -75,6 +75,27 @@ namespace WebApplication1.Service.InheritanceService
             }
         }
 
+        public async Task<Response> CheckEmailExist(string email)
+        {
+            var user = _context.Users.SingleOrDefault(p => p.Email == email);
+            if (user == null)
+            {
+                return new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "I010"
+                };
+            }
+            else
+            {
+                return new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C010e"
+                };
+            }
+        }
+
         public async Task<Response> GoogleSignIn(UserModel model)
         {
             GoogleJsonWebSignature.Payload payload = await GoogleJsonWebSignature.ValidateAsync(model.GoogleToken);
@@ -181,8 +202,63 @@ namespace WebApplication1.Service.InheritanceService
                     return new Response
                     {
                         resultCd = 0,
-                        MessageCode = "I010",
+                        MessageCode = "I010a",
                         Data = GenerateSignInToken(userInsert)
+                    };
+                }
+                else return mailResult;
+            }
+            else
+            {
+                return new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C010"
+                };
+            }
+        }
+
+        public async Task<Response> Reclaim(UserReClaimModel model)
+        {
+            var userExist = _context.Users.FirstOrDefault(p => p.UserName == model.UserName || p.Email == model.Email);
+            if (userExist != null)
+            {
+                var signInToken = await GenerateReclaimToken(userExist);
+                var baseUrl = _appSettings.BaseUrl;
+                var mailContent = new MailContent
+                {
+                    To = model.Email,
+                    Subject = "Roxanne: Khôi phục tài khoản",
+                    Body = "<html>" +
+                                "<head>" +
+                                    "<style>" +
+                                        "body { font-family: Arial, sans-serif; background-color: #f4f4f4; }" +
+                                        ".container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1); }" +
+                                        ".message { margin-bottom: 20px; }" +
+                                        ".message p { margin: 0; font-size: 16px; margin-bottom: 10px; }" +
+                                        ".btn { display: inline-block; background-color: #007bff; color: #fff !important; text-decoration: none; padding: 10px 20px; border-radius: 5px; }" +
+                                    "</style>" +
+                                "</head>" +
+                                "<body>" +
+                                    "<div class='container'>" +
+                                        "<div class='message'>" +
+                                            "<p style='font-size: 18px; margin-bottom: 10px;'>Xin chào <strong>" + userExist.FullName + "</strong>.</p>" +
+                                            "<p style='font-size: 18px; margin-bottom: 10px;'>Chúng tôi đã nhận được yêu cầu khôi phục tài khoản của bạn, vui lòng truy cập:</p>" +
+                                            "<p><a class='btn' href='" + _appSettings.BaseUrl + "/api/User/ValidateReclaim?token=" + signInToken.AccessToken + "'>Khôi phục tài khoản</a></p>" +
+                                        "</div>" +
+                                    "</div>" +
+                                "</body>" +
+                            "</html>"
+                };
+
+                var mailResult = await _sendMailService.SendMail(mailContent);
+
+                if (mailResult.resultCd == 0)
+                {
+                    return new Response
+                    {
+                        resultCd = 0,
+                        MessageCode = "I010a"
                     };
                 }
                 else return mailResult;
@@ -263,6 +339,31 @@ namespace WebApplication1.Service.InheritanceService
                 updateModel.UserName = userName;
 
                 var entity = await this._userRepository.UpdatePassword(updateModel);
+                return entity;
+            }
+
+            return new Response
+            {
+                resultCd = 1,
+                MessageCode = "C012",
+            };
+        }
+
+        public async Task<Response> ReclaimPassword(UserReclaimPasswordModel model)
+        {
+            Response checkResult = checkIfTokenFormIsValid(model.ReclaimToken);
+            if (checkResult.resultCd != 0) return checkResult;
+            var tokenInverification = (ClaimsPrincipal)checkResult.Data;
+
+            var role = tokenInverification.FindFirstValue("Role");
+
+            if (role == "User" || role == "Admin" || role == "AdminManager")
+            {
+                var userName = tokenInverification.FindFirstValue("UserName");
+                var updateModel = model;
+                updateModel.UserName = userName;
+
+                var entity = await this._userRepository.ReclaimPassword(updateModel);
                 return entity;
             }
 
@@ -446,6 +547,17 @@ namespace WebApplication1.Service.InheritanceService
             var token = jwtTokenHandler.CreateToken(tokenDescription);
             var accessToken = jwtTokenHandler.WriteToken(token);
 
+            var reqToken = new ReqTemporaryToken
+            {
+                Token = accessToken,
+                IsActivated = true,
+                CreateDate = DateTime.UtcNow,
+                Purpose = TokenPurpose.SignIn
+            };
+
+            await _context.ReqTemporaryTokens.AddAsync(reqToken);
+            await _context.SaveChangesAsync();
+
             return new TokenModel
             {
                 AccessToken = accessToken,
@@ -459,6 +571,12 @@ namespace WebApplication1.Service.InheritanceService
 
             if (checkResult.resultCd == 0)
             {
+                var existToken = _context.ReqTemporaryTokens.Where(entity => entity.Token == bearerToken && entity.Purpose == TokenPurpose.SignIn).
+                     OrderByDescending(entity => entity.CreateDate).FirstOrDefault();
+
+                if (existToken == null) return false;
+                if (!existToken.IsActivated) return false;
+
                 var tokenInverification = (ClaimsPrincipal)checkResult.Data;
                 var purpose = tokenInverification.FindFirstValue("Purpose");
                 if (purpose == "signIn")
@@ -472,9 +590,83 @@ namespace WebApplication1.Service.InheritanceService
                         if (enumValue == UserRole.Admin) user.Role = UserRole.AdminTemp;
                         else if (enumValue == UserRole.User) user.Role = UserRole.User;
 
+                        existToken.IsActivated = false;
                         await _context.SaveChangesAsync();
+
                         return true;
                     }
+                }
+            }
+            return false;
+        }
+
+        public async Task<TokenModel> GenerateReclaimToken(User user)
+        {
+            var jwtTokenHandler = new JwtSecurityTokenHandler();
+
+            var secretKeyBytes = Encoding.UTF8.GetBytes(_appSettings.SecretKey);
+
+            var permissions = getPermission(user.Role);
+
+            var tokenDescription = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[] {
+                    new Claim(ClaimTypes.Name, user.FullName),
+                    new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim("UserName", user.UserName),
+                    new Claim("Id", user.Id.ToString()),
+                    new Claim("Purpose", "reClaim"),
+                    //roles
+                    new Claim("Role", user.Role.ToString()),
+                    new Claim("Permissions", permissions != null ? JsonSerializer.Serialize(permissions) : string.Empty,JsonClaimValueTypes.JsonArray)
+
+                }),
+                Issuer = _appSettings.Issuer,
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha512Signature)
+            };
+
+            var token = jwtTokenHandler.CreateToken(tokenDescription);
+            var accessToken = jwtTokenHandler.WriteToken(token);
+
+            var reqToken = new ReqTemporaryToken
+            {
+                Token = accessToken,
+                IsActivated = true,
+                CreateDate = DateTime.UtcNow,
+                Purpose = TokenPurpose.Reclaim
+            };
+
+            await _context.ReqTemporaryTokens.AddAsync(reqToken);
+            await _context.SaveChangesAsync();
+
+            return new TokenModel
+            {
+                AccessToken = accessToken,
+                RefreshToken = null,
+            };
+        }
+
+        public async Task<bool> validateReclaimToken(string bearerToken)
+        {
+            var checkResult = checkIfTokenFormIsValid(bearerToken);
+
+            if (checkResult.resultCd == 0)
+            {
+                var existToken = _context.ReqTemporaryTokens.Where(entity => entity.Token == bearerToken && entity.Purpose == TokenPurpose.Reclaim).
+                     OrderByDescending(entity => entity.CreateDate).FirstOrDefault();
+
+                if (existToken == null) return false;
+                if (!existToken.IsActivated) return false;
+
+                var tokenInverification = (ClaimsPrincipal)checkResult.Data;
+                var purpose = tokenInverification.FindFirstValue("Purpose");
+                if (purpose == "reClaim")
+                {
+                    existToken.IsActivated = false;
+                    await _context.SaveChangesAsync();
+                    return true;
                 }
             }
             return false;

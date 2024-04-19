@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using WebApplication1.Model;
+using WebApplication1.Model.VirtualModel;
 using WebApplication1.Service.InheritanceService;
 
 namespace WebApplication1.Controllers
@@ -11,10 +13,12 @@ namespace WebApplication1.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserService _userService;
+        private readonly AppSetting _appSettings;
 
-        public UserController(UserService userService)
+        public UserController(UserService userService, IOptionsMonitor<AppSetting> optionsMonitor)
         {
             _userService = userService;
+            _appSettings = optionsMonitor.CurrentValue;
         }
 
         [HttpPost("Login")]
@@ -27,6 +31,31 @@ namespace WebApplication1.Controllers
         public async Task<IActionResult> CheckExist(String userName)
         {
             return Ok(await _userService.CheckExist(userName));
+        }
+
+        [HttpPost("CheckExist/email")]
+        public async Task<IActionResult> CheckEmailExist(string email)
+        {
+            return Ok(await _userService.CheckEmailExist(email));
+        }
+
+        [HttpPost("CheckExist/reclaim")]
+        public async Task<IActionResult> reclaimCheckExist(string reclaimInfo)
+        {
+            var emailCheck = await _userService.CheckEmailExist(reclaimInfo);
+            if (emailCheck.resultCd == 0) { 
+                var userCheck = await _userService.CheckExist(reclaimInfo);
+                if (userCheck.resultCd == 0) { return Ok(userCheck); }
+            }
+
+            var response = new Response
+            {
+                resultCd = 0,
+                Data = null,
+                MessageCode = "I010b"
+            };
+
+            return Ok(response);
         }
 
         [HttpPost("GoogleSignIn")]
@@ -56,6 +85,12 @@ namespace WebApplication1.Controllers
         {
             var bearer_token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
             return Ok(await _userService.UpdatePassword(model, bearer_token));
+        }
+
+        [HttpPost("ReclaimPassword")]
+        public async Task<IActionResult> ReclaimPassword(UserReclaimPasswordModel model)
+        {
+            return Ok(await _userService.ReclaimPassword(model));
         }
 
         [Authorize(Policy = "GetUserListAccess")]
@@ -95,7 +130,19 @@ namespace WebApplication1.Controllers
 
             if (result)
             {
-                return Redirect("http://localhost:4200/guest/login?activated=1");
+                return Redirect(_appSettings.ClientUrl + "/guest/login?activated=1");
+            }
+            else return BadRequest("Token not valid");
+        }
+
+        [HttpGet("ValidateReclaim")]
+        public async Task<IActionResult> ValidateReclaim(string token)
+        {
+            var result = await _userService.validateReclaimToken(token);
+
+            if (result)
+            {
+                return Redirect(_appSettings.ClientUrl + "/guest/login?activated=1");
             }
             else return BadRequest("Token not valid");
         }

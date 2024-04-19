@@ -42,48 +42,86 @@ public class ReceiptRepository : IReceiptRepository
 
         if (tourishPlan != null)
         {
-            var fullReceipt = new FullReceipt
-            {
-                TotalReceiptId = totalReceipt.TotalReceiptId,               
-                OriginalPrice = GetTotalPrice(tourishPlan),
-                GuestName = receiptModel.GuestName,
-                Description = receiptModel.Description,
-                PhoneNumber = receiptModel.PhoneNumber,
-                Email = receiptModel.Email,
-                TotalTicket = receiptModel.TotalTicket,
-                DiscountAmount = receiptModel.DiscountAmount,
-                DiscountFloat = receiptModel.DiscountFloat,
-                Status = FullReceiptStatus.Created,
-                CreatedDate = DateTime.UtcNow,
-                UpdateDate = DateTime.UtcNow
-            };
-
+            var existFullReceipt = _context.FullReceiptList.FirstOrDefault(entity => entity.Email == receiptModel.Email);
             var planExist = _context.TourishPlan.FirstOrDefault((plan
-                  => plan.Id == totalReceipt.TourishPlanId));
+               => plan.Id == totalReceipt.TourishPlanId));
 
-            if (planExist != null && planExist.RemainTicket >= receiptModel.TotalTicket)
+            if (existFullReceipt == null)
             {
-                await _context.FullReceiptList.AddAsync(fullReceipt);
-                await _context.SaveChangesAsync();
-
-                return new Response
+                var fullReceipt = new FullReceipt
                 {
-                    resultCd = 0,
-                    MessageCode = "I511",
-                    returnId = fullReceipt.FullReceiptId,
-                    // Create type success               
+                    TotalReceiptId = totalReceipt.TotalReceiptId,
+                    OriginalPrice = GetTotalPrice(tourishPlan),
+                    GuestName = receiptModel.GuestName,
+                    Description = receiptModel.Description,
+                    PhoneNumber = receiptModel.PhoneNumber,
+                    Email = receiptModel.Email,
+                    TotalTicket = receiptModel.TotalTicket,
+                    DiscountAmount = receiptModel.DiscountAmount,
+                    DiscountFloat = receiptModel.DiscountFloat,
+                    Status = FullReceiptStatus.Created,
+                    CreatedDate = DateTime.UtcNow,
+                    UpdateDate = DateTime.UtcNow
                 };
+
+                if (planExist != null && planExist.RemainTicket >= receiptModel.TotalTicket)
+                {
+                    await _context.FullReceiptList.AddAsync(fullReceipt);
+                    await _context.SaveChangesAsync();
+
+                    return new Response
+                    {
+                        resultCd = 0,
+                        MessageCode = "I511",
+                        returnId = fullReceipt.FullReceiptId,
+                        // Create type success               
+                    };
+                }
+                else
+                {
+                    return new Response
+                    {
+                        resultCd = 0,
+                        MessageCode = "C515",
+                        returnId = fullReceipt.FullReceiptId,
+                        // Out of ticket              
+                    };
+                }
             }
             else
             {
-                return new Response
+                existFullReceipt.GuestName = receiptModel.GuestName;
+                existFullReceipt.PhoneNumber = receiptModel.PhoneNumber;
+                existFullReceipt.TotalTicket = receiptModel.TotalTicket;
+                existFullReceipt.OriginalPrice = GetTotalPrice(tourishPlan);
+                existFullReceipt.UpdateDate = DateTime.UtcNow;
+
+                if (planExist != null && planExist.RemainTicket >= receiptModel.TotalTicket)
                 {
-                    resultCd = 0,
-                    MessageCode = "C515",
-                    returnId = fullReceipt.FullReceiptId,
-                    // Out of ticket              
-                };
+                    await _context.SaveChangesAsync();
+
+                    return new Response
+                    {
+                        resultCd = 0,
+                        MessageCode = "I511",
+                        returnId = existFullReceipt.FullReceiptId,
+                        // Create type success               
+                    };
+                }
+                else
+                {
+                    return new Response
+                    {
+                        resultCd = 0,
+                        MessageCode = "C515",
+                        returnId = existFullReceipt.FullReceiptId,
+                        // Out of ticket              
+                    };
+                }
             }
+
+
+
         }
         else
         {
@@ -127,9 +165,9 @@ public class ReceiptRepository : IReceiptRepository
                 PhoneNumber = receiptModel.PhoneNumber,
                 Email = receiptModel.Email,
                 TotalTicket = receiptModel.TotalTicket,
-                OriginalPrice = GetTotalPrice(tourishPlan),              
-                DiscountAmount = (double) 0,
-                DiscountFloat = (float) 0,
+                OriginalPrice = GetTotalPrice(tourishPlan),
+                DiscountAmount = (double)0,
+                DiscountFloat = (float)0,
                 Status = FullReceiptStatus.Created,
                 CreatedDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow

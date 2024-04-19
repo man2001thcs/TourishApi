@@ -48,6 +48,7 @@ namespace WebApplication1.Data.DbContextFile
         //
         public DbSet<User> Users { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<ReqTemporaryToken> ReqTemporaryTokens { get; set; }
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -200,13 +201,28 @@ namespace WebApplication1.Data.DbContextFile
 
             });
 
-
-
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasIndex(e => e.UserName).IsUnique();
                 entity.Property(e => e.FullName).IsRequired().HasMaxLength(150);
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(150);
+            });
+
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.ToTable(nameof(RefreshToken));
+
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.User)
+                .WithMany(e => e.RefreshTokenList)
+                .HasForeignKey(e => e.UserId)
+                .HasConstraintName("FK_User_RefreshToken");
+            });
+
+            modelBuilder.Entity<ReqTemporaryToken>(entity =>
+            {
+                entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
             });
 
             modelBuilder.Entity<RefreshToken>(entity =>

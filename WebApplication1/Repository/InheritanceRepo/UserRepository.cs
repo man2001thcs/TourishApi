@@ -186,5 +186,33 @@ namespace WebApplication1.Repository.InheritanceRepo
                 MessageCode = "C012",
             };
         }
+
+        public async Task<Response> ReclaimPassword(UserReclaimPasswordModel model)
+        {
+            var userExist = _context.Users.FirstOrDefault(p => p.UserName == model.UserName);
+            if (userExist != null) //không đúng
+            {
+                userExist.UpdateDate = DateTime.UtcNow;
+
+                if (userExist.Password != "None")
+                {
+                    userExist.Password = model.NewPassword;
+                }
+
+                await _context.SaveChangesAsync();
+
+                return new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "I012",
+                };
+            }
+
+            return new Response
+            {
+                resultCd = 0,
+                MessageCode = "C012",
+            };
+        }
     }
 }

@@ -11,6 +11,7 @@ namespace WebApplication1.Repository.Interface
         Response getByName(String userName, int? type);
         Task<Response> UpdateInfo(UserRole userRoleAuthority, Boolean isSelfUpdate, UserUpdateModel entityModel);
         Task<Response> UpdatePassword(UserUpdatePasswordModel entityModel);
+        Task<Response> ReclaimPassword(UserReclaimPasswordModel entityModel);
         Response Delete(Guid id);
     }
 }

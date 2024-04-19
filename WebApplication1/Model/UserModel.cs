@@ -33,4 +33,17 @@ namespace WebApplication1.Model
         public string? UserName { get; set; }
         public string NewPassword { get; set; }
     }
+
+    public class UserReclaimPasswordModel
+    {
+        public string? UserName { get; set; }
+        public string? ReclaimToken { get; set; }
+        public string NewPassword { get; set; }
+    }
+
+    public class UserReClaimModel
+    {
+        public string? UserName { get; set; }
+        public string? Email { get; set; }
+    }
 }
