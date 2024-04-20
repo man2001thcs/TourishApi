@@ -1,5 +1,6 @@
 ﻿using Google.Apis.Auth;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -22,13 +23,16 @@ namespace WebApplication1.Service.InheritanceService
         private readonly AppSetting _appSettings;
         private readonly IUserRepository _userRepository;
         private readonly ISendMailService _sendMailService;
+        private readonly ILogger<UserService> logger;
 
-        public UserService(MyDbContext context, IUserRepository userRepository, IOptionsMonitor<AppSetting> optionsMonitor, ISendMailService sendMailService, IOptions<AppSetting> appSettings)
+        public UserService(MyDbContext context, IUserRepository userRepository, IOptionsMonitor<AppSetting> optionsMonitor, ILogger<UserService> _logger,
+            ISendMailService sendMailService, IOptions<AppSetting> appSettings)
         {
             _context = context;
             _appSettings = optionsMonitor.CurrentValue;
             _userRepository = userRepository;
             _sendMailService = sendMailService;
+            logger = _logger;
         }
 
         public async Task<Response> Validate(LoginModel model)
@@ -92,6 +96,27 @@ namespace WebApplication1.Service.InheritanceService
                 {
                     resultCd = 1,
                     MessageCode = "C010e"
+                };
+            }
+        }
+
+        public async Task<Response> CheckReclaimExist(string reclaimInfo)
+        {
+            var user = _context.Users.SingleOrDefault(p => p.Email == reclaimInfo || p.UserName == reclaimInfo);
+            if (user != null)
+            {
+                return new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "I010b"
+                };
+            }
+            else
+            {
+                return new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C010n"
                 };
             }
         }
@@ -220,14 +245,14 @@ namespace WebApplication1.Service.InheritanceService
 
         public async Task<Response> Reclaim(UserReClaimModel model)
         {
-            var userExist = _context.Users.FirstOrDefault(p => p.UserName == model.UserName || p.Email == model.Email);
+            var userExist = _context.Users.FirstOrDefault(p => p.UserName == model.ReclaimInfo || p.Email == model.ReclaimInfo);
             if (userExist != null)
             {
                 var signInToken = await GenerateReclaimToken(userExist);
                 var baseUrl = _appSettings.BaseUrl;
                 var mailContent = new MailContent
                 {
-                    To = model.Email,
+                    To = userExist.Email,
                     Subject = "Roxanne: Khôi phục tài khoản",
                     Body = "<html>" +
                                 "<head>" +
@@ -351,6 +376,18 @@ namespace WebApplication1.Service.InheritanceService
 
         public async Task<Response> ReclaimPassword(UserReclaimPasswordModel model)
         {
+            var existToken = _context.ReqTemporaryTokens.Where(token => token.Token == model.ReclaimToken && token.Purpose == TokenPurpose.Reclaim).FirstOrDefault();
+            if (existToken == null) return new Response
+            {
+                resultCd = 1,
+                MessageCode = "C008",
+            };
+
+            existToken.IsActivated = false;
+            existToken.ClosedDate = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
             Response checkResult = checkIfTokenFormIsValid(model.ReclaimToken);
             if (checkResult.resultCd != 0) return checkResult;
             var tokenInverification = (ClaimsPrincipal)checkResult.Data;
@@ -606,12 +643,9 @@ namespace WebApplication1.Service.InheritanceService
 
             var secretKeyBytes = Encoding.UTF8.GetBytes(_appSettings.SecretKey);
 
-            var permissions = getPermission(user.Role);
-
             var tokenDescription = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[] {
-                    new Claim(ClaimTypes.Name, user.FullName),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
                     new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -620,10 +654,10 @@ namespace WebApplication1.Service.InheritanceService
                     new Claim("Purpose", "reClaim"),
                     //roles
                     new Claim("Role", user.Role.ToString()),
-                    new Claim("Permissions", permissions != null ? JsonSerializer.Serialize(permissions) : string.Empty,JsonClaimValueTypes.JsonArray)
 
                 }),
                 Issuer = _appSettings.Issuer,
+                Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha512Signature)
             };
 
@@ -651,7 +685,6 @@ namespace WebApplication1.Service.InheritanceService
         public async Task<bool> validateReclaimToken(string bearerToken)
         {
             var checkResult = checkIfTokenFormIsValid(bearerToken);
-
             if (checkResult.resultCd == 0)
             {
                 var existToken = _context.ReqTemporaryTokens.Where(entity => entity.Token == bearerToken && entity.Purpose == TokenPurpose.Reclaim).
@@ -664,10 +697,8 @@ namespace WebApplication1.Service.InheritanceService
                 var purpose = tokenInverification.FindFirstValue("Purpose");
                 if (purpose == "reClaim")
                 {
-                    existToken.IsActivated = false;
-                    await _context.SaveChangesAsync();
                     return true;
-                }
+                }             
             }
             return false;
         }
@@ -832,8 +863,7 @@ namespace WebApplication1.Service.InheritanceService
                 }
 
                 // Check 4: Check expired
-                var expiredDateExt = expiredDate.AddHours(1);
-                if (expiredDateExt < DateTime.UtcNow)
+                if (expiredDate < DateTime.UtcNow)
                 {
                     return new Response
                     {
@@ -977,19 +1007,28 @@ namespace WebApplication1.Service.InheritanceService
                 }
 
                 // Check 3: Check expired
-                var utcExpiredDate = long.Parse(tokenInverification.
-                    Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp)
-                    .Value);
-
-                var expiredDate = ConvertUnixTimeToDateTime(utcExpiredDate);
-                if (expiredDate > DateTime.UtcNow)
+                var expClaim = tokenInverification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp);
+                logger.LogInformation(expClaim.Value);
+                if (expClaim != null)
                 {
-                    return new Response
-                    {
-                        resultCd = 1,
-                        MessageCode = "C003",
-                        // Not expired yet
-                    };
+                    var utcExpiredDate = long.Parse(expClaim.Value);
+                    logger.LogInformation(utcExpiredDate.ToString());
+
+                    var expiredDate = ConvertUnixTimeToDateTime(utcExpiredDate);
+
+                    logger.LogInformation(expiredDate.ToString());
+                    // Check 4: Check expired
+                    if (expiredDate < DateTime.UtcNow)
+                    {                       
+                        logger.LogInformation(DateTime.UtcNow.ToString());
+                        logger.LogInformation("Failed time");
+                        return new Response
+                        {
+                            resultCd = 1,
+                            MessageCode = "C004e",
+                            // expired
+                        };
+                    }
                 }
 
                 return new Response
@@ -1013,9 +1052,7 @@ namespace WebApplication1.Service.InheritanceService
         private DateTime ConvertUnixTimeToDateTime(long utcExpiredDate)
         {
             var dateTimeInterval = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            dateTimeInterval.AddSeconds(utcExpiredDate).ToUniversalTime();
-
-            return dateTimeInterval;
+            return dateTimeInterval.AddSeconds(utcExpiredDate).ToUniversalTime();
         }
     }
 }

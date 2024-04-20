@@ -43,7 +43,6 @@ namespace WebApplication1.Model
 
     public class UserReClaimModel
     {
-        public string? UserName { get; set; }
-        public string? Email { get; set; }
+        public string ReclaimInfo { get; set; }
     }
 }

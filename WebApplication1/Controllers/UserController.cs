@@ -42,20 +42,8 @@ namespace WebApplication1.Controllers
         [HttpPost("CheckExist/reclaim")]
         public async Task<IActionResult> reclaimCheckExist(string reclaimInfo)
         {
-            var emailCheck = await _userService.CheckEmailExist(reclaimInfo);
-            if (emailCheck.resultCd == 0) { 
-                var userCheck = await _userService.CheckExist(reclaimInfo);
-                if (userCheck.resultCd == 0) { return Ok(userCheck); }
-            }
-
-            var response = new Response
-            {
-                resultCd = 0,
-                Data = null,
-                MessageCode = "I010b"
-            };
-
-            return Ok(response);
+           
+            return Ok(await _userService.CheckReclaimExist(reclaimInfo));
         }
 
         [HttpPost("GoogleSignIn")]
@@ -69,6 +57,12 @@ namespace WebApplication1.Controllers
         public async Task<IActionResult> SignIn(UserModel model)
         {
             return Ok(await _userService.SignIn(model));
+        }
+
+        [HttpPost("ReclaimReq")]
+        public async Task<IActionResult> ReclaimReq(UserReClaimModel model)
+        {
+            return Ok(await _userService.Reclaim(model));
         }
 
         [Authorize(Policy = "UpdateUserInfoAccess")]
@@ -142,7 +136,7 @@ namespace WebApplication1.Controllers
 
             if (result)
             {
-                return Redirect(_appSettings.ClientUrl + "/guest/login?activated=1");
+                return Redirect(_appSettings.ClientUrl + "/guest/reclaim?reclaim-token=" + token);
             }
             else return BadRequest("Token not valid");
         }
