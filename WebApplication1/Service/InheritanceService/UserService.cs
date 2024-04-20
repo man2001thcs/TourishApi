@@ -1,6 +1,5 @@
 ﻿using Google.Apis.Auth;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -698,7 +697,7 @@ namespace WebApplication1.Service.InheritanceService
                 if (purpose == "reClaim")
                 {
                     return true;
-                }             
+                }
             }
             return false;
         }
@@ -1019,7 +1018,7 @@ namespace WebApplication1.Service.InheritanceService
                     logger.LogInformation(expiredDate.ToString());
                     // Check 4: Check expired
                     if (expiredDate < DateTime.UtcNow)
-                    {                       
+                    {
                         logger.LogInformation(DateTime.UtcNow.ToString());
                         logger.LogInformation("Failed time");
                         return new Response

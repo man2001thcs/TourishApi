@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using WebApplication1.Model;
-using WebApplication1.Model.VirtualModel;
 using WebApplication1.Service.InheritanceService;
 
 namespace WebApplication1.Controllers
@@ -42,7 +41,7 @@ namespace WebApplication1.Controllers
         [HttpPost("CheckExist/reclaim")]
         public async Task<IActionResult> reclaimCheckExist(string reclaimInfo)
         {
-           
+
             return Ok(await _userService.CheckReclaimExist(reclaimInfo));
         }
 

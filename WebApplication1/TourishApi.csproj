@@ -44,6 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
+	  <Folder Include="Repository\InheritanceRepo\Transport\" />
 	  <Folder Include="Repository\Interface\Receipt\" />
 	  <Folder Include="wwwroot\Resources\Images\" />
   </ItemGroup>

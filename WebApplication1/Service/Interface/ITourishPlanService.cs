@@ -9,6 +9,8 @@ namespace TourishApi.Service.Interface
         public Response GetAll(
             string? search,
             string? category,
+            string? startingPoint, string? endPoint, string? startingDate,
+            double? priceFrom, double? priceTo,
             string? sortBy,
             int page = 1,
             int pageSize = 5

@@ -116,7 +116,8 @@ public class TourishPlanRepository : ITourishPlanRepository
         };
     }
 
-    public Response GetAll(string? search, string? category, string? sortBy, int page = 1, int pageSize = 5)
+    public Response GetAll(string? search, string? category, string? startingPoint, string? endPoint, string? startingDate,
+        double? priceFrom, double? priceTo, string? sortBy, int page = 1, int pageSize = 5)
     {
         var entityQuery = _context.TourishPlan.Include(entity => entity.MovingSchedules).
             Include(entity => entity.EatSchedules).
@@ -137,6 +138,32 @@ public class TourishPlanRepository : ITourishPlanRepository
         {
             entityQuery = entityQuery.Where(entity => entity.TourishCategoryRelations
             .Count(categoryRelation => (categoryRelation.TourishCategory != null) ? categoryRelation.TourishCategory.Name.Contains(category) : false) >= 1);
+        }
+
+        if (!string.IsNullOrEmpty(startingPoint))
+        {
+            entityQuery = entityQuery.Where(entity => entity.StartingPoint.Contains(startingPoint));
+        }
+
+        if (!string.IsNullOrEmpty(endPoint))
+        {
+            entityQuery = entityQuery.Where(entity => entity.EndPoint.Contains(endPoint));
+        }
+
+        if (priceFrom != null)
+        {
+            entityQuery = entityQuery.Where(entity => GetTotalPrice(entity) >= priceFrom);
+
+            if (priceTo != null) entityQuery = entityQuery.Where(entity => GetTotalPrice(entity) <= priceTo);
+        }
+
+        if (!string.IsNullOrEmpty(startingDate))
+        {
+            if (DateTime.TryParse(startingDate, out DateTime dateTime))
+            {
+                entityQuery = entityQuery.Where(entity => entity.StartDate.Day == dateTime.Day
+                && entity.StartDate.Month == dateTime.Month && entity.StartDate.Year == dateTime.Year);
+            }
         }
 
         #endregion
@@ -485,5 +512,36 @@ public class TourishPlanRepository : ITourishPlanRepository
                 }
             }
         }
+    }
+
+    private double GetTotalPrice(TourishPlan tourishPlan)
+    {
+        double totalPrice = 0;
+
+        if (tourishPlan.StayingSchedules != null)
+        {
+            foreach (var entity in tourishPlan.StayingSchedules)
+            {
+                totalPrice += entity.SinglePrice ?? 0;
+            }
+        }
+
+        if (tourishPlan.EatSchedules != null)
+        {
+            foreach (var entity in tourishPlan.EatSchedules)
+            {
+                totalPrice += entity.SinglePrice ?? 0;
+            }
+        }
+
+        if (tourishPlan.MovingSchedules != null)
+        {
+            foreach (var entity in tourishPlan.MovingSchedules)
+            {
+                totalPrice += entity.SinglePrice ?? 0;
+            }
+        }
+
+        return totalPrice;
     }
 }
