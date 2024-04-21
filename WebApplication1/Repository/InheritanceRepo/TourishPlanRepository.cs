@@ -116,7 +116,7 @@ public class TourishPlanRepository : ITourishPlanRepository
         };
     }
 
-    public Response GetAll(string? search, string? category, string? startingPoint, string? endPoint, string? startingDate,
+    public Response GetAll(string? search, string? category, string? categoryString, string? startingPoint, string? endPoint, string? startingDate,
         double? priceFrom, double? priceTo, string? sortBy, int page = 1, int pageSize = 5)
     {
         var entityQuery = _context.TourishPlan.Include(entity => entity.MovingSchedules).
@@ -140,6 +140,19 @@ public class TourishPlanRepository : ITourishPlanRepository
             .Count(categoryRelation => (categoryRelation.TourishCategory != null) ? categoryRelation.TourishCategory.Name.Contains(category) : false) >= 1);
         }
 
+        if (!string.IsNullOrEmpty(categoryString))
+        {
+            string[] categoryArray = Newtonsoft.Json.JsonConvert.DeserializeObject<string[]>(categoryString);
+
+            if (categoryArray != null)
+            {
+                entityQuery = entityQuery.Where(entity => entity.TourishCategoryRelations
+                    .Count(categoryRelation => (categoryRelation.TourishCategory != null) ? categoryArray.Contains(categoryRelation.TourishCategory.Name) : false) >= 1);
+            }
+        }
+
+        
+
         if (!string.IsNullOrEmpty(startingPoint))
         {
             entityQuery = entityQuery.Where(entity => entity.StartingPoint.Contains(startingPoint));
@@ -152,9 +165,20 @@ public class TourishPlanRepository : ITourishPlanRepository
 
         if (priceFrom != null)
         {
-            entityQuery = entityQuery.Where(entity => GetTotalPrice(entity) >= priceFrom);
+            entityQuery = entityQuery.Where(entity =>
+                (entity.StayingSchedules.Sum(schedule => schedule.SinglePrice) +
+                entity.EatSchedules.Sum(schedule => schedule.SinglePrice) +
+                entity.MovingSchedules.Sum(schedule => schedule.SinglePrice))
+                >= priceFrom);
 
-            if (priceTo != null) entityQuery = entityQuery.Where(entity => GetTotalPrice(entity) <= priceTo);
+            if (priceTo != null)
+            {
+                entityQuery = entityQuery.Where(entity =>
+                    (entity.StayingSchedules.Sum(schedule => schedule.SinglePrice) +
+                    entity.EatSchedules.Sum(schedule => schedule.SinglePrice) +
+                    entity.MovingSchedules.Sum(schedule => schedule.SinglePrice))
+                    <= priceTo);
+            }
         }
 
         if (!string.IsNullOrEmpty(startingDate))
@@ -184,7 +208,7 @@ public class TourishPlanRepository : ITourishPlanRepository
         #endregion
 
         #region Paging
-        var result = PaginatorModel<TourishPlan>.Create(entityQuery, page, PAGE_SIZE);
+        var result = PaginatorModel<TourishPlan>.Create(entityQuery, page, pageSize);
         #endregion
 
         var entityVM = new Response

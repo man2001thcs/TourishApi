@@ -18,10 +18,10 @@ namespace WebApplication1.Controllers.TourishPlan
 
         // GET: api/<ValuesController>
         [HttpGet]
-        public IActionResult GetAll(string? search, string? category, string? startingPoint, string? endPoint, string? startingDate,
+        public IActionResult GetAll(string? search, string? category, string? categoryString, string? startingPoint, string? endPoint, string? startingDate,
             double? priceFrom, double? priceTo, string? sortBy, int page = 1, int pageSize = 5)
         {
-            return Ok(_entityService.GetAll(search, category, startingPoint, endPoint, startingDate, priceFrom, priceTo, sortBy, page, pageSize));
+            return Ok(_entityService.GetAll(search, category, categoryString, startingPoint, endPoint, startingDate, priceFrom, priceTo, sortBy, page, pageSize));
         }
 
         [HttpGet("{id}")]

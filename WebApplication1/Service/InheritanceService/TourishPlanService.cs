@@ -89,16 +89,16 @@ namespace TourishApi.Service.InheritanceService
 
         public Response GetAll(
             string? search,
-            string? category, string? startingPoint, string? endPoint, string? startingDate,
+            string? category, string? categoryString, string? startingPoint, string? endPoint, string? startingDate,
             double? priceFrom, double? priceTo,
             string? sortBy,
-            int page = 1,
-            int pageSize = 5
+            int page,
+            int pageSize
         )
         {
             try
             {
-                var entityList = _entityRepository.GetAll(search, category, startingPoint, endPoint, startingDate, priceFrom, priceTo, sortBy, page, pageSize);
+                var entityList = _entityRepository.GetAll(search, category, categoryString, startingPoint, endPoint, startingDate, priceFrom, priceTo, sortBy, page, pageSize);
                 return entityList;
             }
             catch (Exception ex)
