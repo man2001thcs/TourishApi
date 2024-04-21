@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System.Globalization;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Schedule;
@@ -6,17 +8,20 @@ using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
 using WebApplication1.Service;
+using WebApplication1.Service.InheritanceService;
 namespace WebApplication1.Repository.InheritanceRepo;
 public class TourishPlanRepository : ITourishPlanRepository
 {
     private readonly MyDbContext _context;
     private readonly IBlobService blobService;
+    private readonly ILogger<TourishPlanRepository> logger;
     public static int PAGE_SIZE { get; set; } = 5;
     private readonly char[] delimiter = new char[] { ';' };
-    public TourishPlanRepository(MyDbContext _context, IBlobService blobService)
+    public TourishPlanRepository(MyDbContext _context, IBlobService blobService, ILogger<TourishPlanRepository> _logger)
     {
         this._context = _context;
         this.blobService = blobService;
+        this.logger = _logger;
     }
 
     public async Task<Response> Add(TourishPlanInsertModel entityModel, String id)
@@ -183,10 +188,15 @@ public class TourishPlanRepository : ITourishPlanRepository
 
         if (!string.IsNullOrEmpty(startingDate))
         {
-            if (DateTime.TryParse(startingDate, out DateTime dateTime))
+
+            // Mảng chứa các mẫu định dạng mà bạn cho phép
+            string[] formats = { "ddd MMM dd yyyy HH:mm:ss 'GMT'zzz", "yyyy-MM-ddTHH:mm:sszzz" }; // Thêm các định dạng khác nếu cần
+            DateTime dateTime;
+            if (DateTime.TryParseExact(startingDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime))
             {
+                logger.LogInformation(dateTime.ToString());
                 entityQuery = entityQuery.Where(entity => entity.StartDate.Day == dateTime.Day
-                && entity.StartDate.Month == dateTime.Month && entity.StartDate.Year == dateTime.Year);
+                    && entity.StartDate.Month == dateTime.Month && entity.StartDate.Year == dateTime.Year);
             }
         }
 
