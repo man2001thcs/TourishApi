@@ -5,7 +5,7 @@ using WebApplication1.Repository.InheritanceRepo;
 
 namespace TourishApi.Service.InheritanceService.Schedule
 {
-    public class EatScheduleService : IBaseService<TourishOuterScheduleRepository, EatScheduleModel>
+    public class EatScheduleService
     {
         private readonly TourishOuterScheduleRepository _entityRepository;
 
@@ -14,7 +14,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
             _entityRepository = airPlaneRepository;
         }
 
-        public Response CreateNew(EatScheduleModel entityModel)
+        public async Task<Response> CreateNew(EatScheduleModel entityModel)
         {
             try
             {
@@ -22,7 +22,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
 
                 if (entityExist.Data == null)
                 {
-                    var response = _entityRepository.AddEatSchedule(entityModel);
+                    var response = await _entityRepository.AddEatSchedule(entityModel);
 
                     return (response);
                 }
@@ -43,11 +43,11 @@ namespace TourishApi.Service.InheritanceService.Schedule
             }
         }
 
-        public Response DeleteById(Guid id)
+        public async Task<Response> DeleteById(Guid id)
         {
             try
             {
-                _entityRepository.DeleteEatSchedule(id);
+                await _entityRepository.DeleteEatSchedule(id);
                 var response = new Response { resultCd = 0, MessageCode = "I433" };
                 return response;
             }
@@ -113,11 +113,11 @@ namespace TourishApi.Service.InheritanceService.Schedule
             }
         }
 
-        public Response UpdateEntityById(Guid id, EatScheduleModel EatScheduleModel)
+        public async Task<Response> UpdateEntityById(Guid id, EatScheduleModel EatScheduleModel)
         {
             try
             {
-                var response = _entityRepository.UpdateEatSchedule(EatScheduleModel);
+                var response = await _entityRepository.UpdateEatSchedule(EatScheduleModel);
 
                 return response;
             }

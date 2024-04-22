@@ -20,9 +20,9 @@ namespace WebApplication1.Controllers.Schedule
 
         [HttpPut("{id}")]
         [Authorize(Policy = "UpdateTourishPlanAccess")]
-        public IActionResult UpdateStayingScheduleById(Guid id, StayingScheduleModel StayingScheduleModel)
+        public async Task<IActionResult> UpdateStayingScheduleById(Guid id, StayingScheduleModel StayingScheduleModel)
         {
-            return Ok(_entityService.UpdateEntityById(id, StayingScheduleModel));
+            return Ok(await _entityService.UpdateEntityById(id, StayingScheduleModel));
         }
     }
 }

@@ -5,7 +5,7 @@ using WebApplication1.Repository.InheritanceRepo;
 
 namespace TourishApi.Service.InheritanceService.Schedule
 {
-    public class StayingScheduleService : IBaseService<TourishOuterScheduleRepository, StayingScheduleModel>
+    public class StayingScheduleService
     {
         private readonly TourishOuterScheduleRepository _entityRepository;
 
@@ -14,7 +14,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
             _entityRepository = entityRepository;
         }
 
-        public Response CreateNew(StayingScheduleModel entityModel)
+        public async Task<Response> CreateNew(StayingScheduleModel entityModel)
         {
             try
             {
@@ -22,7 +22,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
 
                 if (entityExist.Data == null)
                 {
-                    var response = _entityRepository.AddStayingSchedule(entityModel);
+                    var response = await _entityRepository.AddStayingSchedule(entityModel);
 
                     return (response);
                 }
@@ -43,11 +43,11 @@ namespace TourishApi.Service.InheritanceService.Schedule
             }
         }
 
-        public Response DeleteById(Guid id)
+        public async Task<Response> DeleteById(Guid id)
         {
             try
             {
-                _entityRepository.DeleteStayingSchedule(id);
+                await _entityRepository.DeleteStayingSchedule(id);
                 var response = new Response { resultCd = 0, MessageCode = "I433" };
                 return response;
             }
@@ -113,11 +113,11 @@ namespace TourishApi.Service.InheritanceService.Schedule
             }
         }
 
-        public Response UpdateEntityById(Guid id, StayingScheduleModel StayingScheduleModel)
+        public async Task<Response> UpdateEntityById(Guid id, StayingScheduleModel StayingScheduleModel)
         {
             try
             {
-                var response = _entityRepository.UpdateStayingSchedule(StayingScheduleModel);
+                var response = await _entityRepository.UpdateStayingSchedule(StayingScheduleModel);
 
                 return response;
             }

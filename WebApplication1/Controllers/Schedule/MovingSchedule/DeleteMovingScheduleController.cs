@@ -19,9 +19,9 @@ namespace WebApplication1.Controllers.Schedule
 
         [HttpDelete("{id}")]
         [Authorize(Policy = "DeleteTourishPlanAccess")]
-        public IActionResult DeleteById(Guid id)
+        public async Task<IActionResult> DeleteById(Guid id)
         {
-            return Ok(_entityService.DeleteById(id));
+            return Ok(await _entityService.DeleteById(id));
         }
     }
 }

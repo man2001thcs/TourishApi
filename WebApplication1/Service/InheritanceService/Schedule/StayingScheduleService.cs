@@ -5,7 +5,7 @@ using WebApplication1.Repository.InheritanceRepo;
 
 namespace TourishApi.Service.InheritanceService.Schedule
 {
-    public class MovingScheduleService : IBaseService<TourishOuterScheduleRepository, MovingScheduleModel>
+    public class MovingScheduleService
     {
         private readonly TourishOuterScheduleRepository _entityRepository;
 
@@ -14,7 +14,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
             _entityRepository = entityRepository;
         }
 
-        public Response CreateNew(MovingScheduleModel entityModel)
+        public async Task<Response> CreateNew(MovingScheduleModel entityModel)
         {
             try
             {
@@ -22,7 +22,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
 
                 if (entityExist.Data == null)
                 {
-                    var response = _entityRepository.AddMovingSchedule(entityModel);
+                    var response = await _entityRepository.AddMovingSchedule(entityModel);
 
                     return (response);
                 }
@@ -43,11 +43,11 @@ namespace TourishApi.Service.InheritanceService.Schedule
             }
         }
 
-        public Response DeleteById(Guid id)
+        public async Task<Response> DeleteById(Guid id)
         {
             try
             {
-                _entityRepository.DeleteMovingSchedule(id);
+                await _entityRepository.DeleteMovingSchedule(id);
                 var response = new Response { resultCd = 0, MessageCode = "I433" };
                 return response;
             }
@@ -113,13 +113,13 @@ namespace TourishApi.Service.InheritanceService.Schedule
             }
         }
 
-        public Response UpdateEntityById(Guid id, MovingScheduleModel MovingScheduleModel)
+        public async Task<Response> UpdateEntityById(Guid id, MovingScheduleModel MovingScheduleModel)
         {
             try
             {
                 var response = _entityRepository.UpdateMovingSchedule(MovingScheduleModel);
 
-                return response;
+                return await response;
             }
             catch (Exception ex)
             {

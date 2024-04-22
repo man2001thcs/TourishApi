@@ -1,23 +1,26 @@
-﻿using WebApplication1.Data.DbContextFile;
+﻿using Google.Api.Gax;
+using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Schedule;
 using WebApplication1.Model;
 using WebApplication1.Model.Schedule;
 using WebApplication1.Model.VirtualModel;
+using WebApplication1.Service;
 
 namespace WebApplication1.Repository.InheritanceRepo
 {
     public class TourishOuterScheduleRepository
     {
         private readonly MyDbContext _context;
+        private BlobService _blobService;
         public static int PAGE_SIZE { get; set; } = 5;
-        public TourishOuterScheduleRepository(MyDbContext _context)
+        public TourishOuterScheduleRepository(MyDbContext _context, BlobService blobService)
         {
             this._context = _context;
+            _blobService = blobService;
         }
 
-        public Response AddEatSchedule(EatScheduleModel addModel)
+        public async Task<Response> AddEatSchedule(EatScheduleModel addModel)
         {
-
             var addValue = new EatSchedule
             {
                 PlaceName = addModel.PlaceName,
@@ -29,13 +32,13 @@ namespace WebApplication1.Repository.InheritanceRepo
                 Status = addModel.Status,
                 StartDate = addModel.StartDate,
                 EndDate = addModel.EndDate,
-
-                Description = addModel.Description,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
-            _context.Add(addValue);
-            _context.SaveChanges();
+            await _context.AddAsync(addValue);
+            await _context.SaveChangesAsync();
+
+            await _blobService.UploadStringBlobAsync("eatschedule-content-container", addModel.Description ?? "Không có thông tin", "text/plain", addValue.ToString() ?? "" + ".txt");
 
             return new Response
             {
@@ -45,7 +48,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response AddMovingSchedule(MovingScheduleModel addModel)
+        public async Task<Response> AddMovingSchedule(MovingScheduleModel addModel)
         {
 
             var addValue = new MovingSchedule
@@ -61,13 +64,13 @@ namespace WebApplication1.Repository.InheritanceRepo
                 Status = addModel.Status,
                 StartDate = addModel.StartDate,
                 EndDate = addModel.EndDate,
-
-                Description = addModel.Description,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
-            _context.Add(addValue);
-            _context.SaveChanges();
+            await _context.AddAsync(addValue);
+            await _context.SaveChangesAsync();
+
+            await _blobService.UploadStringBlobAsync("movingschedule-content-container", addModel.Description ?? "Không có thông tin", "text/plain", addValue.ToString() ?? "" + ".txt");
 
             return new Response
             {
@@ -77,7 +80,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response AddStayingSchedule(StayingScheduleModel addModel)
+        public async Task<Response> AddStayingSchedule(StayingScheduleModel addModel)
         {
 
             var addValue = new StayingSchedule
@@ -92,13 +95,13 @@ namespace WebApplication1.Repository.InheritanceRepo
                 Status = addModel.Status,
                 StartDate = addModel.StartDate,
                 EndDate = addModel.EndDate,
-
-                Description = addModel.Description,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
-            _context.Add(addValue);
-            _context.SaveChanges();
+            await _context.AddAsync(addValue);
+            await _context.SaveChangesAsync();
+
+            await _blobService.UploadStringBlobAsync("stayingschedule-content-container", addModel.Description ?? "Không có thông tin", "text/plain", addValue.ToString() ?? "" + ".txt");
 
             return new Response
             {
@@ -108,13 +111,14 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response DeleteEatSchedule(Guid id)
+        public async Task<Response> DeleteEatSchedule(Guid id)
         {
             var deleteEntity = _context.EatSchedules.FirstOrDefault((entity
                => entity.Id == id));
             if (deleteEntity != null)
             {
-                _context.Remove(deleteEntity);
+                await _blobService.DeleteFileBlobAsync("eatschedule-content-container", deleteEntity.Id.ToString());
+                _context.Remove(deleteEntity);               
                 _context.SaveChanges();
             }
 
@@ -126,12 +130,13 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response DeleteMovingSchedule(Guid id)
+        public async Task<Response> DeleteMovingSchedule(Guid id)
         {
             var deleteEntity = _context.MovingSchedules.FirstOrDefault((entity
                => entity.Id == id));
             if (deleteEntity != null)
             {
+                await _blobService.DeleteFileBlobAsync("movingschedule-content-container", deleteEntity.Id.ToString());
                 _context.Remove(deleteEntity);
                 _context.SaveChanges();
             }
@@ -144,12 +149,13 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response DeleteStayingSchedule(Guid id)
+        public async Task<Response> DeleteStayingSchedule(Guid id)
         {
             var deleteEntity = _context.StayingSchedules.FirstOrDefault((entity
                => entity.Id == id));
             if (deleteEntity != null)
             {
+                await _blobService.DeleteFileBlobAsync("stayingschedule-content-container", deleteEntity.Id.ToString());
                 _context.Remove(deleteEntity);
                 _context.SaveChanges();
             }
@@ -323,16 +329,23 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response UpdateEatSchedule(EatScheduleModel entityModel)
+        public async Task<Response> UpdateEatSchedule(EatScheduleModel entityModel)
         {
             var entity = _context.EatSchedules.FirstOrDefault((entity
                 => entity.Id == entityModel.Id));
             if (entity != null)
             {
                 entity.UpdateDate = DateTime.UtcNow;
-                entity.Description = entityModel.Description;
                 entity.PlaceName = entityModel.PlaceName;
+                entity.SinglePrice = entityModel.SinglePrice;
+                entity.SupportNumber = entityModel.SupportNumber;
+                entity.Address = entityModel.Address;
+                entity.StartDate = entityModel.StartDate;
+                entity.EndDate = entityModel.EndDate;
+                entity.Status = entityModel.Status;
+
                 _context.SaveChanges();
+                await _blobService.UploadStringBlobAsync("eatschedule-content-container", entityModel.Description ?? "Không có thông tin", "text/plain", entity.Id.ToString() ?? "" + ".txt");
             }
 
             return new Response
@@ -367,17 +380,22 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response UpdateStayingSchedule(StayingScheduleModel entityModel)
+        public async Task<Response> UpdateStayingSchedule(StayingScheduleModel entityModel)
         {
             var entity = _context.StayingSchedules.FirstOrDefault((entity
                 => entity.Id == entityModel.Id));
             if (entity != null)
             {
                 entity.UpdateDate = DateTime.UtcNow;
-                entity.Description = entityModel.Description;
                 entity.PlaceName = entityModel.PlaceName;
+                entity.SupportNumber = entityModel.SupportNumber;
+                entity.Address = entityModel.Address;
+                entity.SinglePrice = entityModel.SinglePrice;
+                entity.RestHouseBranchId = entityModel.RestHouseBranchId;
                 _context.SaveChanges();
             }
+
+            await _blobService.UploadStringBlobAsync("stayingschedule-content-container", entityModel.Description ?? "Không có thông tin", "text/plain", entity.Id.ToString() ?? "" + ".txt");
 
             return new Response
             {
@@ -412,16 +430,27 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response UpdateMovingSchedule(MovingScheduleModel entityModel)
+        public async Task<Response> UpdateMovingSchedule(MovingScheduleModel entityModel)
         {
             var entity = _context.MovingSchedules.FirstOrDefault((entity
                 => entity.Id == entityModel.Id));
             if (entity != null)
             {
                 entity.UpdateDate = DateTime.UtcNow;
-                entity.Description = entityModel.Description;
                 entity.BranchName = entityModel.BranchName;
+                entity.PhoneNumber = entityModel.PhoneNumber;
+                entity.TransportId = entityModel.TransportId;
+                entity.VehiclePlate = entityModel.VehiclePlate;
+                entity.VehicleType = entityModel.VehicleType;
+                entity.SinglePrice = entityModel.SinglePrice;
+                entity.DriverName = entityModel.DriverName; 
+                entity.StartDate = entityModel.StartDate;
+                entity.EndDate = entityModel.EndDate;
+                entity.StartingPlace = entityModel.StartingPlace;
+                entity.HeadingPlace = entityModel.HeadingPlace;
                 _context.SaveChanges();
+
+                await _blobService.UploadStringBlobAsync("movingschedule-content-container", entityModel.Description ?? "Không có thông tin", "text/plain", entity.Id.ToString() ?? "" + ".txt");
             }
 
             return new Response

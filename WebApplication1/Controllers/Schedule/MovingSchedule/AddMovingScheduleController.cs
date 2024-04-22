@@ -20,9 +20,9 @@ namespace WebApplication1.Controllers.Schedule
 
         [HttpPost]
         [Authorize(Policy = "CreateTourishPlanAccess")]
-        public IActionResult CreateNew(MovingScheduleModel entityModel)
+        public async Task<IActionResult> CreateNew(MovingScheduleModel entityModel)
         {
-            return Ok(_entityService.CreateNew(entityModel));
+            return Ok(await _entityService.CreateNew(entityModel));
         }
     }
 }
