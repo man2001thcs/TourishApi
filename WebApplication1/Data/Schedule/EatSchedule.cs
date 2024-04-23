@@ -14,6 +14,7 @@ namespace WebApplication1.Data.Schedule
         [Key]
         public Guid Id { get; set; }
         public Guid? TourishPlanId { get; set; }
+        public string? Name { get; set; }
 
         [Required]
         [MaxLength(200)]

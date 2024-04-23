@@ -7,6 +7,7 @@ namespace WebApplication1.Model.Schedule
     {
         public Guid Id { get; set; }
         public Guid? TourishPlanId { get; set; }
+        public string? Name { get; set; }
         public string? DriverName { get; set; }
         public string? VehiclePlate { get; set; }
         public string? PhoneNumber { get; set; }

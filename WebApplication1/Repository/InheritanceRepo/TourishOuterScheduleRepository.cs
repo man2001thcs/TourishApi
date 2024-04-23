@@ -11,9 +11,9 @@ namespace WebApplication1.Repository.InheritanceRepo
     public class TourishOuterScheduleRepository
     {
         private readonly MyDbContext _context;
-        private BlobService _blobService;
+        private readonly IBlobService _blobService;
         public static int PAGE_SIZE { get; set; } = 5;
-        public TourishOuterScheduleRepository(MyDbContext _context, BlobService blobService)
+        public TourishOuterScheduleRepository(MyDbContext _context, IBlobService blobService)
         {
             this._context = _context;
             _blobService = blobService;
@@ -23,6 +23,7 @@ namespace WebApplication1.Repository.InheritanceRepo
         {
             var addValue = new EatSchedule
             {
+                Name = addModel.Name,
                 PlaceName = addModel.PlaceName,
                 RestaurantId = addModel.RestaurantId,
                 SinglePrice = addModel.SinglePrice,
@@ -53,12 +54,16 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             var addValue = new MovingSchedule
             {
+                Name = addModel.Name,
                 BranchName = addModel.BranchName,
                 HeadingPlace = addModel.HeadingPlace,
                 StartingPlace = addModel.StartingPlace,
                 TransportId = addModel.TransportId,
                 VehicleType = addModel.VehicleType,
                 SinglePrice = addModel.SinglePrice,
+                DriverName = addModel.DriverName,
+                VehiclePlate = addModel.VehiclePlate,
+
 
                 TourishPlanId = null,
                 Status = addModel.Status,
@@ -85,6 +90,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             var addValue = new StayingSchedule
             {
+                Name = addModel.Name,
                 PlaceName = addModel.PlaceName,
                 RestHouseBranchId = addModel.RestHouseBranchId,
                 RestHouseType = addModel.RestHouseType,
@@ -335,8 +341,10 @@ namespace WebApplication1.Repository.InheritanceRepo
                 => entity.Id == entityModel.Id));
             if (entity != null)
             {
+                entity.Name = entityModel.Name;
                 entity.UpdateDate = DateTime.UtcNow;
                 entity.PlaceName = entityModel.PlaceName;
+                entity.RestaurantId = entityModel.RestaurantId;
                 entity.SinglePrice = entityModel.SinglePrice;
                 entity.SupportNumber = entityModel.SupportNumber;
                 entity.Address = entityModel.Address;
@@ -386,12 +394,17 @@ namespace WebApplication1.Repository.InheritanceRepo
                 => entity.Id == entityModel.Id));
             if (entity != null)
             {
+                entity.Name = entityModel.Name;
                 entity.UpdateDate = DateTime.UtcNow;
                 entity.PlaceName = entityModel.PlaceName;
                 entity.SupportNumber = entityModel.SupportNumber;
                 entity.Address = entityModel.Address;
                 entity.SinglePrice = entityModel.SinglePrice;
                 entity.RestHouseBranchId = entityModel.RestHouseBranchId;
+                entity.RestHouseType = entityModel.RestHouseType;
+                entity.Status = entityModel.Status;
+                entity.StartDate = entityModel.StartDate;
+                entity.EndDate = entityModel.EndDate;
                 _context.SaveChanges();
             }
 
@@ -437,6 +450,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             if (entity != null)
             {
                 entity.UpdateDate = DateTime.UtcNow;
+                entity.Name = entityModel.Name;
                 entity.BranchName = entityModel.BranchName;
                 entity.PhoneNumber = entityModel.PhoneNumber;
                 entity.TransportId = entityModel.TransportId;
@@ -444,10 +458,11 @@ namespace WebApplication1.Repository.InheritanceRepo
                 entity.VehicleType = entityModel.VehicleType;
                 entity.SinglePrice = entityModel.SinglePrice;
                 entity.DriverName = entityModel.DriverName; 
-                entity.StartDate = entityModel.StartDate;
-                entity.EndDate = entityModel.EndDate;
                 entity.StartingPlace = entityModel.StartingPlace;
                 entity.HeadingPlace = entityModel.HeadingPlace;
+                entity.Status = entityModel.Status;
+                entity.StartDate = entityModel.StartDate;
+                entity.EndDate = entityModel.EndDate;
                 _context.SaveChanges();
 
                 await _blobService.UploadStringBlobAsync("movingschedule-content-container", entityModel.Description ?? "Không có thông tin", "text/plain", entity.Id.ToString() ?? "" + ".txt");
