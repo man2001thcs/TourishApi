@@ -39,7 +39,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             await _context.AddAsync(addValue);
             await _context.SaveChangesAsync();
 
-            await _blobService.UploadStringBlobAsync("eatschedule-content-container", addModel.Description ?? "Không có thông tin", "text/plain", addValue.ToString() ?? "" + ".txt");
+            await _blobService.UploadStringBlobAsync("eatschedule-content-container", addModel.Description ?? "Không có thông tin", "text/plain", addValue.Id.ToString() ?? "" + ".txt");
 
             return new Response
             {
@@ -63,8 +63,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 SinglePrice = addModel.SinglePrice,
                 DriverName = addModel.DriverName,
                 VehiclePlate = addModel.VehiclePlate,
-
-
+                PhoneNumber = addModel.PhoneNumber,
                 TourishPlanId = null,
                 Status = addModel.Status,
                 StartDate = addModel.StartDate,
@@ -75,7 +74,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             await _context.AddAsync(addValue);
             await _context.SaveChangesAsync();
 
-            await _blobService.UploadStringBlobAsync("movingschedule-content-container", addModel.Description ?? "Không có thông tin", "text/plain", addValue.ToString() ?? "" + ".txt");
+            await _blobService.UploadStringBlobAsync("movingschedule-content-container", addModel.Description ?? "Không có thông tin", "text/plain", addValue.Id.ToString() ?? "" + ".txt");
 
             return new Response
             {
@@ -107,7 +106,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             await _context.AddAsync(addValue);
             await _context.SaveChangesAsync();
 
-            await _blobService.UploadStringBlobAsync("stayingschedule-content-container", addModel.Description ?? "Không có thông tin", "text/plain", addValue.ToString() ?? "" + ".txt");
+            await _blobService.UploadStringBlobAsync("stayingschedule-content-container", addModel.Description ?? "Không có thông tin", "text/plain", addValue.Id.ToString() ?? "" + ".txt");
 
             return new Response
             {
@@ -224,6 +223,8 @@ namespace WebApplication1.Repository.InheritanceRepo
             var entityQuery = _context.MovingSchedules.AsQueryable();
 
             #region Filtering
+            entityQuery = entityQuery.Where(entity => entity.TourishPlan
+                == null);
             if (!string.IsNullOrEmpty(search))
             {
                 entityQuery = entityQuery.Where(entity => entity.BranchName
@@ -421,7 +422,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response getByMovingScheduleId(Guid id)
         {
-            var entity = _context.StayingSchedules.FirstOrDefault((entity
+            var entity = _context.MovingSchedules.FirstOrDefault((entity
                 => entity.Id == id));
 
             return new Response
@@ -433,8 +434,8 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response getByNameMovingSchedule(String name)
         {
-            var entity = _context.StayingSchedules.FirstOrDefault((entity
-                => entity.PlaceName == name));
+            var entity = _context.MovingSchedules.FirstOrDefault((entity
+                => entity.Name == name));
 
             return new Response
             {

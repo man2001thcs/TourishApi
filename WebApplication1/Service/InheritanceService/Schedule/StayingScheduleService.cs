@@ -18,7 +18,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
         {
             try
             {
-                var entityExist = _entityRepository.getByNameMovingSchedule(entityModel.BranchName);
+                var entityExist = _entityRepository.getByNameMovingSchedule(entityModel.Name);
 
                 if (entityExist.Data == null)
                 {

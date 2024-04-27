@@ -25,6 +25,7 @@ namespace WebApplication1.Repository.InheritanceRepo.RestHoouse
                 PlaceBranch = addModel.PlaceBranch,
                 HotlineNumber = addModel.HotlineNumber,
                 SupportEmail = addModel.SupportEmail,
+                RestHouseType = addModel.RestHouseType,
                 HeadQuarterAddress = addModel.HeadQuarterAddress,
                 Description = addModel.Description,
                 DiscountAmount = addModel.DiscountAmount,
@@ -146,6 +147,7 @@ namespace WebApplication1.Repository.InheritanceRepo.RestHoouse
                 entity.PlaceBranch = entityModel.PlaceBranch;
                 entity.HotlineNumber = entityModel.HotlineNumber;
                 entity.SupportEmail = entityModel.SupportEmail;
+                entity.RestHouseType = entityModel.RestHouseType;
                 entity.HeadQuarterAddress = entityModel.HeadQuarterAddress;
                 entity.Description = entityModel.Description;
                 entity.DiscountAmount = entityModel.DiscountAmount;
