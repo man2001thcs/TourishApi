@@ -28,6 +28,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Transport
                 Description = addModel.Description,
                 DiscountAmount = addModel.DiscountAmount,
                 DiscountFloat = addModel.DiscountFloat,
+                VehicleType = addModel.VehicleType,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
@@ -150,6 +151,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Transport
                 entity.Description = entityModel.Description;
                 entity.DiscountAmount = entityModel.DiscountAmount;
                 entity.DiscountFloat = entityModel.DiscountFloat;
+                entity.VehicleType = entityModel.VehicleType;
                 _context.SaveChanges();
             }
 
