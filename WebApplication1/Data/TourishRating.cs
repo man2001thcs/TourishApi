@@ -19,4 +19,3 @@ namespace WebApplication1.Data
         public TourishPlan TourishPlan { get; set; }
     }
 }
-
