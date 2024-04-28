@@ -32,6 +32,7 @@ namespace WebApplication1.Model
         public string SupportNumber { get; set; }
         public PlanStatus PlanStatus { get; set; }
         public string? Description { get; set; }
+        public List<TourishSchedule>? TourishScheduleList { get; set; }
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -56,6 +57,7 @@ namespace WebApplication1.Model
         public string? Description { get; set; }
 
         public List<TourishCategoryRelation>? TourishCategoryRelations { get; set; }
+        public List<TourishSchedule>? TourishScheduleList { get; set; }
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }

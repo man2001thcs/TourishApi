@@ -73,6 +73,11 @@ public class TourishPlanRepository : ITourishPlanRepository
             tourishPlan.TourishCategoryRelations = entityModel.TourishCategoryRelations;
         }
 
+        if (entityModel.TourishScheduleList != null)
+        {
+            tourishPlan.TourishScheduleList = entityModel.TourishScheduleList;
+        }
+
         await _context.AddAsync(tourishPlan);
         await _context.SaveChangesAsync();
         await blobService.UploadStringBlobAsync("tourish-content-container", entityModel.Description ?? "", "text/plain", tourishPlan.Id.ToString() ?? "" + ".txt");
@@ -127,7 +132,8 @@ public class TourishPlanRepository : ITourishPlanRepository
         var entityQuery = _context.TourishPlan.Include(entity => entity.MovingSchedules).
             Include(entity => entity.EatSchedules).
             Include(entity => entity.StayingSchedules).
-            Include(entity => entity.TourishCategoryRelations).
+            Include(entity => entity.TourishScheduleList).
+            Include(entity => entity.TourishCategoryRelations).           
             ThenInclude(entity => entity.TourishCategory).
              Include(entity => entity.TotalReceipt).
              ThenInclude(entity => entity.FullReceiptList).
@@ -325,6 +331,13 @@ public class TourishPlanRepository : ITourishPlanRepository
                 entity.TourishCategoryRelations = entityModel.TourishCategoryRelations;
             }
 
+            if (entityModel.TourishScheduleList != null)
+            {
+                await _context.TourishScheduleList.Where(a => a.TourishPlanId == entityModel.Id).ExecuteDeleteAsync();
+                await _context.SaveChangesAsync();
+                entity.TourishScheduleList = entityModel.TourishScheduleList;
+            }
+
             entity.UpdateDate = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
@@ -418,7 +431,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                     var oldId = (String)schedule.id;
 
 
-                    if (oldId.Length > 0)
+                    if (oldId != null)
                     {
                         await blobService.RenameFileBlobAsync("eatschedule-content-container", oldId, eatSchedule.Id.ToString());
 
@@ -475,7 +488,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                     var insertString = (String)schedule.description;
                     var oldId = (String)schedule.id;
 
-                    if (oldId.Length > 0)
+                    if (oldId != null)
                     {
                         await blobService.RenameFileBlobAsync("movingschedule-content-container", oldId, movingSchedule.Id.ToString());
 
@@ -530,7 +543,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                     var insertString = (String)schedule.description;
                     var oldId = (String)schedule.id;
 
-                    if (oldId.Length > 0)
+                    if (oldId != null)
                     {
                         await blobService.RenameFileBlobAsync("stayingschedule-content-container", oldId, stayingSchedule.Id.ToString());
 

@@ -52,7 +52,15 @@ namespace WebApplication1.Controllers.File
                     }
                     else if (productType == "2")
                     {
-                        productTypeValue = ResourceTypeEnum.Message;
+                        productTypeValue = ResourceTypeEnum.EatContact;
+                    }
+                    else if (productType == "3")
+                    {
+                        productTypeValue = ResourceTypeEnum.MovingContact;
+                    }
+                    else if (productType == "4")
+                    {
+                        productTypeValue = ResourceTypeEnum.RestHouseContact;
                     }
 
                     var fileSaveModel = new FileModel

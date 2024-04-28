@@ -25,6 +25,7 @@ namespace WebApplication1.Data.DbContextFile
         public DbSet<StayingSchedule> StayingSchedules { get; set; }
 
         public DbSet<TourishPlan> TourishPlan { get; set; }
+        public DbSet<TourishSchedule> TourishScheduleList { get; set; }
         public DbSet<TourishCategory> TourishCategories { get; set; }
         public DbSet<TourishCategoryRelation> TourishCategoryRelations { get; set; }
         public DbSet<TourishInterest> TourishInterests { get; set; }
@@ -123,6 +124,18 @@ namespace WebApplication1.Data.DbContextFile
                 entity.ToTable(nameof(TourishCategory));
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+            });
+
+            modelBuilder.Entity<TourishSchedule>(entity =>
+            {
+                entity.ToTable(nameof(TourishSchedule));
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+                entity.HasOne(e => e.TourishPlan)
+               .WithMany(e => e.TourishScheduleList)
+               .HasForeignKey(e => e.TourishPlanId)
+               .HasConstraintName("FK_TourishPlan_TourishSchedule");
             });
 
             modelBuilder.Entity<TourishCategoryRelation>(entity =>
