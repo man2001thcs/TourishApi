@@ -1,6 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Globalization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Globalization;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Schedule;
@@ -9,7 +9,9 @@ using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
 using WebApplication1.Service;
 using WebApplication1.Service.InheritanceService;
+
 namespace WebApplication1.Repository.InheritanceRepo;
+
 public class TourishPlanRepository : ITourishPlanRepository
 {
     private readonly MyDbContext _context;
@@ -17,7 +19,12 @@ public class TourishPlanRepository : ITourishPlanRepository
     private readonly ILogger<TourishPlanRepository> logger;
     public static int PAGE_SIZE { get; set; } = 5;
     private readonly char[] delimiter = new char[] { ';' };
-    public TourishPlanRepository(MyDbContext _context, IBlobService blobService, ILogger<TourishPlanRepository> _logger)
+
+    public TourishPlanRepository(
+        MyDbContext _context,
+        IBlobService blobService,
+        ILogger<TourishPlanRepository> _logger
+    )
     {
         this._context = _context;
         this.blobService = blobService;
@@ -26,7 +33,6 @@ public class TourishPlanRepository : ITourishPlanRepository
 
     public async Task<Response> Add(TourishPlanInsertModel entityModel, String id)
     {
-
         var tourishPlan = new TourishPlan
         {
             TourName = entityModel.TourName,
@@ -50,8 +56,7 @@ public class TourishPlanRepository : ITourishPlanRepository
 
         if (id != null)
         {
-            var user = _context.Users
-                .SingleOrDefault(u => u.Id.ToString() == id);
+            var user = _context.Users.SingleOrDefault(u => u.Id.ToString() == id);
 
             tourishInterest = new TourishInterest
             {
@@ -75,12 +80,32 @@ public class TourishPlanRepository : ITourishPlanRepository
 
         if (entityModel.TourishScheduleList != null)
         {
-            tourishPlan.TourishScheduleList = entityModel.TourishScheduleList;
+            var tourishDataScheduleList = new List<TourishSchedule>();
+            foreach (var item in entityModel.TourishScheduleList)
+            {
+                tourishDataScheduleList.Add(
+                    new TourishSchedule
+                    {
+                        TourishPlanId = item.TourishPlanId,
+                        PlanStatus = item.PlanStatus,
+                        StartDate = item.StartDate,
+                        EndDate = item.EndDate,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow
+                    }
+                );
+            }
+            tourishPlan.TourishScheduleList = tourishDataScheduleList;
         }
 
         await _context.AddAsync(tourishPlan);
         await _context.SaveChangesAsync();
-        await blobService.UploadStringBlobAsync("tourish-content-container", entityModel.Description ?? "", "text/plain", tourishPlan.Id.ToString() ?? "" + ".txt");
+        await blobService.UploadStringBlobAsync(
+            "tourish-content-container",
+            entityModel.Description ?? "",
+            "text/plain",
+            tourishPlan.Id.ToString() ?? "" + ".txt"
+        );
 
         if (!String.IsNullOrEmpty(entityModel.EatingScheduleString))
         {
@@ -102,15 +127,13 @@ public class TourishPlanRepository : ITourishPlanRepository
             resultCd = 0,
             MessageCode = "I411",
             returnId = tourishPlan.Id,
-            // Create type success               
+            // Create type success
         };
-
     }
 
     public Response Delete(Guid id)
     {
-        var entity = _context.TourishPlan.FirstOrDefault((entity
-          => entity.Id == id));
+        var entity = _context.TourishPlan.FirstOrDefault((entity => entity.Id == id));
         if (entity != null)
         {
             blobService.DeleteFileBlobAsync("tourish-content-container", entity.Id.ToString());
@@ -122,22 +145,34 @@ public class TourishPlanRepository : ITourishPlanRepository
         {
             resultCd = 0,
             MessageCode = "I413",
-            // Delete type success               
+            // Delete type success
         };
     }
 
-    public Response GetAll(string? search, string? category, string? categoryString, string? startingPoint, string? endPoint, string? startingDate,
-        double? priceFrom, double? priceTo, string? sortBy, int page = 1, int pageSize = 5)
+    public Response GetAll(
+        string? search,
+        string? category,
+        string? categoryString,
+        string? startingPoint,
+        string? endPoint,
+        string? startingDate,
+        double? priceFrom,
+        double? priceTo,
+        string? sortBy,
+        int page = 1,
+        int pageSize = 5
+    )
     {
-        var entityQuery = _context.TourishPlan.Include(entity => entity.MovingSchedules).
-            Include(entity => entity.EatSchedules).
-            Include(entity => entity.StayingSchedules).
-            Include(entity => entity.TourishScheduleList).
-            Include(entity => entity.TourishCategoryRelations).           
-            ThenInclude(entity => entity.TourishCategory).
-             Include(entity => entity.TotalReceipt).
-             ThenInclude(entity => entity.FullReceiptList).
-            AsQueryable();
+        var entityQuery = _context
+            .TourishPlan.Include(entity => entity.MovingSchedules)
+            .Include(entity => entity.EatSchedules)
+            .Include(entity => entity.StayingSchedules)
+            .Include(entity => entity.TourishScheduleList)
+            .Include(entity => entity.TourishCategoryRelations)
+            .ThenInclude(entity => entity.TourishCategory)
+            .Include(entity => entity.TotalReceipt)
+            .ThenInclude(entity => entity.FullReceiptList)
+            .AsQueryable();
 
         #region Filtering
         if (!string.IsNullOrEmpty(search))
@@ -147,22 +182,32 @@ public class TourishPlanRepository : ITourishPlanRepository
 
         if (!string.IsNullOrEmpty(category))
         {
-            entityQuery = entityQuery.Where(entity => entity.TourishCategoryRelations
-            .Count(categoryRelation => (categoryRelation.TourishCategory != null) ? categoryRelation.TourishCategory.Name.Contains(category) : false) >= 1);
+            entityQuery = entityQuery.Where(entity =>
+                entity.TourishCategoryRelations.Count(categoryRelation =>
+                    (categoryRelation.TourishCategory != null)
+                        ? categoryRelation.TourishCategory.Name.Contains(category)
+                        : false
+                ) >= 1
+            );
         }
 
         if (!string.IsNullOrEmpty(categoryString))
         {
-            string[] categoryArray = Newtonsoft.Json.JsonConvert.DeserializeObject<string[]>(categoryString);
+            string[] categoryArray = Newtonsoft.Json.JsonConvert.DeserializeObject<string[]>(
+                categoryString
+            );
 
             if (categoryArray != null)
             {
-                entityQuery = entityQuery.Where(entity => entity.TourishCategoryRelations
-                    .Count(categoryRelation => (categoryRelation.TourishCategory != null) ? categoryArray.Contains(categoryRelation.TourishCategory.Name) : false) >= 1);
+                entityQuery = entityQuery.Where(entity =>
+                    entity.TourishCategoryRelations.Count(categoryRelation =>
+                        (categoryRelation.TourishCategory != null)
+                            ? categoryArray.Contains(categoryRelation.TourishCategory.Name)
+                            : false
+                    ) >= 1
+                );
             }
         }
-
-        
 
         if (!string.IsNullOrEmpty(startingPoint))
         {
@@ -177,32 +222,46 @@ public class TourishPlanRepository : ITourishPlanRepository
         if (priceFrom != null)
         {
             entityQuery = entityQuery.Where(entity =>
-                (entity.StayingSchedules.Sum(schedule => schedule.SinglePrice) +
-                entity.EatSchedules.Sum(schedule => schedule.SinglePrice) +
-                entity.MovingSchedules.Sum(schedule => schedule.SinglePrice))
-                >= priceFrom);
+                (
+                    entity.StayingSchedules.Sum(schedule => schedule.SinglePrice)
+                    + entity.EatSchedules.Sum(schedule => schedule.SinglePrice)
+                    + entity.MovingSchedules.Sum(schedule => schedule.SinglePrice)
+                ) >= priceFrom
+            );
 
             if (priceTo != null)
             {
                 entityQuery = entityQuery.Where(entity =>
-                    (entity.StayingSchedules.Sum(schedule => schedule.SinglePrice) +
-                    entity.EatSchedules.Sum(schedule => schedule.SinglePrice) +
-                    entity.MovingSchedules.Sum(schedule => schedule.SinglePrice))
-                    <= priceTo);
+                    (
+                        entity.StayingSchedules.Sum(schedule => schedule.SinglePrice)
+                        + entity.EatSchedules.Sum(schedule => schedule.SinglePrice)
+                        + entity.MovingSchedules.Sum(schedule => schedule.SinglePrice)
+                    ) <= priceTo
+                );
             }
         }
 
         if (!string.IsNullOrEmpty(startingDate))
         {
-
             // Mảng chứa các mẫu định dạng mà bạn cho phép
             string[] formats = { "ddd MMM dd yyyy HH:mm:ss 'GMT'zzz", "yyyy-MM-ddTHH:mm:sszzz" }; // Thêm các định dạng khác nếu cần
             DateTime dateTime;
-            if (DateTime.TryParseExact(startingDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime))
+            if (
+                DateTime.TryParseExact(
+                    startingDate,
+                    formats,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out dateTime
+                )
+            )
             {
                 logger.LogInformation(dateTime.ToString());
-                entityQuery = entityQuery.Where(entity => entity.StartDate.Day == dateTime.Day
-                    && entity.StartDate.Month == dateTime.Month && entity.StartDate.Year == dateTime.Year);
+                entityQuery = entityQuery.Where(entity =>
+                    entity.StartDate.Day == dateTime.Day
+                    && entity.StartDate.Month == dateTime.Month
+                    && entity.StartDate.Year == dateTime.Year
+                );
             }
         }
 
@@ -239,45 +298,42 @@ public class TourishPlanRepository : ITourishPlanRepository
 
     public Response getById(Guid id)
     {
-        var entity = _context.TourishPlan.Where(entity => entity.Id == id).Include(entity => entity.EatSchedules).
-            Include(entity => entity.StayingSchedules).
-            Include(entity => entity.MovingSchedules).
-            Include(entity => entity.TourishCategoryRelations).
-            ThenInclude(entity => entity.TourishCategory).
-             Include(entity => entity.TotalReceipt).
-             ThenInclude(entity => entity.FullReceiptList)
-           .FirstOrDefault();
-        if (entity == null) { return null; }
-
-        return new Response
+        var entity = _context
+            .TourishPlan.Where(entity => entity.Id == id)
+            .Include(entity => entity.EatSchedules)
+            .Include(entity => entity.StayingSchedules)
+            .Include(entity => entity.MovingSchedules)
+            .Include(entity => entity.TourishScheduleList)
+            .Include(entity => entity.TourishCategoryRelations)
+            .ThenInclude(entity => entity.TourishCategory)
+            .Include(entity => entity.TotalReceipt)
+            .ThenInclude(entity => entity.FullReceiptList)
+            .FirstOrDefault();
+        if (entity == null)
         {
-            resultCd = 0,
-            Data = entity
-        };
+            return null;
+        }
+
+        return new Response { resultCd = 0, Data = entity };
     }
 
     public Response getByName(String TourName)
     {
-        var entity = _context.TourishPlan.FirstOrDefault((entity
-            => entity.TourName == TourName));
+        var entity = _context.TourishPlan.FirstOrDefault((entity => entity.TourName == TourName));
 
-        return new Response
-        {
-            resultCd = 0,
-            Data = entity
-        };
+        return new Response { resultCd = 0, Data = entity };
     }
 
     public async Task<Response> Update(TourishPlanUpdateModel entityModel, String id)
     {
-        var entity = _context.TourishPlan.Include(entity => entity.EatSchedules).
-            Include(entity => entity.StayingSchedules).
-            Include(entity => entity.MovingSchedules).
-            Include(entity => entity.TourishInterestList).
-            FirstOrDefault((entity => entity.Id == entityModel.Id));
+        var entity = _context
+            .TourishPlan.Include(entity => entity.EatSchedules)
+            .Include(entity => entity.StayingSchedules)
+            .Include(entity => entity.MovingSchedules)
+            .Include(entity => entity.TourishInterestList)
+            .FirstOrDefault((entity => entity.Id == entityModel.Id));
         if (entity != null)
         {
-
             entity.TourName = entityModel.TourName ?? entity.TourName;
 
             entity.TourName = entityModel.TourName;
@@ -297,8 +353,7 @@ public class TourishPlanRepository : ITourishPlanRepository
 
             if (id != null)
             {
-                var user = _context.Users
-                .SingleOrDefault(u => u.Id.ToString() == id);
+                var user = _context.Users.SingleOrDefault(u => u.Id.ToString() == id);
 
                 if (user != null)
                 {
@@ -315,49 +370,84 @@ public class TourishPlanRepository : ITourishPlanRepository
                         entity.TourishInterestList = new List<TourishInterest>();
                     }
 
-                    if (entity.TourishInterestList.Count(interest => interest.UserId.ToString() == id) <= 0)
+                    if (
+                        entity.TourishInterestList.Count(interest =>
+                            interest.UserId.ToString() == id
+                        ) <= 0
+                    )
                     {
                         entity.TourishInterestList.Add(tourishInterest);
                     }
-
-
                 }
             }
 
             if (entityModel.TourishCategoryRelations != null)
             {
-                await _context.TourishCategoryRelations.Where(a => a.TourishPlanId == entityModel.Id).ExecuteDeleteAsync();
+                await _context
+                    .TourishCategoryRelations.Where(a => a.TourishPlanId == entityModel.Id)
+                    .ExecuteDeleteAsync();
                 await _context.SaveChangesAsync();
                 entity.TourishCategoryRelations = entityModel.TourishCategoryRelations;
             }
 
             if (entityModel.TourishScheduleList != null)
             {
-                await _context.TourishScheduleList.Where(a => a.TourishPlanId == entityModel.Id).ExecuteDeleteAsync();
+                await _context
+                    .TourishScheduleList.Where(a => a.TourishPlanId == entityModel.Id)
+                    .ExecuteDeleteAsync();
                 await _context.SaveChangesAsync();
-                entity.TourishScheduleList = entityModel.TourishScheduleList;
+                var tourishDataScheduleList = new List<TourishSchedule>();
+                foreach (var item in entityModel.TourishScheduleList)
+                {
+                    tourishDataScheduleList.Add(
+                        new TourishSchedule
+                        {
+                            TourishPlanId = item.TourishPlanId,
+                            PlanStatus = item.PlanStatus,
+                            StartDate = item.StartDate,
+                            EndDate = item.EndDate,
+                            CreateDate = item.CreateDate ?? DateTime.UtcNow,
+                            UpdateDate = DateTime.UtcNow,
+                        }
+                    );
+                }
+                entity.TourishScheduleList = tourishDataScheduleList;
             }
 
             entity.UpdateDate = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
-            await blobService.UploadStringBlobAsync("tourish-content-container", entityModel.Description ?? "", "text/plain", entityModel.Id.ToString() ?? "" + ".txt");
+            await blobService.UploadStringBlobAsync(
+                "tourish-content-container",
+                entityModel.Description ?? "",
+                "text/plain",
+                entityModel.Id.ToString() ?? "" + ".txt"
+            );
 
-            if (entityModel.StayingScheduleString != "" && entityModel.StayingScheduleString != null)
+            if (
+                entityModel.StayingScheduleString != ""
+                && entityModel.StayingScheduleString != null
+            )
             {
-                await _context.StayingSchedules.Where(a => a.TourishPlanId == entityModel.Id).ExecuteDeleteAsync();
+                await _context
+                    .StayingSchedules.Where(a => a.TourishPlanId == entityModel.Id)
+                    .ExecuteDeleteAsync();
                 await AddStayingSchedule(entity.Id, entityModel.StayingScheduleString);
             }
 
             if (entityModel.MovingScheduleString != "" && entityModel.MovingScheduleString != null)
             {
-                await _context.MovingSchedules.Where(a => a.TourishPlanId == entityModel.Id).ExecuteDeleteAsync();
+                await _context
+                    .MovingSchedules.Where(a => a.TourishPlanId == entityModel.Id)
+                    .ExecuteDeleteAsync();
                 await AddMovingSchedule(entity.Id, entityModel.MovingScheduleString);
             }
 
             if (entityModel.EatingScheduleString != "" && entityModel.EatingScheduleString != null)
             {
-                await _context.EatSchedules.Where(a => a.TourishPlanId == entityModel.Id).ExecuteDeleteAsync();
+                await _context
+                    .EatSchedules.Where(a => a.TourishPlanId == entityModel.Id)
+                    .ExecuteDeleteAsync();
                 await AddEatSchedule(entity.Id, entityModel.EatingScheduleString);
             }
 
@@ -365,16 +455,12 @@ public class TourishPlanRepository : ITourishPlanRepository
             {
                 resultCd = 0,
                 MessageCode = "I412",
-                // Update type success               
+                // Update type success
             };
         }
         else
         {
-            return new Response
-            {
-                resultCd = 0,
-                MessageCode = "C412",
-            };
+            return new Response { resultCd = 0, MessageCode = "C412", };
         }
     }
 
@@ -388,12 +474,16 @@ public class TourishPlanRepository : ITourishPlanRepository
         return await blobService.DeleteFileBlobAsync(containerName, blobName);
     }
 
-
     public async Task<List<TourishInterest>> getTourInterest(Guid id)
     {
-        var entity = await _context.TourishPlan.Where(entity => entity.Id == id).Include(tour => tour.TourishInterestList)
-           .FirstOrDefaultAsync();
-        if (entity == null) { return null; }
+        var entity = await _context
+            .TourishPlan.Where(entity => entity.Id == id)
+            .Include(tour => tour.TourishInterestList)
+            .FirstOrDefaultAsync();
+        if (entity == null)
+        {
+            return null;
+        }
 
         return entity.TourishInterestList.ToList();
     }
@@ -402,11 +492,12 @@ public class TourishPlanRepository : ITourishPlanRepository
     {
         if (!String.IsNullOrEmpty(FullScheduleString))
         {
-            dynamic scheduleArray = Newtonsoft.Json.JsonConvert.DeserializeObject(FullScheduleString);
+            dynamic scheduleArray = Newtonsoft.Json.JsonConvert.DeserializeObject(
+                FullScheduleString
+            );
 
             if (scheduleArray != null)
             {
-
                 foreach (var schedule in scheduleArray)
                 {
                     var eatSchedule = new EatSchedule
@@ -430,36 +521,48 @@ public class TourishPlanRepository : ITourishPlanRepository
                     var insertString = (String)schedule.description;
                     var oldId = (String)schedule.id;
 
-
                     if (oldId != null)
                     {
-                        await blobService.RenameFileBlobAsync("eatschedule-content-container", oldId, eatSchedule.Id.ToString());
+                        await blobService.RenameFileBlobAsync(
+                            "eatschedule-content-container",
+                            oldId,
+                            eatSchedule.Id.ToString()
+                        );
 
                         if (insertString.Length > 0)
                         {
-                            await blobService.UploadStringBlobAsync("eatschedule-content-container", (String)schedule.description ?? "Không có thông tin", "text/plain", eatSchedule.Id.ToString() ?? "" + ".txt");
+                            await blobService.UploadStringBlobAsync(
+                                "eatschedule-content-container",
+                                (String)schedule.description ?? "Không có thông tin",
+                                "text/plain",
+                                eatSchedule.Id.ToString() ?? "" + ".txt"
+                            );
                         }
                     }
                     else
                     {
-                        await blobService.UploadStringBlobAsync("eatschedule-content-container", "Không có thông tin", "text/plain", eatSchedule.Id.ToString() ?? "" + ".txt");
+                        await blobService.UploadStringBlobAsync(
+                            "eatschedule-content-container",
+                            "Không có thông tin",
+                            "text/plain",
+                            eatSchedule.Id.ToString() ?? "" + ".txt"
+                        );
                     }
                 }
             }
         }
-
     }
 
     private async Task AddMovingSchedule(Guid tourishPlanId, string FullScheduleString)
     {
-
         if (!String.IsNullOrEmpty(FullScheduleString))
         {
-            dynamic scheduleArray = Newtonsoft.Json.JsonConvert.DeserializeObject(FullScheduleString);
+            dynamic scheduleArray = Newtonsoft.Json.JsonConvert.DeserializeObject(
+                FullScheduleString
+            );
 
             if (scheduleArray != null)
             {
-
                 foreach (var schedule in scheduleArray)
                 {
                     var movingSchedule = new MovingSchedule
@@ -490,33 +593,46 @@ public class TourishPlanRepository : ITourishPlanRepository
 
                     if (oldId != null)
                     {
-                        await blobService.RenameFileBlobAsync("movingschedule-content-container", oldId, movingSchedule.Id.ToString());
+                        await blobService.RenameFileBlobAsync(
+                            "movingschedule-content-container",
+                            oldId,
+                            movingSchedule.Id.ToString()
+                        );
 
                         if (insertString.Length > 0)
                         {
-                            await blobService.UploadStringBlobAsync("movingschedule-content-container", (String)schedule.description ?? "Không có thông tin", "text/plain", movingSchedule.Id.ToString() ?? "" + ".txt");
+                            await blobService.UploadStringBlobAsync(
+                                "movingschedule-content-container",
+                                (String)schedule.description ?? "Không có thông tin",
+                                "text/plain",
+                                movingSchedule.Id.ToString() ?? "" + ".txt"
+                            );
                         }
                     }
                     else
                     {
-                        await blobService.UploadStringBlobAsync("movingschedule-content-container", "Không có thông tin", "text/plain", movingSchedule.Id.ToString() ?? "" + ".txt");
+                        await blobService.UploadStringBlobAsync(
+                            "movingschedule-content-container",
+                            "Không có thông tin",
+                            "text/plain",
+                            movingSchedule.Id.ToString() ?? "" + ".txt"
+                        );
                     }
                 }
-
             }
         }
     }
 
     private async Task AddStayingSchedule(Guid tourishPlanId, string FullScheduleString)
     {
-
         if (!String.IsNullOrEmpty(FullScheduleString))
         {
-            dynamic scheduleArray = Newtonsoft.Json.JsonConvert.DeserializeObject(FullScheduleString);
+            dynamic scheduleArray = Newtonsoft.Json.JsonConvert.DeserializeObject(
+                FullScheduleString
+            );
 
             if (scheduleArray != null)
             {
-
                 foreach (var schedule in scheduleArray)
                 {
                     var stayingSchedule = new StayingSchedule
@@ -545,16 +661,30 @@ public class TourishPlanRepository : ITourishPlanRepository
 
                     if (oldId != null)
                     {
-                        await blobService.RenameFileBlobAsync("stayingschedule-content-container", oldId, stayingSchedule.Id.ToString());
+                        await blobService.RenameFileBlobAsync(
+                            "stayingschedule-content-container",
+                            oldId,
+                            stayingSchedule.Id.ToString()
+                        );
 
                         if (insertString.Length > 0)
                         {
-                            await blobService.UploadStringBlobAsync("stayingschedule-content-container", (String)schedule.description ?? "Không có thông tin", "text/plain", stayingSchedule.Id.ToString() ?? "" + ".txt");
+                            await blobService.UploadStringBlobAsync(
+                                "stayingschedule-content-container",
+                                (String)schedule.description ?? "Không có thông tin",
+                                "text/plain",
+                                stayingSchedule.Id.ToString() ?? "" + ".txt"
+                            );
                         }
                     }
                     else
                     {
-                        await blobService.UploadStringBlobAsync("stayingschedule-content-container", "Không có thông tin", "text/plain", stayingSchedule.Id.ToString() ?? "" + ".txt");
+                        await blobService.UploadStringBlobAsync(
+                            "stayingschedule-content-container",
+                            "Không có thông tin",
+                            "text/plain",
+                            stayingSchedule.Id.ToString() ?? "" + ".txt"
+                        );
                     }
                 }
             }

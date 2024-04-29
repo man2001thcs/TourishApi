@@ -12,6 +12,6 @@ namespace WebApplication1.Data
         public DateTime EndDate { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
-        public TourishPlan TourishPlan { get; set; }
+        public TourishPlan? TourishPlan { get; set; }
     }
 }
