@@ -11,7 +11,9 @@ namespace WebApplication1.Data.Receipt
     public class TotalReceipt
     {
         public Guid TotalReceiptId { get; set; }
-        public Guid TourishPlanId { get; set; }
+        public Guid? TourishPlanId { get; set; }
+        public Guid? ScheduleId { get; set; }
+        public ScheduleType? ScheduleType { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime UpdateDate { get; set; }
         public DateTime? CompleteDate { get; set; }

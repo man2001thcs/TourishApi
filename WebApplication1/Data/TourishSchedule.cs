@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using WebApplication1.Data.Receipt;
 
 namespace WebApplication1.Data
 {
@@ -13,5 +14,6 @@ namespace WebApplication1.Data
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
         public TourishPlan? TourishPlan { get; set; }
+        public FullReceipt? FullReceipt { get; set; }
     }
 }

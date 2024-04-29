@@ -6,6 +6,7 @@ namespace WebApplication1.Model.Receipt
     {
         public Guid? FullReceiptId { get; set; }
         public Guid? TotalReceiptId { get; set; }
+        public Guid? TourishScheduleId { get; set; }
         public string GuestName { get; set; }
         public string PhoneNumber { get; set; }
         public string Email { get; set; }

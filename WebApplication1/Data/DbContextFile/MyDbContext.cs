@@ -84,6 +84,7 @@ namespace WebApplication1.Data.DbContextFile
                 entity.HasOne(e => e.TotalReceipt)
                 .WithOne(e => e.TourishPlan)
                 .HasForeignKey<TotalReceipt>(e => e.TourishPlanId)
+                .IsRequired(false)
                 .HasConstraintName("FK_TourishPlan_TotalReceipt");
 
                 entity.HasMany(e => e.NotificationList)
@@ -224,6 +225,20 @@ namespace WebApplication1.Data.DbContextFile
                .WithOne(e => e.TotalReceipt)
                .HasForeignKey(e => e.TotalReceiptId)
                .HasConstraintName("FK_TotalReceipt_FullReceipt");
+
+            });
+
+            modelBuilder.Entity<FullReceipt>(entity =>
+            {
+                entity.ToTable(nameof(FullReceipt));
+                entity.HasKey(e => e.TotalReceiptId);
+                entity.Property(e => e.CreatedDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+
+                entity.HasOne(e => e.TourishSchedule)
+               .WithOne(e => e.FullReceipt)
+               .HasForeignKey<FullReceipt>(e => e.TourishScheduleId)
+               .HasConstraintName("FK_FullReceipt_TourishSchedule");
 
             });
 
