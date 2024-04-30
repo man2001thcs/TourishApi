@@ -231,12 +231,13 @@ namespace WebApplication1.Data.DbContextFile
             modelBuilder.Entity<FullReceipt>(entity =>
             {
                 entity.ToTable(nameof(FullReceipt));
-                entity.HasKey(e => e.TotalReceiptId);
+                entity.HasKey(e => e.FullReceiptId);
                 entity.Property(e => e.CreatedDate).IsRequired().HasDefaultValueSql("getutcdate()");
 
 
                 entity.HasOne(e => e.TourishSchedule)
                .WithOne(e => e.FullReceipt)
+               .IsRequired(false)
                .HasForeignKey<FullReceipt>(e => e.TourishScheduleId)
                .HasConstraintName("FK_FullReceipt_TourishSchedule");
 

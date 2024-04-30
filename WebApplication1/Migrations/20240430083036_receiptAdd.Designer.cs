@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data.DbContextFile;
 
@@ -11,9 +12,11 @@ using WebApplication1.Data.DbContextFile;
 namespace TourishApi.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240430083036_receiptAdd")]
+    partial class receiptAdd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -438,8 +441,7 @@ namespace TourishApi.Migrations
 
             modelBuilder.Entity("WebApplication1.Data.Receipt.FullReceipt", b =>
                 {
-                    b.Property<Guid>("FullReceiptId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("TotalReceiptId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("CompleteDate")
@@ -464,6 +466,9 @@ namespace TourishApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("FullReceiptId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("GuestName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -481,9 +486,6 @@ namespace TourishApi.Migrations
                     b.Property<int>("TotalChildTicket")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("TotalReceiptId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("TotalTicket")
                         .HasColumnType("int");
 
@@ -493,9 +495,7 @@ namespace TourishApi.Migrations
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("FullReceiptId");
-
-                    b.HasIndex("TotalReceiptId");
+                    b.HasKey("TotalReceiptId");
 
                     b.HasIndex("TourishScheduleId")
                         .IsUnique()

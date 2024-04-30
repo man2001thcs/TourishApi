@@ -11,6 +11,7 @@ namespace WebApplication1.Data.Receipt
     [Table("FullReceipt")]
     public class FullReceipt
     {
+        [Key]
         public Guid FullReceiptId { get; set; }
         public Guid TotalReceiptId { get; set; }
         public Guid? TourishScheduleId { get; set; }

@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Receipt;
+using WebApplication1.Data.Schedule;
 using WebApplication1.Model;
 using WebApplication1.Model.Receipt;
 using WebApplication1.Model.VirtualModel;
@@ -410,6 +412,7 @@ public class ReceiptRepository : IReceiptRepository
     {
         var receiptQuery = _context
             .TotalReceiptList.Include(receipt => receipt.FullReceiptList)
+            .ThenInclude(receipt => receipt.TourishSchedule)
             .Include(receipt => receipt.TourishPlan)
             .Include(receipt => receipt.TourishPlan.MovingSchedules)
             .Include(receipt => receipt.TourishPlan.EatSchedules)
@@ -449,6 +452,7 @@ public class ReceiptRepository : IReceiptRepository
         var result = PaginatorModel<TotalReceipt>.Create(receiptQuery, page, PAGE_SIZE);
         #endregion
 
+
         var receiptVM = new Response
         {
             resultCd = 0,
@@ -478,8 +482,26 @@ public class ReceiptRepository : IReceiptRepository
         var receipt = _context
             .FullReceiptList.Where(receipt => receipt.FullReceiptId == id)
             .Include(entity => entity.TotalReceipt)
+            .Include(entity => entity.TourishSchedule)
             .ThenInclude(entity => entity.TourishPlan)
             .FirstOrDefault();
+        if (receipt == null)
+        {
+            return null;
+        }
+
+        return new Response { resultCd = 0, Data = receipt };
+    }
+
+    public Response getFullReceiptForServiceById(Guid id, ScheduleType scheduleType)
+    {
+        var receipt = _context
+           .FullReceiptList.Where(receipt => receipt.FullReceiptId == id)
+           .Include(entity => entity.TotalReceipt)
+           .Include(entity => entity.TourishSchedule)
+           .ThenInclude(entity => entity.TourishPlan)
+           .FirstOrDefault();
+       
         if (receipt == null)
         {
             return null;
