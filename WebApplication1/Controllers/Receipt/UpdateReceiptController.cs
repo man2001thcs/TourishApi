@@ -28,5 +28,12 @@ namespace WebApplication1.Controllers.Receipt
         {
             return Ok(await _receiptService.UpdateReceiptById(fullReceiptId, receiptModel));
         }
+
+        [HttpPut("user/{id}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateReceiptForUserById(Guid fullReceiptId, FullReceiptUpdateModel receiptModel)
+        {
+            return Ok(await _receiptService.UpdateReceiptForUserById(fullReceiptId, receiptModel));
+        }
     }
 }

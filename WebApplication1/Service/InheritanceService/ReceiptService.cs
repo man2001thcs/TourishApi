@@ -160,6 +160,26 @@ namespace TourishApi.Service.InheritanceService
 
         }
 
+        public Response GetAllForUser(string? email, string? sortBy, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
+        {
+            try
+            {
+                var receiptList = _receiptRepository.GetAllForUser(email, status, sortBy, page, pageSize);
+                return receiptList;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+
+        }
+
         public Response GetById(Guid id)
         {
             try
@@ -196,6 +216,31 @@ namespace TourishApi.Service.InheritanceService
             try
             {
                 await _receiptRepository.Update(receiptModel);
+                var response = new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "I512",
+                };
+                return response;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+
+        }
+
+        public async Task<Response> UpdateReceiptForUserById(Guid fullReceiptId, FullReceiptUpdateModel receiptModel)
+        {
+            try
+            {
+                await _receiptRepository.UpdateForUser(receiptModel);
                 var response = new Response
                 {
                     resultCd = 0,

@@ -463,6 +463,86 @@ public class ReceiptRepository : IReceiptRepository
         return receiptVM;
     }
 
+    public Response GetAllForUser(
+        string? email,
+        ReceiptStatus? status,
+        string? sortBy,
+        int page = 1,
+        int pageSize = 5
+    )
+    {
+        var receiptQuery = _context
+            .TotalReceiptList.Include(receipt => receipt.FullReceiptList)
+            .ThenInclude(receipt => receipt.TourishSchedule)
+            .Include(receipt => receipt.TourishPlan)
+            .Include(receipt => receipt.TourishPlan.MovingSchedules)
+            .Include(receipt => receipt.TourishPlan.EatSchedules)
+            .Include(receipt => receipt.TourishPlan.StayingSchedules)
+            .AsQueryable();
+
+        #region Filtering
+        if (!string.IsNullOrEmpty(email))
+        {
+            receiptQuery = receiptQuery.Where(receipt =>
+                receipt.FullReceiptList.Count(entity => entity.Email == email) >= 1
+            );
+        }
+
+        if (!string.IsNullOrEmpty(status.ToString()))
+        {
+            receiptQuery = receiptQuery.Where(receipt => receipt.Status == status);
+        }
+        #endregion
+
+        #region Sorting
+        //Default sort by Name (TenHh)
+        receiptQuery = receiptQuery.OrderBy(receipt => receipt.UpdateDate);
+
+        if (!string.IsNullOrEmpty(sortBy))
+        {
+            switch (sortBy)
+            {
+                case "status_desc":
+                    receiptQuery = receiptQuery.OrderByDescending(receipt => receipt.Status);
+                    break;
+            }
+        }
+        #endregion
+
+        #region Paging
+        var result = PaginatorModel<TotalReceipt>.Create(receiptQuery, page, PAGE_SIZE);
+        #endregion
+
+        var resultDto = result.Select(entity => new TotalReceipt
+        {
+            TotalReceiptId = entity.TotalReceiptId,
+            TourishPlanId = entity.TourishPlanId,
+            ScheduleId = entity.ScheduleId,
+            ScheduleType = entity.ScheduleType,
+
+            Status = entity.Status,
+            Description = entity.Description,
+            CompleteDate = entity.CompleteDate,
+
+            FullReceiptList = entity
+                .FullReceiptList.Where(entity => entity.Email == email)
+                .ToList(),
+            TourishPlan = entity.TourishPlan,
+
+            CreatedDate = entity.CreatedDate,
+            UpdateDate = entity.UpdateDate,
+        });
+
+        var receiptVM = new Response
+        {
+            resultCd = 0,
+            Data = resultDto.ToList(),
+            count = result.TotalCount,
+        };
+
+        return receiptVM;
+    }
+
     public Response getById(Guid id)
     {
         var receipt = _context
@@ -496,12 +576,12 @@ public class ReceiptRepository : IReceiptRepository
     public Response getFullReceiptForServiceById(Guid id, ScheduleType scheduleType)
     {
         var receipt = _context
-           .FullReceiptList.Where(receipt => receipt.FullReceiptId == id)
-           .Include(entity => entity.TotalReceipt)
-           .Include(entity => entity.TourishSchedule)
-           .ThenInclude(entity => entity.TourishPlan)
-           .FirstOrDefault();
-       
+            .FullReceiptList.Where(receipt => receipt.FullReceiptId == id)
+            .Include(entity => entity.TotalReceipt)
+            .Include(entity => entity.TourishSchedule)
+            .ThenInclude(entity => entity.TourishPlan)
+            .FirstOrDefault();
+
         if (receipt == null)
         {
             return null;
@@ -525,6 +605,8 @@ public class ReceiptRepository : IReceiptRepository
             receipt.DiscountFloat = receiptModel.DiscountFloat;
             receipt.OriginalPrice = receiptModel.OriginalPrice;
             receipt.TotalTicket = receiptModel.TotalTicket;
+            receipt.TotalChildTicket = receiptModel.TotalChildTicket;
+            receipt.TourishScheduleId = receiptModel.TourishScheduleId;
             receipt.Description = receiptModel.Description;
             receipt.Status = receiptModel.Status;
 
@@ -536,38 +618,277 @@ public class ReceiptRepository : IReceiptRepository
                 (plan => plan.Id == receipt.TotalReceipt.TourishPlanId)
             );
 
-            if (receipt.Status == FullReceiptStatus.Completed)
+            if (
+                receipt.Status != FullReceiptStatus.Completed
+                && receiptModel.Status == FullReceiptStatus.Completed
+            )
             {
-                if (planExist != null && planExist.RemainTicket >= receiptModel.TotalTicket)
+                if (planExist != null)
                 {
-                    planExist.RemainTicket = planExist.RemainTicket - receiptModel.TotalTicket;
+                    if (planExist != null && planExist.RemainTicket >= receiptModel.TotalTicket)
+                    {
+                        planExist.RemainTicket = planExist.RemainTicket - receiptModel.TotalTicket;
+
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        return new Response
+                        {
+                            resultCd = 0,
+                            MessageCode = "C515",
+                            returnId = receipt.TotalReceiptId,
+                            // Out of ticket
+                        };
+                    }
+                }
+            }
+
+            if (
+                receipt.Status == FullReceiptStatus.Completed
+                && receiptModel.Status == FullReceiptStatus.Completed
+            )
+            {
+                if (planExist != null)
+                {
+                    if (
+                        planExist != null
+                        && planExist.RemainTicket + oldTotalTicket >= receiptModel.TotalTicket
+                    )
+                    {
+                        planExist.RemainTicket =
+                            planExist.RemainTicket - receiptModel.TotalTicket + oldTotalTicket;
+
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        return new Response
+                        {
+                            resultCd = 0,
+                            MessageCode = "C515",
+                            returnId = receipt.TotalReceiptId,
+                            // Out of ticket
+                        };
+                    }
+                }
+            }
+
+            if (
+                receipt.Status == FullReceiptStatus.Completed
+                && receiptModel.Status == FullReceiptStatus.Cancelled
+            )
+            {
+                if (planExist != null)
+                {
+                    if (planExist.RemainTicket + oldTotalTicket <= planExist.TotalTicket)
+                    {
+                        planExist.RemainTicket = planExist.RemainTicket + oldTotalTicket;
+                    }
+                    else
+                    {
+                        planExist.RemainTicket = planExist.TotalTicket;
+                    }
 
                     await _context.SaveChangesAsync();
                 }
             }
 
-            if (receipt.Status == FullReceiptStatus.Cancelled)
-            {
-                if (
-                    planExist != null
-                    && planExist.RemainTicket + oldTotalTicket >= receiptModel.TotalTicket
-                    && receipt.Status == FullReceiptStatus.Completed
+            var totalReceiptComplete = await _context
+                .TotalReceiptList.Where(receipt =>
+                    receipt.TotalReceiptId == receiptModel.TotalReceiptId
                 )
-                {
-                    planExist.RemainTicket = planExist.RemainTicket + oldTotalTicket;
+                .Include(entity => entity.FullReceiptList)
+                .FirstOrDefaultAsync();
 
-                    await _context.SaveChangesAsync();
-                }
+            var totalCount = totalReceiptComplete.FullReceiptList.Count();
+
+            var createCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
+                fullReceipt.Status == FullReceiptStatus.Created
+            );
+            var onGoingCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
+                fullReceipt.Status == FullReceiptStatus.AwaitPayment
+            );
+            var complteteCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
+                fullReceipt.Status == FullReceiptStatus.Completed
+            );
+            var cancelCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
+                fullReceipt.Status == FullReceiptStatus.Cancelled
+            );
+
+            if (totalCount == createCount)
+            {
+                totalReceiptComplete.Status = ReceiptStatus.Created;
             }
-            else
+            else if (onGoingCount < totalCount && onGoingCount > 1)
+            {
+                totalReceiptComplete.Status = ReceiptStatus.OnGoing;
+            }
+            else if (complteteCount == totalCount)
+            {
+                totalReceiptComplete.Status = ReceiptStatus.Completed;
+            }
+            else if (cancelCount == totalCount)
+            {
+                totalReceiptComplete.Status = ReceiptStatus.Cancelled;
+            }
+
+            _context.SaveChanges();
+        }
+
+        return new Response
+        {
+            resultCd = 0,
+            MessageCode = "I512",
+            // Update type success
+        };
+    }
+
+    public async Task<Response> UpdateForUser(FullReceiptUpdateModel receiptModel)
+    {
+        var receipt = _context
+            .FullReceiptList.Include(entity => entity.TotalReceipt)
+            .FirstOrDefault((receipt => receipt.FullReceiptId == receiptModel.FullReceiptId));
+
+        if (receipt != null)
+        {
+            if (receiptModel.Status == FullReceiptStatus.Cancelled)
             {
                 return new Response
                 {
                     resultCd = 0,
-                    MessageCode = "C515",
+                    MessageCode = "C516",
                     returnId = receipt.TotalReceiptId,
-                    // Out of ticket
                 };
+            }
+
+            var planExist = _context.TourishPlan.FirstOrDefault(
+                (plan => plan.Id == receipt.TotalReceipt.TourishPlanId)
+            );
+
+            if (planExist.PlanStatus == PlanStatus.OnGoing)
+            {
+                return new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "C517",
+                    returnId = receipt.TotalReceiptId,
+                };
+            }
+            else if (planExist.PlanStatus == PlanStatus.Complete)
+            {
+                return new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "C518",
+                    returnId = receipt.TotalReceiptId,
+                };
+            }
+            else if (planExist.PlanStatus == PlanStatus.Cancel)
+            {
+                return new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "C519",
+                    returnId = receipt.TotalReceiptId,
+                };
+            }
+
+            var oldTotalTicket = receipt.TotalTicket;
+
+            receipt.GuestName = receiptModel.GuestName;
+            if (receipt.Status == FullReceiptStatus.Completed)
+            {
+                return new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "C520",
+                    returnId = receipt.TotalReceiptId,
+                };
+            }
+            receipt.Status = receiptModel.Status;
+            receipt.TotalTicket = receiptModel.TotalTicket;
+            receipt.TotalChildTicket = receiptModel.TotalChildTicket;
+            receipt.TourishScheduleId = receiptModel.TourishScheduleId;
+
+            receipt.UpdateDate = DateTime.UtcNow;
+            if (receiptModel.Status == FullReceiptStatus.Completed)
+                receipt.CompleteDate = DateTime.UtcNow;
+
+            if (
+                receipt.Status != FullReceiptStatus.Completed
+                && receiptModel.Status == FullReceiptStatus.Completed
+            )
+            {
+                if (planExist != null)
+                {
+                    if (planExist != null && planExist.RemainTicket >= receiptModel.TotalTicket)
+                    {
+                        planExist.RemainTicket = planExist.RemainTicket - receiptModel.TotalTicket;
+
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        return new Response
+                        {
+                            resultCd = 0,
+                            MessageCode = "C515",
+                            returnId = receipt.TotalReceiptId,
+                            // Out of ticket
+                        };
+                    }
+                }
+            }
+
+            if (
+                receipt.Status == FullReceiptStatus.Completed
+                && receiptModel.Status == FullReceiptStatus.Completed
+            )
+            {
+                if (planExist != null)
+                {
+                    if (
+                        planExist != null
+                        && planExist.RemainTicket + oldTotalTicket >= receiptModel.TotalTicket
+                    )
+                    {
+                        planExist.RemainTicket =
+                            planExist.RemainTicket - receiptModel.TotalTicket + oldTotalTicket;
+
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        return new Response
+                        {
+                            resultCd = 0,
+                            MessageCode = "C515",
+                            returnId = receipt.TotalReceiptId,
+                            // Out of ticket
+                        };
+                    }
+                }
+            }
+
+            if (
+                receipt.Status == FullReceiptStatus.Completed
+                && receiptModel.Status == FullReceiptStatus.Cancelled
+            )
+            {
+                if (planExist != null)
+                {
+                    if (planExist.RemainTicket + oldTotalTicket <= planExist.TotalTicket)
+                    {
+                        planExist.RemainTicket = planExist.RemainTicket + oldTotalTicket;
+                    }
+                    else
+                    {
+                        planExist.RemainTicket = planExist.TotalTicket;
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
             }
 
             var totalReceiptComplete = await _context

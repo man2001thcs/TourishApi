@@ -29,6 +29,14 @@ namespace WebApplication1.Controllers.Receipt
 
         }
 
+        // GET: api/<ValuesController>
+        [HttpGet("user")]
+        public IActionResult GetAllForUser(string? email, string? sortBy, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
+        {
+            return Ok(_receiptService.GetAllForUser(email, sortBy, page, pageSize, status));
+
+        }
+
         [HttpGet("{id}")]
         public IActionResult GetById(Guid id)
         {
