@@ -335,7 +335,6 @@ namespace WebApplication1.Service.InheritanceService
             {
                 var userName = tokenInverification.FindFirstValue("UserName");
                 var updateModel = model;
-                updateModel.UserName = userName;
 
                 var response = await this._userRepository.UpdateInfo(UserRole.User, isSelfUpdate, updateModel);
                 return response;

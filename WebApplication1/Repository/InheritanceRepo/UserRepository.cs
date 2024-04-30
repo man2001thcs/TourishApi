@@ -107,7 +107,9 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public async Task<Response> UpdateInfo(UserRole userRoleAuthority, Boolean isSelfUpdate, UserUpdateModel model)
         {
-            if ((int)userRoleAuthority == (int)model.Role)
+            var userExist = _context.Users.FirstOrDefault(p => p.UserName == model.UserName);
+
+            if ((int)userRoleAuthority == (int)userExist.Role)
             {
                 if (!isSelfUpdate)
                 {
@@ -119,7 +121,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 }
             }
 
-            if ((int)userRoleAuthority < (int)model.Role)
+            if ((int)userRoleAuthority < (int)userExist.Role || (int)userRoleAuthority < (int) model.Role)
             {
                 return new Response
                 {
@@ -128,8 +130,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 };
 
             }
-
-            var userExist = _context.Users.FirstOrDefault(p => p.UserName == model.UserName);
+         
             if (userExist != null) //không đúng
             {
                 userExist.UpdateDate = DateTime.UtcNow;

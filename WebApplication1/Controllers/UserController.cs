@@ -64,7 +64,7 @@ namespace WebApplication1.Controllers
             return Ok(await _userService.Reclaim(model));
         }
 
-        [Authorize(Policy = "UpdateUserInfoAccess")]
+        [Authorize]
         [HttpPost("Update")]
         public async Task<IActionResult> Update(UserUpdateModel model)
         {
@@ -72,7 +72,7 @@ namespace WebApplication1.Controllers
             return Ok(await _userService.Update(model, bearer_token));
         }
 
-        [Authorize(Policy = "UpdateUserPasswordAccess")]
+        [Authorize]
         [HttpPost("UpdatePassword")]
         public async Task<IActionResult> UpdatePassword(UserUpdatePasswordModel model)
         {

@@ -98,6 +98,26 @@ public class TourishPlanRepository : ITourishPlanRepository
             tourishPlan.TourishScheduleList = tourishDataScheduleList;
         }
 
+        if (entityModel.TourishScheduleList != null)
+        {
+            var tourishDataScheduleList = new List<TourishSchedule>();
+            foreach (var item in entityModel.TourishScheduleList)
+            {
+                tourishDataScheduleList.Add(
+                    new TourishSchedule
+                    {
+                        TourishPlanId = item.TourishPlanId,
+                        PlanStatus = item.PlanStatus,
+                        StartDate = item.StartDate,
+                        EndDate = item.EndDate,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow
+                    }
+                );
+            }
+            tourishPlan.TourishScheduleList = tourishDataScheduleList;
+        }
+
         await _context.AddAsync(tourishPlan);
         await _context.SaveChangesAsync();
         await blobService.UploadStringBlobAsync(
@@ -390,18 +410,39 @@ public class TourishPlanRepository : ITourishPlanRepository
                 entity.TourishCategoryRelations = entityModel.TourishCategoryRelations;
             }
 
+            //if (entityModel.TourishScheduleList != null)
+            //{
+            //    await _context
+            //        .TourishScheduleList.Where(a => a.TourishPlanId == entityModel.Id)
+            //        .ExecuteDeleteAsync();
+            //    await _context.SaveChangesAsync();
+            //    var tourishDataScheduleList = new List<TourishSchedule>();
+            //    foreach (var item in entityModel.TourishScheduleList)
+            //    {
+            //        tourishDataScheduleList.Add(
+            //            new TourishSchedule
+            //            {
+            //                TourishPlanId = item.TourishPlanId,
+            //                PlanStatus = item.PlanStatus,
+            //                StartDate = item.StartDate,
+            //                EndDate = item.EndDate,
+            //                CreateDate = item.CreateDate ?? DateTime.UtcNow,
+            //                UpdateDate = DateTime.UtcNow,
+            //            }
+            //        );
+            //    }
+            //    entity.TourishScheduleList = tourishDataScheduleList;
+            //}
+
             if (entityModel.TourishScheduleList != null)
-            {
-                await _context
-                    .TourishScheduleList.Where(a => a.TourishPlanId == entityModel.Id)
-                    .ExecuteDeleteAsync();
-                await _context.SaveChangesAsync();
+            {              
                 var tourishDataScheduleList = new List<TourishSchedule>();
                 foreach (var item in entityModel.TourishScheduleList)
                 {
                     tourishDataScheduleList.Add(
                         new TourishSchedule
                         {
+                            Id = item.Id.Value,
                             TourishPlanId = item.TourishPlanId,
                             PlanStatus = item.PlanStatus,
                             StartDate = item.StartDate,
