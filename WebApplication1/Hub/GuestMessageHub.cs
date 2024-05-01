@@ -157,12 +157,12 @@ namespace SignalR.Hub
 
             if (!adminId.IsNullOrEmpty())
             {
-                var userRole = Context.User.FindFirstValue("Role");
-                if (userRole != "Admin")
-                {
-                    Context.Abort();
-                }
-                else
+                //var userRole = Context.User.FindFirstValue("Role");
+                //if (userRole != "Admin")
+                //{
+                //    Context.Abort();
+                //}
+                //else
                 {
                     var admin = _context.Users.Include(u => u.NotificationConList)
                     .SingleOrDefault(u => u.Id.ToString() == adminId);

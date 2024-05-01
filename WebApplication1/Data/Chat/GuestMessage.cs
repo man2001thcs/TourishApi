@@ -16,8 +16,8 @@ namespace WebApplication1.Data.Chat
         public Guid? GuestMessageConId { get; set; }
         public Guid? AdminMessageConId { get; set; }
 
-        public GuestMessageCon GuestMessageCon { get; set; }
-        public AdminMessageCon AdminMessageCon { get; set; }
+        public GuestMessageCon? GuestMessageCon { get; set; }
+        public AdminMessageCon? AdminMessageCon { get; set; }
 
         public GuestMessage()
         {
