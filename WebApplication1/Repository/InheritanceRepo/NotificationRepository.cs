@@ -56,6 +56,8 @@ namespace WebApplication1.Repository.InheritanceRepo
                 UserCreateId = addModel.UserCreateId,
                 UserReceiveId = addModel.UserReceiveId,
                 TourishPlanId = addModel.TourishPlanId,
+                MovingScheduleId = addModel.MovingScheduleId,
+                StayingScheduleId = addModel.StayingScheduleId,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
@@ -248,7 +250,9 @@ namespace WebApplication1.Repository.InheritanceRepo
                 ContentCode = notification.ContentCode,
                 UserCreateId = notification.UserCreateId,
                 UserReceiveId = notification.UserReceiveId,
-                TourishPlanId = notification.TourishPlanId, 
+                TourishPlanId = notification.TourishPlanId,
+                MovingScheduleId = notification.MovingScheduleId,
+                StayingScheduleId = notification.StayingScheduleId,
                 IsDeleted = notification.IsDeleted,
                 IsRead = notification.IsRead,
                 CreateDate = notification.CreateDate,
@@ -359,6 +363,8 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 entity.UpdateDate = DateTime.UtcNow;
                 entity.TourishPlanId = entityModel.TourishPlanId;
+                entity.MovingScheduleId = entityModel.MovingScheduleId;
+                entity.StayingScheduleId = entityModel.StayingScheduleId;
                 entity.Content = entityModel.Content;
                 entity.ContentCode = entityModel.ContentCode;
                 _context.SaveChanges();

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SignalR.Hub.Client;
@@ -7,16 +8,22 @@ using WebApplication1.Data;
 using WebApplication1.Data.Connection;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
+using WebApplication1.Repository.InheritanceRepo;
+using WebApplication1.Service.InheritanceService;
 
 namespace SignalR.Hub
 {
     public class NotificationHub : Hub<INotificationHubClient>
     {
         private readonly MyDbContext _context;
+        private readonly ILogger<NotificationHub> logger;
+        private readonly UserService _userService;
 
-        public NotificationHub(MyDbContext context, IOptionsMonitor<AppSetting> optionsMonitor)
+        public NotificationHub(MyDbContext context, IOptionsMonitor<AppSetting> optionsMonitor, ILogger<NotificationHub> _logger, UserService userService)
         {
             _context = context;
+            logger = _logger;
+            _userService = userService;
         }
 
         public async Task SendOffersToAll(NotificationDTOModel notification)
@@ -83,14 +90,20 @@ namespace SignalR.Hub
 
         public override async Task OnConnectedAsync()
         {
-            var userId = Context.User.FindFirstValue("Id");
+            var httpContext = Context.GetHttpContext();
+            var token = httpContext.Request.Query["token"];
+            var tokenClaim = (ClaimsPrincipal)_userService.checkIfTokenFormIsValid(token).Data;
 
-            var userRole = Context.User.FindFirstValue("Role") ?? "";
-            //if (userRole != "Admin" && userRole != "User" && userRole != "AdminManager")
-            //{
-            //    Context.Abort();
-            //}
-            //else
+            var userId = tokenClaim.FindFirstValue("Id");
+            var userRole = tokenClaim.FindFirstValue("Role") ?? "";
+
+            logger.LogInformation("user-log:" + token);
+            logger.LogDebug("user-log:" + token);
+            if (userRole != "Admin" && userRole != "User" && userRole != "AdminManager")
+            {
+                Context.Abort();
+            }
+            else
             {
                 var user = _context.Users.Include(u => u.NotificationConList)
                .SingleOrDefault(u => u.Id.ToString() == userId);

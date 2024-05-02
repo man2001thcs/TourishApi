@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SignalR.Hub.Client;
+using System.Security.Claims;
 using TourishApi.Service.InheritanceService;
 using WebApplication1.Data;
 using WebApplication1.Data.Chat;
@@ -10,6 +11,7 @@ using WebApplication1.Data.Connection;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
 using WebApplication1.Model.Connection;
+using WebApplication1.Service.InheritanceService;
 
 namespace SignalR.Hub
 {
@@ -17,11 +19,13 @@ namespace SignalR.Hub
     {
         private readonly MyDbContext _context;
         private readonly NotificationService _notificationService;
+        private readonly UserService _userService;
 
-        public GuestMessageHub(MyDbContext context, IOptionsMonitor<AppSetting> optionsMonitor, NotificationService notificationService)
+        public GuestMessageHub(MyDbContext context, IOptionsMonitor<AppSetting> optionsMonitor, NotificationService notificationService, UserService userService)
         {
             _context = context;
             _notificationService = notificationService;
+            _userService = userService;
         }
 
         public async Task SendMessageToAll(GuestMessageModel message)
@@ -149,19 +153,22 @@ namespace SignalR.Hub
         public override async Task OnConnectedAsync()
         {
             var adminId = (string)Context.GetHttpContext().Request.Query["adminId"];
-
             var guestEmail = (string)Context.GetHttpContext().Request.Query["guestEmail"];
             var guestName = (string)Context.GetHttpContext().Request.Query["guestName"];
             var guestPhoneNumber = (string)Context.GetHttpContext().Request.Query["guestPhoneNumber"];
+            var token = Context.GetHttpContext().Request.Query["token"];
 
+            var tokenClaim = (ClaimsPrincipal)_userService.checkIfTokenFormIsValid(token).Data;
+
+            var userId = tokenClaim.FindFirstValue("Id");
+            var userRole = tokenClaim.FindFirstValue("Role") ?? "";
             if (!adminId.IsNullOrEmpty())
             {
-                //var userRole = Context.User.FindFirstValue("Role");
-                //if (userRole != "Admin")
-                //{
-                //    Context.Abort();
-                //}
-                //else
+                if (userRole != "Admin" && userRole != "AdminManager")
+                {
+                    Context.Abort();
+                }
+                else
                 {
                     var admin = _context.Users.Include(u => u.NotificationConList)
                     .SingleOrDefault(u => u.Id.ToString() == adminId);
