@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TourishApi.Service.InheritanceService.Schedule;
 using WebApplication1.Model.Schedule;
 
@@ -22,7 +23,8 @@ namespace WebApplication1.Controllers.Schedule
         [Authorize(Policy = "CreateTourishPlanAccess")]
         public async Task<IActionResult> CreateNew(MovingScheduleModel entityModel)
         {
-            return Ok(await _entityService.CreateNew(entityModel));
+            string userId = User.FindFirstValue("Id");
+            return Ok(await _entityService.CreateNew(userId, entityModel));
         }
     }
 }

@@ -35,5 +35,7 @@ namespace WebApplication1.Data.Schedule
         public DateTime UpdateDate { get; set; }
 
         public TourishPlan TourishPlan { get; set; }
+        public ICollection<ScheduleInterest>? ScheduleInterestList { get; set; }
+        public ICollection<Notification>? NotificationList { get; set; }
     }
 }

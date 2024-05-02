@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using WebApplication1.Data.Schedule;
 
 namespace WebApplication1.Data
 {
@@ -16,10 +17,14 @@ namespace WebApplication1.Data
         public DateTime? UpdateDate { get; set; }
 
         public Guid? TourishPlanId { get; set; }
+        public Guid? MovingScheduleId { get; set; }
+        public Guid? StayingScheduleId { get; set; }
 
         // Relationship
         public User UserCreator { get; set; }
         public User UserReceiver { get; set; }
         public TourishPlan? TourishPlan { get; set; }
+        public MovingSchedule? MovingSchedule { get; set; }
+        public StayingSchedule? StayingSchedule { get; set; }
     }
 }

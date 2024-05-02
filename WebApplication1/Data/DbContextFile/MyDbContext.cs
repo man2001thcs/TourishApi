@@ -171,6 +171,27 @@ namespace WebApplication1.Data.DbContextFile
                 .HasConstraintName("FK_User_TourishInterest");
             });
 
+            modelBuilder.Entity<ScheduleInterest>(entity =>
+            {
+                entity.ToTable(nameof(ScheduleInterest));
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.MovingSchedule)
+                .WithMany(e => e.ScheduleInterestList)
+                .HasForeignKey(e => e.MovingScheduleId)
+                .HasConstraintName("FK_MovingSchedule_ScheduleInterest");
+
+                entity.HasOne(e => e.StayingSchedule)
+                .WithMany(e => e.ScheduleInterestList)
+                .HasForeignKey(e => e.StayingScheduleId)
+                .HasConstraintName("FK_StayingSchedule_ScheduleInterest");
+
+                entity.HasOne(e => e.User)
+                .WithMany(e => e.ScheduleInterestList)
+                .HasForeignKey(e => e.UserId)
+                .HasConstraintName("FK_User_ScheduleInterest");
+            });
+
             modelBuilder.Entity<TourishComment>(entity =>
             {
                 entity.ToTable(nameof(TourishComment));
@@ -336,6 +357,16 @@ namespace WebApplication1.Data.DbContextFile
                .WithMany(e => e.NotificationReceiveList)
                .HasForeignKey(e => e.UserReceiveId).IsRequired(false)
                .HasConstraintName("FK_UserReceive_Notification");
+
+                entity.HasOne(e => e.MovingSchedule)
+              .WithMany(e => e.NotificationList)
+              .HasForeignKey(e => e.MovingScheduleId).IsRequired(false)
+              .HasConstraintName("FK_MovingSchedule_Notification");
+
+                entity.HasOne(e => e.StayingSchedule)
+              .WithMany(e => e.NotificationList)
+              .HasForeignKey(e => e.MovingScheduleId).IsRequired(false)
+              .HasConstraintName("FK_StayingSchedule_Notification");
             });
 
             modelBuilder.Entity<NotificationFcmToken>(entity =>

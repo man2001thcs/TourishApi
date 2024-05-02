@@ -85,7 +85,7 @@ namespace SignalR.Hub
         {
             var userId = Context.User.FindFirstValue("Id");
 
-            var userRole = Context.User.FindFirstValue("Role");
+            var userRole = Context.User.FindFirstValue("Role") ?? "";
             //if (userRole != "Admin" && userRole != "User" && userRole != "AdminManager")
             //{
             //    Context.Abort();

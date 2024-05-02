@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TourishApi.Repository.Interface;
-using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;

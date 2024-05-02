@@ -1,28 +1,45 @@
-﻿using TourishApi.Service.Interface;
+﻿using WebApplication1.Model;
 using WebApplication1.Model.Schedule;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.InheritanceRepo;
 
 namespace TourishApi.Service.InheritanceService.Schedule
 {
-    public class MovingScheduleService
+    public class StayingScheduleService
     {
         private readonly TourishOuterScheduleRepository _entityRepository;
+        private readonly NotificationService _notificationService;
 
-        public MovingScheduleService(TourishOuterScheduleRepository entityRepository)
+        public StayingScheduleService(TourishOuterScheduleRepository entityRepository, NotificationService notificationService)
         {
             _entityRepository = entityRepository;
+            _notificationService = notificationService;
         }
 
-        public async Task<Response> CreateNew(MovingScheduleModel entityModel)
+        public async Task<Response> CreateNew(string userId, StayingScheduleModel entityModel)
         {
             try
             {
-                var entityExist = _entityRepository.getByNameMovingSchedule(entityModel.Name);
+                var entityExist = _entityRepository.getByNameStayingSchedule(entityModel.PlaceName);
 
                 if (entityExist.Data == null)
                 {
-                    var response = await _entityRepository.AddMovingSchedule(entityModel);
+                    var response = await _entityRepository.AddStayingSchedule(userId, entityModel);
+
+                    var notification = new NotificationModel
+                    {
+                        UserCreateId = new Guid(userId),
+                        UserReceiveId = new Guid(userId),
+                        StayingScheduleId = response.returnId,
+                        Content = "",
+                        ContentCode = "I431",
+                        IsRead = false,
+                        IsDeleted = false,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow
+                    };
+
+                    await _notificationService.CreateNewAsync(new Guid(userId), notification);
 
                     return (response);
                 }
@@ -47,7 +64,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
         {
             try
             {
-                await _entityRepository.DeleteMovingSchedule(id);
+                await _entityRepository.DeleteStayingSchedule(id);
                 var response = new Response { resultCd = 0, MessageCode = "I433" };
                 return response;
             }
@@ -67,7 +84,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
         {
             try
             {
-                var entityList = _entityRepository.GetAllMovingSchedule(search, type, sortBy, page, pageSize);
+                var entityList = _entityRepository.GetAllStayingSchedule(search, type, sortBy, page, pageSize);
                 return entityList;
             }
             catch (Exception ex)
@@ -86,7 +103,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
         {
             try
             {
-                var entity = _entityRepository.getByMovingScheduleId(id);
+                var entity = _entityRepository.getByStayingScheduleId(id);
                 if (entity.Data == null)
                 {
                     var response = new Response
@@ -113,13 +130,38 @@ namespace TourishApi.Service.InheritanceService.Schedule
             }
         }
 
-        public async Task<Response> UpdateEntityById(Guid id, MovingScheduleModel MovingScheduleModel)
+        public async Task<Response> UpdateEntityById(string userId, StayingScheduleModel entityModel)
         {
             try
             {
-                var response = _entityRepository.UpdateMovingSchedule(MovingScheduleModel);
+                var response = await _entityRepository.UpdateStayingSchedule(userId, entityModel);
 
-                return await response;
+                if (response.MessageCode == "I432")
+                {
+                    var interestList = await _entityRepository.getScheduleInterest(entityModel.Id, ScheduleType.MovingSchedule);
+
+                    foreach (var interest in interestList)
+                    {
+                        var notification = new NotificationModel
+                        {
+                            UserCreateId = new Guid(userId),
+                            UserReceiveId = interest.UserId,
+                            StayingScheduleId = entityModel.Id,
+                            Content = "",
+                            ContentCode = "I432",
+                            IsRead = false,
+                            IsDeleted = false,
+                            CreateDate = DateTime.UtcNow,
+                            UpdateDate = DateTime.UtcNow
+                        };
+
+                        // _notificationService.CreateNew(notification);
+
+                        await _notificationService.CreateNewAsync(interest.UserId, notification);
+                    };
+                }
+
+                return response;
             }
             catch (Exception ex)
             {

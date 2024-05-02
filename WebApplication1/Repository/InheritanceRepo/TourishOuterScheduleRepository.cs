@@ -1,4 +1,5 @@
-﻿using Google.Api.Gax;
+﻿using Microsoft.EntityFrameworkCore;
+using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Schedule;
 using WebApplication1.Model;
@@ -36,6 +37,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
+
             await _context.AddAsync(addValue);
             await _context.SaveChangesAsync();
 
@@ -49,7 +51,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public async Task<Response> AddMovingSchedule(MovingScheduleModel addModel)
+        public async Task<Response> AddMovingSchedule(string userId, MovingScheduleModel addModel)
         {
 
             var addValue = new MovingSchedule
@@ -71,6 +73,30 @@ namespace WebApplication1.Repository.InheritanceRepo
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
+
+            var scheduleInterest = new ScheduleInterest();
+            var scheduleInterestList = new List<ScheduleInterest>();
+
+            if (userId != null)
+            {
+                var user = _context.Users.SingleOrDefault(u => u.Id.ToString() == userId);
+
+                scheduleInterest = new ScheduleInterest
+                {
+                    InterestStatus = InterestStatus.Creator,
+                    User = user,
+                    MovingSchedule = addValue,
+                    UpdateDate = DateTime.UtcNow
+                };
+
+                scheduleInterestList.Add(scheduleInterest);
+
+                addValue.ScheduleInterestList = scheduleInterestList;
+            }
+
+            addValue.ScheduleInterestList = scheduleInterestList;
+
+
             await _context.AddAsync(addValue);
             await _context.SaveChangesAsync();
 
@@ -84,7 +110,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public async Task<Response> AddStayingSchedule(StayingScheduleModel addModel)
+        public async Task<Response> AddStayingSchedule(string userId, StayingScheduleModel addModel)
         {
 
             var addValue = new StayingSchedule
@@ -103,6 +129,29 @@ namespace WebApplication1.Repository.InheritanceRepo
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
+
+            var scheduleInterest = new ScheduleInterest();
+            var scheduleInterestList = new List<ScheduleInterest>();
+
+            if (userId != null)
+            {
+                var user = _context.Users.SingleOrDefault(u => u.Id.ToString() == userId);
+
+                scheduleInterest = new ScheduleInterest
+                {
+                    InterestStatus = InterestStatus.Creator,
+                    User = user,
+                    StayingSchedule = addValue,
+                    UpdateDate = DateTime.UtcNow
+                };
+
+                scheduleInterestList.Add(scheduleInterest);
+
+                addValue.ScheduleInterestList = scheduleInterestList;
+            }
+
+            addValue.ScheduleInterestList = scheduleInterestList;
+
             await _context.AddAsync(addValue);
             await _context.SaveChangesAsync();
 
@@ -123,7 +172,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             if (deleteEntity != null)
             {
                 await _blobService.DeleteFileBlobAsync("eatschedule-content-container", deleteEntity.Id.ToString());
-                _context.Remove(deleteEntity);               
+                _context.Remove(deleteEntity);
                 _context.SaveChanges();
             }
 
@@ -389,7 +438,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public async Task<Response> UpdateStayingSchedule(StayingScheduleModel entityModel)
+        public async Task<Response> UpdateStayingSchedule(string userId, StayingScheduleModel entityModel)
         {
             var entity = _context.StayingSchedules.FirstOrDefault((entity
                 => entity.Id == entityModel.Id));
@@ -406,7 +455,38 @@ namespace WebApplication1.Repository.InheritanceRepo
                 entity.Status = entityModel.Status;
                 entity.StartDate = entityModel.StartDate;
                 entity.EndDate = entityModel.EndDate;
-                _context.SaveChanges();
+
+                var scheduleInterest = new ScheduleInterest();
+                if (userId != null)
+                {
+                    var user = _context.Users.SingleOrDefault(u => u.Id.ToString() == userId);
+
+                    if (user != null)
+                    {
+                        scheduleInterest = new ScheduleInterest
+                        {
+                            InterestStatus = InterestStatus.Modifier,
+                            User = user,
+                            StayingSchedule = entity,
+                            UpdateDate = DateTime.UtcNow
+                        };
+
+                        if (entity.ScheduleInterestList == null)
+                        {
+                            entity.ScheduleInterestList = new List<ScheduleInterest>();
+                        }
+
+                        if (
+                            entity.ScheduleInterestList.Count(interest =>
+                                interest.UserId.ToString() == userId
+                            ) <= 0
+                        )
+                        {
+                            entity.ScheduleInterestList.Add(scheduleInterest);
+                        }
+                    }
+                }
+                await _context.SaveChangesAsync();
             }
 
             await _blobService.UploadStringBlobAsync("stayingschedule-content-container", entityModel.Description ?? "Không có thông tin", "text/plain", entity.Id.ToString() ?? "" + ".txt");
@@ -444,7 +524,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public async Task<Response> UpdateMovingSchedule(MovingScheduleModel entityModel)
+        public async Task<Response> UpdateMovingSchedule(string userId, MovingScheduleModel entityModel)
         {
             var entity = _context.MovingSchedules.FirstOrDefault((entity
                 => entity.Id == entityModel.Id));
@@ -458,13 +538,45 @@ namespace WebApplication1.Repository.InheritanceRepo
                 entity.VehiclePlate = entityModel.VehiclePlate;
                 entity.VehicleType = entityModel.VehicleType;
                 entity.SinglePrice = entityModel.SinglePrice;
-                entity.DriverName = entityModel.DriverName; 
+                entity.DriverName = entityModel.DriverName;
                 entity.StartingPlace = entityModel.StartingPlace;
                 entity.HeadingPlace = entityModel.HeadingPlace;
                 entity.Status = entityModel.Status;
                 entity.StartDate = entityModel.StartDate;
                 entity.EndDate = entityModel.EndDate;
-                _context.SaveChanges();
+
+                var scheduleInterest = new ScheduleInterest();
+                if (userId != null)
+                {
+                    var user = _context.Users.SingleOrDefault(u => u.Id.ToString() == userId);
+
+                    if (user != null)
+                    {
+                        scheduleInterest = new ScheduleInterest
+                        {
+                            InterestStatus = InterestStatus.Modifier,
+                            User = user,
+                            MovingSchedule = entity,
+                            UpdateDate = DateTime.UtcNow
+                        };
+
+                        if (entity.ScheduleInterestList == null)
+                        {
+                            entity.ScheduleInterestList = new List<ScheduleInterest>();
+                        }
+
+                        if (
+                            entity.ScheduleInterestList.Count(interest =>
+                                interest.UserId.ToString() == userId
+                            ) <= 0
+                        )
+                        {
+                            entity.ScheduleInterestList.Add(scheduleInterest);
+                        }
+                    }
+                }
+
+                await _context.SaveChangesAsync();
 
                 await _blobService.UploadStringBlobAsync("movingschedule-content-container", entityModel.Description ?? "Không có thông tin", "text/plain", entity.Id.ToString() ?? "" + ".txt");
             }
@@ -475,6 +587,39 @@ namespace WebApplication1.Repository.InheritanceRepo
                 MessageCode = "I432",
                 // Update type success               
             };
+        }
+
+        public async Task<List<ScheduleInterest>> getScheduleInterest(Guid id, ScheduleType scheduleType)
+        {
+            if (scheduleType == ScheduleType.MovingSchedule)
+            {
+                var entity = await _context
+                .MovingSchedules.Where(entity => entity.Id == id)
+                .Include(tour => tour.ScheduleInterestList)
+                .FirstOrDefaultAsync();
+                if (entity == null)
+                {
+                    return null;
+                }
+
+                return entity.ScheduleInterestList.ToList();
+            }
+            else
+            if (scheduleType == ScheduleType.StayingSchedule)
+            {
+                var entity = await _context
+                .StayingSchedules.Where(entity => entity.Id == id)
+                .Include(tour => tour.ScheduleInterestList)
+                .FirstOrDefaultAsync();
+                if (entity == null)
+                {
+                    return null;
+                }
+
+                return entity.ScheduleInterestList.ToList();
+            }
+
+            return new List<ScheduleInterest>();
         }
     }
 }

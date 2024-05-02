@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using WebApplication1.Data;
+﻿using WebApplication1.Data;
 
 namespace WebApplication1.Model
 {

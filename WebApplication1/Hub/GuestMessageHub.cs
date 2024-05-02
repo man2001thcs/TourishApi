@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SignalR.Hub.Client;
-using System.Security.Claims;
 using TourishApi.Service.InheritanceService;
 using WebApplication1.Data;
 using WebApplication1.Data.Chat;

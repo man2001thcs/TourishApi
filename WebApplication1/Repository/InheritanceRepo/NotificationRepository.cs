@@ -1,10 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FirebaseAdmin.Messaging;
+using Microsoft.EntityFrameworkCore;
 using TourishApi.Repository.Interface;
 using WebApplication1.Data;
 using WebApplication1.Data.Connection;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
+using Notification = WebApplication1.Data.Notification;
 
 namespace WebApplication1.Repository.InheritanceRepo
 {
@@ -27,6 +29,8 @@ namespace WebApplication1.Repository.InheritanceRepo
                 UserCreateId = addModel.UserCreateId,
                 UserReceiveId = addModel.UserReceiveId,
                 TourishPlanId = addModel.TourishPlanId,
+                MovingScheduleId = addModel.MovingScheduleId,
+                StayingScheduleId = addModel.StayingScheduleId,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
@@ -134,7 +138,11 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response GetAllForReceiver(string? userId, string? sortBy, int page = 1, int pageSize = 5)
         {
             var entityQuery = _context.Notifications.Include(entity => entity.UserCreator)
-                .Include(entity => entity.UserReceiver).Include(entity => entity.TourishPlan).AsQueryable();
+                .Include(entity => entity.UserReceiver)
+                .Include(entity => entity.TourishPlan)
+                .Include(entity => entity.MovingSchedule)
+                .Include(entity => entity.StayingSchedule)
+                .AsQueryable();
 
             #region Filtering
             if (!string.IsNullOrEmpty(userId))
@@ -179,7 +187,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 IsRead = notification.IsRead,
                 CreateDate = notification.CreateDate,
                 UpdateDate = notification.UpdateDate,
-                TourName = notification.TourishPlan != null ? notification.TourishPlan.TourName : "",
+                ObjectName = convertNotifyObjectName(notification),
                 CreatorFullName = notification.UserCreator != null ? notification.UserCreator.FullName : "",
             }).ToList();
 
@@ -196,8 +204,11 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response GetAllForCreator(string? userId, string? sortBy, int page = 1, int pageSize = 5)
         {
             var entityQuery = _context.Notifications.Include(entity => entity.UserCreator)
-                .Include(entity => entity.UserReceiver).Include(entity => entity.TourishPlan).
-                AsQueryable();
+                .Include(entity => entity.UserReceiver)
+                .Include(entity => entity.TourishPlan)
+                .Include(entity => entity.MovingSchedule)
+                .Include(entity => entity.StayingSchedule)
+                .AsQueryable();
 
             #region Filtering
             if (!string.IsNullOrEmpty(userId))
@@ -237,12 +248,12 @@ namespace WebApplication1.Repository.InheritanceRepo
                 ContentCode = notification.ContentCode,
                 UserCreateId = notification.UserCreateId,
                 UserReceiveId = notification.UserReceiveId,
-                TourishPlanId = notification.TourishPlanId,
+                TourishPlanId = notification.TourishPlanId, 
                 IsDeleted = notification.IsDeleted,
                 IsRead = notification.IsRead,
                 CreateDate = notification.CreateDate,
                 UpdateDate = notification.UpdateDate,
-                TourName = notification.TourishPlan != null ? notification.TourishPlan.TourName : "",
+                ObjectName = convertNotifyObjectName(notification),
                 CreatorFullName = notification.UserCreator != null ? notification.UserCreator.FullName : "",
             }).ToList();
 
@@ -256,10 +267,30 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         }
 
+        private string convertNotifyObjectName(Notification notification)
+        {
+            var objectName = "";
+            if (notification.TourishPlan != null)
+            {
+                objectName = notification.TourishPlan.TourName;
+            }
+            if (notification.MovingSchedule != null)
+            {
+                objectName = notification.MovingSchedule.Name;
+            }
+            if (notification.StayingSchedule != null)
+            {
+                objectName = notification.StayingSchedule.Name;
+            }
+
+            return objectName;
+        }
+
         public Response getById(Guid id)
         {
             var entity = _context.Notifications.Include(entity => entity.UserCreator)
-                .Include(entity => entity.UserReceiver).Include(entity => entity.TourishPlan).FirstOrDefault((entity
+                .Include(entity => entity.UserReceiver).Include(entity => entity.TourishPlan).Include(entity => entity.MovingSchedule)
+                .Include(entity => entity.StayingSchedule).FirstOrDefault((entity
                 => entity.Id == id));
 
             return new Response
@@ -272,7 +303,8 @@ namespace WebApplication1.Repository.InheritanceRepo
         public async Task<Notification> getByIdAsync(Guid id)
         {
             var entity = await _context.Notifications.Include(entity => entity.UserCreator)
-                .Include(entity => entity.UserReceiver).Include(entity => entity.TourishPlan).FirstOrDefaultAsync((entity
+                .Include(entity => entity.UserReceiver).Include(entity => entity.TourishPlan).Include(entity => entity.MovingSchedule)
+                .Include(entity => entity.StayingSchedule).FirstOrDefaultAsync((entity
                 => entity.Id == id));
 
             return entity;
@@ -281,7 +313,8 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response getByName(String name)
         {
             var entity = _context.Notifications.Include(entity => entity.UserCreator)
-                .Include(entity => entity.UserReceiver).Include(entity => entity.TourishPlan).FirstOrDefault((entity
+                .Include(entity => entity.UserReceiver).Include(entity => entity.TourishPlan).Include(entity => entity.MovingSchedule)
+                .Include(entity => entity.StayingSchedule).FirstOrDefault((entity
                 => entity.Content == name));
 
             return new Response
@@ -310,6 +343,8 @@ namespace WebApplication1.Repository.InheritanceRepo
                 .Include(entity => entity.UserCreator)
                 .Include(entity => entity.UserReceiver)
                 .Include(entity => entity.TourishPlan)
+                .Include(entity => entity.MovingSchedule)
+                .Include(entity => entity.StayingSchedule)
                 .Where(entity => entity.TourishPlan.Id == tourId && entity.UserCreator.Id == modifiedId
                 && (entity.UpdateDate.Value > compareTime)).ToList();
 
@@ -345,6 +380,8 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 entity.UpdateDate = DateTime.UtcNow;
                 entity.TourishPlanId = entityModel.TourishPlanId;
+                entity.MovingScheduleId = entityModel.MovingScheduleId;
+                entity.StayingScheduleId = entityModel.StayingScheduleId;
                 entity.Content = entityModel.Content;
                 entity.ContentCode = entityModel.ContentCode;
                 await _context.SaveChangesAsync();

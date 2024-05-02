@@ -1,5 +1,4 @@
-﻿using TourishApi.Service.Interface;
-using WebApplication1.Model.Schedule;
+﻿using WebApplication1.Model.Schedule;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.InheritanceRepo;
 

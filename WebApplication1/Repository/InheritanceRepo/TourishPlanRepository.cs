@@ -1,6 +1,5 @@
-﻿using System.Globalization;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Schedule;
@@ -8,7 +7,6 @@ using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
 using WebApplication1.Service;
-using WebApplication1.Service.InheritanceService;
 
 namespace WebApplication1.Repository.InheritanceRepo;
 
@@ -435,7 +433,7 @@ public class TourishPlanRepository : ITourishPlanRepository
             //}
 
             if (entityModel.TourishScheduleList != null)
-            {              
+            {
                 var tourishDataScheduleList = new List<TourishSchedule>();
                 foreach (var item in entityModel.TourishScheduleList)
                 {

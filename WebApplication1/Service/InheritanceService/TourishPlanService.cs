@@ -36,7 +36,7 @@ namespace TourishApi.Service.InheritanceService
                         UserReceiveId = new Guid(userId),
                         TourishPlanId = response.returnId,
                         Content = "",
-                        ContentCode = "I412",
+                        ContentCode = "I411",
                         IsRead = false,
                         IsDeleted = false,
                         CreateDate = DateTime.UtcNow,

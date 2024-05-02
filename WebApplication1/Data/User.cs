@@ -45,6 +45,7 @@ namespace WebApplication1.Data
         public ICollection<TourishComment> TourishCommentList { get; set; }
         public ICollection<TourishRating> TourishRatingList { get; set; }
         public ICollection<ScheduleRating> ScheduleRatingList { get; set; }
+        public ICollection<ScheduleInterest>? ScheduleInterestList { get; set; }
         public User()
         {
             this.Role = UserRole.New;

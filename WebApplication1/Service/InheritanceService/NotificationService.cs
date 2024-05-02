@@ -81,12 +81,26 @@ namespace TourishApi.Service.InheritanceService
             {
                 if (fullDetailNotification != null)
                 {
+                    var objectName = "";
+                    if (fullDetailNotification.TourishPlan != null)
+                    {
+                        objectName = fullDetailNotification.TourishPlan.TourName;
+                    }
+                    if (fullDetailNotification.MovingSchedule != null)
+                    {
+                        objectName = fullDetailNotification.MovingSchedule.Name;
+                    }
+                    if (fullDetailNotification.StayingSchedule != null)
+                    {
+                        objectName = fullDetailNotification.StayingSchedule.Name;
+                    }
+
                     var notificationDTOUpdate = new NotificationDTOModel
                     {
                         Id = fullDetailNotification.Id,
                         UserCreateId = fullDetailNotification.UserCreateId,
                         UserReceiveId = fullDetailNotification.UserReceiveId,
-                        TourName = fullDetailNotification.TourishPlan != null ? fullDetailNotification.TourishPlan.TourName : "",
+                        ObjectName = objectName,
                         CreatorFullName = fullDetailNotification.UserCreator != null ? fullDetailNotification.UserCreator.FullName : "",
                         Content = fullDetailNotification.Content,
                         ContentCode = fullDetailNotification.ContentCode,
@@ -278,12 +292,26 @@ namespace TourishApi.Service.InheritanceService
 
                 if (connection != null)
                 {
+                    var objectName = "";
+                    if (fullDetailNotification.TourishPlan != null)
+                    {
+                        objectName = fullDetailNotification.TourishPlan.TourName;
+                    }
+                    if (fullDetailNotification.MovingSchedule != null)
+                    {
+                        objectName = fullDetailNotification.MovingSchedule.Name;
+                    }
+                    if (fullDetailNotification.StayingSchedule != null)
+                    {
+                        objectName = fullDetailNotification.StayingSchedule.Name;
+                    }
+
                     var notificationDTOUpdate = new NotificationDTOModel
                     {
                         Id = fullDetailNotification.Id,
                         UserCreateId = fullDetailNotification.UserCreateId,
                         UserReceiveId = fullDetailNotification.UserReceiveId,
-                        TourName = fullDetailNotification.TourishPlan.TourName,
+                        ObjectName = objectName,
                         CreatorFullName = fullDetailNotification.UserCreator.FullName,
                         Content = fullDetailNotification.Content,
                         ContentCode = fullDetailNotification.ContentCode,
