@@ -6,6 +6,7 @@ using WebApplication1.Model;
 using WebApplication1.Model.Schedule;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Service;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WebApplication1.Repository.InheritanceRepo
 {
@@ -373,7 +374,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response getByNameEatSchedule(String name)
+        public Response getByNameEatSchedule(string name)
         {
             var entity = _context.EatSchedules.FirstOrDefault((entity
                 => entity.PlaceName == name));
@@ -426,7 +427,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response getByNameStayingSchedule(String name)
+        public Response getByNameStayingSchedule(string name)
         {
             var entity = _context.StayingSchedules.FirstOrDefault((entity
                 => entity.PlaceName == name));
@@ -512,7 +513,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response getByNameMovingSchedule(String name)
+        public Response getByNameMovingSchedule(string name)
         {
             var entity = _context.MovingSchedules.FirstOrDefault((entity
                 => entity.Name == name));
@@ -620,6 +621,133 @@ namespace WebApplication1.Repository.InheritanceRepo
             }
 
             return new List<ScheduleInterest>();
+        }
+
+        public Response getScheduleInterest(Guid scheduleId, ScheduleType scheduleType, Guid userId)
+        {
+            if (scheduleType == ScheduleType.MovingSchedule)
+            {
+                var data = _context.ScheduleInterests.FirstOrDefault(entity => entity.MovingScheduleId == scheduleId && entity.UserId == userId);
+                return new Response
+                {
+                    resultCd = 0,
+                    Data = data,
+                    // Update type success
+                };
+            } else if (scheduleType == ScheduleType.StayingSchedule)
+            {
+                var data = _context.ScheduleInterests.FirstOrDefault(entity => entity.StayingScheduleId == scheduleId && entity.UserId == userId);
+                return new Response
+                {
+                    resultCd = 0,
+                    Data = data,
+                    // Update type success
+                };
+            }
+
+            return new Response
+            {
+                resultCd = 1,
+                Data = null,
+                MessageCode = "C430"
+                // Update type success
+            };
+
+
+        }
+
+        public async Task<Response> setScheduleInterest(Guid scheduleId, ScheduleType scheduleType, Guid userId, InterestStatus interestStatus)
+        {
+
+
+            if (scheduleType == ScheduleType.MovingSchedule)
+            {
+                var existInterest = _context.ScheduleInterests.FirstOrDefault(entity => entity.MovingScheduleId == scheduleId && entity.UserId == userId);
+                
+                if (existInterest != null)
+                {
+                    existInterest.InterestStatus = interestStatus;
+                    existInterest.UpdateDate = DateTime.UtcNow;
+
+                    await _context.SaveChangesAsync();
+
+                    return new Response
+                    {
+                        resultCd = 0,
+                        MessageCode = "I415",
+                        // Update type success
+                    };
+                }
+                else
+                {
+                    var insertValue = new TourishInterest
+                    {
+                        TourishPlanId = scheduleId,
+                        UserId = userId,
+                        InterestStatus = interestStatus,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow
+                    };
+
+                    _context.Add(insertValue);
+                    await _context.SaveChangesAsync();
+
+                    return new Response
+                    {
+                        resultCd = 0,
+                        MessageCode = "I415",
+                        // Update type success
+                    };
+                }
+            }
+            else if (scheduleType == ScheduleType.StayingSchedule)
+            {
+                var existInterest = _context.ScheduleInterests.FirstOrDefault(entity => entity.StayingScheduleId == scheduleId && entity.UserId == userId);
+                
+                if (existInterest != null)
+                {
+                    existInterest.InterestStatus = interestStatus;
+                    existInterest.UpdateDate = DateTime.UtcNow;
+
+                    await _context.SaveChangesAsync();
+
+                    return new Response
+                    {
+                        resultCd = 0,
+                        MessageCode = "I415",
+                        // Update type success
+                    };
+                }
+                else
+                {
+                    var insertValue = new TourishInterest
+                    {
+                        TourishPlanId = scheduleId,
+                        UserId = userId,
+                        InterestStatus = interestStatus,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow
+                    };
+
+                    _context.Add(insertValue);
+                    await _context.SaveChangesAsync();
+
+                    return new Response
+                    {
+                        resultCd = 0,
+                        MessageCode = "I415",
+                        // Update type success
+                    };
+                }
+            }
+
+            return new Response
+            {
+                resultCd = 1,
+                MessageCode = "C434",
+                // Update type success
+            };
+
         }
     }
 }

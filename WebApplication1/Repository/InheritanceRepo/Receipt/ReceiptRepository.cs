@@ -195,6 +195,31 @@ public class ReceiptRepository : IReceiptRepository
             await _context.SaveChangesAsync();
         }
 
+        if (receiptModel.Email != null)
+        {
+            var user = _context.Users.SingleOrDefault(u => u.Email.ToString() == receiptModel.Email);
+
+            var existInterest = _context.TourishInterests.SingleOrDefault(u => u.UserId == user.Id && u.TourishPlanId == receiptModel.TourishPlanId);
+            if (existInterest == null)
+            {
+                var tourishInterest = new TourishInterest
+                {
+                    InterestStatus = InterestStatus.User,
+                    User = user,
+                    TourishPlanId = tourishPlan.Id,
+                    UpdateDate = DateTime.UtcNow
+                };
+
+                await _context.AddAsync(tourishInterest);
+                await _context.SaveChangesAsync();
+            } else
+            {
+                existInterest.InterestStatus = InterestStatus.User;
+                existInterest.UpdateDate = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }           
+        }
+
         var originalPrice = (double)0;
 
         if (tourishPlan != null)

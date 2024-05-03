@@ -760,4 +760,55 @@ public class TourishPlanRepository : ITourishPlanRepository
 
         return totalPrice;
     }
+
+    public Response getTourInterest(Guid tourId, Guid userId)
+    {
+        var data = _context.TourishInterests.FirstOrDefault(entity => entity.TourishPlanId == tourId && entity.UserId == userId);
+        return new Response
+        {
+            resultCd = 0,
+            Data = data,
+            // Update type success
+        };
+        
+    }
+
+    public async Task<Response> setTourInterest(Guid tourId, Guid userId, InterestStatus interestStatus)
+    {
+        var existInterest = _context.TourishInterests.FirstOrDefault(entity => entity.TourishPlanId == tourId && entity.UserId == userId);
+        if (existInterest != null)
+        {
+            existInterest.InterestStatus = interestStatus;
+            existInterest.UpdateDate = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return new Response
+            {
+                resultCd = 0,
+                MessageCode = "I415",
+                // Update type success
+            };
+        } else
+        {
+            var insertValue = new TourishInterest
+            {
+                TourishPlanId = tourId,
+                UserId = userId,
+                InterestStatus = interestStatus,
+                CreateDate = DateTime.UtcNow,
+                UpdateDate = DateTime.UtcNow
+            };
+
+            _context.Add(insertValue);  
+            await _context.SaveChangesAsync();
+
+            return new Response
+            {
+                resultCd = 0,
+                MessageCode = "I415",
+                // Update type success
+            };
+        }
+    }
 }

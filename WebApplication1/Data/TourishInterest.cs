@@ -7,7 +7,8 @@ namespace WebApplication1.Data
         Creator = 0,
         Modifier = 1,
         Interest = 2,
-        NotInterested = 3,
+        User = 3,
+        NotInterested = 4,
     }
 
     [Table("TourishInterest")]

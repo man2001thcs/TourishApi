@@ -1,4 +1,5 @@
 ﻿using TourishApi.Service.Interface;
+using WebApplication1.Data;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
@@ -198,6 +199,16 @@ namespace TourishApi.Service.InheritanceService
             };
             return response;
 
+        }
+
+        public Response getTourInterest(Guid tourId, Guid userId)
+        {
+            return _entityRepository.getTourInterest(tourId, userId);
+        }
+
+        public Task<Response> setTourInterest(Guid tourId, Guid userId, InterestStatus interestStatus)
+        {
+            return _entityRepository.setTourInterest(tourId, userId, interestStatus);
         }
     }
 }

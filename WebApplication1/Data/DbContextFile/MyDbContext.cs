@@ -32,6 +32,7 @@ namespace WebApplication1.Data.DbContextFile
         public DbSet<TourishComment> TourishComments { get; set; }
         public DbSet<TourishRating> TourishRatings { get; set; }
         public DbSet<ScheduleRating> ScheduleRatings { get; set; }
+        public DbSet<ScheduleInterest> ScheduleInterests { get; set; }
 
         public DbSet<TotalReceipt> TotalReceiptList { get; set; }
         public DbSet<FullReceipt> FullReceiptList { get; set; }

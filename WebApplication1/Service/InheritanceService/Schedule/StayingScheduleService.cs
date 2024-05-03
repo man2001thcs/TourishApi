@@ -1,4 +1,5 @@
-﻿using WebApplication1.Model;
+﻿using WebApplication1.Data;
+using WebApplication1.Model;
 using WebApplication1.Model.Schedule;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.InheritanceRepo;
@@ -173,6 +174,16 @@ namespace TourishApi.Service.InheritanceService.Schedule
                 };
                 return response;
             }
+        }
+
+        public Response getScheduleInterest(Guid scheduleId, Guid userId)
+        {
+            return _entityRepository.getScheduleInterest(scheduleId, ScheduleType.StayingSchedule, userId);
+        }
+
+        public Task<Response> setScheduleInterest(Guid scheduleId, Guid userId, InterestStatus interestStatus)
+        {
+            return _entityRepository.setScheduleInterest(scheduleId, ScheduleType.StayingSchedule, userId, interestStatus);
         }
     }
 }
