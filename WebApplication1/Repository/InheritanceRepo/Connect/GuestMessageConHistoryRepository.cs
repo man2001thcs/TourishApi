@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TourishApi.Extension;
 using TourishApi.Repository.Interface;
 using WebApplication1.Data.Connection;
 using WebApplication1.Data.DbContextFile;
@@ -59,7 +60,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
         public Response GetAll(
             string? search,
             int? type,
-            string? sortBy,
+            string? sortBy, string? sortDirection,
             int page = 1,
             int pageSize = 5
         )
@@ -81,6 +82,14 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
 
             #region Sorting
             entityQuery = entityQuery.OrderByDescending(entity => entity.CreateDate);
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
+                {
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
+                }
+            }
             #endregion
 
             #region Paging
@@ -136,7 +145,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
         public Response GetAllForAdmin(
             string? search,
             int? type,
-            string? sortBy,
+            string? sortBy, string? sortDirection,
             int page = 1,
             int pageSize = 5
         )
@@ -161,6 +170,14 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
 
             #region Sorting
             entityQuery = entityQuery.OrderByDescending(entity => entity.CreateDate);
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
+                {
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
+                }
+            }
             #endregion
 
             #region Paging

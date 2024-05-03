@@ -1,5 +1,6 @@
 ﻿using FirebaseAdmin.Messaging;
 using Microsoft.EntityFrameworkCore;
+using TourishApi.Extension;
 using TourishApi.Repository.Interface;
 using WebApplication1.Data;
 using WebApplication1.Data.Connection;
@@ -91,7 +92,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAll(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
             var entityQuery = _context.Notifications.AsQueryable();
 
@@ -103,22 +104,12 @@ namespace WebApplication1.Repository.InheritanceRepo
             #endregion
 
             #region Sorting
-            entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-
             if (!string.IsNullOrEmpty(sortBy))
             {
-                switch (sortBy)
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
                 {
-                    case "name_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.Content);
-                        break;
-                    case "updateDate_asc":
-                        entityQuery = entityQuery.OrderBy(entity => entity.UpdateDate);
-                        break;
-                    case "updateDate_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-                        break;
-
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
                 }
             }
             #endregion
@@ -137,7 +128,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         }
 
-        public Response GetAllForReceiver(string? userId, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAllForReceiver(string? userId, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
             var entityQuery = _context.Notifications.Include(entity => entity.UserCreator)
                 .Include(entity => entity.UserReceiver)
@@ -154,21 +145,12 @@ namespace WebApplication1.Repository.InheritanceRepo
             #endregion
 
             #region Sorting
-            entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-
             if (!string.IsNullOrEmpty(sortBy))
             {
-                switch (sortBy)
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
                 {
-                    case "name_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.Content);
-                        break;
-                    case "updateDate_asc":
-                        entityQuery = entityQuery.OrderBy(entity => entity.UpdateDate);
-                        break;
-                    case "updateDate_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-                        break;
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
                 }
             }
             #endregion
@@ -203,7 +185,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         }
 
-        public Response GetAllForCreator(string? userId, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAllForCreator(string? userId, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
             var entityQuery = _context.Notifications.Include(entity => entity.UserCreator)
                 .Include(entity => entity.UserReceiver)
@@ -220,21 +202,12 @@ namespace WebApplication1.Repository.InheritanceRepo
             #endregion
 
             #region Sorting
-            entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-
             if (!string.IsNullOrEmpty(sortBy))
             {
-                switch (sortBy)
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
                 {
-                    case "name_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.Content);
-                        break;
-                    case "updateDate_asc":
-                        entityQuery = entityQuery.OrderBy(entity => entity.UpdateDate);
-                        break;
-                    case "updateDate_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-                        break;
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
                 }
             }
             #endregion

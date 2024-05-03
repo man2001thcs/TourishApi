@@ -295,8 +295,7 @@ public class TourishPlanRepository : ITourishPlanRepository
             {
                 entityQuery = entityQuery.OrderByColumnDescending(sortBy);
             }
-        }
-       
+        }      
         #endregion
 
         #region Paging

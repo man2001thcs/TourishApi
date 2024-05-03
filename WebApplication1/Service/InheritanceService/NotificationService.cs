@@ -143,11 +143,11 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAll(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
             try
             {
-                var entityList = _entityRepository.GetAll(search, type, sortBy, page, pageSize);
+                var entityList = _entityRepository.GetAll(search, type, sortBy, sortDirection, page, pageSize);
                 return entityList;
             }
             catch (Exception ex)
@@ -165,6 +165,7 @@ namespace TourishApi.Service.InheritanceService
         public Response GetAllForReceiver(
             string? userId,
             string? sortBy,
+            string? sortDirection,
             int page = 1,
             int pageSize = 5
         )
@@ -174,6 +175,7 @@ namespace TourishApi.Service.InheritanceService
                 var entityList = _entityRepository.GetAllForReceiver(
                     userId,
                     sortBy,
+                    sortDirection,
                     page,
                     pageSize
                 );
@@ -194,13 +196,14 @@ namespace TourishApi.Service.InheritanceService
         public Response GetAllForCreator(
             string? userId,
             string? sortBy,
+            string? sortDirection,
             int page = 1,
             int pageSize = 5
         )
         {
             try
             {
-                var entityList = _entityRepository.GetAllForCreator(userId, sortBy, page, pageSize);
+                var entityList = _entityRepository.GetAllForCreator(userId, sortBy, sortDirection, page, pageSize);
                 return entityList;
             }
             catch (Exception ex)

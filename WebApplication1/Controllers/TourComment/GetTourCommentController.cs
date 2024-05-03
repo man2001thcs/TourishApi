@@ -18,17 +18,17 @@ namespace WebApplication1.Controllers.TourComment
 
         // GET: api/<ValuesController>
         [HttpGet]
-        public IActionResult GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public IActionResult GetAll(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
-            return Ok(_entityService.GetAll(search, type, sortBy, page, pageSize));
+            return Ok(_entityService.GetAll(search, type, sortBy, sortDirection, page, pageSize));
 
         }
 
         // GET: api/<ValuesController>
         [HttpGet("tourishplan")]
-        public IActionResult GetAllByTourishPlanId(Guid tourishPlanId, string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public IActionResult GetAllByTourishPlanId(Guid tourishPlanId, string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
-            return Ok(_entityService.GetAllByTourishPlanId(tourishPlanId, search, type, sortBy, page, pageSize));
+            return Ok(_entityService.GetAllByTourishPlanId(tourishPlanId, search, type, sortBy, sortDirection, page, pageSize));
         }
 
         [HttpGet("{id}")]

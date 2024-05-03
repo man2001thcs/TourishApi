@@ -1,4 +1,5 @@
-﻿using TourishApi.Repository.Interface;
+﻿using TourishApi.Extension;
+using TourishApi.Repository.Interface;
 
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.RestHouse;
@@ -63,7 +64,7 @@ namespace WebApplication1.Repository.InheritanceRepo.RestHoouse
             };
         }
 
-        public Response GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAll(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
             var entityQuery = _context.RestHouseContactList.AsQueryable();
 
@@ -80,21 +81,12 @@ namespace WebApplication1.Repository.InheritanceRepo.RestHoouse
             #endregion
 
             #region Sorting
-            entityQuery = entityQuery.OrderByDescending(entity => entity.PlaceBranch);
-
             if (!string.IsNullOrEmpty(sortBy))
             {
-                switch (sortBy)
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
                 {
-                    case "name_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.PlaceBranch);
-                        break;
-                    case "updateDate_asc":
-                        entityQuery = entityQuery.OrderBy(entity => entity.UpdateDate);
-                        break;
-                    case "updateDate_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-                        break;
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
                 }
             }
             #endregion

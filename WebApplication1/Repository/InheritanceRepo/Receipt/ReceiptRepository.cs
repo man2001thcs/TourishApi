@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using TourishApi.Extension;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Receipt;
@@ -431,6 +432,7 @@ public class ReceiptRepository : IReceiptRepository
         string? tourishPlanId,
         ReceiptStatus? status,
         string? sortBy,
+        string? sortDirection,
         int page = 1,
         int pageSize = 5
     )
@@ -459,16 +461,12 @@ public class ReceiptRepository : IReceiptRepository
         #endregion
 
         #region Sorting
-        //Default sort by Name (TenHh)
-        receiptQuery = receiptQuery.OrderBy(receipt => receipt.UpdateDate);
-
         if (!string.IsNullOrEmpty(sortBy))
         {
-            switch (sortBy)
+            receiptQuery = receiptQuery.OrderByColumn(sortBy);
+            if (sortDirection == "desc")
             {
-                case "status_desc":
-                    receiptQuery = receiptQuery.OrderByDescending(receipt => receipt.Status);
-                    break;
+                receiptQuery = receiptQuery.OrderByColumnDescending(sortBy);
             }
         }
         #endregion
@@ -492,6 +490,7 @@ public class ReceiptRepository : IReceiptRepository
         string? email,
         ReceiptStatus? status,
         string? sortBy,
+         string? sortDirection,
         int page = 1,
         int pageSize = 5
     )
@@ -520,16 +519,12 @@ public class ReceiptRepository : IReceiptRepository
         #endregion
 
         #region Sorting
-        //Default sort by Name (TenHh)
-        receiptQuery = receiptQuery.OrderBy(receipt => receipt.UpdateDate);
-
         if (!string.IsNullOrEmpty(sortBy))
         {
-            switch (sortBy)
+            receiptQuery = receiptQuery.OrderByColumn(sortBy);
+            if (sortDirection == "desc")
             {
-                case "status_desc":
-                    receiptQuery = receiptQuery.OrderByDescending(receipt => receipt.Status);
-                    break;
+                receiptQuery = receiptQuery.OrderByColumnDescending(sortBy);
             }
         }
         #endregion

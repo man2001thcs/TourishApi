@@ -73,11 +73,11 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAll(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
             try
             {
-                var entityList = _entityRepository.GetAll(search, type, sortBy, page, pageSize);
+                var entityList = _entityRepository.GetAll(search, type, sortBy, sortDirection, page, pageSize);
                 return entityList;
             }
             catch (Exception ex)
@@ -91,11 +91,11 @@ namespace TourishApi.Service.InheritanceService
                 return response;
             }
         }
-        public Response GetAllByTourishPlanId(Guid tourishPlanId, string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAllByTourishPlanId(Guid tourishPlanId, string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
             try
             {
-                var entityList = _entityRepository.GetAllByTourishPlanId(tourishPlanId, search, type, sortBy, page, pageSize);
+                var entityList = _entityRepository.GetAllByTourishPlanId(tourishPlanId, search, type, sortBy, sortDirection, page, pageSize);
                 return entityList;
             }
             catch (Exception ex)

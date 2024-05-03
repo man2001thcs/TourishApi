@@ -1,4 +1,5 @@
-﻿using TourishApi.Repository.Interface;
+﻿using TourishApi.Extension;
+using TourishApi.Repository.Interface;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Transport;
 using WebApplication1.Model;
@@ -62,7 +63,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Transport
             };
         }
 
-        public Response GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAll(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
             var entityQuery = _context.MovingContactList.AsQueryable();
 
@@ -80,23 +81,15 @@ namespace WebApplication1.Repository.InheritanceRepo.Transport
             #endregion
 
             #region Sorting
-            entityQuery = entityQuery.OrderByDescending(entity => entity.BranchName);
-
             if (!string.IsNullOrEmpty(sortBy))
             {
-                switch (sortBy)
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
                 {
-                    case "name_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.BranchName);
-                        break;
-                    case "updateDate_asc":
-                        entityQuery = entityQuery.OrderBy(entity => entity.UpdateDate);
-                        break;
-                    case "updateDate_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-                        break;
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
                 }
             }
+
             #endregion
 
             #region Paging

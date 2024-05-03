@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TourishApi.Extension;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Schedule;
@@ -223,7 +224,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response GetAllEatSchedule(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAllEatSchedule(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
             var entityQuery = _context.EatSchedules.AsQueryable();
 
@@ -235,21 +236,12 @@ namespace WebApplication1.Repository.InheritanceRepo
             #endregion
 
             #region Sorting
-            entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-
             if (!string.IsNullOrEmpty(sortBy))
             {
-                switch (sortBy)
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
                 {
-                    case "name_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.PlaceName);
-                        break;
-                    case "updateDate_asc":
-                        entityQuery = entityQuery.OrderBy(entity => entity.UpdateDate);
-                        break;
-                    case "updateDate_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-                        break;
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
                 }
             }
             #endregion
@@ -268,7 +260,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         }
 
-        public Response GetAllMovingSchedule(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAllMovingSchedule(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
             var entityQuery = _context.MovingSchedules.AsQueryable();
 
@@ -283,21 +275,12 @@ namespace WebApplication1.Repository.InheritanceRepo
             #endregion
 
             #region Sorting
-            entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-
             if (!string.IsNullOrEmpty(sortBy))
             {
-                switch (sortBy)
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
                 {
-                    case "name_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.BranchName);
-                        break;
-                    case "updateDate_asc":
-                        entityQuery = entityQuery.OrderBy(entity => entity.UpdateDate);
-                        break;
-                    case "updateDate_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-                        break;
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
                 }
             }
             #endregion
@@ -316,7 +299,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         }
 
-        public Response GetAllStayingSchedule(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAllStayingSchedule(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
             var entityQuery = _context.StayingSchedules.AsQueryable();
 
@@ -329,21 +312,12 @@ namespace WebApplication1.Repository.InheritanceRepo
             #endregion
 
             #region Sorting
-            entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-
             if (!string.IsNullOrEmpty(sortBy))
             {
-                switch (sortBy)
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
                 {
-                    case "name_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.PlaceName);
-                        break;
-                    case "updateDate_asc":
-                        entityQuery = entityQuery.OrderBy(entity => entity.UpdateDate);
-                        break;
-                    case "updateDate_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-                        break;
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
                 }
             }
             #endregion

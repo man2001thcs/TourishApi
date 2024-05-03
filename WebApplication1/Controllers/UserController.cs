@@ -88,10 +88,10 @@ namespace WebApplication1.Controllers
 
         [Authorize(Policy = "GetUserListAccess")]
         [HttpGet("GetUserList")]
-        public IActionResult GetUserList(string? search, int type, string? sortBy, int page = 1, int pageSize = 5)
+        public IActionResult GetUserList(string? search, int type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
             var bearer_token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-            return Ok(_userService.GetUserList(bearer_token, search, type, sortBy, page, pageSize));
+            return Ok(_userService.GetUserList(bearer_token, search, type, sortBy, sortDirection, page, pageSize));
         }
 
         [Authorize(Policy = "GetUserAccess")]

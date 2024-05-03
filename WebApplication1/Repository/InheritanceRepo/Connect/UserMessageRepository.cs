@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TourishApi.Extension;
 using TourishApi.Repository.Interface;
 using WebApplication1.Data.Chat;
 using WebApplication1.Data.DbContextFile;
@@ -57,7 +58,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
             };
         }
 
-        public Response GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAll(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
             var entityQuery = _context.UserMessages.AsQueryable();
 
@@ -69,7 +70,14 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
             #endregion
 
             #region Sorting
-            entityQuery = entityQuery.OrderByDescending(entity => entity.CreateDate);
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
+                {
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
+                }
+            }
             #endregion
 
             #region Paging

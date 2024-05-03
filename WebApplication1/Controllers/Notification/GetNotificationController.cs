@@ -18,23 +18,23 @@ namespace WebApplication1.Controllers.Notification
 
         // GET: api/<ValuesController>
         [HttpGet]
-        public IActionResult GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public IActionResult GetAll(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
-            return Ok(_entityService.GetAll(search, type, sortBy, page, pageSize));
+            return Ok(_entityService.GetAll(search, type, sortBy, sortDirection, page, pageSize));
 
         }
 
         [HttpGet("creator")]
-        public IActionResult GetForCreator(string? creatorId, string? sortBy, int page = 1, int pageSize = 5)
+        public IActionResult GetForCreator(string? creatorId, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
-            return Ok(_entityService.GetAllForCreator(creatorId, sortBy, page, pageSize));
+            return Ok(_entityService.GetAllForCreator(creatorId, sortBy, sortDirection, page, pageSize));
 
         }
 
         [HttpGet("receiver")]
-        public IActionResult GetForReceiver(string? receiverId, string? sortBy, int page = 1, int pageSize = 5)
+        public IActionResult GetForReceiver(string? receiverId, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
-            return Ok(_entityService.GetAllForReceiver(receiverId, sortBy, page, pageSize));
+            return Ok(_entityService.GetAllForReceiver(receiverId, sortBy, sortDirection, page, pageSize));
 
         }
 

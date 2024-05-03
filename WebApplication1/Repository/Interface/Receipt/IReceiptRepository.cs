@@ -10,6 +10,7 @@ namespace WebApplication1.Repository.Interface.Receipt
             string? TourishPlanId,
             ReceiptStatus? status,
             string? sortBy,
+            string? sortDirection,
             int page = 1,
             int pageSize = 5
         );
@@ -17,6 +18,7 @@ namespace WebApplication1.Repository.Interface.Receipt
             string? email,
             ReceiptStatus? status,
             string? sortBy,
+            string? sortDirection,
             int page = 1,
             int pageSize = 5
         );

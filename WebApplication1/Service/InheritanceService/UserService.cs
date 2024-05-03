@@ -37,7 +37,9 @@ namespace WebApplication1.Service.InheritanceService
         public async Task<Response> Validate(LoginModel model)
         {
             var user = _context.Users.SingleOrDefault(p => p.UserName == model.UserName);
-            var hashInputPassword = ConvertToStringFromByteArray(HashPassword(model.Password, ConvertStringToByteArray(user.PasswordSalt)));
+            var hashInputPassword = ConvertToStringFromByteArray(HashPassword(model.Password, ConvertStringToByteArray(user.PasswordSalt)));          
+             
+            logger.LogInformation("Test: " + hashInputPassword ?? "");
 
             if (hashInputPassword != user.Password) //không đúng
             {
@@ -48,6 +50,12 @@ namespace WebApplication1.Service.InheritanceService
                 };
             }
 
+            var generateSalt = GenerateSalt();
+            var newHashInputPassword = ConvertToStringFromByteArray(HashPassword(model.Password, generateSalt));
+            user.Password = newHashInputPassword;
+            user.PasswordSalt = ConvertToStringFromByteArray(generateSalt);
+
+            await _context.SaveChangesAsync();
             //cấp token
             var token = await GenerateToken(user);
 
@@ -426,7 +434,7 @@ namespace WebApplication1.Service.InheritanceService
             };
         }
 
-        public Response GetUserList(string bearer_token, string? search, int type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetUserList(string bearer_token, string? search, int type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
             Response checkResult = checkIfTokenFormIsValid(bearer_token);
             if (checkResult.resultCd != 0) return checkResult;
@@ -447,13 +455,13 @@ namespace WebApplication1.Service.InheritanceService
                     };
                 }
 
-                var entityList = this._userRepository.GetAll(search, type, sortBy, page, pageSize);
+                var entityList = this._userRepository.GetAll(search, type, sortBy, sortDirection, page, pageSize);
                 return entityList;
             }
 
             if (role == "AdminManager")
             {
-                var entityList = this._userRepository.GetAll(search, type, sortBy, page, pageSize);
+                var entityList = this._userRepository.GetAll(search, type, sortBy, sortDirection, page, pageSize);
                 return entityList;
             }
             else

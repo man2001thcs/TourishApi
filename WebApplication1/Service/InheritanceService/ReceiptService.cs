@@ -140,11 +140,11 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response GetAll(string? tourishPlanId, string? sortBy, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
+        public Response GetAll(string? tourishPlanId, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
         {
             try
             {
-                var receiptList = _receiptRepository.GetAll(tourishPlanId, status, sortBy, page, pageSize);
+                var receiptList = _receiptRepository.GetAll(tourishPlanId, status, sortBy, sortDirection, page, pageSize);
                 return receiptList;
             }
             catch (Exception ex)
@@ -160,11 +160,11 @@ namespace TourishApi.Service.InheritanceService
 
         }
 
-        public Response GetAllForUser(string? email, string? sortBy, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
+        public Response GetAllForUser(string? email, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
         {
             try
             {
-                var receiptList = _receiptRepository.GetAllForUser(email, status, sortBy, page, pageSize);
+                var receiptList = _receiptRepository.GetAllForUser(email, status, sortBy, sortDirection, page, pageSize);
                 return receiptList;
             }
             catch (Exception ex)

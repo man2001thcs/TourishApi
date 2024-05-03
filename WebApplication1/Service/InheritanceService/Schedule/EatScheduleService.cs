@@ -62,11 +62,11 @@ namespace TourishApi.Service.InheritanceService.Schedule
             }
         }
 
-        public Response GetAll(string? search, int? type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAll(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
             try
             {
-                var entityList = _entityRepository.GetAllEatSchedule(search, type, sortBy, page, pageSize);
+                var entityList = _entityRepository.GetAllEatSchedule(search, type, sortBy, sortDirection, page, pageSize);
                 return entityList;
             }
             catch (Exception ex)

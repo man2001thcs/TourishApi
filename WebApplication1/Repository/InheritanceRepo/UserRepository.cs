@@ -1,4 +1,5 @@
-﻿using WebApplication1.Data;
+﻿using TourishApi.Extension;
+using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
@@ -33,7 +34,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Response GetAll(string? search, int type, string? sortBy, int page = 1, int pageSize = 5)
+        public Response GetAll(string? search, int type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
             var entityQuery = _context.Users.AsQueryable();
 
@@ -48,21 +49,12 @@ namespace WebApplication1.Repository.InheritanceRepo
             #endregion
 
             #region Sorting
-            entityQuery = entityQuery.OrderBy(entity => entity.FullName);
-
             if (!string.IsNullOrEmpty(sortBy))
             {
-                switch (sortBy)
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
                 {
-                    case "name_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.FullName);
-                        break;
-                    case "updateDate_asc":
-                        entityQuery = entityQuery.OrderBy(entity => entity.UpdateDate);
-                        break;
-                    case "updateDate_desc":
-                        entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
-                        break;
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
                 }
             }
             #endregion
