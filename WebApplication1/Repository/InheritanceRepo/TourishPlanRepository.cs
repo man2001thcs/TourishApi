@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using TourishApi.Extension;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Schedule;
@@ -177,6 +178,7 @@ public class TourishPlanRepository : ITourishPlanRepository
         double? priceFrom,
         double? priceTo,
         string? sortBy,
+        string? sortDirection,
         int page = 1,
         int pageSize = 5
     )
@@ -286,18 +288,15 @@ public class TourishPlanRepository : ITourishPlanRepository
         #endregion
 
         #region Sorting
-        //Default sort by Name (TenHh)
-        entityQuery = entityQuery.OrderByDescending(entity => entity.TourName);
-
         if (!string.IsNullOrEmpty(sortBy))
         {
-            switch (sortBy)
+            entityQuery = entityQuery.OrderByColumn(sortBy);
+            if (sortDirection == "desc")
             {
-                case "title_desc":
-                    entityQuery = entityQuery.OrderByDescending(entity => entity.TourName);
-                    break;
+                entityQuery = entityQuery.OrderByColumnDescending(sortBy);
             }
         }
+       
         #endregion
 
         #region Paging
