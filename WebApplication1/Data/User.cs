@@ -21,6 +21,8 @@ namespace WebApplication1.Data
         [Required]
         public string Password { get; set; }
         [Required]
+        public string PasswordSalt { get; set; }
+        [Required]
         public UserRole Role { get; set; }
         public string Email { get; set; }
         public required string FullName { get; set; }

@@ -170,6 +170,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 if (userExist.Password != "None")
                 {
                     userExist.Password = model.NewPassword;
+                    userExist.PasswordSalt = model.PasswordSalt;
                 }
 
                 await _context.SaveChangesAsync();
@@ -198,6 +199,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 if (userExist.Password != "None")
                 {
                     userExist.Password = model.NewPassword;
+                    userExist.PasswordSalt = model.PasswordSalt;
                 }
 
                 await _context.SaveChangesAsync();

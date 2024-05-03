@@ -36,8 +36,10 @@ namespace WebApplication1.Service.InheritanceService
 
         public async Task<Response> Validate(LoginModel model)
         {
-            var user = _context.Users.SingleOrDefault(p => p.UserName == model.UserName && model.Password == p.Password && model.Password != "None");
-            if (user == null) //không đúng
+            var user = _context.Users.SingleOrDefault(p => p.UserName == model.UserName);
+            var hashInputPassword = ConvertToStringFromByteArray(HashPassword(model.Password, ConvertStringToByteArray(user.PasswordSalt)));
+
+            if (hashInputPassword != user.Password) //không đúng
             {
                 return new Response
                 {
@@ -124,7 +126,7 @@ namespace WebApplication1.Service.InheritanceService
         {
             GoogleJsonWebSignature.Payload payload = await GoogleJsonWebSignature.ValidateAsync(model.GoogleToken);
 
-            var userExist = _context.Users.Count(p => p.Email == model.Email && p.Password == "None");
+            var userExist = _context.Users.Count(p => p.Email == model.Email);
 
             if (payload == null)
             {
@@ -142,6 +144,7 @@ namespace WebApplication1.Service.InheritanceService
                     UserName = model.Email,
                     Email = model.Email,
                     Password = "None",
+                    PasswordSalt = "None",
                     PhoneNumber = model.PhoneNumber,
                     Role = UserRole.User,
                     Address = model.Address,
@@ -171,11 +174,14 @@ namespace WebApplication1.Service.InheritanceService
             var userExist = _context.Users.Count(p => p.UserName == model.UserName || p.Email == model.Email);
             if (userExist < 1) //không đúng
             {
+                var generateSalt = GenerateSalt();
+                var hashInputPassword = ConvertToStringFromByteArray(HashPassword(model.Password, generateSalt));
                 var userInsert = new User
                 {
                     UserName = model.UserName,
                     Email = model.Email,
-                    Password = model.Password,
+                    Password = hashInputPassword,
+                    PasswordSalt = ConvertToStringFromByteArray(generateSalt),
                     PhoneNumber = model.PhoneNumber,
                     Role = UserRole.New,
                     Address = model.Address,
@@ -358,8 +364,14 @@ namespace WebApplication1.Service.InheritanceService
             if (role == "User" || role == "Admin" || role == "AdminManager")
             {
                 var userName = tokenInverification.FindFirstValue("UserName");
+
+                var generateSalt = GenerateSalt();
+                var hashInputPassword = ConvertToStringFromByteArray(HashPassword(model.NewPassword, generateSalt));
+
                 var updateModel = model;
                 updateModel.UserName = userName;
+                updateModel.NewPassword = hashInputPassword;
+                updateModel.PasswordSalt = ConvertToStringFromByteArray(generateSalt);
 
                 var entity = await this._userRepository.UpdatePassword(updateModel);
                 return entity;
@@ -395,8 +407,13 @@ namespace WebApplication1.Service.InheritanceService
             if (role == "User" || role == "Admin" || role == "AdminManager")
             {
                 var userName = tokenInverification.FindFirstValue("UserName");
+                var generateSalt = GenerateSalt();
+                var hashInputPassword = ConvertToStringFromByteArray(HashPassword(model.NewPassword, generateSalt));
+
                 var updateModel = model;
                 updateModel.UserName = userName;
+                updateModel.NewPassword = hashInputPassword;
+                updateModel.PasswordSalt = ConvertToStringFromByteArray(generateSalt);
 
                 var entity = await this._userRepository.ReclaimPassword(updateModel);
                 return entity;
@@ -1051,6 +1068,38 @@ namespace WebApplication1.Service.InheritanceService
         {
             var dateTimeInterval = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             return dateTimeInterval.AddSeconds(utcExpiredDate).ToUniversalTime();
+        }
+
+        private byte[] GenerateSalt()
+        {
+            byte[] salt = new byte[16]; // You can adjust the size of the salt according to your needs
+            using (var rng = new RNGCryptoServiceProvider())
+            {
+                rng.GetBytes(salt);
+            }
+            return salt;
+        }
+
+        private byte[] HashPassword(string password, byte[] salt)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                // Concatenate the password and salt
+                byte[] combinedBytes = Encoding.UTF8.GetBytes(password + Convert.ToBase64String(salt));
+
+                // Compute the hash
+                return sha256.ComputeHash(combinedBytes);
+            }
+        }
+
+        private byte[] ConvertStringToByteArray(string saltString)
+        {
+            return Convert.FromBase64String(saltString);
+        }
+
+        private string ConvertToStringFromByteArray(byte[] byteArray)
+        {
+            return Convert.ToBase64String(byteArray);
         }
     }
 }

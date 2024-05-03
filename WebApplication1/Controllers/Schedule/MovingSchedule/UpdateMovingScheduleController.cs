@@ -31,7 +31,7 @@ namespace WebApplication1.Controllers.Schedule
         [HttpPost("interest")]
         public async Task<IActionResult> SetInterest(TourishInterestModel tourishInterestModel)
         {
-            var response = await _entityService.(tourishInterestModel.TourishPlanId,
+            var response = await _entityService.setScheduleInterest(tourishInterestModel.TourishPlanId,
                 tourishInterestModel.UserId, tourishInterestModel.InterestStatus);
             return Ok(response);
         }
