@@ -37,5 +37,6 @@ namespace WebApplication1.Data.Schedule
         public TourishPlan TourishPlan { get; set; }
         public ICollection<ScheduleInterest>? ScheduleInterestList { get; set; }
         public ICollection<Notification>? NotificationList { get; set; }
+        public ICollection<Instruction>? InstructionList { get; set; }
     }
 }

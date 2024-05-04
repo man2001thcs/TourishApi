@@ -34,6 +34,8 @@ namespace WebApplication1.Data.DbContextFile
         public DbSet<ScheduleRating> ScheduleRatings { get; set; }
         public DbSet<ScheduleInterest> ScheduleInterests { get; set; }
 
+        public DbSet<Instruction> Instructions { get; set; }
+
         public DbSet<TotalReceipt> TotalReceiptList { get; set; }
         public DbSet<FullReceipt> FullReceiptList { get; set; }
 
@@ -180,17 +182,43 @@ namespace WebApplication1.Data.DbContextFile
                 entity.HasOne(e => e.MovingSchedule)
                 .WithMany(e => e.ScheduleInterestList)
                 .HasForeignKey(e => e.MovingScheduleId)
+                .IsRequired(false)
                 .HasConstraintName("FK_MovingSchedule_ScheduleInterest");
 
                 entity.HasOne(e => e.StayingSchedule)
                 .WithMany(e => e.ScheduleInterestList)
                 .HasForeignKey(e => e.StayingScheduleId)
+                .IsRequired(false)
                 .HasConstraintName("FK_StayingSchedule_ScheduleInterest");
 
                 entity.HasOne(e => e.User)
                 .WithMany(e => e.ScheduleInterestList)
                 .HasForeignKey(e => e.UserId)
                 .HasConstraintName("FK_User_ScheduleInterest");
+            });
+
+            modelBuilder.Entity<Instruction>(entity =>
+            {
+                entity.ToTable(nameof(Instruction));
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.MovingSchedule)
+                .WithMany(e => e.InstructionList)
+                .IsRequired(false)
+                .HasForeignKey(e => e.MovingScheduleId)
+                .HasConstraintName("FK_MovingSchedule_Instruction");
+
+                entity.HasOne(e => e.StayingSchedule)
+                .WithMany(e => e.InstructionList)
+                .IsRequired(false)
+                .HasForeignKey(e => e.StayingScheduleId)
+                .HasConstraintName("FK_StayingSchedule_Instruction");
+
+                entity.HasOne(e => e.TourishPlan)
+                .WithMany(e => e.InstructionList)
+                .IsRequired(false)
+                .HasForeignKey(e => e.StayingScheduleId)
+                .HasConstraintName("FK_TourishPlan_Instruction");
             });
 
             modelBuilder.Entity<TourishComment>(entity =>

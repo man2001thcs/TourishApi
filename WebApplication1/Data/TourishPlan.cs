@@ -46,6 +46,8 @@ namespace WebApplication1.Data
         public ICollection<TourishRating> TourishRatingList { get; set; }
 
         public ICollection<TourishSchedule> TourishScheduleList { get; set; }
+
+        public ICollection<Instruction> InstructionList { get; set; }
         public TourishPlan()
         {
             PlanStatus = PlanStatus.Waiting;

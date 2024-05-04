@@ -33,8 +33,9 @@ namespace WebApplication1.Controllers.TourishPlan
         [Authorize]
         public async Task<IActionResult> SetInterest(TourishInterestModel tourishInterestModel)
         {
-            var response = await _entityService.setTourInterest(tourishInterestModel.TourishPlanId, 
-                tourishInterestModel.UserId, tourishInterestModel.InterestStatus);
+            string userId = User.FindFirstValue("Id");
+            var response = await _entityService.setTourInterest(tourishInterestModel.TourishPlanId,
+                new Guid(userId), tourishInterestModel.InterestStatus);
             return Ok(response);
         }
     }

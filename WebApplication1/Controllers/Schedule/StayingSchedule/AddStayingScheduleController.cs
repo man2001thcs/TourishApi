@@ -32,8 +32,9 @@ namespace WebApplication1.Controllers.Schedule
         [Authorize]
         public async Task<IActionResult> SetInterest(ScheduleInterestModel tourishInterestModel)
         {
+            string userId = User.FindFirstValue("Id");
             var response = await _entityService.setScheduleInterest(tourishInterestModel.ScheduleId,
-                tourishInterestModel.UserId, tourishInterestModel.InterestStatus);
+                 new Guid(userId), tourishInterestModel.InterestStatus);
             return Ok(response);
         }
     }
