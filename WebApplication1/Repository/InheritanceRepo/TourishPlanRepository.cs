@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Globalization;
+﻿using System.Globalization;
+using Microsoft.EntityFrameworkCore;
 using TourishApi.Extension;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
@@ -18,6 +18,27 @@ public class TourishPlanRepository : ITourishPlanRepository
     private readonly ILogger<TourishPlanRepository> logger;
     public static int PAGE_SIZE { get; set; } = 5;
     private readonly char[] delimiter = new char[] { ';' };
+
+    private readonly string[] priceInstructionLines = new string[]
+    {
+        "Hộ chiếu phải còn thời hạn sử dụng trên 6 tháng, Tính từ ngày khởi hành đi và về.",
+        "Hành lý quá cước qui định. Xe vận chuyển ngoài chương trình + Các show về đêm.",
+        "Điện thoại, giặt ủi, nước uống trong phòng khách sạn và các chi phí cá nhân khác.",
+        "Phí bồi dưỡng cho hướng dẫn viên 125.000VND/Ngày/Khách."
+    };
+
+    private readonly string[] cautionInstructionLines = new string[]
+    {
+        "Tour du lịch thuần túy, Quý khách vui lòng không rời đoàn.",
+        "Du khách Việt Kiều hoặc nước ngoài phải có visa tái nhập nhiều lần hoặc miễn thị thực 5 năm và mang theo khi tham gia tour.",
+        "Trẻ em dưới 16 tuổi phải có bố mẹ đi cùng hoặc người được uỷ quyền có giấy uỷ quyền từ bố mẹ.",
+        "Hộ chiếu phải mang theo bản gốc hợp lệ không bị rạn, phai mờ, và còn thời hạn sử dụng trên 6 tháng (tính từ ngày khởi hành).",
+        "Không sử dụng thẻ xanh. Nếu sử dụng Sổ Du lịch (yêu cầu visa nước nhập cảnh), vui lòng thông báo cho nhân viên nhận tour nếu Quý khách sử dụng các hồ sơ khác ngoài hộ chiếu.",
+        "Công ty du lịch không chịu trách nhiệm nếu Quý khách bị từ chối nhập cảnh với bất kỳ lý do nào từ hải quan nước ngoài.",
+        "Công ty được phép thay đổi lịch trình chuyến đi và sử dụng các hãng hàng không thay thế, nhưng vẫn đảm bảo tham quan đầy đủ các điểm theo chương trình.",
+        "Thứ tự điểm tham quan và lộ trình có thể thay đổi tùy theo tình hình thực tế, nhưng vẫn đảm bảo đầy đủ các điểm tham quan như ban đầu.",
+        "Trong trường hợp bất khả kháng như khủng bố, thiên tai hoặc thay đổi lịch trình của phương tiện công cộng (máy bay, tàu hỏa...), Công ty du lịch giữ quyền điều chỉnh lộ trình tour cho phù hợp và an toàn cho khách hàng, mà không phải chịu trách nhiệm bồi thường thiệt hại phát sinh."
+    };
 
     public TourishPlanRepository(
         MyDbContext _context,
@@ -50,9 +71,9 @@ public class TourishPlanRepository : ITourishPlanRepository
             UpdateDate = DateTime.UtcNow,
         };
 
-        var tourishInterest = new TourishInterest();
+        #region Interest
         var tourishInterestList = new List<TourishInterest>();
-
+        var tourishInterest = new TourishInterest();
         if (id != null)
         {
             var user = _context.Users.SingleOrDefault(u => u.Id.ToString() == id);
@@ -71,6 +92,20 @@ public class TourishPlanRepository : ITourishPlanRepository
         }
 
         tourishPlan.TourishInterestList = tourishInterestList;
+        #endregion
+
+        #region Interest
+        var instructionList = new List<Instruction>();
+        var instruction = new Instruction();
+        if (id != null)
+        {
+            instructionList.Add(instruction);
+
+            tourishPlan.InstructionList = instructionList;
+        }
+        #endregion
+
+
 
         if (entityModel.TourishCategoryRelations != null)
         {
@@ -117,6 +152,8 @@ public class TourishPlanRepository : ITourishPlanRepository
             tourishPlan.TourishScheduleList = tourishDataScheduleList;
         }
 
+        tourishPlan.InstructionList = initiateInstructionList();
+
         await _context.AddAsync(tourishPlan);
         await _context.SaveChangesAsync();
         await blobService.UploadStringBlobAsync(
@@ -150,6 +187,39 @@ public class TourishPlanRepository : ITourishPlanRepository
         };
     }
 
+    private List<Instruction> initiateInstructionList()
+    {
+        var instructionList = new List<Instruction>();
+
+        foreach (var instruction in priceInstructionLines)
+        {
+            instructionList.Add(
+                new Instruction
+                {
+                    InstructionType = InstructionType.Price,
+                    Description = instruction,
+                    CreateDate = DateTime.UtcNow,
+                    UpdateDate = DateTime.UtcNow,
+                }
+            );
+        }
+
+        foreach (var instruction in cautionInstructionLines)
+        {
+            instructionList.Add(
+                new Instruction
+                {
+                    InstructionType = InstructionType.Caution,
+                    Description = instruction,
+                    CreateDate = DateTime.UtcNow,
+                    UpdateDate = DateTime.UtcNow,
+                }
+            );
+        }
+
+        return instructionList;
+    }
+
     public Response Delete(Guid id)
     {
         var entity = _context.TourishPlan.FirstOrDefault((entity => entity.Id == id));
@@ -179,6 +249,7 @@ public class TourishPlanRepository : ITourishPlanRepository
         double? priceTo,
         string? sortBy,
         string? sortDirection,
+        string? userId,
         int page = 1,
         int pageSize = 5
     )
@@ -187,7 +258,9 @@ public class TourishPlanRepository : ITourishPlanRepository
             .TourishPlan.Include(entity => entity.MovingSchedules)
             .Include(entity => entity.EatSchedules)
             .Include(entity => entity.StayingSchedules)
+            .Include(entity => entity.InstructionList)
             .Include(entity => entity.TourishScheduleList)
+            .Include(entity => entity.TourishInterestList)
             .Include(entity => entity.TourishCategoryRelations)
             .ThenInclude(entity => entity.TourishCategory)
             .Include(entity => entity.TotalReceipt)
@@ -198,6 +271,17 @@ public class TourishPlanRepository : ITourishPlanRepository
         if (!string.IsNullOrEmpty(search))
         {
             entityQuery = entityQuery.Where(entity => entity.TourName.Contains(search));
+        }
+
+        if (!string.IsNullOrEmpty(userId))
+        {
+            // Lọc trên danh sách TourishInterestList của từng đối tượng TourishPlan
+            foreach (var tourishPlan in entityQuery)
+            {
+                tourishPlan.TourishInterestList = tourishPlan
+                    .TourishInterestList.Where(interest => interest.UserId.ToString() == userId)
+                    .ToList();
+            }
         }
 
         if (!string.IsNullOrEmpty(category))
@@ -295,7 +379,7 @@ public class TourishPlanRepository : ITourishPlanRepository
             {
                 entityQuery = entityQuery.OrderByColumnDescending(sortBy);
             }
-        }      
+        }
         #endregion
 
         #region Paging
@@ -449,6 +533,26 @@ public class TourishPlanRepository : ITourishPlanRepository
                     );
                 }
                 entity.TourishScheduleList = tourishDataScheduleList;
+            }
+
+            if (entityModel.InstructionList != null)
+            {
+                var instructionList = new List<Instruction>();
+                foreach (var item in entityModel.InstructionList)
+                {
+                    instructionList.Add(
+                        new Instruction
+                        {
+                            Id = item.Id.Value,
+                            TourishPlanId = item.TourishPlanId,
+                            Description = item.Description,
+                            InstructionType = item.InstructionType,
+                            CreateDate = item.CreateDate,
+                            UpdateDate = DateTime.UtcNow,
+                        }
+                    );
+                }
+                entity.InstructionList = instructionList;
             }
 
             entity.UpdateDate = DateTime.UtcNow;
@@ -761,44 +865,68 @@ public class TourishPlanRepository : ITourishPlanRepository
 
     public Response getTourInterest(Guid tourId, Guid userId)
     {
-        var data = _context.TourishInterests.FirstOrDefault(entity => entity.TourishPlanId == tourId && entity.UserId == userId);
+        var data = _context.TourishInterests.FirstOrDefault(entity =>
+            entity.TourishPlanId == tourId && entity.UserId == userId
+        );
         return new Response
         {
             resultCd = 0,
             Data = data,
             // Update type success
         };
-        
     }
 
-    public async Task<Response> setTourInterest(Guid tourId, Guid userId, InterestStatus interestStatus)
+    public async Task<Response> setTourInterest(
+        Guid tourId,
+        Guid userId,
+        InterestStatus interestStatus
+    )
     {
-        var existInterest = _context.TourishInterests.FirstOrDefault(entity => entity.TourishPlanId == tourId && entity.UserId == userId);
+        var existInterest = _context.TourishInterests.FirstOrDefault(entity =>
+            entity.TourishPlanId == tourId && entity.UserId == userId
+        );
         if (existInterest != null)
         {
-            existInterest.InterestStatus = interestStatus;
+            if (
+                existInterest.InterestStatus == InterestStatus.Creator
+                || existInterest.InterestStatus == InterestStatus.User
+            )
+                return new Response { resultCd = 1, MessageCode = "C416", };
+
+            if (
+                existInterest.InterestStatus == InterestStatus.Interest
+                || existInterest.InterestStatus == InterestStatus.Modifier
+            )
+            {
+                existInterest.InterestStatus = InterestStatus.NotInterested;
+            }
+            else if (existInterest.InterestStatus == InterestStatus.NotInterested)
+            {
+                existInterest.InterestStatus = InterestStatus.Interest;
+            }
+
             existInterest.UpdateDate = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
-            return new Response
+            if (existInterest.InterestStatus == InterestStatus.NotInterested)
             {
-                resultCd = 0,
-                MessageCode = "I415",
-                // Update type success
-            };
-        } else
+                return new Response { resultCd = 0, MessageCode = "I416", };
+            }
+            return new Response { resultCd = 0, MessageCode = "I415", };
+        }
+        else
         {
             var insertValue = new TourishInterest
             {
                 TourishPlanId = tourId,
                 UserId = userId,
-                InterestStatus = interestStatus,
+                InterestStatus = InterestStatus.Interest,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow
             };
 
-            _context.Add(insertValue);  
+            _context.Add(insertValue);
             await _context.SaveChangesAsync();
 
             return new Response

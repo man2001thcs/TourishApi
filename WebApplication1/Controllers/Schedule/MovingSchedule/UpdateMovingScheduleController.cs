@@ -28,11 +28,18 @@ namespace WebApplication1.Controllers.Schedule
             return Ok(await _entityService.UpdateEntityById(userId, MovingScheduleModel));
         }
 
-        [HttpPost("interest")]
+        [HttpPut("interest")]
         public async Task<IActionResult> SetInterest(TourishInterestModel tourishInterestModel)
         {
             var response = await _entityService.setScheduleInterest(tourishInterestModel.TourishPlanId,
                 tourishInterestModel.UserId, tourishInterestModel.InterestStatus);
+            return Ok(response);
+        }
+
+        [HttpPut("instruction")]
+        public async Task<IActionResult> SetInstruction(ScheduleInstructionModel model)
+        {
+            var response = await _entityService.UpdateInstructionList(model);
             return Ok(response);
         }
     }

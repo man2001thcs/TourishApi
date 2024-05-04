@@ -13,7 +13,8 @@ namespace TourishApi.Service.InheritanceService
 
         public TourishPlanService(
             ITourishPlanRepository tourishPlanRepository,
-            NotificationService notificationService)
+            NotificationService notificationService
+        )
         {
             _entityRepository = tourishPlanRepository;
             _notificationService = notificationService;
@@ -90,17 +91,37 @@ namespace TourishApi.Service.InheritanceService
 
         public Response GetAll(
             string? search,
-            string? category, string? categoryString, string? startingPoint, string? endPoint, string? startingDate,
-            double? priceFrom, double? priceTo,
+            string? category,
+            string? categoryString,
+            string? startingPoint,
+            string? endPoint,
+            string? startingDate,
+            double? priceFrom,
+            double? priceTo,
             string? sortBy,
             string? sortDirection,
+            string? userId,
             int page,
             int pageSize
         )
         {
             try
             {
-                var entityList = _entityRepository.GetAll(search, category, categoryString, startingPoint, endPoint, startingDate, priceFrom, priceTo, sortBy, sortDirection, page, pageSize);
+                var entityList = _entityRepository.GetAll(
+                    search,
+                    category,
+                    categoryString,
+                    startingPoint,
+                    endPoint,
+                    startingDate,
+                    priceFrom,
+                    priceTo,
+                    sortBy,
+                    sortDirection,
+                    userId,
+                    page,
+                    pageSize
+                );
                 return entityList;
             }
             catch (Exception ex)
@@ -172,9 +193,9 @@ namespace TourishApi.Service.InheritanceService
                         // _notificationService.CreateNew(notification);
 
                         await _notificationService.CreateNewAsync(interest.UserId, notification);
-                    };
+                    }
+                    ;
                 }
-
 
                 return response;
             }
@@ -199,7 +220,6 @@ namespace TourishApi.Service.InheritanceService
                 Data = await _entityRepository.getDescription(containerName, blobName)
             };
             return response;
-
         }
 
         public Response getTourInterest(Guid tourId, Guid userId)
@@ -207,7 +227,11 @@ namespace TourishApi.Service.InheritanceService
             return _entityRepository.getTourInterest(tourId, userId);
         }
 
-        public Task<Response> setTourInterest(Guid tourId, Guid userId, InterestStatus interestStatus)
+        public Task<Response> setTourInterest(
+            Guid tourId,
+            Guid userId,
+            InterestStatus interestStatus
+        )
         {
             return _entityRepository.setTourInterest(tourId, userId, interestStatus);
         }

@@ -13,6 +13,7 @@ namespace TourishApi.Service.Interface
             double? priceFrom, double? priceTo,
             string? sortBy,
             string? sortDirection,
+            string? userId,
             int page,
             int pageSize
         );

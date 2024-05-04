@@ -38,6 +38,7 @@ namespace WebApplication1.Model
         public DateTime EndDate { get; set; }
 
         public List<TourishCategoryRelation>? TourishCategoryRelations { get; set; }
+        public List<InstructionModel>? InstructionList { get; set; }
 
         public string EatingScheduleString { get; set; }
         public string MovingScheduleString { get; set; }
@@ -58,7 +59,7 @@ namespace WebApplication1.Model
 
         public List<TourishCategoryRelation>? TourishCategoryRelations { get; set; }
         public List<TourishScheduleModel>? TourishScheduleList { get; set; }
-
+        public List<InstructionModel>? InstructionList { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 

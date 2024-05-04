@@ -28,15 +28,5 @@ namespace WebApplication1.Controllers.TourishPlan
             var response = await _entityService.CreateNew(userId, entityModel);
             return Ok(response);
         }
-
-        [HttpPost("interest")]
-        [Authorize]
-        public async Task<IActionResult> SetInterest(TourishInterestModel tourishInterestModel)
-        {
-            string userId = User.FindFirstValue("Id");
-            var response = await _entityService.setTourInterest(tourishInterestModel.TourishPlanId,
-                new Guid(userId), tourishInterestModel.InterestStatus);
-            return Ok(response);
-        }
     }
 }

@@ -26,5 +26,7 @@ namespace WebApplication1.Model.Schedule
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
 
+        public List<InstructionModel>? InstructionList { get; set; }
+
     }
 }

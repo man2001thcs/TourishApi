@@ -184,6 +184,13 @@ namespace TourishApi.Service.InheritanceService.Schedule
         {
             return _entityRepository.setScheduleInterest(scheduleId, ScheduleType.MovingSchedule, userId, interestStatus);
         }
+
+        public async Task<Response> UpdateInstructionList(
+            ScheduleInstructionModel scheduleInstructionModel
+        )
+        {
+            return await _entityRepository.UpdateInstructionList(scheduleInstructionModel);
+        }
     }
 }
 

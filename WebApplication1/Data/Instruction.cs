@@ -5,7 +5,7 @@ namespace WebApplication1.Data
 {
     public enum InstructionType
     {
-        NotIncludePrice = 0, ExceptService = 1
+        Price = 0, Caution = 1
     }
 
     [Table("Instruction")]
@@ -21,5 +21,7 @@ namespace WebApplication1.Data
         public TourishPlan? TourishPlan { get; set; }
         public MovingSchedule? MovingSchedule { get; set; }
         public StayingSchedule? StayingSchedule { get; set; }
+        public DateTime CreateDate { get; set; }
+        public DateTime UpdateDate { get; set; }
     }
 }
