@@ -339,6 +339,66 @@ namespace WebApplication1.Repository.InheritanceRepo
             return entityVM;
         }
 
+        public Response GetAllMovingScheduleWithAuthority(
+            string? search,
+            int? type,
+            string? sortBy,
+            string? sortDirection,
+            string? userId,
+            int page = 1,
+            int pageSize = 5
+        )
+        {
+            var entityQuery = _context
+                .MovingSchedules.Include(entity => entity.ScheduleInterestList)
+                .Include(entity => entity.InstructionList)
+                .AsQueryable();
+
+            #region Filtering
+            entityQuery = entityQuery.Where(entity => entity.TourishPlan == null);
+            if (!string.IsNullOrEmpty(search))
+            {
+                entityQuery = entityQuery.Where(entity => entity.BranchName.Contains(search));
+            }
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                // Lọc trên danh sách TourishInterestList của từng đối tượng TourishPlan
+                foreach (var schedule in entityQuery)
+                {
+                    schedule.ScheduleInterestList = schedule
+                        .ScheduleInterestList.Where(interest =>
+                            interest.UserId.ToString() == userId
+                        )
+                        .ToList();
+                }
+            }
+            #endregion
+
+            #region Sorting
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
+                {
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
+                }
+            }
+            #endregion
+
+            #region Paging
+            var result = PaginatorModel<MovingSchedule>.Create(entityQuery, page, pageSize);
+            #endregion
+
+            var entityVM = new Response
+            {
+                resultCd = 0,
+                Data = result.ToList(),
+                count = result.TotalCount,
+            };
+            return entityVM;
+        }      
+
         public Response GetAllMovingSchedule(
             string? search,
             int? type,
@@ -348,7 +408,10 @@ namespace WebApplication1.Repository.InheritanceRepo
             int pageSize = 5
         )
         {
-            var entityQuery = _context.MovingSchedules.AsQueryable();
+            var entityQuery = _context
+                .MovingSchedules.Include(entity => entity.ScheduleInterestList)
+                .Include(entity => entity.InstructionList)
+                .AsQueryable();
 
             #region Filtering
             entityQuery = entityQuery.Where(entity => entity.TourishPlan == null);
@@ -397,6 +460,61 @@ namespace WebApplication1.Repository.InheritanceRepo
             if (!string.IsNullOrEmpty(search))
             {
                 entityQuery = entityQuery.Where(entity => entity.PlaceName.Contains(search));
+            }
+            #endregion
+
+            #region Sorting
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
+                {
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
+                }
+            }
+            #endregion
+
+            #region Paging
+            var result = PaginatorModel<StayingSchedule>.Create(entityQuery, page, pageSize);
+            #endregion
+
+            var entityVM = new Response
+            {
+                resultCd = 0,
+                Data = result.ToList(),
+                count = result.TotalCount,
+            };
+            return entityVM;
+        }
+
+        public Response GetAllStayingScheduleWithAuthority(
+            string? search,
+            int? type,
+            string? sortBy,
+            string? sortDirection,
+            string? userId,
+            int page = 1,
+            int pageSize = 5
+        )
+        {
+            var entityQuery = _context.StayingSchedules.AsQueryable();
+
+            #region Filtering
+            if (!string.IsNullOrEmpty(search))
+            {
+                entityQuery = entityQuery.Where(entity => entity.PlaceName.Contains(search));
+            }
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                foreach (var schedule in entityQuery)
+                {
+                    schedule.ScheduleInterestList = schedule
+                        .ScheduleInterestList.Where(interest =>
+                            interest.UserId.ToString() == userId
+                        )
+                        .ToList();
+                }
             }
             #endregion
 
@@ -494,9 +612,9 @@ namespace WebApplication1.Repository.InheritanceRepo
             StayingScheduleModel entityModel
         )
         {
-            var entity = _context.StayingSchedules.FirstOrDefault(
-                (entity => entity.Id == entityModel.Id)
-            );
+            var entity = _context
+                .StayingSchedules.Include(entity => entity.ScheduleInterestList)
+                .FirstOrDefault((entity => entity.Id == entityModel.Id));
             if (entity != null)
             {
                 entity.Name = entityModel.Name;
@@ -523,6 +641,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                             InterestStatus = InterestStatus.Modifier,
                             User = user,
                             StayingSchedule = entity,
+                            CreateDate = DateTime.UtcNow,
                             UpdateDate = DateTime.UtcNow
                         };
 
@@ -533,7 +652,8 @@ namespace WebApplication1.Repository.InheritanceRepo
 
                         if (
                             entity.ScheduleInterestList.Count(interest =>
-                                interest.UserId.ToString() == userId
+                                interest.UserId == user.Id
+                                && interest.StayingScheduleId == entity.Id
                             ) <= 0
                         )
                         {
@@ -562,7 +682,9 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response getByMovingScheduleId(Guid id)
         {
-            var entity = _context.MovingSchedules.FirstOrDefault((entity => entity.Id == id));
+            var entity = _context
+                .MovingSchedules.Include(entity => entity.ScheduleInterestList)
+                .FirstOrDefault((entity => entity.Id == id));
 
             return new Response { resultCd = 0, Data = entity };
         }
@@ -622,7 +744,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
                         if (
                             entity.ScheduleInterestList.Count(interest =>
-                                interest.UserId.ToString() == userId
+                                interest.UserId == user.Id && interest.MovingScheduleId == entity.Id
                             ) <= 0
                         )
                         {
@@ -831,11 +953,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 );
 
                 if (existSchedule == null)
-                    return new Response
-                    {
-                        resultCd = 1,
-                        MessageCode = "C430",
-                    };
+                    return new Response { resultCd = 1, MessageCode = "C430", };
 
                 if (scheduleInstructionModel.InstructionList != null)
                 {
@@ -900,11 +1018,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 }
             }
 
-            return new Response
-            {
-                resultCd = 1,
-                MessageCode = "C430",
-            };
+            return new Response { resultCd = 1, MessageCode = "C430", };
         }
     }
 }

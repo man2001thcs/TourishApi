@@ -145,6 +145,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             #endregion
 
             #region Sorting
+            entityQuery = entityQuery.OrderByDescending(entity => entity.CreateDate);
             if (!string.IsNullOrEmpty(sortBy))
             {
                 entityQuery = entityQuery.OrderByColumn(sortBy);
@@ -247,7 +248,7 @@ namespace WebApplication1.Repository.InheritanceRepo
         private string convertNotifyObjectName(Notification notification)
         {
             var objectName = "";
-            if (notification.TourishPlan != null)
+            if (notification.TourishPlanId != null)
             {
                 objectName = notification.TourishPlan.TourName;
             }

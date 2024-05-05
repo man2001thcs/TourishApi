@@ -107,22 +107,43 @@ namespace TourishApi.Service.InheritanceService
         {
             try
             {
-                var entityList = _entityRepository.GetAll(
-                    search,
-                    category,
-                    categoryString,
-                    startingPoint,
-                    endPoint,
-                    startingDate,
-                    priceFrom,
-                    priceTo,
-                    sortBy,
-                    sortDirection,
-                    userId,
-                    page,
-                    pageSize
-                );
-                return entityList;
+                if (String.IsNullOrEmpty(userId))
+                {
+                    var entityList = _entityRepository.GetAll(
+                        search,
+                        category,
+                        categoryString,
+                        startingPoint,
+                        endPoint,
+                        startingDate,
+                        priceFrom,
+                        priceTo,
+                        sortBy,
+                        sortDirection,
+                        page,
+                        pageSize
+                    );
+                    return entityList;
+                }
+                else
+                {
+                    var entityList = _entityRepository.GetAllWithAuthority(
+                        search,
+                        category,
+                        categoryString,
+                        startingPoint,
+                        endPoint,
+                        startingDate,
+                        priceFrom,
+                        priceTo,
+                        sortBy,
+                        sortDirection,
+                        userId,
+                        page,
+                        pageSize
+                    );
+                    return entityList;
+                }
             }
             catch (Exception ex)
             {

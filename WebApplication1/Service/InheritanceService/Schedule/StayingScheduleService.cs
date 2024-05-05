@@ -81,12 +81,20 @@ namespace TourishApi.Service.InheritanceService.Schedule
             }
         }
 
-        public Response GetAll(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
+        public Response GetAll(string? search, int? type, string? sortBy, string? sortDirection, string? userId, int page = 1, int pageSize = 5)
         {
             try
             {
-                var entityList = _entityRepository.GetAllStayingSchedule(search, type, sortBy, sortDirection, page, pageSize);
-                return entityList;
+                if (String.IsNullOrEmpty(userId))
+                {
+                    var entityList = _entityRepository.GetAllStayingSchedule(search, type, sortBy, sortDirection, page, pageSize);
+                    return entityList;
+                }
+                else
+                {
+                    var entityList = _entityRepository.GetAllStayingScheduleWithAuthority(search, type, sortBy, sortDirection, userId, page, pageSize);
+                    return entityList;
+                }
             }
             catch (Exception ex)
             {
@@ -139,7 +147,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
 
                 if (response.MessageCode == "I432")
                 {
-                    var interestList = await _entityRepository.getScheduleInterest(entityModel.Id, ScheduleType.MovingSchedule);
+                    var interestList = await _entityRepository.getScheduleInterest(entityModel.Id, ScheduleType.StayingSchedule);
 
                     foreach (var interest in interestList)
                     {
@@ -156,8 +164,6 @@ namespace TourishApi.Service.InheritanceService.Schedule
                             UpdateDate = DateTime.UtcNow
                         };
 
-                        // _notificationService.CreateNew(notification);
-
                         await _notificationService.CreateNewAsync(interest.UserId, notification);
                     };
                 }
@@ -170,7 +176,8 @@ namespace TourishApi.Service.InheritanceService.Schedule
                 {
                     resultCd = 1,
                     MessageCode = "C434",
-                    Error = ex.Message
+                    Error = ex.Message,
+                    Data = ex
                 };
                 return response;
             }

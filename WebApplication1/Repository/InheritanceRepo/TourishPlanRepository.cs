@@ -249,10 +249,156 @@ public class TourishPlanRepository : ITourishPlanRepository
         double? priceTo,
         string? sortBy,
         string? sortDirection,
-        string? userId,
         int page = 1,
         int pageSize = 5
     )
+    {
+        var entityQuery = _context
+            .TourishPlan.Include(entity => entity.MovingSchedules)
+            .Include(entity => entity.EatSchedules)
+            .Include(entity => entity.StayingSchedules)
+            .Include(entity => entity.InstructionList)
+            .Include(entity => entity.TourishScheduleList)
+            .Include(entity => entity.TourishInterestList)
+            .Include(entity => entity.TourishCategoryRelations)
+            .ThenInclude(entity => entity.TourishCategory)
+            .Include(entity => entity.TotalReceipt)
+            .ThenInclude(entity => entity.FullReceiptList)
+            .AsQueryable();
+
+        #region Filtering
+        if (!string.IsNullOrEmpty(search))
+        {
+            entityQuery = entityQuery.Where(entity => entity.TourName.Contains(search));
+        }
+
+        if (!string.IsNullOrEmpty(category))
+        {
+            entityQuery = entityQuery.Where(entity =>
+                entity.TourishCategoryRelations.Count(categoryRelation =>
+                    (categoryRelation.TourishCategory != null)
+                        ? categoryRelation.TourishCategory.Name.Contains(category)
+                        : false
+                ) >= 1
+            );
+        }
+
+        if (!string.IsNullOrEmpty(categoryString))
+        {
+            string[] categoryArray = Newtonsoft.Json.JsonConvert.DeserializeObject<string[]>(
+                categoryString
+            );
+
+            if (categoryArray != null)
+            {
+                entityQuery = entityQuery.Where(entity =>
+                    entity.TourishCategoryRelations.Count(categoryRelation =>
+                        (categoryRelation.TourishCategory != null)
+                            ? categoryArray.Contains(categoryRelation.TourishCategory.Name)
+                            : false
+                    ) >= 1
+                );
+            }
+        }
+
+        if (!string.IsNullOrEmpty(startingPoint))
+        {
+            entityQuery = entityQuery.Where(entity => entity.StartingPoint.Contains(startingPoint));
+        }
+
+        if (!string.IsNullOrEmpty(endPoint))
+        {
+            entityQuery = entityQuery.Where(entity => entity.EndPoint.Contains(endPoint));
+        }
+
+        if (priceFrom != null)
+        {
+            entityQuery = entityQuery.Where(entity =>
+                (
+                    entity.StayingSchedules.Sum(schedule => schedule.SinglePrice)
+                    + entity.EatSchedules.Sum(schedule => schedule.SinglePrice)
+                    + entity.MovingSchedules.Sum(schedule => schedule.SinglePrice)
+                ) >= priceFrom
+            );
+
+            if (priceTo != null)
+            {
+                entityQuery = entityQuery.Where(entity =>
+                    (
+                        entity.StayingSchedules.Sum(schedule => schedule.SinglePrice)
+                        + entity.EatSchedules.Sum(schedule => schedule.SinglePrice)
+                        + entity.MovingSchedules.Sum(schedule => schedule.SinglePrice)
+                    ) <= priceTo
+                );
+            }
+        }
+
+        if (!string.IsNullOrEmpty(startingDate))
+        {
+            // Mảng chứa các mẫu định dạng mà bạn cho phép
+            string[] formats = { "ddd MMM dd yyyy HH:mm:ss 'GMT'zzz", "yyyy-MM-ddTHH:mm:sszzz" }; // Thêm các định dạng khác nếu cần
+            DateTime dateTime;
+            if (
+                DateTime.TryParseExact(
+                    startingDate,
+                    formats,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out dateTime
+                )
+            )
+            {
+                logger.LogInformation(dateTime.ToString());
+                entityQuery = entityQuery.Where(entity =>
+                    entity.StartDate.Day == dateTime.Day
+                    && entity.StartDate.Month == dateTime.Month
+                    && entity.StartDate.Year == dateTime.Year
+                );
+            }
+        }
+
+        #endregion
+
+        #region Sorting
+        if (!string.IsNullOrEmpty(sortBy))
+        {
+            entityQuery = entityQuery.OrderByColumn(sortBy);
+            if (sortDirection == "desc")
+            {
+                entityQuery = entityQuery.OrderByColumnDescending(sortBy);
+            }
+        }
+        #endregion
+
+        #region Paging
+        var result = PaginatorModel<TourishPlan>.Create(entityQuery, page, pageSize);
+        #endregion
+
+        var entityVM = new Response
+        {
+            resultCd = 0,
+            Data = result.ToList(),
+            count = result.TotalCount,
+        };
+
+        return entityVM;
+    }
+
+    public Response GetAllWithAuthority(
+    string? search,
+    string? category,
+    string? categoryString,
+    string? startingPoint,
+    string? endPoint,
+    string? startingDate,
+    double? priceFrom,
+    double? priceTo,
+    string? sortBy,
+    string? sortDirection,
+    string? userId,
+    int page = 1,
+    int pageSize = 5
+)
     {
         var entityQuery = _context
             .TourishPlan.Include(entity => entity.MovingSchedules)

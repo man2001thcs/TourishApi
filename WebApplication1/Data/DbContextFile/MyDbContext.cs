@@ -394,7 +394,7 @@ namespace WebApplication1.Data.DbContextFile
 
                 entity.HasOne(e => e.StayingSchedule)
               .WithMany(e => e.NotificationList)
-              .HasForeignKey(e => e.MovingScheduleId).IsRequired(false)
+              .HasForeignKey(e => e.StayingScheduleId).IsRequired(false)
               .HasConstraintName("FK_StayingSchedule_Notification");
             });
 

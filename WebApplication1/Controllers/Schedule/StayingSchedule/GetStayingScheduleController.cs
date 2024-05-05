@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TourishApi.Service.InheritanceService.Schedule;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -18,10 +20,35 @@ namespace WebApplication1.Controllers.Schedule
 
         // GET: api/<ValuesController>
         [HttpGet]
-        public IActionResult GetAll(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
+        public IActionResult GetAll(
+            string? search,
+            int? type,
+            string? sortBy,
+            string? sortDirection,
+            int page = 1,
+            int pageSize = 5
+        )
         {
-            return Ok(_entityService.GetAll(search, type, sortBy, sortDirection, page, pageSize));
+            return Ok(
+                _entityService.GetAll(search, type, sortBy, sortDirection, "", page, pageSize)
+            );
+        }
 
+        [HttpGet("with-authority")]
+        [Authorize]
+        public IActionResult GetAllWithAuthority(
+            string? search,
+            int? type,
+            string? sortBy,
+            string? sortDirection,
+            int page = 1,
+            int pageSize = 5
+        )
+        {
+            string userId = User.FindFirstValue("Id");
+            return Ok(
+                _entityService.GetAll(search, type, sortBy, sortDirection, userId, page, pageSize)
+            );
         }
 
         [HttpGet("{id}")]
@@ -33,9 +60,7 @@ namespace WebApplication1.Controllers.Schedule
         [HttpGet("interest")]
         public IActionResult GetById(Guid scheduleId, Guid userId)
         {
-            return Ok(_entityService.getScheduleInterest(scheduleId,
-                userId));
+            return Ok(_entityService.getScheduleInterest(scheduleId, userId));
         }
     }
 }
-

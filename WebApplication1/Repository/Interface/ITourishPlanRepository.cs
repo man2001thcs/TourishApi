@@ -6,8 +6,35 @@ namespace WebApplication1.Repository.Interface
 {
     public interface ITourishPlanRepository
     {
-        Response GetAll(string? search, string? category, string? categoryString, string? startingPoint, string? endPoint, string? startingDate, double? priceFrom, 
-            double? priceTo, string? sortBy, string? sortDirection, string? userId, int page = 1, int pageSize = 5);
+        Response GetAll(
+            string? search,
+            string? category,
+            string? categoryString,
+            string? startingPoint,
+            string? endPoint,
+            string? startingDate,
+            double? priceFrom,
+            double? priceTo,
+            string? sortBy,
+            string? sortDirection,
+            int page = 1,
+            int pageSize = 5
+        );
+        Response GetAllWithAuthority(
+            string? search,
+            string? category,
+            string? categoryString,
+            string? startingPoint,
+            string? endPoint,
+            string? startingDate,
+            double? priceFrom,
+            double? priceTo,
+            string? sortBy,
+            string? sortDirection,
+            string? userId,
+            int page = 1,
+            int pageSize = 5
+        );
         Response getById(Guid id);
         Response getByName(String TourName);
         Task<List<TourishInterest>> getTourInterest(Guid id);
