@@ -403,6 +403,7 @@ public class TourishPlanRepository : ITourishPlanRepository
             .Include(entity => entity.EatSchedules)
             .Include(entity => entity.StayingSchedules)
             .Include(entity => entity.MovingSchedules)
+            .Include(entity => entity.InstructionList)
             .Include(entity => entity.TourishScheduleList)
             .Include(entity => entity.TourishCategoryRelations)
             .ThenInclude(entity => entity.TourishCategory)
@@ -546,7 +547,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                             Id = item.Id.Value,
                             TourishPlanId = item.TourishPlanId,
                             Description = item.Description,
-                            InstructionType = item.InstructionType,
+                            InstructionType = item.InstructionType, 
                             CreateDate = item.CreateDate,
                             UpdateDate = DateTime.UtcNow,
                         }

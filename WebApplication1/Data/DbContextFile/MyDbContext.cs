@@ -217,7 +217,7 @@ namespace WebApplication1.Data.DbContextFile
                 entity.HasOne(e => e.TourishPlan)
                 .WithMany(e => e.InstructionList)
                 .IsRequired(false)
-                .HasForeignKey(e => e.StayingScheduleId)
+                .HasForeignKey(e => e.TourishPlanId)
                 .HasConstraintName("FK_TourishPlan_Instruction");
             });
 
