@@ -29,7 +29,6 @@ namespace WebApplication1.Data.Receipt
         public DateTime? CompleteDate { get; set; }
         public float DiscountFloat { get; set; }
         public double DiscountAmount { get; set; }
-
         // Relationship
         public TotalReceipt TotalReceipt { get; set; }
         public TourishSchedule TourishSchedule { get; set; }
