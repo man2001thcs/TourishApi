@@ -8,6 +8,8 @@ namespace WebApplication1.Repository.Interface
     {
         Response GetAll(string? search, string? category, string? categoryString, string? startingPoint, string? endPoint, string? startingDate, double? priceFrom,
             double? priceTo, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5);
+        Response GetAllWithAuthority(string? search, string? category, string? categoryString, string? startingPoint, string? endPoint, string? startingDate, double? priceFrom,
+           double? priceTo, string? sortBy, string? sortDirection, string? userId, int page = 1, int pageSize = 5);
         Response getById(Guid id);
         Response getByName(String TourName);
         Task<List<TourishInterest>> getTourInterest(Guid id);
@@ -17,5 +19,6 @@ namespace WebApplication1.Repository.Interface
         Response Delete(Guid id);
         Response getTourInterest(Guid tourId, Guid userId);
         Task<Response> setTourInterest(Guid tourId, Guid userId, InterestStatus interestStatus);
+        Response getTopTourRating();
     }
 }

@@ -260,5 +260,131 @@ namespace TourishApi.Service.InheritanceService
             }
 
         }
+
+        public Response getUnpaidClient()
+        {
+            try
+            {
+                return _receiptRepository.getUnpaidClient();
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public Response getTopGrossTourInMonth()
+        {
+            try
+            {
+                return _receiptRepository.getTopGrossTourInMonth();
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public Response getTopTicketTourInMonth()
+        {
+            try
+            {
+                return _receiptRepository.getTopTicketTourInMonth();
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public Response getTopGrossMovingScheduleInMonth()
+        {
+            try
+            {
+                return _receiptRepository.getTopGrossMovingScheduleInMonth();
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public Response getTopGrossStayingScheduleInMonth()
+        {
+            try
+            {
+                return _receiptRepository.getTopGrossStayingScheduleInMonth();
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public Response getTopTicketMovingScheduleInMonth()
+        {
+            try
+            {
+                return _receiptRepository.getTopTicketMovingScheduleInMonth();
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public Response getTopTicketStayingScheduleInMonth()
+        {
+            try
+            {
+                return _receiptRepository.getTopTicketStayingScheduleInMonth();
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
     }
 }

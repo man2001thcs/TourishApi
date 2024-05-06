@@ -1091,7 +1091,7 @@ public class TourishPlanRepository : ITourishPlanRepository
             .TourishPlan
             .Include(tour => tour.TourishRatingList)
             .Where(e => e.TourishRatingList.Count() > 10)
-            .OrderByDescending(entity => entity.TourishRatingList.Sum(e => e.Rating)/entity.TourishRatingList.Count())
+            .OrderByDescending(entity => entity.TourishRatingList.Sum(e => e.Rating) / entity.TourishRatingList.Count())
             .ThenByDescending(entity => entity.TourishRatingList.Count())
             .ToList();
 

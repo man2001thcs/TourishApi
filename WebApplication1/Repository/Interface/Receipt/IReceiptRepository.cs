@@ -29,5 +29,19 @@ namespace WebApplication1.Repository.Interface.Receipt
         Task<Response> Update(FullReceiptUpdateModel receiptModel);
         Task<Response> UpdateForUser(FullReceiptUpdateModel receiptModel);
         Response Delete(Guid id);
+
+        Response getUnpaidClient();
+
+        Response getTopGrossTourInMonth();
+
+        Response getTopTicketTourInMonth();
+
+        Response getTopGrossMovingScheduleInMonth();
+
+        Response getTopGrossStayingScheduleInMonth();
+
+        Response getTopTicketMovingScheduleInMonth();
+
+        Response getTopTicketStayingScheduleInMonth();
     }
 }

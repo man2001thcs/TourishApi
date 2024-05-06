@@ -256,5 +256,24 @@ namespace TourishApi.Service.InheritanceService
         {
             return _entityRepository.setTourInterest(tourId, userId, interestStatus);
         }
+
+        public Response getTopTourRating()
+        {
+            try
+            {
+                return _entityRepository.getTopTourRating();
+            }          
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C414",
+                    Error = ex.Message,
+                    Data = ex
+                };
+                return response;
+            }
+        }
     }
 }

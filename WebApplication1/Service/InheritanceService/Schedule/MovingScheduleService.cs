@@ -89,12 +89,13 @@ namespace TourishApi.Service.InheritanceService.Schedule
                 {
                     var entityList = _entityRepository.GetAllMovingSchedule(search, type, sortBy, sortDirection, page, pageSize);
                     return entityList;
-                } else
+                }
+                else
                 {
                     var entityList = _entityRepository.GetAllMovingScheduleWithAuthority(search, type, sortBy, sortDirection, userId, page, pageSize);
                     return entityList;
                 }
-                
+
             }
             catch (Exception ex)
             {

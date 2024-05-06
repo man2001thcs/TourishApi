@@ -335,6 +335,102 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         }
 
+        public Response GetAllMovingScheduleWithAuthority(string? search, int? type, string? sortBy, string? sortDirection, string? userId, int page = 1, int pageSize = 5)
+        {
+            var entityQuery = _context.MovingSchedules.AsQueryable();
+
+            #region Filtering
+            entityQuery = entityQuery.Where(entity => entity.TourishPlan
+                == null);
+            if (!string.IsNullOrEmpty(search))
+            {
+                entityQuery = entityQuery.Where(entity => entity.BranchName
+                .Contains(search));
+            }
+            if (!string.IsNullOrEmpty(userId))
+            {
+                // Lọc trên danh sách TourishInterestList của từng đối tượng TourishPlan
+                foreach (var schedule in entityQuery)
+                {
+                    schedule.ScheduleInterestList = schedule
+                        .ScheduleInterestList.Where(interest => interest.UserId.ToString() == userId)
+                        .ToList();
+                }
+            }
+            #endregion
+
+            #region Sorting
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
+                {
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
+                }
+            }
+            #endregion
+
+            #region Paging
+            var result = PaginatorModel<MovingSchedule>.Create(entityQuery, page, pageSize);
+            #endregion
+
+            var entityVM = new Response
+            {
+                resultCd = 0,
+                Data = result.ToList(),
+                count = result.TotalCount,
+            };
+            return entityVM;
+
+        }
+
+        public Response GetAllStayingScheduleWithAuthority(string? search, int? type, string? sortBy, string? sortDirection, string? userId, int page = 1, int pageSize = 5)
+        {
+            var entityQuery = _context.StayingSchedules.AsQueryable();
+
+            #region Filtering
+            if (!string.IsNullOrEmpty(search))
+            {
+                entityQuery = entityQuery.Where(entity => entity.PlaceName
+                .Contains(search));
+            }
+            if (!string.IsNullOrEmpty(userId))
+            {
+                // Lọc trên danh sách TourishInterestList của từng đối tượng TourishPlan
+                foreach (var schedule in entityQuery)
+                {
+                    schedule.ScheduleInterestList = schedule
+                        .ScheduleInterestList.Where(interest => interest.UserId.ToString() == userId)
+                        .ToList();
+                }
+            }
+            #endregion
+
+            #region Sorting
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
+                {
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
+                }
+            }
+            #endregion
+
+            #region Paging
+            var result = PaginatorModel<StayingSchedule>.Create(entityQuery, page, pageSize);
+            #endregion
+
+            var entityVM = new Response
+            {
+                resultCd = 0,
+                Data = result.ToList(),
+                count = result.TotalCount,
+            };
+            return entityVM;
+
+        }
+
         public Response getByEatScheduleId(Guid id)
         {
             var entity = _context.EatSchedules.FirstOrDefault((entity
@@ -713,6 +809,100 @@ namespace WebApplication1.Repository.InheritanceRepo
                         // Update type success
                     };
                 }
+            }
+
+            return new Response
+            {
+                resultCd = 1,
+                MessageCode = "C434",
+                // Update type success
+            };
+
+        }
+
+        public async Task<Response> UpdateInstructionList(ScheduleInstructionModel scheduleInstructionModel)
+        {
+            if (scheduleInstructionModel.ScheduleType == ScheduleType.MovingSchedule)
+            {
+                var existSchedule = _context.MovingSchedules.FirstOrDefault(entity => entity.Id == scheduleInstructionModel.ScheduleId);
+                if (existSchedule != null)
+                {
+                    if (scheduleInstructionModel.InstructionList != null)
+                    {
+                        var instructionList = new List<Instruction>();
+                        foreach (var item in scheduleInstructionModel.InstructionList)
+                        {
+                            instructionList.Add(
+                                new Instruction
+                                {
+                                    Id = item.Id.Value,
+                                    TourishPlanId = item.TourishPlanId,
+                                    Description = item.Description,
+                                    InstructionType = item.InstructionType,
+                                    CreateDate = item.CreateDate,
+                                    UpdateDate = DateTime.UtcNow,
+                                }
+                            );
+                        }
+                        existSchedule.InstructionList = instructionList;
+
+                        await _context.SaveChangesAsync();
+
+                        return new Response
+                        {
+                            resultCd = 1,
+                            MessageCode = "C432",
+                            // Update type success
+                        };
+                    }
+                } else return new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C430",
+                    // Update type success
+                };
+
+            } else if (scheduleInstructionModel.ScheduleType == ScheduleType.StayingSchedule)
+            {
+                var existSchedule = _context.StayingSchedules.FirstOrDefault(entity => entity.Id == scheduleInstructionModel.ScheduleId);
+                if (existSchedule != null)
+                {
+                    if (scheduleInstructionModel.InstructionList != null)
+                    {
+                        var instructionList = new List<Instruction>();
+                        foreach (var item in scheduleInstructionModel.InstructionList)
+                        {
+                            instructionList.Add(
+                                new Instruction
+                                {
+                                    Id = item.Id.Value,
+                                    TourishPlanId = item.TourishPlanId,
+                                    Description = item.Description,
+                                    InstructionType = item.InstructionType,
+                                    CreateDate = item.CreateDate,
+                                    UpdateDate = DateTime.UtcNow,
+                                }
+                            );
+                        }
+                        existSchedule.InstructionList = instructionList;
+
+                        await _context.SaveChangesAsync();
+
+                        return new Response
+                        {
+                            resultCd = 1,
+                            MessageCode = "C432",
+                            // Update type success
+                        };
+                    }
+                }
+                else return new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C430",
+                    // Update type success
+                };
+
             }
 
             return new Response

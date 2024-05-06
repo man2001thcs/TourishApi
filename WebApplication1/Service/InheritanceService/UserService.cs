@@ -677,6 +677,7 @@ namespace WebApplication1.Service.InheritanceService
                     new Claim("Purpose", "reClaim"),
                     //roles
                     new Claim("Role", user.Role.ToString()),
+                    new Claim(ClaimTypes.Role, user.Role.ToString()),
 
                 }),
                 Issuer = _appSettings.Issuer,

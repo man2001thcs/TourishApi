@@ -969,12 +969,13 @@ public class ReceiptRepository : IReceiptRepository
             .Include(entity => entity.TourishSchedule)
             .ThenInclude(entity => entity.TourishPlan)
             .Where(entity => (int)entity.Status < 2)
-            .Select(entity =>  new {
+            .Select(entity => new
+            {
                 GuestName = entity.GuestName,
                 OriginalPrice = entity.OriginalPrice,
                 TotalTicket = entity.TotalTicket,
                 TotalChildTicket = entity.TotalChildTicket,
-                TourishPlanId =  entity.TotalReceipt.TourishPlanId,
+                TourishPlanId = entity.TotalReceipt.TourishPlanId,
                 ScheduleId = entity.TotalReceipt.ScheduleId,
                 ScheduleType = entity.TotalReceipt.ScheduleType
             }).ToList();
@@ -998,12 +999,13 @@ public class ReceiptRepository : IReceiptRepository
             .ThenInclude(entity => entity.TourishPlan)
             .Where(entity => entity.TotalReceipt.TourishPlanId.HasValue)
             .Where(entity => (int)entity.Status < 3)
-            .Where(entity => (entity.CreatedDate.Month == DateTime.UtcNow.Month && entity.CreatedDate.Year == DateTime.UtcNow.Year) 
+            .Where(entity => (entity.CreatedDate.Month == DateTime.UtcNow.Month && entity.CreatedDate.Year == DateTime.UtcNow.Year)
             || (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year))
-            .OrderByDescending(entity => (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount)*(1 - entity.DiscountFloat))
-            .Select(entity => new {
+            .OrderByDescending(entity => (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount) * (1 - entity.DiscountFloat))
+            .Select(entity => new
+            {
                 GuestName = entity.GuestName,
-                TotalPrice = (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount)*(1 - entity.DiscountFloat),
+                TotalPrice = (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount) * (1 - entity.DiscountFloat),
                 OriginalPrice = entity.OriginalPrice,
                 TotalTicket = entity.TotalTicket,
                 TotalChildTicket = entity.TotalChildTicket,
@@ -1034,7 +1036,8 @@ public class ReceiptRepository : IReceiptRepository
             .Where(entity => (entity.CreatedDate.Month == DateTime.UtcNow.Month && entity.CreatedDate.Year == DateTime.UtcNow.Year)
             || (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year))
             .OrderByDescending(entity => entity.TotalTicket + entity.TotalChildTicket)
-            .Select(entity => new {
+            .Select(entity => new
+            {
                 GuestName = entity.GuestName,
                 TotalPrice = (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount) * (1 - entity.DiscountFloat),
                 OriginalPrice = entity.OriginalPrice,
@@ -1066,7 +1069,8 @@ public class ReceiptRepository : IReceiptRepository
             .Where(entity => (entity.CreatedDate.Month == DateTime.UtcNow.Month && entity.CreatedDate.Year == DateTime.UtcNow.Year)
             || (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year))
             .OrderByDescending(entity => (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount) * (1 - entity.DiscountFloat))
-            .Select(entity => new {
+            .Select(entity => new
+            {
                 GuestName = entity.GuestName,
                 TotalPrice = (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount) * (1 - entity.DiscountFloat),
                 OriginalPrice = entity.OriginalPrice,
@@ -1098,7 +1102,8 @@ public class ReceiptRepository : IReceiptRepository
             .Where(entity => (entity.CreatedDate.Month == DateTime.UtcNow.Month && entity.CreatedDate.Year == DateTime.UtcNow.Year)
             || (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year))
             .OrderByDescending(entity => (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount) * (1 - entity.DiscountFloat))
-            .Select(entity => new {
+            .Select(entity => new
+            {
                 GuestName = entity.GuestName,
                 TotalPrice = (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount) * (1 - entity.DiscountFloat),
                 OriginalPrice = entity.OriginalPrice,
@@ -1130,7 +1135,8 @@ public class ReceiptRepository : IReceiptRepository
             .Where(entity => (entity.CreatedDate.Month == DateTime.UtcNow.Month && entity.CreatedDate.Year == DateTime.UtcNow.Year)
             || (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year))
             .OrderByDescending(entity => entity.TotalTicket + entity.TotalChildTicket)
-            .Select(entity => new {
+            .Select(entity => new
+            {
                 GuestName = entity.GuestName,
                 TotalPrice = (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount) * (1 - entity.DiscountFloat),
                 OriginalPrice = entity.OriginalPrice,
@@ -1162,7 +1168,8 @@ public class ReceiptRepository : IReceiptRepository
             .Where(entity => (entity.CreatedDate.Month == DateTime.UtcNow.Month && entity.CreatedDate.Year == DateTime.UtcNow.Year)
             || (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year))
             .OrderByDescending(entity => entity.TotalTicket + entity.TotalChildTicket)
-            .Select(entity => new {
+            .Select(entity => new
+            {
                 GuestName = entity.GuestName,
                 TotalPrice = (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount) * (1 - entity.DiscountFloat),
                 OriginalPrice = entity.OriginalPrice,
