@@ -86,7 +86,7 @@ namespace SignalR.Hub
             }
         }
 
-        public async Task ChangeNotifyToRead(Guid notificationId)
+        public async Task ChangeNotifyToRead(Guid notificationId, Boolean isRead)
         {
             try
             {
