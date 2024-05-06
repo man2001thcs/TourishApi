@@ -8,6 +8,7 @@ namespace WebApplication1.Model
         public Guid TourishPlanId { get; set; }
         public PlanStatus PlanStatus { get; set; }
         public DateTime StartDate { get; set; }
+
         public DateTime EndDate { get; set; }
         public DateTime? CreateDate { get; set; }
         public DateTime? UpdateDate { get; set; }
