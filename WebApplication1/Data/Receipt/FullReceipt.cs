@@ -26,6 +26,7 @@ namespace WebApplication1.Data.Receipt
         public string? Description { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime UpdateDate { get; set; }
+
         public DateTime? CompleteDate { get; set; }
         public float DiscountFloat { get; set; }
         public double DiscountAmount { get; set; }
