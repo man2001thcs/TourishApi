@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Mvc;
 using TourishApi.Service.InheritanceService;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -23,17 +21,7 @@ namespace WebApplication1.Controllers.TourishPlan
         public IActionResult GetAll(string? search, string? category, string? categoryString, string? startingPoint, string? endPoint, string? startingDate,
             double? priceFrom, double? priceTo, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
-            return Ok(_entityService.GetAll(search, category, categoryString, startingPoint, endPoint, startingDate, priceFrom, priceTo, sortBy, sortDirection, "", page, pageSize));
-        }
-
-        // GET: api/<ValuesController>
-        [HttpGet("with-auhthority")]
-        [Authorize]
-        public IActionResult GetAllWithAuthority(string? search, string? category, string? categoryString, string? startingPoint, string? endPoint, string? startingDate,
-            double? priceFrom, double? priceTo, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
-        {
-            string userId = User.FindFirstValue("Id");
-            return Ok(_entityService.GetAll(search, category, categoryString, startingPoint, endPoint, startingDate, priceFrom, priceTo, sortBy, sortDirection, userId, page, pageSize));
+            return Ok(_entityService.GetAll(search, category, categoryString, startingPoint, endPoint, startingDate, priceFrom, priceTo, sortBy, sortDirection, page, pageSize));
         }
 
         [HttpGet("{id}")]
@@ -42,13 +30,11 @@ namespace WebApplication1.Controllers.TourishPlan
             return Ok(_entityService.GetById(id));
         }
 
-        [Authorize]
         [HttpGet("interest")]
-        public IActionResult GetInterest(Guid tourishPlanId)
+        public IActionResult GetById(Guid tourishPlanId, Guid userId)
         {
-            string userId = User.FindFirstValue("Id");
-            return Ok(_entityService.getTourInterest(tourishPlanId, 
-                new Guid(userId)));
+            return Ok(_entityService.getTourInterest(tourishPlanId,
+                userId));
         }
     }
 }

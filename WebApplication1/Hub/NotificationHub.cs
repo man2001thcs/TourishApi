@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SignalR.Hub.Client;
@@ -8,7 +7,6 @@ using WebApplication1.Data;
 using WebApplication1.Data.Connection;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
-using WebApplication1.Repository.InheritanceRepo;
 using WebApplication1.Service.InheritanceService;
 
 namespace SignalR.Hub

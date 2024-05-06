@@ -1,5 +1,4 @@
-﻿using FirebaseAdmin.Messaging;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TourishApi.Extension;
 using TourishApi.Repository.Interface;
 using WebApplication1.Data;
@@ -145,7 +144,6 @@ namespace WebApplication1.Repository.InheritanceRepo
             #endregion
 
             #region Sorting
-            entityQuery = entityQuery.OrderByDescending(entity => entity.CreateDate);
             if (!string.IsNullOrEmpty(sortBy))
             {
                 entityQuery = entityQuery.OrderByColumn(sortBy);
@@ -248,7 +246,7 @@ namespace WebApplication1.Repository.InheritanceRepo
         private string convertNotifyObjectName(Notification notification)
         {
             var objectName = "";
-            if (notification.TourishPlanId != null)
+            if (notification.TourishPlan != null)
             {
                 objectName = notification.TourishPlan.TourName;
             }

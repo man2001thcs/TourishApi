@@ -113,7 +113,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 }
             }
 
-            if ((int)userRoleAuthority < (int)userExist.Role || (int)userRoleAuthority < (int) model.Role)
+            if ((int)userRoleAuthority < (int)userExist.Role || (int)userRoleAuthority < (int)model.Role)
             {
                 return new Response
                 {
@@ -122,7 +122,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 };
 
             }
-         
+
             if (userExist != null) //không đúng
             {
                 userExist.UpdateDate = DateTime.UtcNow;

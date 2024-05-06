@@ -1,5 +1,5 @@
-﻿using System.Globalization;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using TourishApi.Extension;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
@@ -693,7 +693,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                             Id = item.Id.Value,
                             TourishPlanId = item.TourishPlanId,
                             Description = item.Description,
-                            InstructionType = item.InstructionType, 
+                            InstructionType = item.InstructionType,
                             CreateDate = item.CreateDate,
                             UpdateDate = DateTime.UtcNow,
                         }
@@ -1083,5 +1083,18 @@ public class TourishPlanRepository : ITourishPlanRepository
                 // Update type success
             };
         }
+    }
+
+    public Response getTopTourRating()
+    {
+        var entityList = _context
+            .TourishPlan
+            .Include(tour => tour.TourishRatingList)
+            .Where(e => e.TourishRatingList.Count() > 10)
+            .OrderByDescending(entity => entity.TourishRatingList.Sum(e => e.Rating)/entity.TourishRatingList.Count())
+            .ThenByDescending(entity => entity.TourishRatingList.Count())
+            .ToList();
+
+        return new Response { resultCd = 0, Data = entityList };
     }
 }

@@ -37,8 +37,8 @@ namespace WebApplication1.Service.InheritanceService
         public async Task<Response> Validate(LoginModel model)
         {
             var user = _context.Users.SingleOrDefault(p => p.UserName == model.UserName);
-            var hashInputPassword = ConvertToStringFromByteArray(HashPassword(model.Password, ConvertStringToByteArray(user.PasswordSalt)));          
-             
+            var hashInputPassword = ConvertToStringFromByteArray(HashPassword(model.Password, ConvertStringToByteArray(user.PasswordSalt)));
+
             logger.LogInformation("Test: " + hashInputPassword ?? "");
 
             if (hashInputPassword != user.Password) //không đúng

@@ -1,10 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using TourishApi.Extension;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Receipt;
-using WebApplication1.Data.Schedule;
 using WebApplication1.Model;
 using WebApplication1.Model.Receipt;
 using WebApplication1.Model.VirtualModel;
@@ -213,12 +211,13 @@ public class ReceiptRepository : IReceiptRepository
 
                 await _context.AddAsync(tourishInterest);
                 await _context.SaveChangesAsync();
-            } else
+            }
+            else
             {
                 existInterest.InterestStatus = InterestStatus.User;
                 existInterest.UpdateDate = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
-            }           
+            }
         }
 
         var originalPrice = (double)0;
@@ -959,5 +958,227 @@ public class ReceiptRepository : IReceiptRepository
             MessageCode = "I512",
             // Update type success
         };
+    }
+
+    public Response getUnpaidClient()
+    {
+        var receiptList = _context
+            .FullReceiptList
+            .Include(entity => entity.TotalReceipt)
+            .Include(entity => entity.TotalReceipt)
+            .Include(entity => entity.TourishSchedule)
+            .ThenInclude(entity => entity.TourishPlan)
+            .Where(entity => (int)entity.Status < 2)
+            .Select(entity =>  new {
+                GuestName = entity.GuestName,
+                OriginalPrice = entity.OriginalPrice,
+                TotalTicket = entity.TotalTicket,
+                TotalChildTicket = entity.TotalChildTicket,
+                TourishPlanId =  entity.TotalReceipt.TourishPlanId,
+                ScheduleId = entity.TotalReceipt.ScheduleId,
+                ScheduleType = entity.TotalReceipt.ScheduleType
+            }).ToList();
+
+
+        if (receiptList == null)
+        {
+            return new Response { resultCd = 1, Data = new List<FullReceipt>() };
+        }
+
+        return new Response { resultCd = 0, Data = receiptList };
+    }
+
+    public Response getTopGrossTourInMonth()
+    {
+        var receiptList = _context
+            .FullReceiptList
+            .Include(entity => entity.TotalReceipt)
+            .Include(entity => entity.TotalReceipt)
+            .Include(entity => entity.TourishSchedule)
+            .ThenInclude(entity => entity.TourishPlan)
+            .Where(entity => entity.TotalReceipt.TourishPlanId.HasValue)
+            .Where(entity => (int)entity.Status < 3)
+            .Where(entity => (entity.CreatedDate.Month == DateTime.UtcNow.Month && entity.CreatedDate.Year == DateTime.UtcNow.Year) 
+            || (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year))
+            .OrderByDescending(entity => (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount)*(1 - entity.DiscountFloat))
+            .Select(entity => new {
+                GuestName = entity.GuestName,
+                TotalPrice = (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount)*(1 - entity.DiscountFloat),
+                OriginalPrice = entity.OriginalPrice,
+                TotalTicket = entity.TotalTicket,
+                TotalChildTicket = entity.TotalChildTicket,
+                TourishPlanId = entity.TotalReceipt.TourishPlanId,
+                ScheduleId = entity.TotalReceipt.ScheduleId,
+                ScheduleType = entity.TotalReceipt.ScheduleType
+            }).ToList();
+
+
+        if (receiptList == null)
+        {
+            return new Response { resultCd = 1, Data = new List<FullReceipt>() };
+        }
+
+        return new Response { resultCd = 0, Data = receiptList };
+    }
+
+    public Response getTopTicketTourInMonth()
+    {
+        var receiptList = _context
+            .FullReceiptList
+            .Include(entity => entity.TotalReceipt)
+            .Include(entity => entity.TotalReceipt)
+            .Include(entity => entity.TourishSchedule)
+            .ThenInclude(entity => entity.TourishPlan)
+            .Where(entity => entity.TotalReceipt.TourishPlanId.HasValue)
+            .Where(entity => (int)entity.Status < 3)
+            .Where(entity => (entity.CreatedDate.Month == DateTime.UtcNow.Month && entity.CreatedDate.Year == DateTime.UtcNow.Year)
+            || (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year))
+            .OrderByDescending(entity => entity.TotalTicket + entity.TotalChildTicket)
+            .Select(entity => new {
+                GuestName = entity.GuestName,
+                TotalPrice = (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount) * (1 - entity.DiscountFloat),
+                OriginalPrice = entity.OriginalPrice,
+                TotalTicket = entity.TotalTicket,
+                TotalChildTicket = entity.TotalChildTicket,
+                TourishPlanId = entity.TotalReceipt.TourishPlanId,
+                ScheduleId = entity.TotalReceipt.ScheduleId,
+                ScheduleType = entity.TotalReceipt.ScheduleType
+            }).ToList();
+
+
+        if (receiptList == null)
+        {
+            return new Response { resultCd = 1, Data = new List<FullReceipt>() };
+        }
+
+        return new Response { resultCd = 0, Data = receiptList };
+    }
+
+    public Response getTopGrossMovingScheduleInMonth()
+    {
+        var receiptList = _context
+            .FullReceiptList
+            .Include(entity => entity.TotalReceipt)
+            .Include(entity => entity.TotalReceipt)
+            .Where(entity => (int)entity.Status < 3)
+            .Where(entity => !entity.TotalReceipt.TourishPlanId.HasValue)
+            .Where(entity => entity.TotalReceipt.ScheduleType == ScheduleType.MovingSchedule)
+            .Where(entity => (entity.CreatedDate.Month == DateTime.UtcNow.Month && entity.CreatedDate.Year == DateTime.UtcNow.Year)
+            || (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year))
+            .OrderByDescending(entity => (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount) * (1 - entity.DiscountFloat))
+            .Select(entity => new {
+                GuestName = entity.GuestName,
+                TotalPrice = (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount) * (1 - entity.DiscountFloat),
+                OriginalPrice = entity.OriginalPrice,
+                TotalTicket = entity.TotalTicket,
+                TotalChildTicket = entity.TotalChildTicket,
+                TourishPlanId = entity.TotalReceipt.TourishPlanId,
+                ScheduleId = entity.TotalReceipt.ScheduleId,
+                ScheduleType = entity.TotalReceipt.ScheduleType
+            }).ToList();
+
+
+        if (receiptList == null)
+        {
+            return new Response { resultCd = 1, Data = new List<FullReceipt>() };
+        }
+
+        return new Response { resultCd = 0, Data = receiptList };
+    }
+
+    public Response getTopGrossStayingScheduleInMonth()
+    {
+        var receiptList = _context
+            .FullReceiptList
+            .Include(entity => entity.TotalReceipt)
+            .Include(entity => entity.TotalReceipt)
+            .Where(entity => (int)entity.Status < 3)
+            .Where(entity => !entity.TotalReceipt.TourishPlanId.HasValue)
+            .Where(entity => entity.TotalReceipt.ScheduleType == ScheduleType.StayingSchedule)
+            .Where(entity => (entity.CreatedDate.Month == DateTime.UtcNow.Month && entity.CreatedDate.Year == DateTime.UtcNow.Year)
+            || (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year))
+            .OrderByDescending(entity => (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount) * (1 - entity.DiscountFloat))
+            .Select(entity => new {
+                GuestName = entity.GuestName,
+                TotalPrice = (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount) * (1 - entity.DiscountFloat),
+                OriginalPrice = entity.OriginalPrice,
+                TotalTicket = entity.TotalTicket,
+                TotalChildTicket = entity.TotalChildTicket,
+                TourishPlanId = entity.TotalReceipt.TourishPlanId,
+                ScheduleId = entity.TotalReceipt.ScheduleId,
+                ScheduleType = entity.TotalReceipt.ScheduleType
+            }).ToList();
+
+
+        if (receiptList == null)
+        {
+            return new Response { resultCd = 1, Data = new List<FullReceipt>() };
+        }
+
+        return new Response { resultCd = 0, Data = receiptList };
+    }
+
+    public Response getTopTicketMovingScheduleInMonth()
+    {
+        var receiptList = _context
+            .FullReceiptList
+            .Include(entity => entity.TotalReceipt)
+            .Include(entity => entity.TotalReceipt)
+            .Where(entity => (int)entity.Status < 3)
+            .Where(entity => !entity.TotalReceipt.TourishPlanId.HasValue)
+            .Where(entity => entity.TotalReceipt.ScheduleType == ScheduleType.MovingSchedule)
+            .Where(entity => (entity.CreatedDate.Month == DateTime.UtcNow.Month && entity.CreatedDate.Year == DateTime.UtcNow.Year)
+            || (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year))
+            .OrderByDescending(entity => entity.TotalTicket + entity.TotalChildTicket)
+            .Select(entity => new {
+                GuestName = entity.GuestName,
+                TotalPrice = (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount) * (1 - entity.DiscountFloat),
+                OriginalPrice = entity.OriginalPrice,
+                TotalTicket = entity.TotalTicket,
+                TotalChildTicket = entity.TotalChildTicket,
+                TourishPlanId = entity.TotalReceipt.TourishPlanId,
+                ScheduleId = entity.TotalReceipt.ScheduleId,
+                ScheduleType = entity.TotalReceipt.ScheduleType
+            }).ToList();
+
+
+        if (receiptList == null)
+        {
+            return new Response { resultCd = 1, Data = new List<FullReceipt>() };
+        }
+
+        return new Response { resultCd = 0, Data = receiptList };
+    }
+
+    public Response getTopTicketStayingScheduleInMonth()
+    {
+        var receiptList = _context
+            .FullReceiptList
+            .Include(entity => entity.TotalReceipt)
+            .Include(entity => entity.TotalReceipt)
+            .Where(entity => (int)entity.Status < 3)
+            .Where(entity => !entity.TotalReceipt.TourishPlanId.HasValue)
+            .Where(entity => entity.TotalReceipt.ScheduleType == ScheduleType.StayingSchedule)
+            .Where(entity => (entity.CreatedDate.Month == DateTime.UtcNow.Month && entity.CreatedDate.Year == DateTime.UtcNow.Year)
+            || (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year))
+            .OrderByDescending(entity => entity.TotalTicket + entity.TotalChildTicket)
+            .Select(entity => new {
+                GuestName = entity.GuestName,
+                TotalPrice = (entity.OriginalPrice * entity.TotalTicket + entity.TotalChildTicket * entity.TotalTicket - entity.DiscountAmount) * (1 - entity.DiscountFloat),
+                OriginalPrice = entity.OriginalPrice,
+                TotalTicket = entity.TotalTicket,
+                TotalChildTicket = entity.TotalChildTicket,
+                TourishPlanId = entity.TotalReceipt.TourishPlanId,
+                ScheduleId = entity.TotalReceipt.ScheduleId,
+                ScheduleType = entity.TotalReceipt.ScheduleType
+            }).ToList();
+
+
+        if (receiptList == null)
+        {
+            return new Response { resultCd = 1, Data = new List<FullReceipt>() };
+        }
+
+        return new Response { resultCd = 0, Data = receiptList };
     }
 }

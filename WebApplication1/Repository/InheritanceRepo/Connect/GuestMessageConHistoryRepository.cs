@@ -314,7 +314,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
 
                     resultDto.GuestMessages = messageList;
                 }
-                
+
 
                 return new Response { resultCd = 0, Data = resultDto, };
             }
