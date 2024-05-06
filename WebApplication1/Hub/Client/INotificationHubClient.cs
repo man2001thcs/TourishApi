@@ -9,5 +9,6 @@ namespace SignalR.Hub.Client
         Task SendOffersToAll(NotificationDTOModel notification);
         Task SendString(String stringA);
         Task SendError(Guid userId, string error);
+        Task ChangeNotifyToRead(Guid notificationId, Boolean isRead);
     }
 }

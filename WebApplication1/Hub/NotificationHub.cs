@@ -86,6 +86,27 @@ namespace SignalR.Hub
             }
         }
 
+        public async Task ChangeNotifyToRead(Guid notificationId)
+        {
+            try
+            {
+                var notification = _context.Notifications.Where(u => (u.Id == notificationId)).FirstOrDefault();
+                if (notification != null)
+                {
+                    notification.IsRead = true;
+                    await _context.SaveChangesAsync();
+                    await Clients.Client(Context.ConnectionId).ChangeNotifyToRead(notificationId, true);
+                }
+                else
+                    await Clients.Client(Context.ConnectionId).ChangeNotifyToRead(notificationId, false);
+            }
+            catch (Exception ex)
+            {             
+                await Clients.Client(Context.ConnectionId).SendError(notificationId, "Lỗi xảy ra: " + ex.ToString());            
+            }
+            
+        }
+
         public override async Task OnConnectedAsync()
         {
             var httpContext = Context.GetHttpContext();

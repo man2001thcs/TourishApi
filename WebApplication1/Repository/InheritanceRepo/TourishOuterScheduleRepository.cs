@@ -855,14 +855,16 @@ namespace WebApplication1.Repository.InheritanceRepo
                             // Update type success
                         };
                     }
-                } else return new Response
+                }
+                else return new Response
                 {
                     resultCd = 1,
                     MessageCode = "C430",
                     // Update type success
                 };
 
-            } else if (scheduleInstructionModel.ScheduleType == ScheduleType.StayingSchedule)
+            }
+            else if (scheduleInstructionModel.ScheduleType == ScheduleType.StayingSchedule)
             {
                 var existSchedule = _context.StayingSchedules.FirstOrDefault(entity => entity.Id == scheduleInstructionModel.ScheduleId);
                 if (existSchedule != null)

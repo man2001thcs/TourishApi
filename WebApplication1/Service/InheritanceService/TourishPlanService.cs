@@ -262,7 +262,7 @@ namespace TourishApi.Service.InheritanceService
             try
             {
                 return _entityRepository.getTopTourRating();
-            }          
+            }
             catch (Exception ex)
             {
                 var response = new Response
