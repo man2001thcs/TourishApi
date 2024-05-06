@@ -19,7 +19,6 @@ namespace WebApplication1.Data
         public Guid? TourishPlanId { get; set; }
         public Guid? MovingScheduleId { get; set; }
         public Guid? StayingScheduleId { get; set; }
-
         // Relationship
         public User UserCreator { get; set; }
         public User UserReceiver { get; set; }
