@@ -27,7 +27,7 @@ namespace WebApplication1.Model.Receipt
 
     public class FullReceiptClientInsertModel
     {
-        public Guid TourishPlanId { get; set; }
+        public Guid? TourishPlanId { get; set; }
         public Guid? ScheduleId { get; set; }
         public ScheduleType? ScheduleType { get; set; }
         public Guid? TourishScheduleId { get; set; }
@@ -41,7 +41,7 @@ namespace WebApplication1.Model.Receipt
 
     public class FullReceiptUpdateModel
     {
-        public Guid TourishPlanId { get; set; }
+        public Guid? TourishPlanId { get; set; }
         public Guid? ScheduleId { get; set; }
         public ScheduleType? ScheduleType { get; set; }
         public Guid? TourishScheduleId { get; set; }

@@ -19,7 +19,6 @@ using WebApplication1.Repository.InheritanceRepo.RestaurantPlace;
 using WebApplication1.Repository.InheritanceRepo.RestHoouse;
 using WebApplication1.Repository.InheritanceRepo.Transport;
 using WebApplication1.Repository.Interface;
-using WebApplication1.Repository.Interface.Receipt;
 using WebApplication1.Service;
 using WebApplication1.Service.InheritanceService;
 using WebApplication1.Trigger;
@@ -85,7 +84,7 @@ namespace MyWebApiApp
             services.AddScoped<TourishOuterScheduleRepository>();
 
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IReceiptRepository, ReceiptRepository>();
+            services.AddScoped<ReceiptRepository>();
             services.AddScoped<ITourishPlanRepository, TourishPlanRepository>();
             services.AddScoped<IFileRepository, FileRepository>();
 

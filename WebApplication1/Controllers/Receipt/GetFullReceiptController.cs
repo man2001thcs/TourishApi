@@ -75,5 +75,26 @@ namespace WebApplication1.Controllers.Receipt
         {
             return Ok(_receiptService.getTopTicketStayingScheduleInMonth());
         }
+
+        [HttpGet("tourish-plan/total-month-gross")]
+        [Authorize(Roles = "Admin,AdminManager")]
+        public IActionResult getGrossTourishPlanInYear()
+        {
+            return Ok(_receiptService.getGrossTourishPlanInYear());
+        }
+
+        [HttpGet("moving-schedule/total-month-gross")]
+        [Authorize(Roles = "Admin,AdminManager")]
+        public IActionResult getGrossMovingScheduleInYear()
+        {
+            return Ok(_receiptService.getGrossMovingScheduleInYear());
+        }
+
+        [HttpGet("staying-schedule/total-month-gross")]
+        [Authorize(Roles = "Admin,AdminManager")]
+        public IActionResult getGrossStayingScheduleInYear()
+        {
+            return Ok(_receiptService.getGrossStayingScheduleInYear());
+        }
     }
 }
