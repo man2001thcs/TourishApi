@@ -226,7 +226,12 @@ namespace MyWebApiApp
             {
                 app.UseSwagger();
                 app.UseDeveloperExceptionPage();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWebApiApp v1"));
+                
+                app.UseSwaggerUI(options =>
+                {
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWebApiApp v1");
+                    options.RoutePrefix = string.Empty;
+                });
             }
 
             if (!env.IsDevelopment())
