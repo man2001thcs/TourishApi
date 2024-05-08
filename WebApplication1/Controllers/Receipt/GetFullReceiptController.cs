@@ -21,17 +21,31 @@ namespace WebApplication1.Controllers.Receipt
         }
 
 
-        [HttpGet("{id}")]
-        public IActionResult GetById(Guid id)
+        [HttpGet("tour/{id}")]
+        public IActionResult GetFullTourReceiptById(Guid id)
         {
-            return Ok(_receiptService.GetFullReceiptById(id));
+            return Ok(_receiptService.GetFullTourReceiptById(id));
         }
 
-        [HttpGet("unpaid-client")]
-        [Authorize(Roles = "Admin,AdminManager")]
-        public IActionResult getUnpaidClient()
+        [HttpGet("schedule/{id}")]
+        public IActionResult GetFullScheduleReceiptById(Guid id)
         {
-            return Ok(_receiptService.getUnpaidClient());
+            return Ok(_receiptService.GetFullScheduleReceiptById(id));
+        }
+
+
+        [HttpGet("tour/unpaid-client")]
+        [Authorize(Roles = "Admin,AdminManager")]
+        public IActionResult getUnpaidTourClient()
+        {
+            return Ok(_receiptService.getUnpaidTourClient());
+        }
+
+        [HttpGet("schedule/unpaid-client")]
+        [Authorize(Roles = "Admin,AdminManager")]
+        public IActionResult getUnpaidScheduleClient()
+        {
+            return Ok(_receiptService.getUnpaidScheduleClient());
         }
 
         [HttpGet("gross-tour")]

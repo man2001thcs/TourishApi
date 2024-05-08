@@ -41,6 +41,9 @@ namespace WebApplication1.Data.DbContextFile
         public DbSet<TotalReceipt> TotalReceiptList { get; set; }
         public DbSet<FullReceipt> FullReceiptList { get; set; }
 
+        public DbSet<TotalScheduleReceipt> TotalScheduleReceiptList { get; set; }
+        public DbSet<FullScheduleReceipt> FullScheduleReceiptList { get; set; }
+
         //
         public DbSet<UserMessage> UserMessages { get; set; }
         public DbSet<GuestMessage> GuestMessages { get; set; }
@@ -291,18 +294,6 @@ namespace WebApplication1.Data.DbContextFile
                 .IsRequired(false)
                 .HasConstraintName("FK_TourishPlan_TotalReceipt");
 
-                //entity.HasOne(e => e.StayingSchedule)
-                //.WithOne(e => e.TotalReceipt)
-                //.HasForeignKey<TotalReceipt>(e => e.StayingSchedule)
-                //.IsRequired(false)
-                //.HasConstraintName("FK_StayingSchedule_TotalReceipt");
-
-                //entity.HasOne(e => e.MovingSchedule)
-                //.WithOne(e => e.TotalReceipt)
-                //.HasForeignKey<TotalReceipt>(e => e.MovingScheduleId)
-                //.IsRequired(false)
-                //.HasConstraintName("FK_MovingSchedule_TotalReceipt");
-
             });
 
             modelBuilder.Entity<FullReceipt>(entity =>
@@ -318,11 +309,60 @@ namespace WebApplication1.Data.DbContextFile
                .HasForeignKey<FullReceipt>(e => e.TourishScheduleId)
                .HasConstraintName("FK_FullReceipt_TourishSchedule");
 
+
+            });
+
+            modelBuilder.Entity<TotalScheduleReceipt>(entity =>
+            {
+                entity.ToTable(nameof(TotalScheduleReceipt));
+                entity.HasKey(e => e.TotalReceiptId);
+                entity.Property(e => e.CreatedDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+
+                entity.HasMany(e => e.FullReceiptList)
+               .WithOne(e => e.TotalReceipt)
+               .HasForeignKey(e => e.TotalReceiptId)
+               .HasConstraintName("FK_TotalScheduleReceipt_FullScheduleReceipt");
+
+            });
+
+            modelBuilder.Entity<MovingSchedule>(entity =>
+            {
+                entity.ToTable(nameof(MovingSchedule));
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");               
+
+                entity.HasOne(e => e.TotalReceipt)
+                .WithOne(e => e.MovingSchedule)
+                .HasForeignKey<TotalScheduleReceipt>(e => e.MovingScheduleId)
+                .IsRequired(false)
+                .HasConstraintName("FK_MovingSchedule_TotalScheduleReceipt");
+            });
+
+            modelBuilder.Entity<StayingSchedule>(entity =>
+            {
+                entity.ToTable(nameof(StayingSchedule));
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+                entity.HasOne(e => e.TotalReceipt)
+                .WithOne(e => e.StayingSchedule)
+                .HasForeignKey<TotalScheduleReceipt>(e => e.StayingScheduleId)
+                .IsRequired(false)
+                .HasConstraintName("FK_StayingSchedule_TotalScheduleReceipt");
+            });
+
+            modelBuilder.Entity<FullScheduleReceipt>(entity =>
+            {
+                entity.ToTable(nameof(FullScheduleReceipt));
+                entity.HasKey(e => e.FullReceiptId);
+                entity.Property(e => e.CreatedDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
                 entity.HasOne(e => e.ServiceSchedule)
-               .WithOne(e => e.FullReceipt)
+               .WithOne(e => e.FullScheduleReceipt)
                .IsRequired(false)
-               .HasForeignKey<FullReceipt>(e => e.ServiceScheduleId)
-               .HasConstraintName("FK_FullReceipt_ServiceSchedule");
+               .HasForeignKey<FullScheduleReceipt>(e => e.ServiceScheduleId)
+               .HasConstraintName("FK_FullScheduleReceipt_ServiceSchedule");
 
             });
 

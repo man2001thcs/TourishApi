@@ -12,8 +12,8 @@ using WebApplication1.Data.DbContextFile;
 namespace TourishApi.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20240508100429_ajustSchedule")]
-    partial class ajustSchedule
+    [Migration("20240508141332_greatOne")]
+    partial class greatOne
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -526,9 +526,6 @@ namespace TourishApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("ServiceScheduleId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -549,10 +546,6 @@ namespace TourishApi.Migrations
 
                     b.HasKey("FullReceiptId");
 
-                    b.HasIndex("ServiceScheduleId")
-                        .IsUnique()
-                        .HasFilter("[ServiceScheduleId] IS NOT NULL");
-
                     b.HasIndex("TotalReceiptId");
 
                     b.HasIndex("TourishScheduleId")
@@ -562,7 +555,110 @@ namespace TourishApi.Migrations
                     b.ToTable("FullReceipt", (string)null);
                 });
 
+            modelBuilder.Entity("WebApplication1.Data.Receipt.FullScheduleReceipt", b =>
+                {
+                    b.Property<Guid>("FullReceiptId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CompleteDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getutcdate()");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(900)
+                        .HasColumnType("nvarchar(900)");
+
+                    b.Property<double>("DiscountAmount")
+                        .HasColumnType("float");
+
+                    b.Property<float>("DiscountFloat")
+                        .HasColumnType("real");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GuestName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("OriginalPrice")
+                        .HasColumnType("float");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ServiceScheduleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalChildTicket")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TotalReceiptId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("TotalTicket")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("FullReceiptId");
+
+                    b.HasIndex("ServiceScheduleId")
+                        .IsUnique()
+                        .HasFilter("[ServiceScheduleId] IS NOT NULL");
+
+                    b.HasIndex("TotalReceiptId");
+
+                    b.ToTable("FullScheduleReceipt", (string)null);
+                });
+
             modelBuilder.Entity("WebApplication1.Data.Receipt.TotalReceipt", b =>
+                {
+                    b.Property<Guid>("TotalReceiptId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CompleteDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getutcdate()");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("TourishPlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("TotalReceiptId");
+
+                    b.HasIndex("TourishPlanId")
+                        .IsUnique()
+                        .HasFilter("[TourishPlanId] IS NOT NULL");
+
+                    b.ToTable("TotalReceipt", (string)null);
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.Receipt.TotalScheduleReceipt", b =>
                 {
                     b.Property<Guid>("TotalReceiptId")
                         .ValueGeneratedOnAdd()
@@ -588,9 +684,6 @@ namespace TourishApi.Migrations
                     b.Property<Guid?>("StayingScheduleId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("TourishPlanId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("datetime2");
 
@@ -604,11 +697,7 @@ namespace TourishApi.Migrations
                         .IsUnique()
                         .HasFilter("[StayingScheduleId] IS NOT NULL");
 
-                    b.HasIndex("TourishPlanId")
-                        .IsUnique()
-                        .HasFilter("[TourishPlanId] IS NOT NULL");
-
-                    b.ToTable("TotalReceipt", (string)null);
+                    b.ToTable("TotalScheduleReceipt", (string)null);
                 });
 
             modelBuilder.Entity("WebApplication1.Data.ReqTemporaryToken", b =>
@@ -1504,11 +1593,6 @@ namespace TourishApi.Migrations
 
             modelBuilder.Entity("WebApplication1.Data.Receipt.FullReceipt", b =>
                 {
-                    b.HasOne("WebApplication1.Data.ServiceSchedule", "ServiceSchedule")
-                        .WithOne("FullReceipt")
-                        .HasForeignKey("WebApplication1.Data.Receipt.FullReceipt", "ServiceScheduleId")
-                        .HasConstraintName("FK_FullReceipt_ServiceSchedule");
-
                     b.HasOne("WebApplication1.Data.Receipt.TotalReceipt", "TotalReceipt")
                         .WithMany("FullReceiptList")
                         .HasForeignKey("TotalReceiptId")
@@ -1521,33 +1605,55 @@ namespace TourishApi.Migrations
                         .HasForeignKey("WebApplication1.Data.Receipt.FullReceipt", "TourishScheduleId")
                         .HasConstraintName("FK_FullReceipt_TourishSchedule");
 
-                    b.Navigation("ServiceSchedule");
-
                     b.Navigation("TotalReceipt");
 
                     b.Navigation("TourishSchedule");
                 });
 
+            modelBuilder.Entity("WebApplication1.Data.Receipt.FullScheduleReceipt", b =>
+                {
+                    b.HasOne("WebApplication1.Data.ServiceSchedule", "ServiceSchedule")
+                        .WithOne("FullScheduleReceipt")
+                        .HasForeignKey("WebApplication1.Data.Receipt.FullScheduleReceipt", "ServiceScheduleId")
+                        .HasConstraintName("FK_FullScheduleReceipt_ServiceSchedule");
+
+                    b.HasOne("WebApplication1.Data.Receipt.TotalScheduleReceipt", "TotalReceipt")
+                        .WithMany("FullReceiptList")
+                        .HasForeignKey("TotalReceiptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_TotalScheduleReceipt_FullScheduleReceipt");
+
+                    b.Navigation("ServiceSchedule");
+
+                    b.Navigation("TotalReceipt");
+                });
+
             modelBuilder.Entity("WebApplication1.Data.Receipt.TotalReceipt", b =>
                 {
-                    b.HasOne("WebApplication1.Data.Schedule.MovingSchedule", "MovingSchedule")
-                        .WithOne("TotalReceipt")
-                        .HasForeignKey("WebApplication1.Data.Receipt.TotalReceipt", "MovingScheduleId");
-
-                    b.HasOne("WebApplication1.Data.Schedule.StayingSchedule", "StayingSchedule")
-                        .WithOne("TotalReceipt")
-                        .HasForeignKey("WebApplication1.Data.Receipt.TotalReceipt", "StayingScheduleId");
-
                     b.HasOne("WebApplication1.Data.TourishPlan", "TourishPlan")
                         .WithOne("TotalReceipt")
                         .HasForeignKey("WebApplication1.Data.Receipt.TotalReceipt", "TourishPlanId")
                         .HasConstraintName("FK_TourishPlan_TotalReceipt");
 
+                    b.Navigation("TourishPlan");
+                });
+
+            modelBuilder.Entity("WebApplication1.Data.Receipt.TotalScheduleReceipt", b =>
+                {
+                    b.HasOne("WebApplication1.Data.Schedule.MovingSchedule", "MovingSchedule")
+                        .WithOne("TotalReceipt")
+                        .HasForeignKey("WebApplication1.Data.Receipt.TotalScheduleReceipt", "MovingScheduleId")
+                        .HasConstraintName("FK_MovingSchedule_TotalScheduleReceipt");
+
+                    b.HasOne("WebApplication1.Data.Schedule.StayingSchedule", "StayingSchedule")
+                        .WithOne("TotalReceipt")
+                        .HasForeignKey("WebApplication1.Data.Receipt.TotalScheduleReceipt", "StayingScheduleId")
+                        .HasConstraintName("FK_StayingSchedule_TotalScheduleReceipt");
+
                     b.Navigation("MovingSchedule");
 
                     b.Navigation("StayingSchedule");
-
-                    b.Navigation("TourishPlan");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.SaveFile", b =>
@@ -1760,6 +1866,11 @@ namespace TourishApi.Migrations
                     b.Navigation("FullReceiptList");
                 });
 
+            modelBuilder.Entity("WebApplication1.Data.Receipt.TotalScheduleReceipt", b =>
+                {
+                    b.Navigation("FullReceiptList");
+                });
+
             modelBuilder.Entity("WebApplication1.Data.Schedule.MovingSchedule", b =>
                 {
                     b.Navigation("InstructionList");
@@ -1770,8 +1881,7 @@ namespace TourishApi.Migrations
 
                     b.Navigation("ServiceScheduleList");
 
-                    b.Navigation("TotalReceipt")
-                        .IsRequired();
+                    b.Navigation("TotalReceipt");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.Schedule.StayingSchedule", b =>
@@ -1784,13 +1894,12 @@ namespace TourishApi.Migrations
 
                     b.Navigation("ServiceScheduleList");
 
-                    b.Navigation("TotalReceipt")
-                        .IsRequired();
+                    b.Navigation("TotalReceipt");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.ServiceSchedule", b =>
                 {
-                    b.Navigation("FullReceipt");
+                    b.Navigation("FullScheduleReceipt");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.TourishCategory", b =>

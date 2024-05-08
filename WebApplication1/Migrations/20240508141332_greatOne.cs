@@ -6,11 +6,15 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TourishApi.Migrations
 {
     /// <inheritdoc />
-    public partial class ajustSchedule : Migration
+    public partial class greatOne : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "ScheduleId",
+                table: "TotalReceipt");
+
             migrationBuilder.DropColumn(
                 name: "ScheduleType",
                 table: "TotalReceipt");
@@ -63,23 +67,6 @@ namespace TourishApi.Migrations
                 name: "Status",
                 table: "EatSchedule");
 
-            migrationBuilder.RenameColumn(
-                name: "ScheduleId",
-                table: "TotalReceipt",
-                newName: "StayingScheduleId");
-
-            migrationBuilder.AddColumn<Guid>(
-                name: "MovingScheduleId",
-                table: "TotalReceipt",
-                type: "uniqueidentifier",
-                nullable: true);
-
-            migrationBuilder.AddColumn<Guid>(
-                name: "ServiceScheduleId",
-                table: "FullReceipt",
-                type: "uniqueidentifier",
-                nullable: true);
-
             migrationBuilder.CreateTable(
                 name: "ServiceSchedule",
                 columns: table => new
@@ -108,26 +95,82 @@ namespace TourishApi.Migrations
                         principalColumn: "Id");
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_TotalReceipt_MovingScheduleId",
-                table: "TotalReceipt",
-                column: "MovingScheduleId",
-                unique: true,
-                filter: "[MovingScheduleId] IS NOT NULL");
+            migrationBuilder.CreateTable(
+                name: "TotalScheduleReceipt",
+                columns: table => new
+                {
+                    TotalReceiptId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MovingScheduleId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    StayingScheduleId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "getutcdate()"),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CompleteDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TotalScheduleReceipt", x => x.TotalReceiptId);
+                    table.ForeignKey(
+                        name: "FK_MovingSchedule_TotalScheduleReceipt",
+                        column: x => x.MovingScheduleId,
+                        principalTable: "MovingSchedule",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_StayingSchedule_TotalScheduleReceipt",
+                        column: x => x.StayingScheduleId,
+                        principalTable: "StayingSchedule",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FullScheduleReceipt",
+                columns: table => new
+                {
+                    FullReceiptId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TotalReceiptId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ServiceScheduleId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    GuestName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OriginalPrice = table.Column<double>(type: "float", nullable: false),
+                    TotalTicket = table.Column<int>(type: "int", nullable: false),
+                    TotalChildTicket = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(900)", maxLength: 900, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "getutcdate()"),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CompleteDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DiscountFloat = table.Column<float>(type: "real", nullable: false),
+                    DiscountAmount = table.Column<double>(type: "float", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FullScheduleReceipt", x => x.FullReceiptId);
+                    table.ForeignKey(
+                        name: "FK_FullScheduleReceipt_ServiceSchedule",
+                        column: x => x.ServiceScheduleId,
+                        principalTable: "ServiceSchedule",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_TotalScheduleReceipt_FullScheduleReceipt",
+                        column: x => x.TotalReceiptId,
+                        principalTable: "TotalScheduleReceipt",
+                        principalColumn: "TotalReceiptId",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
             migrationBuilder.CreateIndex(
-                name: "IX_TotalReceipt_StayingScheduleId",
-                table: "TotalReceipt",
-                column: "StayingScheduleId",
-                unique: true,
-                filter: "[StayingScheduleId] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FullReceipt_ServiceScheduleId",
-                table: "FullReceipt",
+                name: "IX_FullScheduleReceipt_ServiceScheduleId",
+                table: "FullScheduleReceipt",
                 column: "ServiceScheduleId",
                 unique: true,
                 filter: "[ServiceScheduleId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FullScheduleReceipt_TotalReceiptId",
+                table: "FullScheduleReceipt",
+                column: "TotalReceiptId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceSchedule_MovingScheduleId",
@@ -139,70 +182,38 @@ namespace TourishApi.Migrations
                 table: "ServiceSchedule",
                 column: "StayingScheduleId");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_FullReceipt_ServiceSchedule",
-                table: "FullReceipt",
-                column: "ServiceScheduleId",
-                principalTable: "ServiceSchedule",
-                principalColumn: "Id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_TotalReceipt_MovingSchedule_MovingScheduleId",
-                table: "TotalReceipt",
+            migrationBuilder.CreateIndex(
+                name: "IX_TotalScheduleReceipt_MovingScheduleId",
+                table: "TotalScheduleReceipt",
                 column: "MovingScheduleId",
-                principalTable: "MovingSchedule",
-                principalColumn: "Id");
+                unique: true,
+                filter: "[MovingScheduleId] IS NOT NULL");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_TotalReceipt_StayingSchedule_StayingScheduleId",
-                table: "TotalReceipt",
+            migrationBuilder.CreateIndex(
+                name: "IX_TotalScheduleReceipt_StayingScheduleId",
+                table: "TotalScheduleReceipt",
                 column: "StayingScheduleId",
-                principalTable: "StayingSchedule",
-                principalColumn: "Id");
+                unique: true,
+                filter: "[StayingScheduleId] IS NOT NULL");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_FullReceipt_ServiceSchedule",
-                table: "FullReceipt");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_TotalReceipt_MovingSchedule_MovingScheduleId",
-                table: "TotalReceipt");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_TotalReceipt_StayingSchedule_StayingScheduleId",
-                table: "TotalReceipt");
+            migrationBuilder.DropTable(
+                name: "FullScheduleReceipt");
 
             migrationBuilder.DropTable(
                 name: "ServiceSchedule");
 
-            migrationBuilder.DropIndex(
-                name: "IX_TotalReceipt_MovingScheduleId",
-                table: "TotalReceipt");
+            migrationBuilder.DropTable(
+                name: "TotalScheduleReceipt");
 
-            migrationBuilder.DropIndex(
-                name: "IX_TotalReceipt_StayingScheduleId",
-                table: "TotalReceipt");
-
-            migrationBuilder.DropIndex(
-                name: "IX_FullReceipt_ServiceScheduleId",
-                table: "FullReceipt");
-
-            migrationBuilder.DropColumn(
-                name: "MovingScheduleId",
-                table: "TotalReceipt");
-
-            migrationBuilder.DropColumn(
-                name: "ServiceScheduleId",
-                table: "FullReceipt");
-
-            migrationBuilder.RenameColumn(
-                name: "StayingScheduleId",
+            migrationBuilder.AddColumn<Guid>(
+                name: "ScheduleId",
                 table: "TotalReceipt",
-                newName: "ScheduleId");
+                type: "uniqueidentifier",
+                nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "ScheduleType",

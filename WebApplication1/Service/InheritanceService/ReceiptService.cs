@@ -20,12 +20,28 @@ namespace TourishApi.Service.InheritanceService
         {
             try
             {
-                var receiptReturn = await _receiptRepository.Add(receiptInsertModel);
+                if (receiptInsertModel.TourishPlanId != null)
+                {
+                    var receiptReturn = await _receiptRepository.AddTourSchedule(
+                        receiptInsertModel
+                    );
 
-                var receiptReturnId = (Guid)receiptReturn.returnId;
+                    var receiptReturnId = (Guid)receiptReturn.returnId;
 
-                var response = new Response { resultCd = 0, MessageCode = "I511", };
-                return response;
+                    var response = new Response { resultCd = 0, MessageCode = "I511", };
+                    return response;
+                }
+                else
+                {
+                    var receiptReturn = await _receiptRepository.AddServiceSchedule(
+                        receiptInsertModel
+                    );
+
+                    var receiptReturnId = (Guid)receiptReturn.returnId;
+
+                    var response = new Response { resultCd = 0, MessageCode = "I511", };
+                    return response;
+                }
             }
             catch (Exception ex)
             {
@@ -90,11 +106,11 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response DeleteById(Guid id)
+        public Response DeleteTourReceiptById(Guid id)
         {
             try
             {
-                _receiptRepository.Delete(id);
+                _receiptRepository.DeleteTourReceipt(id);
                 var response = new Response { resultCd = 0, MessageCode = "I513", };
                 return response;
             }
@@ -105,11 +121,26 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response GetFullReceiptById(Guid id)
+        public Response DeleteScheduleReceiptById(Guid id)
         {
             try
             {
-                var receipt = _receiptRepository.getFullReceiptById(id);
+                _receiptRepository.DeleteScheduleReceipt(id);
+                var response = new Response { resultCd = 0, MessageCode = "I513", };
+                return response;
+            }
+            catch
+            {
+                var response = new Response { resultCd = 1, MessageCode = "C514", };
+                return response;
+            }
+        }
+
+        public Response GetFullTourReceiptById(Guid id)
+        {
+            try
+            {
+                var receipt = _receiptRepository.getFullTourReceiptById(id);
                 if (receipt.Data == null)
                 {
                     var response = new Response { resultCd = 1, MessageCode = "C510", };
@@ -132,8 +163,67 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response GetAll(
+        public Response GetFullScheduleReceiptById(Guid id)
+        {
+            try
+            {
+                var receipt = _receiptRepository.getFullScheduleReceiptById(id);
+                if (receipt.Data == null)
+                {
+                    var response = new Response { resultCd = 1, MessageCode = "C510", };
+                    return response;
+                }
+                else
+                {
+                    return receipt;
+                }
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public Response GetAllTourReceipt(
             string? tourishPlanId,
+            string? sortBy,
+            string? sortDirection,
+            int page = 1,
+            int pageSize = 5,
+            ReceiptStatus status = ReceiptStatus.Created
+        )
+        {
+            try
+            {
+                var receiptList = _receiptRepository.GetAllTourReceipt(
+                    tourishPlanId,
+                    status,
+                    sortBy,
+                    sortDirection,
+                    page,
+                    pageSize
+                );
+                return receiptList;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public Response GetAllScheduleReceipt(
             string? movingScheduleId,
             string? stayingScheduleId,
             ScheduleType? scheduleType,
@@ -146,8 +236,7 @@ namespace TourishApi.Service.InheritanceService
         {
             try
             {
-                var receiptList = _receiptRepository.GetAll(
-                    tourishPlanId,
+                var receiptList = _receiptRepository.GetAllScheduleReceipt(
                     movingScheduleId,
                     stayingScheduleId,
                     scheduleType,
@@ -171,7 +260,40 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response GetAllForUser(
+        public Response GetAllTourReceiptForUser(
+            string? email,
+            string? sortBy,
+            string? sortDirection,
+            int page = 1,
+            int pageSize = 5,
+            ReceiptStatus status = ReceiptStatus.Created
+        )
+        {
+            try
+            {
+                var receiptList = _receiptRepository.GetAllTourReceiptForUser(
+                    email,
+                    status,
+                    sortBy,
+                    sortDirection,
+                    page,
+                    pageSize
+                );
+                return receiptList;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public Response GetAllScheduleReceiptForUser(
             string? email,
             ScheduleType? scheduleType,
             string? sortBy,
@@ -183,7 +305,7 @@ namespace TourishApi.Service.InheritanceService
         {
             try
             {
-                var receiptList = _receiptRepository.GetAllForUser(
+                var receiptList = _receiptRepository.GetAllScheduleReceiptForUser(
                     email,
                     scheduleType,
                     status,
@@ -206,11 +328,38 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response GetById(Guid id)
+        public Response GetTotalTourReceiptById(Guid id)
         {
             try
             {
-                var receipt = _receiptRepository.getById(id);
+                var receipt = _receiptRepository.getTotalTourReceiptById(id);
+                if (receipt.Data == null)
+                {
+                    var response = new Response { resultCd = 1, MessageCode = "C510", };
+                    return response;
+                }
+                else
+                {
+                    return receipt;
+                }
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public Response GetTotalScheduleReceiptById(Guid id)
+        {
+            try
+            {
+                var receipt = _receiptRepository.getTotalScheduleReceiptById(id);
                 if (receipt.Data == null)
                 {
                     var response = new Response { resultCd = 1, MessageCode = "C510", };
@@ -242,7 +391,8 @@ namespace TourishApi.Service.InheritanceService
             {
                 if (receiptModel.TourishPlanId != null)
                     await _receiptRepository.UpdateTourReceipt(receiptModel);
-                else await _receiptRepository.UpdateScheduleReceipt(receiptModel);
+                else
+                    await _receiptRepository.UpdateScheduleReceipt(receiptModel);
 
                 var response = new Response { resultCd = 0, MessageCode = "I512", };
                 return response;
@@ -268,7 +418,8 @@ namespace TourishApi.Service.InheritanceService
             {
                 if (receiptModel.TourishPlanId != null)
                     await _receiptRepository.UpdateTourReceiptForUser(receiptModel);
-                else await _receiptRepository.UpdateScheduleReceiptForUser(receiptModel);
+                else
+                    await _receiptRepository.UpdateScheduleReceiptForUser(receiptModel);
 
                 var response = new Response { resultCd = 0, MessageCode = "I512", };
                 return response;
@@ -285,11 +436,29 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response getUnpaidClient()
+        public Response getUnpaidTourClient()
         {
             try
             {
-                return _receiptRepository.getUnpaidClient();
+                return _receiptRepository.getUnpaidTourClient();
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public Response getUnpaidScheduleClient()
+        {
+            try
+            {
+                return _receiptRepository.getUnpaidTourClient();
             }
             catch (Exception ex)
             {

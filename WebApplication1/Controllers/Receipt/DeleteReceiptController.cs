@@ -20,11 +20,18 @@ namespace WebApplication1.Controllers.Receipt
             _receiptService = receiptService;
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("tour/{id}")]
         [Authorize(Policy = "DeleteReceiptAccess")]
-        public IActionResult DeleteById(Guid id)
+        public IActionResult DeleteTourReceiptById(Guid id)
         {
-            return Ok(_receiptService.DeleteById(id));
+            return Ok(_receiptService.DeleteTourReceiptById(id));
+        }
+
+        [HttpDelete("schedule/{id}")]
+        [Authorize(Policy = "DeleteReceiptAccess")]
+        public IActionResult DeleteScheduleReceiptById(Guid id)
+        {
+            return Ok(_receiptService.DeleteScheduleReceiptById(id));
         }
     }
 }

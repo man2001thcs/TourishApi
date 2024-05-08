@@ -1,4 +1,6 @@
-﻿using WebApplication1.Data.Transport;
+﻿using WebApplication1.Data;
+using WebApplication1.Data.Schedule;
+using WebApplication1.Data.Transport;
 
 namespace WebApplication1.Model.Schedule
 {
@@ -18,12 +20,15 @@ namespace WebApplication1.Model.Schedule
 
         public string StartingPlace { get; set; }
         public string HeadingPlace { get; set; }
+        public ScheduleStatus Status { get; set; }
         public string? Description { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
 
         public List<InstructionModel>? InstructionList { get; set; }
-        public List<ServiceScheduleModel>? ServiceScheduleList { get; set; }
+        public ICollection<ServiceScheduleModel>? ServiceScheduleList { get; set; }
 
     }
 }

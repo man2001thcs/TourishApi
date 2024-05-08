@@ -22,27 +22,48 @@ namespace WebApplication1.Controllers.Receipt
 
 
         // GET: api/<ValuesController>
-        [HttpGet]
-        public IActionResult GetAll(string? tourishPlanId, string? movingScheduleId,
-            string? stayingScheduleId,
-            ScheduleType? scheduleType, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
+        [HttpGet("tour")]
+        public IActionResult GetAll(string? tourishPlanId, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
         {
-            return Ok(_receiptService.GetAll(tourishPlanId, movingScheduleId, stayingScheduleId, scheduleType, sortBy, sortDirection, page, pageSize, status));
+            return Ok(_receiptService.GetAllTourReceipt(tourishPlanId, sortBy, sortDirection, page, pageSize, status));
 
         }
 
         // GET: api/<ValuesController>
-        [HttpGet("user")]
-        public IActionResult GetAllForUser(string? email, ScheduleType? scheduleType, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
+        [HttpGet("schedule")]
+        public IActionResult GetAll(string? movingScheduleId,
+            string? stayingScheduleId,
+            ScheduleType? scheduleType, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
         {
-            return Ok(_receiptService.GetAllForUser(email, scheduleType, sortBy, sortDirection, page, pageSize, status));
+            return Ok(_receiptService.GetAllScheduleReceipt(movingScheduleId, stayingScheduleId, scheduleType, sortBy, sortDirection, page, pageSize, status));
 
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetById(Guid id)
+        // GET: api/<ValuesController>
+        [HttpGet("tour/user")]
+        public IActionResult GetAllTourReceiptForUser(string? email, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
         {
-            return Ok(_receiptService.GetById(id));
+            return Ok(_receiptService.GetAllTourReceiptForUser(email, sortBy, sortDirection, page, pageSize, status));
+
+        }
+
+        [HttpGet("schedule/user")]
+        public IActionResult GetAllScheduleReceiptForUser(string? email, ScheduleType? scheduleType, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
+        {
+            return Ok(_receiptService.GetAllScheduleReceiptForUser(email, scheduleType, sortBy, sortDirection, page, pageSize, status));
+
+        }
+
+        [HttpGet("tour/{id}")]
+        public IActionResult GetTotalTourReceiptById(Guid id)
+        {
+            return Ok(_receiptService.GetTotalTourReceiptById(id));
+        }
+
+        [HttpGet("schedule/{id}")]
+        public IActionResult GetTotalScheduleReceiptById(Guid id)
+        {
+            return Ok(_receiptService.GetTotalScheduleReceiptById(id));
         }
     }
 }

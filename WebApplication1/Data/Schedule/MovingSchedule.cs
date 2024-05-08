@@ -35,6 +35,6 @@ namespace WebApplication1.Data.Schedule
         public ICollection<Notification>? NotificationList { get; set; }
         public ICollection<Instruction>? InstructionList { get; set; }
         public ICollection<ServiceSchedule>? ServiceScheduleList { get; set; }
-        public TotalReceipt TotalReceipt { get; set; }
+        public TotalScheduleReceipt? TotalReceipt { get; set; }
     }
 }
