@@ -5,9 +5,11 @@ namespace WebApplication1.Model.Receipt
     public class FullReceiptInsertModel
     {
         public Guid? TourishPlanId { get; set; }
-        public Guid? ScheduleId { get; set; }
-        public ScheduleType? ScheduleType { get; set; }
+        public Guid? MovingScheduleId { get; set; }
+        public Guid? StayingScheduleId { get; set; }
+
         public Guid? TourishScheduleId { get; set; }
+        public Guid? ServiceScheduleId { get; set; }
         public Guid FullReceiptId { get; set; }
         public Guid TotalReceiptId { get; set; }
         public string GuestName { get; set; }
@@ -28,9 +30,11 @@ namespace WebApplication1.Model.Receipt
     public class FullReceiptClientInsertModel
     {
         public Guid? TourishPlanId { get; set; }
-        public Guid? ScheduleId { get; set; }
-        public ScheduleType? ScheduleType { get; set; }
+        public Guid? MovingScheduleId { get; set; }
+        public Guid? StayingScheduleId { get; set; }
+
         public Guid? TourishScheduleId { get; set; }
+        public Guid? ServiceScheduleId { get; set; }
         public string GuestName { get; set; }
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
@@ -42,9 +46,11 @@ namespace WebApplication1.Model.Receipt
     public class FullReceiptUpdateModel
     {
         public Guid? TourishPlanId { get; set; }
-        public Guid? ScheduleId { get; set; }
-        public ScheduleType? ScheduleType { get; set; }
+        public Guid? MovingScheduleId { get; set; }
+        public Guid? StayingScheduleId { get; set; }
+
         public Guid? TourishScheduleId { get; set; }
+        public Guid? ServiceScheduleId { get; set; }
         public Guid FullReceiptId { get; set; }
         public Guid TotalReceiptId { get; set; }
         public string GuestName { get; set; }

@@ -1,13 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using WebApplication1.Data.Receipt;
 using WebApplication1.Data.Transport;
 
 namespace WebApplication1.Data.Schedule
 {
-    public enum MovingScheduleStatus
-    {
-        Created = 0, OnGoing = 1, Completed = 2, Cancelled = 3
-    }
 
     [Table("MovingSchedule")]
     public class MovingSchedule
@@ -30,11 +27,6 @@ namespace WebApplication1.Data.Schedule
 
         public string StartingPlace { get; set; }
         public string HeadingPlace { get; set; }
-        public MovingScheduleStatus Status { get; set; }
-        [Column(TypeName = "ntext")]
-        public string? Description { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
 
@@ -42,5 +34,7 @@ namespace WebApplication1.Data.Schedule
         public ICollection<ScheduleInterest>? ScheduleInterestList { get; set; }
         public ICollection<Notification>? NotificationList { get; set; }
         public ICollection<Instruction>? InstructionList { get; set; }
+        public ICollection<ServiceSchedule>? ServiceScheduleList { get; set; }
+        public TotalReceipt TotalReceipt { get; set; }
     }
 }

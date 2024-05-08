@@ -134,7 +134,8 @@ namespace TourishApi.Service.InheritanceService
 
         public Response GetAll(
             string? tourishPlanId,
-            string? scheduleId,
+            string? movingScheduleId,
+            string? stayingScheduleId,
             ScheduleType? scheduleType,
             string? sortBy,
             string? sortDirection,
@@ -147,7 +148,8 @@ namespace TourishApi.Service.InheritanceService
             {
                 var receiptList = _receiptRepository.GetAll(
                     tourishPlanId,
-                    scheduleId,
+                    movingScheduleId,
+                    stayingScheduleId,
                     scheduleType,
                     status,
                     sortBy,

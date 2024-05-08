@@ -23,9 +23,11 @@ namespace WebApplication1.Controllers.Receipt
 
         // GET: api/<ValuesController>
         [HttpGet]
-        public IActionResult GetAll(string? tourishPlanId, string? scheduleId, ScheduleType? scheduleType, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
+        public IActionResult GetAll(string? tourishPlanId, string? movingScheduleId,
+            string? stayingScheduleId,
+            ScheduleType? scheduleType, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
         {
-            return Ok(_receiptService.GetAll(tourishPlanId, scheduleId, scheduleType, sortBy, sortDirection, page, pageSize, status));
+            return Ok(_receiptService.GetAll(tourishPlanId, movingScheduleId, stayingScheduleId, scheduleType, sortBy, sortDirection, page, pageSize, status));
 
         }
 

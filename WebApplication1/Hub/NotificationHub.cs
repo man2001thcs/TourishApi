@@ -101,10 +101,10 @@ namespace SignalR.Hub
                     await Clients.Client(Context.ConnectionId).ChangeNotifyToRead(notificationId, false);
             }
             catch (Exception ex)
-            {             
-                await Clients.Client(Context.ConnectionId).SendError(notificationId, "Lỗi xảy ra: " + ex.ToString());            
+            {
+                await Clients.Client(Context.ConnectionId).SendError(notificationId, "Lỗi xảy ra: " + ex.ToString());
             }
-            
+
         }
 
         public override async Task OnConnectedAsync()

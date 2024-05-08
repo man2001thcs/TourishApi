@@ -1,13 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using WebApplication1.Data.Receipt;
 using WebApplication1.Data.RestHouse;
 
 namespace WebApplication1.Data.Schedule
 {
-    public enum StayingScheduleStatus
-    {
-        Created = 0, OnGoing = 1, Completed = 2, Cancelled = 3
-    }
 
     [Table("StayingSchedule")]
     public class StayingSchedule
@@ -26,11 +23,6 @@ namespace WebApplication1.Data.Schedule
         public RestHouseType RestHouseType { get; set; }
         public Guid RestHouseBranchId { get; set; }
         public double? SinglePrice { get; set; }
-        public StayingScheduleStatus Status { get; set; }
-        [Column(TypeName = "ntext")]
-        public string? Description { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
 
@@ -38,5 +30,7 @@ namespace WebApplication1.Data.Schedule
         public ICollection<ScheduleInterest>? ScheduleInterestList { get; set; }
         public ICollection<Notification>? NotificationList { get; set; }
         public ICollection<Instruction>? InstructionList { get; set; }
+        public ICollection<ServiceSchedule>? ServiceScheduleList { get; set; }
+        public TotalReceipt TotalReceipt { get; set; }
     }
 }

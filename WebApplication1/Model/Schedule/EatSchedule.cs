@@ -1,6 +1,4 @@
-﻿using WebApplication1.Data.Schedule;
-
-namespace WebApplication1.Model.Schedule
+﻿namespace WebApplication1.Model.Schedule
 {
     public class EatScheduleModel
     {
@@ -12,10 +10,7 @@ namespace WebApplication1.Model.Schedule
         public string? SupportNumber { get; set; }
         public Guid RestaurantId { get; set; }
         public double? SinglePrice { get; set; }
-        public EatScheduleStatus Status { get; set; }
         public string? Description { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
     }

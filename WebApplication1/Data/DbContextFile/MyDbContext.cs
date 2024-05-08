@@ -86,12 +86,6 @@ namespace WebApplication1.Data.DbContextFile
                 .HasForeignKey(e => e.TourishPlanId).IsRequired(false)
                 .HasConstraintName("FK_TourishPlan_StayingSchedules");
 
-                entity.HasOne(e => e.TotalReceipt)
-                .WithOne(e => e.TourishPlan)
-                .HasForeignKey<TotalReceipt>(e => e.TourishPlanId)
-                .IsRequired(false)
-                .HasConstraintName("FK_TourishPlan_TotalReceipt");
-
                 entity.HasMany(e => e.NotificationList)
                 .WithOne(e => e.TourishPlan)
                 .HasForeignKey(e => e.TourishPlanId)
@@ -103,8 +97,6 @@ namespace WebApplication1.Data.DbContextFile
                 entity.ToTable(nameof(MovingSchedule));
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
-
-                entity.Property(e => e.Description).HasDefaultValueSql("''");
             });
 
             modelBuilder.Entity<EatSchedule>(entity =>
@@ -112,8 +104,6 @@ namespace WebApplication1.Data.DbContextFile
                 entity.ToTable(nameof(EatSchedule));
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
-
-                entity.Property(e => e.Description).HasDefaultValueSql("''");
             });
 
             modelBuilder.Entity<StayingSchedule>(entity =>
@@ -121,8 +111,6 @@ namespace WebApplication1.Data.DbContextFile
                 entity.ToTable(nameof(StayingSchedule));
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
-
-                entity.Property(e => e.Description).HasDefaultValueSql("''");
             });
 
             modelBuilder.Entity<TourishCategory>(entity =>
@@ -149,6 +137,18 @@ namespace WebApplication1.Data.DbContextFile
                 entity.ToTable(nameof(ServiceSchedule));
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
+
+                entity.HasOne(e => e.MovingSchedule)
+               .WithMany(e => e.ServiceScheduleList)
+               .HasForeignKey(e => e.MovingScheduleId)
+               .IsRequired(false)
+               .HasConstraintName("FK_MovingSchedule_ServiceSchedule");
+
+                entity.HasOne(e => e.StayingSchedule)
+               .WithMany(e => e.ServiceScheduleList)
+               .HasForeignKey(e => e.StayingScheduleId)
+               .IsRequired(false)
+               .HasConstraintName("FK_StayingSchedule_ServiceSchedule");
             });
 
             modelBuilder.Entity<TourishCategoryRelation>(entity =>
@@ -285,6 +285,24 @@ namespace WebApplication1.Data.DbContextFile
                .HasForeignKey(e => e.TotalReceiptId)
                .HasConstraintName("FK_TotalReceipt_FullReceipt");
 
+                entity.HasOne(e => e.TourishPlan)
+                .WithOne(e => e.TotalReceipt)
+                .HasForeignKey<TotalReceipt>(e => e.TourishPlanId)
+                .IsRequired(false)
+                .HasConstraintName("FK_TourishPlan_TotalReceipt");
+
+                //entity.HasOne(e => e.StayingSchedule)
+                //.WithOne(e => e.TotalReceipt)
+                //.HasForeignKey<TotalReceipt>(e => e.StayingSchedule)
+                //.IsRequired(false)
+                //.HasConstraintName("FK_StayingSchedule_TotalReceipt");
+
+                //entity.HasOne(e => e.MovingSchedule)
+                //.WithOne(e => e.TotalReceipt)
+                //.HasForeignKey<TotalReceipt>(e => e.MovingScheduleId)
+                //.IsRequired(false)
+                //.HasConstraintName("FK_MovingSchedule_TotalReceipt");
+
             });
 
             modelBuilder.Entity<FullReceipt>(entity =>
@@ -299,6 +317,12 @@ namespace WebApplication1.Data.DbContextFile
                .IsRequired(false)
                .HasForeignKey<FullReceipt>(e => e.TourishScheduleId)
                .HasConstraintName("FK_FullReceipt_TourishSchedule");
+
+                entity.HasOne(e => e.ServiceSchedule)
+               .WithOne(e => e.FullReceipt)
+               .IsRequired(false)
+               .HasForeignKey<FullReceipt>(e => e.ServiceScheduleId)
+               .HasConstraintName("FK_FullReceipt_ServiceSchedule");
 
             });
 

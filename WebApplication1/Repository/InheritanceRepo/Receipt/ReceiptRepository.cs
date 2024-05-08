@@ -1,5 +1,4 @@
-﻿using Google.Api.Gax;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TourishApi.Extension;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
@@ -39,8 +38,8 @@ public class ReceiptRepository
                 Status = ReceiptStatus.Created,
                 Description = receiptModel.Description,
 
-                ScheduleId = receiptModel.ScheduleId,
-                ScheduleType = receiptModel.ScheduleType,
+                MovingScheduleId = receiptModel.MovingScheduleId,
+                StayingScheduleId = receiptModel.StayingScheduleId,
 
                 CreatedDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow
@@ -63,24 +62,19 @@ public class ReceiptRepository
             }
             else
             {
-                if (receiptModel.ScheduleType == ScheduleType.EatSchedule)
-                {
-                    var schedule = _context.EatSchedules.FirstOrDefault(e =>
-                        e.Id == receiptModel.ScheduleId
-                    );
-                    originalPrice = schedule.SinglePrice ?? (double)0;
-                }
-                else if (receiptModel.ScheduleType == ScheduleType.MovingSchedule)
+
+                if (receiptModel.MovingScheduleId != null)
                 {
                     var schedule = _context.MovingSchedules.FirstOrDefault(e =>
-                        e.Id == receiptModel.ScheduleId
+                        e.Id == receiptModel.MovingScheduleId
                     );
                     originalPrice = schedule.SinglePrice ?? (double)0;
                 }
-                if (receiptModel.ScheduleType == ScheduleType.StayingSchedule)
+
+                if (receiptModel.StayingScheduleId != null)
                 {
                     var schedule = _context.StayingSchedules.FirstOrDefault(e =>
-                        e.Id == receiptModel.ScheduleId
+                        e.Id == receiptModel.StayingScheduleId
                     );
                     originalPrice = schedule.SinglePrice ?? (double)0;
                 }
@@ -92,6 +86,7 @@ public class ReceiptRepository
                 {
                     TotalReceiptId = totalReceipt.TotalReceiptId,
                     TourishScheduleId = receiptModel.TourishScheduleId,
+                    ServiceScheduleId = receiptModel.ServiceScheduleId,
                     OriginalPrice = originalPrice,
                     GuestName = receiptModel.GuestName,
                     Description = receiptModel.Description,
@@ -180,8 +175,8 @@ public class ReceiptRepository
             totalReceipt = new TotalReceipt
             {
                 TourishPlanId = receiptModel.TourishPlanId,
-                ScheduleId = receiptModel.ScheduleId,
-                ScheduleType = receiptModel.ScheduleType,
+                MovingScheduleId = receiptModel.MovingScheduleId,
+                StayingScheduleId = receiptModel.StayingScheduleId,
                 Status = ReceiptStatus.Created,
                 Description = "",
                 CreatedDate = DateTime.UtcNow,
@@ -251,6 +246,7 @@ public class ReceiptRepository
             {
                 TotalReceiptId = totalReceipt.TotalReceiptId,
                 TourishScheduleId = receiptModel.TourishScheduleId,
+                ServiceScheduleId = receiptModel.ServiceScheduleId,
                 GuestName = receiptModel.GuestName,
                 Description = "",
                 PhoneNumber = receiptModel.PhoneNumber,
@@ -300,6 +296,8 @@ public class ReceiptRepository
                 (plan => plan.Id == totalReceipt.TourishPlanId)
             );
 
+            existFullReceipt.TourishScheduleId = receiptModel.TourishScheduleId;
+            existFullReceipt.ServiceScheduleId = receiptModel.ServiceScheduleId;
             existFullReceipt.GuestName = receiptModel.GuestName;
             existFullReceipt.PhoneNumber = receiptModel.PhoneNumber;
             existFullReceipt.TotalTicket = receiptModel.TotalTicket;
@@ -337,8 +335,7 @@ public class ReceiptRepository
     )
     {
         var totalReceipt = _context.TotalReceiptList.FirstOrDefault(entity =>
-            entity.ScheduleId == receiptModel.ScheduleId
-            && entity.ScheduleType == receiptModel.ScheduleType
+            entity.MovingScheduleId == receiptModel.MovingScheduleId || entity.StayingScheduleId == receiptModel.StayingScheduleId
         );
 
         if (totalReceipt == null)
@@ -346,8 +343,8 @@ public class ReceiptRepository
             totalReceipt = new TotalReceipt
             {
                 TourishPlanId = receiptModel.TourishPlanId,
-                ScheduleId = receiptModel.ScheduleId,
-                ScheduleType = receiptModel.ScheduleType,
+                MovingScheduleId = receiptModel.MovingScheduleId,
+                StayingScheduleId = receiptModel.StayingScheduleId,
                 Status = ReceiptStatus.Created,
                 Description = "",
                 CreatedDate = DateTime.UtcNow,
@@ -362,17 +359,17 @@ public class ReceiptRepository
         {
             var user = _context.Users.FirstOrDefault(u => u.Email.ToString() == receiptModel.Email);
 
-            if (receiptModel.ScheduleType == ScheduleType.StayingSchedule)
+            if (receiptModel.MovingScheduleId != null)
             {
                 var schedule = _context.MovingSchedules.FirstOrDefault(entity =>
-                    entity.Id == receiptModel.ScheduleId
+                    entity.Id == receiptModel.MovingScheduleId
                 );
 
                 if (schedule == null)
                     return new Response { resultCd = 1, MessageCode = "I434", };
 
                 var existScheduleInterest = _context.ScheduleInterests.FirstOrDefault(u =>
-                    u.UserId == user.Id && u.MovingScheduleId == receiptModel.ScheduleId
+                    u.UserId == user.Id && u.MovingScheduleId == receiptModel.MovingScheduleId
                 );
                 if (existScheduleInterest == null)
                 {
@@ -394,17 +391,17 @@ public class ReceiptRepository
                     await _context.SaveChangesAsync();
                 }
             }
-            else if (receiptModel.ScheduleType == ScheduleType.MovingSchedule)
+            else if (receiptModel.StayingScheduleId != null)
             {
-                var schedule = _context.MovingSchedules.FirstOrDefault(entity =>
-                    entity.Id == receiptModel.ScheduleId
+                var schedule = _context.StayingSchedules.FirstOrDefault(entity =>
+                    entity.Id == receiptModel.StayingScheduleId
                 );
 
                 if (schedule == null)
                     return new Response { resultCd = 1, MessageCode = "I434", };
 
                 var existScheduleInterest = _context.ScheduleInterests.FirstOrDefault(u =>
-                    u.UserId == user.Id && u.MovingScheduleId == receiptModel.ScheduleId
+                    u.UserId == user.Id && u.StayingScheduleId == receiptModel.StayingScheduleId
                 );
                 if (existScheduleInterest == null)
                 {
@@ -412,7 +409,7 @@ public class ReceiptRepository
                     {
                         InterestStatus = InterestStatus.User,
                         User = user,
-                        MovingScheduleId = schedule.Id,
+                        StayingScheduleId = schedule.Id,
                         UpdateDate = DateTime.UtcNow
                     };
 
@@ -430,24 +427,17 @@ public class ReceiptRepository
 
         var originalPrice = (double)0;
 
-        if (receiptModel.ScheduleType == ScheduleType.EatSchedule)
-        {
-            var schedule = _context.EatSchedules.FirstOrDefault(e =>
-                e.Id == receiptModel.ScheduleId
-            );
-            originalPrice = schedule.SinglePrice ?? (double)0;
-        }
-        else if (receiptModel.ScheduleType == ScheduleType.MovingSchedule)
+        if (receiptModel.MovingScheduleId != null)
         {
             var schedule = _context.MovingSchedules.FirstOrDefault(e =>
-                e.Id == receiptModel.ScheduleId
+                e.Id == receiptModel.MovingScheduleId
             );
             originalPrice = schedule.SinglePrice ?? (double)0;
         }
-        if (receiptModel.ScheduleType == ScheduleType.StayingSchedule)
+        if (receiptModel.StayingScheduleId != null)
         {
             var schedule = _context.StayingSchedules.FirstOrDefault(e =>
-                e.Id == receiptModel.ScheduleId
+                e.Id == receiptModel.StayingScheduleId
             );
             originalPrice = schedule.SinglePrice ?? (double)0;
         }
@@ -462,6 +452,7 @@ public class ReceiptRepository
             {
                 TotalReceiptId = totalReceipt.TotalReceiptId,
                 TourishScheduleId = receiptModel.TourishScheduleId,
+                ServiceScheduleId = receiptModel.ServiceScheduleId,
                 GuestName = receiptModel.GuestName,
                 Description = "",
                 PhoneNumber = receiptModel.PhoneNumber,
@@ -565,7 +556,7 @@ public class ReceiptRepository
         };
     }
 
-    public Response DeleteAllBýTourishPlanId(Guid tourishPlanId)
+    public Response DeleteAllByTourishPlanId(Guid tourishPlanId)
     {
         var receipt = _context.TotalReceiptList.FirstOrDefault(
             (receipt => receipt.TourishPlanId == tourishPlanId)
@@ -591,10 +582,29 @@ public class ReceiptRepository
         };
     }
 
-    public Response DeleteAllBýScheduleId(Guid scheduleId, ScheduleType scheduleType)
+    public Response DeleteAllByMovingScheduleId(Guid scheduleId)
     {
         var receipt = _context.TotalReceiptList.FirstOrDefault(
-            (receipt => receipt.ScheduleId == scheduleId && receipt.ScheduleType == scheduleType)
+            (receipt => receipt.MovingScheduleId == scheduleId)
+        );
+        if (receipt != null)
+        {
+            _context.Remove(receipt);
+            _context.SaveChanges();
+        }
+
+        return new Response
+        {
+            resultCd = 0,
+            MessageCode = "I513",
+            // Delete type success
+        };
+    }
+
+    public Response DeleteAllByStayingScheduleId(Guid scheduleId)
+    {
+        var receipt = _context.TotalReceiptList.FirstOrDefault(
+            (receipt => receipt.StayingScheduleId == scheduleId)
         );
         if (receipt != null)
         {
@@ -612,7 +622,8 @@ public class ReceiptRepository
 
     public Response GetAll(
         string? tourishPlanId,
-        string? scheduleId,
+        string? movingScheduleId,
+        string? stayingScheduleId,
         ScheduleType? scheduleType,
         ReceiptStatus? status,
         string? sortBy,
@@ -624,13 +635,27 @@ public class ReceiptRepository
         var receiptQuery = _context
             .TotalReceiptList.Include(receipt => receipt.FullReceiptList)
             .ThenInclude(receipt => receipt.TourishSchedule)
+            .Include(receipt => receipt.FullReceiptList)
+            .ThenInclude(receipt => receipt.ServiceSchedule)
             .Include(receipt => receipt.TourishPlan)
             .Include(receipt => receipt.TourishPlan.MovingSchedules)
             .Include(receipt => receipt.TourishPlan.EatSchedules)
             .Include(receipt => receipt.TourishPlan.StayingSchedules)
+            .Include(receipt => receipt.MovingSchedule)
+            .Include(receipt => receipt.StayingSchedule)
             .AsQueryable();
 
         #region Filtering
+        if (scheduleType != null)
+        {
+            if (scheduleType == ScheduleType.MovingSchedule)
+                receiptQuery = receiptQuery.Where(receipt => receipt.MovingScheduleId != null);
+
+            if (scheduleType == ScheduleType.StayingSchedule)
+                receiptQuery = receiptQuery.Where(receipt => receipt.StayingScheduleId != null);
+        }
+        else receiptQuery = receiptQuery.Where(receipt => receipt.TourishPlanId != null);
+
         if (!string.IsNullOrEmpty(tourishPlanId))
         {
             receiptQuery = receiptQuery.Where(receipt =>
@@ -638,16 +663,25 @@ public class ReceiptRepository
             );
         }
 
-        if (!string.IsNullOrEmpty(scheduleId))
+        if (!string.IsNullOrEmpty(movingScheduleId))
         {
             receiptQuery = receiptQuery.Where(receipt =>
-                receipt.ScheduleId == new Guid(scheduleId) && receipt.ScheduleType == scheduleType
+                receipt.MovingScheduleId == new Guid(movingScheduleId)
             );
         }
 
-        if (!string.IsNullOrEmpty(status.ToString()))
+        if (!string.IsNullOrEmpty(stayingScheduleId))
         {
-            receiptQuery = receiptQuery.Where(receipt => receipt.Status == status);
+            receiptQuery = receiptQuery.Where(receipt =>
+                receipt.StayingScheduleId == new Guid(stayingScheduleId)
+            );
+        }
+
+        if (status != null)
+        {
+            receiptQuery = receiptQuery.Where(receipt =>
+                receipt.Status == status
+            );
         }
         #endregion
 
@@ -670,19 +704,15 @@ public class ReceiptRepository
         {
             TotalReceiptId = entity.TotalReceiptId,
             TourishPlanId = entity.TourishPlanId,
-            ScheduleId = entity.ScheduleId,
-            ScheduleType = entity.ScheduleType,
+            MovingScheduleId = entity.MovingScheduleId,
+            StayingScheduleId = entity.StayingScheduleId,
             Status = entity.Status,
             Description = entity.Description,
             CompleteDate = entity.CompleteDate,
             FullReceiptList = entity.FullReceiptList,
             TourishPlan = entity.TourishPlan,
-            StayingSchedule = scheduleType == ScheduleType.StayingSchedule
-                ? _context.StayingSchedules.FirstOrDefault(e => e.Id == entity.ScheduleId)
-                : null,
-            MovingSchedule = scheduleType == ScheduleType.MovingSchedule
-                ? _context.MovingSchedules.FirstOrDefault(e => e.Id == entity.ScheduleId)
-                : null,
+            StayingSchedule = entity.StayingSchedule,
+            MovingSchedule = entity.MovingSchedule,
             CreatedDate = entity.CreatedDate,
             UpdateDate = entity.UpdateDate,
         });
@@ -709,11 +739,14 @@ public class ReceiptRepository
     {
         var receiptQuery = _context
             .TotalReceiptList.Include(receipt => receipt.FullReceiptList)
-            .ThenInclude(receipt => receipt.TourishSchedule)
+            .ThenInclude(receipt => receipt.TourishSchedule).Include(receipt => receipt.FullReceiptList)
+            .ThenInclude(receipt => receipt.ServiceSchedule)
             .Include(receipt => receipt.TourishPlan)
             .Include(receipt => receipt.TourishPlan.MovingSchedules)
             .Include(receipt => receipt.TourishPlan.EatSchedules)
             .Include(receipt => receipt.TourishPlan.StayingSchedules)
+            .Include(receipt => receipt.MovingSchedule)
+            .Include(receipt => receipt.StayingSchedule)
             .AsQueryable();
 
         #region Filtering
@@ -731,8 +764,14 @@ public class ReceiptRepository
 
         if (scheduleType != null)
         {
-            receiptQuery = receiptQuery.Where(receipt => receipt.ScheduleType == scheduleType);
+            if (scheduleType == ScheduleType.MovingSchedule)
+                receiptQuery = receiptQuery.Where(receipt => receipt.MovingScheduleId != null);
+
+            if (scheduleType == ScheduleType.StayingSchedule)
+                receiptQuery = receiptQuery.Where(receipt => receipt.StayingScheduleId != null);
         }
+        else receiptQuery = receiptQuery.Where(receipt => receipt.TourishPlanId != null);
+
         #endregion
 
         #region Sorting
@@ -754,8 +793,8 @@ public class ReceiptRepository
         {
             TotalReceiptId = entity.TotalReceiptId,
             TourishPlanId = entity.TourishPlanId,
-            ScheduleId = entity.ScheduleId,
-            ScheduleType = entity.ScheduleType,
+            MovingScheduleId = entity.MovingScheduleId,
+            StayingScheduleId = entity.StayingScheduleId,
 
             Status = entity.Status,
             Description = entity.Description,
@@ -766,12 +805,8 @@ public class ReceiptRepository
                 .ToList(),
             TourishPlan = entity.TourishPlan,
 
-            StayingSchedule = scheduleType == ScheduleType.StayingSchedule
-                ? _context.StayingSchedules.FirstOrDefault(e => e.Id == entity.ScheduleId)
-                : null,
-            MovingSchedule = scheduleType == ScheduleType.MovingSchedule
-                ? _context.MovingSchedules.FirstOrDefault(e => e.Id == entity.ScheduleId)
-                : null,
+            StayingSchedule = entity.StayingSchedule,
+            MovingSchedule = entity.MovingSchedule,
 
             CreatedDate = entity.CreatedDate,
             UpdateDate = entity.UpdateDate,
@@ -807,6 +842,7 @@ public class ReceiptRepository
             .FullReceiptList.Where(receipt => receipt.FullReceiptId == id)
             .Include(entity => entity.TotalReceipt)
             .Include(entity => entity.TourishSchedule)
+            .Include(entity => entity.ServiceSchedule)
             //.ThenInclude(entity => entity.TourishPlan)
             .FirstOrDefault();
         if (receipt == null)
@@ -834,6 +870,7 @@ public class ReceiptRepository
             receipt.TotalTicket = receiptModel.TotalTicket;
             receipt.TotalChildTicket = receiptModel.TotalChildTicket;
             receipt.TourishScheduleId = receiptModel.TourishScheduleId;
+            receipt.ServiceScheduleId = receiptModel.ServiceScheduleId;
             receipt.Description = receiptModel.Description;
             receipt.Status = receiptModel.Status;
 
@@ -988,6 +1025,7 @@ public class ReceiptRepository
             receipt.TotalTicket = receiptModel.TotalTicket;
             receipt.TotalChildTicket = receiptModel.TotalChildTicket;
             receipt.TourishScheduleId = receiptModel.TourishScheduleId;
+            receipt.ServiceScheduleId = receiptModel.ServiceScheduleId;
             receipt.Description = receiptModel.Description;
             receipt.Status = receiptModel.Status;
 
@@ -1264,13 +1302,12 @@ public class ReceiptRepository
                 };
             }
 
-            if (receiptModel.ScheduleType == ScheduleType.MovingSchedule)
+            if (receiptModel.MovingScheduleId != null)
             {
-                var scheduleExist = _context.MovingSchedules.FirstOrDefault(
-                    (plan => plan.Id == receipt.TotalReceipt.ScheduleId)
+                var scheduleExist = _context.ServiceSchedule.Include(entity => entity.Id == receiptModel.ServiceScheduleId).FirstOrDefault(
                 );
 
-                if (scheduleExist.Status == MovingScheduleStatus.OnGoing)
+                if (scheduleExist.Status == ScheduleStatus.OnGoing)
                 {
                     return new Response
                     {
@@ -1279,7 +1316,7 @@ public class ReceiptRepository
                         returnId = receipt.TotalReceiptId,
                     };
                 }
-                else if (scheduleExist.Status == MovingScheduleStatus.Completed)
+                else if (scheduleExist.Status == ScheduleStatus.Completed)
                 {
                     return new Response
                     {
@@ -1288,7 +1325,7 @@ public class ReceiptRepository
                         returnId = receipt.TotalReceiptId,
                     };
                 }
-                else if (scheduleExist.Status == MovingScheduleStatus.Cancelled)
+                else if (scheduleExist.Status == ScheduleStatus.Cancelled)
                 {
                     return new Response
                     {
@@ -1307,13 +1344,13 @@ public class ReceiptRepository
                         returnId = receipt.TotalReceiptId,
                     };
                 }
-            } else if (receiptModel.ScheduleType == ScheduleType.StayingSchedule)
+            }
+            else if (receiptModel.StayingScheduleId != null)
             {
-                var scheduleExist = _context.StayingSchedules.FirstOrDefault(
-                    (plan => plan.Id == receipt.TotalReceipt.ScheduleId)
-                );
+                var scheduleExist = _context.ServiceSchedule.Include(entity => entity.Id == receiptModel.ServiceScheduleId).FirstOrDefault(
+               );
 
-                if (scheduleExist.Status == StayingScheduleStatus.OnGoing)
+                if (scheduleExist.Status == ScheduleStatus.OnGoing)
                 {
                     return new Response
                     {
@@ -1322,7 +1359,7 @@ public class ReceiptRepository
                         returnId = receipt.TotalReceiptId,
                     };
                 }
-                else if (scheduleExist.Status == StayingScheduleStatus.Completed)
+                else if (scheduleExist.Status == ScheduleStatus.Completed)
                 {
                     return new Response
                     {
@@ -1331,7 +1368,8 @@ public class ReceiptRepository
                         returnId = receipt.TotalReceiptId,
                     };
                 }
-                else if (scheduleExist.Status == StayingScheduleStatus.Cancelled)
+
+                else if (scheduleExist.Status == ScheduleStatus.Cancelled)
                 {
                     return new Response
                     {
@@ -1356,7 +1394,7 @@ public class ReceiptRepository
             receipt.Status = receiptModel.Status;
             receipt.TotalTicket = receiptModel.TotalTicket;
             receipt.TotalChildTicket = receiptModel.TotalChildTicket;
-            receipt.TourishScheduleId = receiptModel.TourishScheduleId;
+            receipt.ServiceScheduleId = receiptModel.ServiceScheduleId;
             receipt.UpdateDate = DateTime.UtcNow;
 
             if (receiptModel.Status == FullReceiptStatus.Completed)
@@ -1419,6 +1457,10 @@ public class ReceiptRepository
             .Include(entity => entity.TotalReceipt)
             .Include(entity => entity.TourishSchedule)
             .ThenInclude(entity => entity.TourishPlan)
+            .Include(entity => entity.ServiceSchedule)
+            .ThenInclude(entity => entity.MovingSchedule)
+            .Include(entity => entity.ServiceSchedule)
+            .ThenInclude(entity => entity.StayingScheduleId)
             .Where(entity => (int)entity.Status < 2)
             .Select(entity => new
             {
@@ -1427,8 +1469,8 @@ public class ReceiptRepository
                 TotalTicket = entity.TotalTicket,
                 TotalChildTicket = entity.TotalChildTicket,
                 TourishPlanId = entity.TotalReceipt.TourishPlanId,
-                ScheduleId = entity.TotalReceipt.ScheduleId,
-                ScheduleType = entity.TotalReceipt.ScheduleType
+                MovingScheduleId = entity.TotalReceipt.MovingScheduleId,
+                StayingScheduleId = entity.TotalReceipt.StayingScheduleId
             })
             .ToList();
 
@@ -1478,8 +1520,8 @@ public class ReceiptRepository
                 TotalTicket = entity.TotalTicket,
                 TotalChildTicket = entity.TotalChildTicket,
                 TourishPlanId = entity.TotalReceipt.TourishPlanId,
-                ScheduleId = entity.TotalReceipt.ScheduleId,
-                ScheduleType = entity.TotalReceipt.ScheduleType
+                MovingScheduleId = entity.TotalReceipt.MovingScheduleId,
+                StayingScheduleId = entity.TotalReceipt.StayingScheduleId
             })
             .ToList();
 
@@ -1523,8 +1565,8 @@ public class ReceiptRepository
                 TotalTicket = entity.TotalTicket,
                 TotalChildTicket = entity.TotalChildTicket,
                 TourishPlanId = entity.TotalReceipt.TourishPlanId,
-                ScheduleId = entity.TotalReceipt.ScheduleId,
-                ScheduleType = entity.TotalReceipt.ScheduleType
+                MovingScheduleId = entity.TotalReceipt.MovingScheduleId,
+                StayingScheduleId = entity.TotalReceipt.StayingScheduleId
             })
             .ToList();
 
@@ -1540,10 +1582,10 @@ public class ReceiptRepository
     {
         var receiptList = _context
             .FullReceiptList.Include(entity => entity.TotalReceipt)
+            .ThenInclude(entity => entity.MovingSchedule)
             .Include(entity => entity.TotalReceipt)
             .Where(entity => (int)entity.Status < 3)
-            .Where(entity => !entity.TotalReceipt.TourishPlanId.HasValue)
-            .Where(entity => entity.TotalReceipt.ScheduleType == ScheduleType.MovingSchedule)
+            .Where(entity => entity.TotalReceipt.MovingScheduleId != null)
             .Where(entity =>
                 (
                     entity.CreatedDate.Month == DateTime.UtcNow.Month
@@ -1573,8 +1615,8 @@ public class ReceiptRepository
                 TotalTicket = entity.TotalTicket,
                 TotalChildTicket = entity.TotalChildTicket,
                 TourishPlanId = entity.TotalReceipt.TourishPlanId,
-                ScheduleId = entity.TotalReceipt.ScheduleId,
-                ScheduleType = entity.TotalReceipt.ScheduleType
+                MovingScheduleId = entity.TotalReceipt.MovingScheduleId,
+                ScheduleName = entity.TotalReceipt.MovingSchedule.Name
             })
             .ToList();
 
@@ -1591,9 +1633,9 @@ public class ReceiptRepository
         var receiptList = _context
             .FullReceiptList.Include(entity => entity.TotalReceipt)
             .Include(entity => entity.TotalReceipt)
+            .ThenInclude(entity => entity.StayingSchedule)
             .Where(entity => (int)entity.Status < 3)
-            .Where(entity => !entity.TotalReceipt.TourishPlanId.HasValue)
-            .Where(entity => entity.TotalReceipt.ScheduleType == ScheduleType.StayingSchedule)
+            .Where(entity => entity.TotalReceipt.StayingScheduleId != null)
             .Where(entity =>
                 (
                     entity.CreatedDate.Month == DateTime.UtcNow.Month
@@ -1623,8 +1665,8 @@ public class ReceiptRepository
                 TotalTicket = entity.TotalTicket,
                 TotalChildTicket = entity.TotalChildTicket,
                 TourishPlanId = entity.TotalReceipt.TourishPlanId,
-                ScheduleId = entity.TotalReceipt.ScheduleId,
-                ScheduleType = entity.TotalReceipt.ScheduleType
+                ScheduleName = entity.TotalReceipt.StayingSchedule.Name,
+                StayingScheduleId = entity.TotalReceipt.StayingScheduleId
             })
             .ToList();
 
@@ -1641,9 +1683,9 @@ public class ReceiptRepository
         var receiptList = _context
             .FullReceiptList.Include(entity => entity.TotalReceipt)
             .Include(entity => entity.TotalReceipt)
+            .ThenInclude(entity => entity.MovingSchedule)
             .Where(entity => (int)entity.Status < 3)
-            .Where(entity => !entity.TotalReceipt.TourishPlanId.HasValue)
-            .Where(entity => entity.TotalReceipt.ScheduleType == ScheduleType.MovingSchedule)
+            .Where(entity => entity.TotalReceipt.MovingScheduleId.HasValue)
             .Where(entity =>
                 (
                     entity.CreatedDate.Month == DateTime.UtcNow.Month
@@ -1666,9 +1708,8 @@ public class ReceiptRepository
                 OriginalPrice = entity.OriginalPrice,
                 TotalTicket = entity.TotalTicket,
                 TotalChildTicket = entity.TotalChildTicket,
-                TourishPlanId = entity.TotalReceipt.TourishPlanId,
-                ScheduleId = entity.TotalReceipt.ScheduleId,
-                ScheduleType = entity.TotalReceipt.ScheduleType
+                MovingScheduleId = entity.TotalReceipt.MovingScheduleId,
+                ScheduleName = entity.TotalReceipt.MovingSchedule.Name
             })
             .ToList();
 
@@ -1685,9 +1726,9 @@ public class ReceiptRepository
         var receiptList = _context
             .FullReceiptList.Include(entity => entity.TotalReceipt)
             .Include(entity => entity.TotalReceipt)
+            .ThenInclude(entity => entity.StayingSchedule)
             .Where(entity => (int)entity.Status < 3)
-            .Where(entity => !entity.TotalReceipt.TourishPlanId.HasValue)
-            .Where(entity => entity.TotalReceipt.ScheduleType == ScheduleType.StayingSchedule)
+            .Where(entity => entity.TotalReceipt.StayingScheduleId != null)
             .Where(entity =>
                 (
                     entity.CreatedDate.Month == DateTime.UtcNow.Month
@@ -1711,8 +1752,8 @@ public class ReceiptRepository
                 TotalTicket = entity.TotalTicket,
                 TotalChildTicket = entity.TotalChildTicket,
                 TourishPlanId = entity.TotalReceipt.TourishPlanId,
-                ScheduleId = entity.TotalReceipt.ScheduleId,
-                ScheduleType = entity.TotalReceipt.ScheduleType
+                ScheduleName = entity.TotalReceipt.StayingSchedule.Name,
+                StayingScheduleId = entity.TotalReceipt.StayingScheduleId
             })
             .ToList();
 
@@ -1733,8 +1774,7 @@ public class ReceiptRepository
             .FullReceiptList.Include(entity => entity.TotalReceipt)
             .Include(entity => entity.TotalReceipt)
             .Where(entity => (int)entity.Status < 3)
-            .Where(entity => !entity.TotalReceipt.TourishPlanId.HasValue)
-            .Where(entity => entity.TotalReceipt.ScheduleType == ScheduleType.StayingSchedule)
+            .Where(entity => entity.TotalReceipt.StayingScheduleId != null)
             .Where(entity =>
                 (entity.CreatedDate >= startOfYear && entity.CreatedDate <= currentDate)
                 || (
@@ -1779,8 +1819,7 @@ public class ReceiptRepository
             .FullReceiptList.Include(entity => entity.TotalReceipt)
             .Include(entity => entity.TotalReceipt)
             .Where(entity => (int)entity.Status < 3)
-            .Where(entity => !entity.TotalReceipt.TourishPlanId.HasValue)
-            .Where(entity => entity.TotalReceipt.ScheduleType == ScheduleType.MovingSchedule)
+            .Where(entity => entity.TotalReceipt.MovingScheduleId != null)
             .Where(entity =>
                 (entity.CreatedDate >= startOfYear && entity.CreatedDate <= currentDate)
                 || (

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApplication1.Data.Schedule
 {
-    public enum EatScheduleStatus
+    public enum ScheduleStatus
     {
         Created = 0, OnGoing = 1, Completed = 2, Cancelled = 3
     }
@@ -23,11 +23,6 @@ namespace WebApplication1.Data.Schedule
         public string? SupportNumber { get; set; }
         public Guid RestaurantId { get; set; }
         public double? SinglePrice { get; set; }
-        public EatScheduleStatus Status { get; set; }
-        [Column(TypeName = "ntext")]
-        public string? Description { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
 

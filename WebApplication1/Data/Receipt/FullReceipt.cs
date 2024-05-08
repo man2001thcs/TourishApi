@@ -15,6 +15,7 @@ namespace WebApplication1.Data.Receipt
         public Guid FullReceiptId { get; set; }
         public Guid TotalReceiptId { get; set; }
         public Guid? TourishScheduleId { get; set; }
+        public Guid? ServiceScheduleId { get; set; }
         public string GuestName { get; set; }
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
@@ -32,7 +33,7 @@ namespace WebApplication1.Data.Receipt
         // Relationship
         public TotalReceipt TotalReceipt { get; set; }
         public TourishSchedule TourishSchedule { get; set; }
-
+        public ServiceSchedule ServiceSchedule { get; set; }
         public FullReceipt()
         {
             TotalTicket = 1;

@@ -32,9 +32,6 @@ namespace WebApplication1.Repository.InheritanceRepo
                 Address = addModel.Address,
                 SupportNumber = addModel.SupportNumber,
                 TourishPlanId = null,
-                Status = addModel.Status,
-                StartDate = addModel.StartDate,
-                EndDate = addModel.EndDate,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
@@ -68,12 +65,31 @@ namespace WebApplication1.Repository.InheritanceRepo
                 VehiclePlate = addModel.VehiclePlate,
                 PhoneNumber = addModel.PhoneNumber,
                 TourishPlanId = null,
-                Status = addModel.Status,
-                StartDate = addModel.StartDate,
-                EndDate = addModel.EndDate,
+                ServiceScheduleList = null,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
+
+            if (addModel.ServiceScheduleList != null)
+            {
+                var serviceDataScheduleList = new List<ServiceSchedule>();
+                foreach (var item in addModel.ServiceScheduleList)
+                {
+                    serviceDataScheduleList.Add(
+                        new ServiceSchedule
+                        {
+                            MovingScheduleId = item.MovingScheduleId,
+                            StayingScheduleId = item.StayingScheduleId,
+                            Status = item.Status,
+                            StartDate = item.StartDate,
+                            EndDate = item.EndDate,
+                            CreateDate = DateTime.UtcNow,
+                            UpdateDate = DateTime.UtcNow
+                        }
+                    );
+                }
+                addValue.ServiceScheduleList = serviceDataScheduleList;
+            }
 
             var scheduleInterest = new ScheduleInterest();
             var scheduleInterestList = new List<ScheduleInterest>();
@@ -124,15 +140,33 @@ namespace WebApplication1.Repository.InheritanceRepo
                 Address = addModel.Address,
                 SupportNumber = addModel.SupportNumber,
                 TourishPlanId = null,
-                Status = addModel.Status,
-                StartDate = addModel.StartDate,
-                EndDate = addModel.EndDate,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
             };
 
             var scheduleInterest = new ScheduleInterest();
             var scheduleInterestList = new List<ScheduleInterest>();
+
+            if (addModel.ServiceScheduleList != null)
+            {
+                var serviceDataScheduleList = new List<ServiceSchedule>();
+                foreach (var item in addModel.ServiceScheduleList)
+                {
+                    serviceDataScheduleList.Add(
+                        new ServiceSchedule
+                        {
+                            MovingScheduleId = item.MovingScheduleId,
+                            StayingScheduleId = item.StayingScheduleId,
+                            Status = item.Status,
+                            StartDate = item.StartDate,
+                            EndDate = item.EndDate,
+                            CreateDate = DateTime.UtcNow,
+                            UpdateDate = DateTime.UtcNow
+                        }
+                    );
+                }
+                addValue.ServiceScheduleList = serviceDataScheduleList;
+            }
 
             if (userId != null)
             {
@@ -261,7 +295,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response GetAllMovingSchedule(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
-            var entityQuery = _context.MovingSchedules.AsQueryable();
+            var entityQuery = _context.MovingSchedules.Include(entity => entity.InstructionList).Include(entity => entity.ServiceScheduleList).AsQueryable();
 
             #region Filtering
             entityQuery = entityQuery.Where(entity => entity.TourishPlan
@@ -300,7 +334,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response GetAllStayingSchedule(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
-            var entityQuery = _context.StayingSchedules.AsQueryable();
+            var entityQuery = _context.StayingSchedules.Include(entity => entity.InstructionList).Include(entity => entity.ServiceScheduleList).AsQueryable();
 
             #region Filtering
             if (!string.IsNullOrEmpty(search))
@@ -337,7 +371,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response GetAllMovingScheduleWithAuthority(string? search, int? type, string? sortBy, string? sortDirection, string? userId, int page = 1, int pageSize = 5)
         {
-            var entityQuery = _context.MovingSchedules.AsQueryable();
+            var entityQuery = _context.MovingSchedules.Include(entity => entity.InstructionList).Include(entity => entity.ServiceScheduleList).AsQueryable();
 
             #region Filtering
             entityQuery = entityQuery.Where(entity => entity.TourishPlan
@@ -386,7 +420,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response GetAllStayingScheduleWithAuthority(string? search, int? type, string? sortBy, string? sortDirection, string? userId, int page = 1, int pageSize = 5)
         {
-            var entityQuery = _context.StayingSchedules.AsQueryable();
+            var entityQuery = _context.StayingSchedules.Include(entity => entity.InstructionList).Include(entity => entity.ServiceScheduleList).AsQueryable();
 
             #region Filtering
             if (!string.IsNullOrEmpty(search))
@@ -468,9 +502,6 @@ namespace WebApplication1.Repository.InheritanceRepo
                 entity.SinglePrice = entityModel.SinglePrice;
                 entity.SupportNumber = entityModel.SupportNumber;
                 entity.Address = entityModel.Address;
-                entity.StartDate = entityModel.StartDate;
-                entity.EndDate = entityModel.EndDate;
-                entity.Status = entityModel.Status;
 
                 _context.SaveChanges();
                 await _blobService.UploadStringBlobAsync("eatschedule-content-container", entityModel.Description ?? "Không có thông tin", "text/plain", entity.Id.ToString() ?? "" + ".txt");
@@ -522,9 +553,6 @@ namespace WebApplication1.Repository.InheritanceRepo
                 entity.SinglePrice = entityModel.SinglePrice;
                 entity.RestHouseBranchId = entityModel.RestHouseBranchId;
                 entity.RestHouseType = entityModel.RestHouseType;
-                entity.Status = entityModel.Status;
-                entity.StartDate = entityModel.StartDate;
-                entity.EndDate = entityModel.EndDate;
 
                 var scheduleInterest = new ScheduleInterest();
                 if (userId != null)
@@ -556,6 +584,30 @@ namespace WebApplication1.Repository.InheritanceRepo
                         }
                     }
                 }
+
+                if (entityModel.ServiceScheduleList != null)
+                {
+                    var dataScheduleList = new List<ServiceSchedule>();
+                    foreach (var item in entityModel.ServiceScheduleList)
+                    {
+                        dataScheduleList.Add(
+                            new ServiceSchedule
+                            {
+                                Id = item.Id.Value,
+                                MovingScheduleId = item.MovingScheduleId,
+                                StayingScheduleId = item.StayingScheduleId,
+                                Status = item.Status,
+                                StartDate = item.StartDate,
+                                EndDate = item.EndDate,
+                                CreateDate = item.CreateDate ?? DateTime.UtcNow,
+                                UpdateDate = DateTime.UtcNow,
+                            }
+                        );
+                    }
+                    entity.ServiceScheduleList = dataScheduleList;
+                }
+
+
                 await _context.SaveChangesAsync();
             }
 
@@ -611,9 +663,6 @@ namespace WebApplication1.Repository.InheritanceRepo
                 entity.DriverName = entityModel.DriverName;
                 entity.StartingPlace = entityModel.StartingPlace;
                 entity.HeadingPlace = entityModel.HeadingPlace;
-                entity.Status = entityModel.Status;
-                entity.StartDate = entityModel.StartDate;
-                entity.EndDate = entityModel.EndDate;
 
                 var scheduleInterest = new ScheduleInterest();
                 if (userId != null)
@@ -644,6 +693,28 @@ namespace WebApplication1.Repository.InheritanceRepo
                             entity.ScheduleInterestList.Add(scheduleInterest);
                         }
                     }
+                }
+
+                if (entityModel.ServiceScheduleList != null)
+                {
+                    var dataScheduleList = new List<ServiceSchedule>();
+                    foreach (var item in entityModel.ServiceScheduleList)
+                    {
+                        dataScheduleList.Add(
+                            new ServiceSchedule
+                            {
+                                Id = item.Id.Value,
+                                MovingScheduleId = item.MovingScheduleId,
+                                StayingScheduleId = item.StayingScheduleId,
+                                Status = item.Status,
+                                StartDate = item.StartDate,
+                                EndDate = item.EndDate,
+                                CreateDate = item.CreateDate ?? DateTime.UtcNow,
+                                UpdateDate = DateTime.UtcNow,
+                            }
+                        );
+                    }
+                    entity.ServiceScheduleList = dataScheduleList;
                 }
 
                 await _context.SaveChangesAsync();
