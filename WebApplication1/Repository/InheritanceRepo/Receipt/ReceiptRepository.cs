@@ -163,7 +163,8 @@ public class ReceiptRepository
     public async Task<Response> AddServiceSchedule(FullReceiptInsertModel receiptModel)
     {
         var totalReceipt = _context.TotalScheduleReceiptList.FirstOrDefault(entity =>
-            entity.MovingScheduleId == receiptModel.MovingScheduleId && entity.StayingScheduleId == receiptModel.StayingScheduleId
+            entity.MovingScheduleId == receiptModel.MovingScheduleId
+            && entity.StayingScheduleId == receiptModel.StayingScheduleId
         );
 
         if (totalReceipt == null)
@@ -268,7 +269,7 @@ public class ReceiptRepository
         {
             totalReceipt = new TotalReceipt
             {
-                TourishPlanId = receiptModel.TourishPlanId,               
+                TourishPlanId = receiptModel.TourishPlanId,
                 Status = ReceiptStatus.Created,
                 Description = "",
                 CreatedDate = DateTime.UtcNow,
@@ -651,7 +652,7 @@ public class ReceiptRepository
             .FullScheduleReceiptList.Include(entity => entity.TotalReceipt)
             .FirstOrDefault((receipt => receipt.FullReceiptId == id));
         if (receipt != null)
-        {          
+        {
             _context.Remove(receipt);
             _context.SaveChanges();
         }
@@ -747,13 +748,13 @@ public class ReceiptRepository
             .Include(receipt => receipt.TourishPlan.StayingSchedules)
             .AsQueryable();
 
-        #region Filtering     
+        #region Filtering
         if (!string.IsNullOrEmpty(tourishPlanId))
         {
             receiptQuery = receiptQuery.Where(receipt =>
                 receipt.TourishPlanId == new Guid(tourishPlanId)
             );
-        }      
+        }
 
         if (status != null)
         {
@@ -1002,7 +1003,7 @@ public class ReceiptRepository
 
             if (scheduleType == ScheduleType.StayingSchedule)
                 receiptQuery = receiptQuery.Where(receipt => receipt.StayingScheduleId != null);
-        }      
+        }
 
         #endregion
 
@@ -1138,6 +1139,14 @@ public class ReceiptRepository
             var planExist = _context.TourishPlan.FirstOrDefault(
                 (plan => plan.Id == receipt.TotalReceipt.TourishPlanId)
             );
+
+            if (
+                receipt.Status != FullReceiptStatus.Completed
+                && receiptModel.Status != FullReceiptStatus.Completed
+            )
+            {
+                await _context.SaveChangesAsync();
+            }
 
             if (
                 receipt.Status != FullReceiptStatus.Completed
@@ -1287,7 +1296,7 @@ public class ReceiptRepository
 
             receipt.UpdateDate = DateTime.UtcNow;
             if (receiptModel.Status == FullReceiptStatus.Completed)
-                receipt.CompleteDate = DateTime.UtcNow;          
+                receipt.CompleteDate = DateTime.UtcNow;
 
             var totalReceiptComplete = await _context
                 .TotalReceiptList.Where(receipt =>

@@ -40,14 +40,14 @@ namespace WebApplication1.Controllers.Receipt
         }
 
         // GET: api/<ValuesController>
-        [HttpGet("tour/user")]
+        [HttpGet("user/tour")]
         public IActionResult GetAllTourReceiptForUser(string? email, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
         {
             return Ok(_receiptService.GetAllTourReceiptForUser(email, sortBy, sortDirection, page, pageSize, status));
 
         }
 
-        [HttpGet("schedule/user")]
+        [HttpGet("user/schedule")]
         public IActionResult GetAllScheduleReceiptForUser(string? email, ScheduleType? scheduleType, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
         {
             return Ok(_receiptService.GetAllScheduleReceiptForUser(email, scheduleType, sortBy, sortDirection, page, pageSize, status));
