@@ -15,6 +15,7 @@ namespace WebApplication1.Repository.InheritanceRepo
         private readonly MyDbContext _context;
         private readonly IBlobService _blobService;
         public static int PAGE_SIZE { get; set; } = 5;
+
         public TourishOuterScheduleRepository(MyDbContext _context, IBlobService blobService)
         {
             this._context = _context;
@@ -39,19 +40,23 @@ namespace WebApplication1.Repository.InheritanceRepo
             await _context.AddAsync(addValue);
             await _context.SaveChangesAsync();
 
-            await _blobService.UploadStringBlobAsync("eatschedule-content-container", addModel.Description ?? "Không có thông tin", "text/plain", addValue.Id.ToString() ?? "" + ".txt");
+            await _blobService.UploadStringBlobAsync(
+                "eatschedule-content-container",
+                addModel.Description ?? "Không có thông tin",
+                "text/plain",
+                addValue.Id.ToString() ?? "" + ".txt"
+            );
 
             return new Response
             {
                 resultCd = 0,
                 MessageCode = "I431",
-                // Create type success               
+                // Create type success
             };
         }
 
         public async Task<Response> AddMovingSchedule(string userId, MovingScheduleModel addModel)
         {
-
             var addValue = new MovingSchedule
             {
                 Name = addModel.Name,
@@ -113,23 +118,26 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             addValue.ScheduleInterestList = scheduleInterestList;
 
-
             await _context.AddAsync(addValue);
             await _context.SaveChangesAsync();
 
-            await _blobService.UploadStringBlobAsync("movingschedule-content-container", addModel.Description ?? "Không có thông tin", "text/plain", addValue.Id.ToString() ?? "" + ".txt");
+            await _blobService.UploadStringBlobAsync(
+                "movingschedule-content-container",
+                addModel.Description ?? "Không có thông tin",
+                "text/plain",
+                addValue.Id.ToString() ?? "" + ".txt"
+            );
 
             return new Response
             {
                 resultCd = 0,
                 MessageCode = "I431",
-                // Create type success               
+                // Create type success
             };
         }
 
         public async Task<Response> AddStayingSchedule(string userId, StayingScheduleModel addModel)
         {
-
             var addValue = new StayingSchedule
             {
                 Name = addModel.Name,
@@ -190,23 +198,30 @@ namespace WebApplication1.Repository.InheritanceRepo
             await _context.AddAsync(addValue);
             await _context.SaveChangesAsync();
 
-            await _blobService.UploadStringBlobAsync("stayingschedule-content-container", addModel.Description ?? "Không có thông tin", "text/plain", addValue.Id.ToString() ?? "" + ".txt");
+            await _blobService.UploadStringBlobAsync(
+                "stayingschedule-content-container",
+                addModel.Description ?? "Không có thông tin",
+                "text/plain",
+                addValue.Id.ToString() ?? "" + ".txt"
+            );
 
             return new Response
             {
                 resultCd = 0,
                 MessageCode = "I431",
-                // Create type success               
+                // Create type success
             };
         }
 
         public async Task<Response> DeleteEatSchedule(Guid id)
         {
-            var deleteEntity = _context.EatSchedules.FirstOrDefault((entity
-               => entity.Id == id));
+            var deleteEntity = _context.EatSchedules.FirstOrDefault((entity => entity.Id == id));
             if (deleteEntity != null)
             {
-                await _blobService.DeleteFileBlobAsync("eatschedule-content-container", deleteEntity.Id.ToString());
+                await _blobService.DeleteFileBlobAsync(
+                    "eatschedule-content-container",
+                    deleteEntity.Id.ToString()
+                );
                 _context.Remove(deleteEntity);
                 _context.SaveChanges();
             }
@@ -215,17 +230,19 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 resultCd = 0,
                 MessageCode = "I433",
-                // Delete type success               
+                // Delete type success
             };
         }
 
         public async Task<Response> DeleteMovingSchedule(Guid id)
         {
-            var deleteEntity = _context.MovingSchedules.FirstOrDefault((entity
-               => entity.Id == id));
+            var deleteEntity = _context.MovingSchedules.FirstOrDefault((entity => entity.Id == id));
             if (deleteEntity != null)
             {
-                await _blobService.DeleteFileBlobAsync("movingschedule-content-container", deleteEntity.Id.ToString());
+                await _blobService.DeleteFileBlobAsync(
+                    "movingschedule-content-container",
+                    deleteEntity.Id.ToString()
+                );
                 _context.Remove(deleteEntity);
                 _context.SaveChanges();
             }
@@ -234,17 +251,21 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 resultCd = 0,
                 MessageCode = "I433",
-                // Delete type success               
+                // Delete type success
             };
         }
 
         public async Task<Response> DeleteStayingSchedule(Guid id)
         {
-            var deleteEntity = _context.StayingSchedules.FirstOrDefault((entity
-               => entity.Id == id));
+            var deleteEntity = _context.StayingSchedules.FirstOrDefault(
+                (entity => entity.Id == id)
+            );
             if (deleteEntity != null)
             {
-                await _blobService.DeleteFileBlobAsync("stayingschedule-content-container", deleteEntity.Id.ToString());
+                await _blobService.DeleteFileBlobAsync(
+                    "stayingschedule-content-container",
+                    deleteEntity.Id.ToString()
+                );
                 _context.Remove(deleteEntity);
                 _context.SaveChanges();
             }
@@ -253,11 +274,18 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 resultCd = 0,
                 MessageCode = "I433",
-                // Delete type success               
+                // Delete type success
             };
         }
 
-        public Response GetAllEatSchedule(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
+        public Response GetAllEatSchedule(
+            string? search,
+            int? type,
+            string? sortBy,
+            string? sortDirection,
+            int page = 1,
+            int pageSize = 5
+        )
         {
             var entityQuery = _context.EatSchedules.AsQueryable();
 
@@ -290,20 +318,27 @@ namespace WebApplication1.Repository.InheritanceRepo
                 count = result.TotalCount,
             };
             return entityVM;
-
         }
 
-        public Response GetAllMovingSchedule(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
+        public Response GetAllMovingSchedule(
+            string? search,
+            int? type,
+            string? sortBy,
+            string? sortDirection,
+            int page = 1,
+            int pageSize = 5
+        )
         {
-            var entityQuery = _context.MovingSchedules.Include(entity => entity.InstructionList).Include(entity => entity.ServiceScheduleList).AsQueryable();
+            var entityQuery = _context
+                .MovingSchedules.Include(entity => entity.InstructionList)
+                .Include(entity => entity.ServiceScheduleList)
+                .AsQueryable();
 
             #region Filtering
-            entityQuery = entityQuery.Where(entity => entity.TourishPlan
-                == null);
+            entityQuery = entityQuery.Where(entity => entity.TourishPlan == null);
             if (!string.IsNullOrEmpty(search))
             {
-                entityQuery = entityQuery.Where(entity => entity.BranchName
-                .Contains(search));
+                entityQuery = entityQuery.Where(entity => entity.BranchName.Contains(search));
             }
             #endregion
 
@@ -329,18 +364,26 @@ namespace WebApplication1.Repository.InheritanceRepo
                 count = result.TotalCount,
             };
             return entityVM;
-
         }
 
-        public Response GetAllStayingSchedule(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
+        public Response GetAllStayingSchedule(
+            string? search,
+            int? type,
+            string? sortBy,
+            string? sortDirection,
+            int page = 1,
+            int pageSize = 5
+        )
         {
-            var entityQuery = _context.StayingSchedules.Include(entity => entity.InstructionList).Include(entity => entity.ServiceScheduleList).AsQueryable();
+            var entityQuery = _context
+                .StayingSchedules.Include(entity => entity.InstructionList)
+                .Include(entity => entity.ServiceScheduleList)
+                .AsQueryable();
 
             #region Filtering
             if (!string.IsNullOrEmpty(search))
             {
-                entityQuery = entityQuery.Where(entity => entity.PlaceName
-                .Contains(search));
+                entityQuery = entityQuery.Where(entity => entity.PlaceName.Contains(search));
             }
             #endregion
 
@@ -366,20 +409,28 @@ namespace WebApplication1.Repository.InheritanceRepo
                 count = result.TotalCount,
             };
             return entityVM;
-
         }
 
-        public Response GetAllMovingScheduleWithAuthority(string? search, int? type, string? sortBy, string? sortDirection, string? userId, int page = 1, int pageSize = 5)
+        public Response GetAllMovingScheduleWithAuthority(
+            string? search,
+            int? type,
+            string? sortBy,
+            string? sortDirection,
+            string? userId,
+            int page = 1,
+            int pageSize = 5
+        )
         {
-            var entityQuery = _context.MovingSchedules.Include(entity => entity.InstructionList).Include(entity => entity.ServiceScheduleList).AsQueryable();
+            var entityQuery = _context
+                .MovingSchedules.Include(entity => entity.InstructionList)
+                .Include(entity => entity.ServiceScheduleList)
+                .AsQueryable();
 
             #region Filtering
-            entityQuery = entityQuery.Where(entity => entity.TourishPlan
-                == null);
+            entityQuery = entityQuery.Where(entity => entity.TourishPlan == null);
             if (!string.IsNullOrEmpty(search))
             {
-                entityQuery = entityQuery.Where(entity => entity.BranchName
-                .Contains(search));
+                entityQuery = entityQuery.Where(entity => entity.BranchName.Contains(search));
             }
             if (!string.IsNullOrEmpty(userId))
             {
@@ -387,7 +438,9 @@ namespace WebApplication1.Repository.InheritanceRepo
                 foreach (var schedule in entityQuery)
                 {
                     schedule.ScheduleInterestList = schedule
-                        .ScheduleInterestList.Where(interest => interest.UserId.ToString() == userId)
+                        .ScheduleInterestList.Where(interest =>
+                            interest.UserId.ToString() == userId
+                        )
                         .ToList();
                 }
             }
@@ -415,18 +468,27 @@ namespace WebApplication1.Repository.InheritanceRepo
                 count = result.TotalCount,
             };
             return entityVM;
-
         }
 
-        public Response GetAllStayingScheduleWithAuthority(string? search, int? type, string? sortBy, string? sortDirection, string? userId, int page = 1, int pageSize = 5)
+        public Response GetAllStayingScheduleWithAuthority(
+            string? search,
+            int? type,
+            string? sortBy,
+            string? sortDirection,
+            string? userId,
+            int page = 1,
+            int pageSize = 5
+        )
         {
-            var entityQuery = _context.StayingSchedules.Include(entity => entity.InstructionList).Include(entity => entity.ServiceScheduleList).AsQueryable();
+            var entityQuery = _context
+                .StayingSchedules.Include(entity => entity.InstructionList)
+                .Include(entity => entity.ServiceScheduleList)
+                .AsQueryable();
 
             #region Filtering
             if (!string.IsNullOrEmpty(search))
             {
-                entityQuery = entityQuery.Where(entity => entity.PlaceName
-                .Contains(search));
+                entityQuery = entityQuery.Where(entity => entity.PlaceName.Contains(search));
             }
             if (!string.IsNullOrEmpty(userId))
             {
@@ -434,7 +496,9 @@ namespace WebApplication1.Repository.InheritanceRepo
                 foreach (var schedule in entityQuery)
                 {
                     schedule.ScheduleInterestList = schedule
-                        .ScheduleInterestList.Where(interest => interest.UserId.ToString() == userId)
+                        .ScheduleInterestList.Where(interest =>
+                            interest.UserId.ToString() == userId
+                        )
                         .ToList();
                 }
             }
@@ -462,37 +526,27 @@ namespace WebApplication1.Repository.InheritanceRepo
                 count = result.TotalCount,
             };
             return entityVM;
-
         }
 
         public Response getByEatScheduleId(Guid id)
         {
-            var entity = _context.EatSchedules.FirstOrDefault((entity
-                => entity.Id == id));
+            var entity = _context.EatSchedules.FirstOrDefault((entity => entity.Id == id));
 
-            return new Response
-            {
-                resultCd = 0,
-                Data = entity
-            };
+            return new Response { resultCd = 0, Data = entity };
         }
 
         public Response getByNameEatSchedule(string name)
         {
-            var entity = _context.EatSchedules.FirstOrDefault((entity
-                => entity.PlaceName == name));
+            var entity = _context.EatSchedules.FirstOrDefault((entity => entity.PlaceName == name));
 
-            return new Response
-            {
-                resultCd = 0,
-                Data = entity
-            };
+            return new Response { resultCd = 0, Data = entity };
         }
 
         public async Task<Response> UpdateEatSchedule(EatScheduleModel entityModel)
         {
-            var entity = _context.EatSchedules.FirstOrDefault((entity
-                => entity.Id == entityModel.Id));
+            var entity = _context.EatSchedules.FirstOrDefault(
+                (entity => entity.Id == entityModel.Id)
+            );
             if (entity != null)
             {
                 entity.Name = entityModel.Name;
@@ -504,45 +558,48 @@ namespace WebApplication1.Repository.InheritanceRepo
                 entity.Address = entityModel.Address;
 
                 _context.SaveChanges();
-                await _blobService.UploadStringBlobAsync("eatschedule-content-container", entityModel.Description ?? "Không có thông tin", "text/plain", entity.Id.ToString() ?? "" + ".txt");
+
+                if (!String.IsNullOrEmpty(entityModel.Description))
+                    await _blobService.UploadStringBlobAsync(
+                    "eatschedule-content-container",
+                    entityModel.Description ?? "Không có thông tin",
+                    "text/plain",
+                    entity.Id.ToString() ?? "" + ".txt"
+                );
             }
 
             return new Response
             {
                 resultCd = 0,
                 MessageCode = "I432",
-                // Update type success               
+                // Update type success
             };
         }
 
         public Response getByStayingScheduleId(Guid id)
         {
-            var entity = _context.StayingSchedules.FirstOrDefault((entity
-                => entity.Id == id));
+            var entity = _context.StayingSchedules.Include(entity => entity.ServiceScheduleList).FirstOrDefault((entity => entity.Id == id));
 
-            return new Response
-            {
-                resultCd = 0,
-                Data = entity
-            };
+            return new Response { resultCd = 0, Data = entity };
         }
 
         public Response getByNameStayingSchedule(string name)
         {
-            var entity = _context.StayingSchedules.FirstOrDefault((entity
-                => entity.PlaceName == name));
+            var entity = _context.StayingSchedules.FirstOrDefault(
+                (entity => entity.PlaceName == name)
+            );
 
-            return new Response
-            {
-                resultCd = 0,
-                Data = entity
-            };
+            return new Response { resultCd = 0, Data = entity };
         }
 
-        public async Task<Response> UpdateStayingSchedule(string userId, StayingScheduleModel entityModel)
+        public async Task<Response> UpdateStayingSchedule(
+            string userId,
+            StayingScheduleModel entityModel
+        )
         {
-            var entity = _context.StayingSchedules.FirstOrDefault((entity
-                => entity.Id == entityModel.Id));
+            var entity = _context.StayingSchedules.FirstOrDefault(
+                (entity => entity.Id == entityModel.Id)
+            );
             if (entity != null)
             {
                 entity.Name = entityModel.Name;
@@ -591,11 +648,21 @@ namespace WebApplication1.Repository.InheritanceRepo
                     foreach (var item in entityModel.ServiceScheduleList)
                     {
                         dataScheduleList.Add(
+                            item.Id.HasValue ?
                             new ServiceSchedule
                             {
                                 Id = item.Id.Value,
-                                MovingScheduleId = item.MovingScheduleId,
-                                StayingScheduleId = item.StayingScheduleId,
+                                MovingScheduleId = item.MovingScheduleId ?? null,
+                                StayingScheduleId = item.StayingScheduleId ?? null,
+                                Status = item.Status,
+                                StartDate = item.StartDate,
+                                EndDate = item.EndDate,
+                                CreateDate = item.CreateDate ?? DateTime.UtcNow,
+                                UpdateDate = DateTime.UtcNow,
+                            } : new ServiceSchedule
+                            {
+                                MovingScheduleId = item.MovingScheduleId ?? null,
+                                StayingScheduleId = item.StayingScheduleId ?? null,
                                 Status = item.Status,
                                 StartDate = item.StartDate,
                                 EndDate = item.EndDate,
@@ -607,49 +674,47 @@ namespace WebApplication1.Repository.InheritanceRepo
                     entity.ServiceScheduleList = dataScheduleList;
                 }
 
-
                 await _context.SaveChangesAsync();
             }
 
-            await _blobService.UploadStringBlobAsync("stayingschedule-content-container", entityModel.Description ?? "Không có thông tin", "text/plain", entity.Id.ToString() ?? "" + ".txt");
+            if (!String.IsNullOrEmpty(entityModel.Description))
+                await _blobService.UploadStringBlobAsync(
+                    "stayingschedule-content-container",
+                    entityModel.Description ?? "Không có thông tin",
+                    "text/plain",
+                    entity.Id.ToString() ?? "" + ".txt"
+                );
 
             return new Response
             {
                 resultCd = 0,
                 MessageCode = "I432",
-                // Update type success               
+                // Update type success
             };
         }
 
-
         public Response getByMovingScheduleId(Guid id)
         {
-            var entity = _context.MovingSchedules.FirstOrDefault((entity
-                => entity.Id == id));
+            var entity = _context.MovingSchedules.Include(entity => entity.ServiceScheduleList).FirstOrDefault((entity => entity.Id == id));
 
-            return new Response
-            {
-                resultCd = 0,
-                Data = entity
-            };
+            return new Response { resultCd = 0, Data = entity };
         }
 
         public Response getByNameMovingSchedule(string name)
         {
-            var entity = _context.MovingSchedules.FirstOrDefault((entity
-                => entity.Name == name));
+            var entity = _context.MovingSchedules.FirstOrDefault((entity => entity.Name == name));
 
-            return new Response
-            {
-                resultCd = 0,
-                Data = entity
-            };
+            return new Response { resultCd = 0, Data = entity };
         }
 
-        public async Task<Response> UpdateMovingSchedule(string userId, MovingScheduleModel entityModel)
+        public async Task<Response> UpdateMovingSchedule(
+            string userId,
+            MovingScheduleModel entityModel
+        )
         {
-            var entity = _context.MovingSchedules.FirstOrDefault((entity
-                => entity.Id == entityModel.Id));
+            var entity = _context.MovingSchedules.FirstOrDefault(
+                (entity => entity.Id == entityModel.Id)
+            );
             if (entity != null)
             {
                 entity.UpdateDate = DateTime.UtcNow;
@@ -701,11 +766,21 @@ namespace WebApplication1.Repository.InheritanceRepo
                     foreach (var item in entityModel.ServiceScheduleList)
                     {
                         dataScheduleList.Add(
+                            item.Id.HasValue ?
                             new ServiceSchedule
                             {
                                 Id = item.Id.Value,
-                                MovingScheduleId = item.MovingScheduleId,
-                                StayingScheduleId = item.StayingScheduleId,
+                                MovingScheduleId = item.MovingScheduleId ?? null,
+                                StayingScheduleId = item.StayingScheduleId ?? null,
+                                Status = item.Status,
+                                StartDate = item.StartDate,
+                                EndDate = item.EndDate,
+                                CreateDate = item.CreateDate ?? DateTime.UtcNow,
+                                UpdateDate = DateTime.UtcNow,
+                            } : new ServiceSchedule
+                            {
+                                MovingScheduleId = item.MovingScheduleId ?? null,
+                                StayingScheduleId = item.StayingScheduleId ?? null,
                                 Status = item.Status,
                                 StartDate = item.StartDate,
                                 EndDate = item.EndDate,
@@ -719,25 +794,34 @@ namespace WebApplication1.Repository.InheritanceRepo
 
                 await _context.SaveChangesAsync();
 
-                await _blobService.UploadStringBlobAsync("movingschedule-content-container", entityModel.Description ?? "Không có thông tin", "text/plain", entity.Id.ToString() ?? "" + ".txt");
+                if (!String.IsNullOrEmpty(entityModel.Description))
+                    await _blobService.UploadStringBlobAsync(
+                    "movingschedule-content-container",
+                    entityModel.Description ?? "Không có thông tin",
+                    "text/plain",
+                    entity.Id.ToString() ?? "" + ".txt"
+                );
             }
 
             return new Response
             {
                 resultCd = 0,
                 MessageCode = "I432",
-                // Update type success               
+                // Update type success
             };
         }
 
-        public async Task<List<ScheduleInterest>> getScheduleInterest(Guid id, ScheduleType scheduleType)
+        public async Task<List<ScheduleInterest>> getScheduleInterest(
+            Guid id,
+            ScheduleType scheduleType
+        )
         {
             if (scheduleType == ScheduleType.MovingSchedule)
             {
                 var entity = await _context
-                .MovingSchedules.Where(entity => entity.Id == id)
-                .Include(tour => tour.ScheduleInterestList)
-                .FirstOrDefaultAsync();
+                    .MovingSchedules.Where(entity => entity.Id == id)
+                    .Include(tour => tour.ScheduleInterestList)
+                    .FirstOrDefaultAsync();
                 if (entity == null)
                 {
                     return null;
@@ -745,13 +829,12 @@ namespace WebApplication1.Repository.InheritanceRepo
 
                 return entity.ScheduleInterestList.ToList();
             }
-            else
-            if (scheduleType == ScheduleType.StayingSchedule)
+            else if (scheduleType == ScheduleType.StayingSchedule)
             {
                 var entity = await _context
-                .StayingSchedules.Where(entity => entity.Id == id)
-                .Include(tour => tour.ScheduleInterestList)
-                .FirstOrDefaultAsync();
+                    .StayingSchedules.Where(entity => entity.Id == id)
+                    .Include(tour => tour.ScheduleInterestList)
+                    .FirstOrDefaultAsync();
                 if (entity == null)
                 {
                     return null;
@@ -767,7 +850,9 @@ namespace WebApplication1.Repository.InheritanceRepo
         {
             if (scheduleType == ScheduleType.MovingSchedule)
             {
-                var data = _context.ScheduleInterests.FirstOrDefault(entity => entity.MovingScheduleId == scheduleId && entity.UserId == userId);
+                var data = _context.ScheduleInterests.FirstOrDefault(entity =>
+                    entity.MovingScheduleId == scheduleId && entity.UserId == userId
+                );
                 return new Response
                 {
                     resultCd = 0,
@@ -777,7 +862,9 @@ namespace WebApplication1.Repository.InheritanceRepo
             }
             else if (scheduleType == ScheduleType.StayingSchedule)
             {
-                var data = _context.ScheduleInterests.FirstOrDefault(entity => entity.StayingScheduleId == scheduleId && entity.UserId == userId);
+                var data = _context.ScheduleInterests.FirstOrDefault(entity =>
+                    entity.StayingScheduleId == scheduleId && entity.UserId == userId
+                );
                 return new Response
                 {
                     resultCd = 0,
@@ -793,17 +880,20 @@ namespace WebApplication1.Repository.InheritanceRepo
                 MessageCode = "C430"
                 // Update type success
             };
-
-
         }
 
-        public async Task<Response> setScheduleInterest(Guid scheduleId, ScheduleType scheduleType, Guid userId, InterestStatus interestStatus)
+        public async Task<Response> setScheduleInterest(
+            Guid scheduleId,
+            ScheduleType scheduleType,
+            Guid userId,
+            InterestStatus interestStatus
+        )
         {
-
-
             if (scheduleType == ScheduleType.MovingSchedule)
             {
-                var existInterest = _context.ScheduleInterests.FirstOrDefault(entity => entity.MovingScheduleId == scheduleId && entity.UserId == userId);
+                var existInterest = _context.ScheduleInterests.FirstOrDefault(entity =>
+                    entity.MovingScheduleId == scheduleId && entity.UserId == userId
+                );
 
                 if (existInterest != null)
                 {
@@ -843,7 +933,9 @@ namespace WebApplication1.Repository.InheritanceRepo
             }
             else if (scheduleType == ScheduleType.StayingSchedule)
             {
-                var existInterest = _context.ScheduleInterests.FirstOrDefault(entity => entity.StayingScheduleId == scheduleId && entity.UserId == userId);
+                var existInterest = _context.ScheduleInterests.FirstOrDefault(entity =>
+                    entity.StayingScheduleId == scheduleId && entity.UserId == userId
+                );
 
                 if (existInterest != null)
                 {
@@ -888,14 +980,17 @@ namespace WebApplication1.Repository.InheritanceRepo
                 MessageCode = "C434",
                 // Update type success
             };
-
         }
 
-        public async Task<Response> UpdateInstructionList(ScheduleInstructionModel scheduleInstructionModel)
+        public async Task<Response> UpdateInstructionList(
+            ScheduleInstructionModel scheduleInstructionModel
+        )
         {
             if (scheduleInstructionModel.ScheduleType == ScheduleType.MovingSchedule)
             {
-                var existSchedule = _context.MovingSchedules.FirstOrDefault(entity => entity.Id == scheduleInstructionModel.ScheduleId);
+                var existSchedule = _context.MovingSchedules.FirstOrDefault(entity =>
+                    entity.Id == scheduleInstructionModel.ScheduleId
+                );
                 if (existSchedule != null)
                 {
                     if (scheduleInstructionModel.InstructionList != null)
@@ -927,17 +1022,19 @@ namespace WebApplication1.Repository.InheritanceRepo
                         };
                     }
                 }
-                else return new Response
-                {
-                    resultCd = 1,
-                    MessageCode = "C430",
-                    // Update type success
-                };
-
+                else
+                    return new Response
+                    {
+                        resultCd = 1,
+                        MessageCode = "C430",
+                        // Update type success
+                    };
             }
             else if (scheduleInstructionModel.ScheduleType == ScheduleType.StayingSchedule)
             {
-                var existSchedule = _context.StayingSchedules.FirstOrDefault(entity => entity.Id == scheduleInstructionModel.ScheduleId);
+                var existSchedule = _context.StayingSchedules.FirstOrDefault(entity =>
+                    entity.Id == scheduleInstructionModel.ScheduleId
+                );
                 if (existSchedule != null)
                 {
                     if (scheduleInstructionModel.InstructionList != null)
@@ -969,13 +1066,13 @@ namespace WebApplication1.Repository.InheritanceRepo
                         };
                     }
                 }
-                else return new Response
-                {
-                    resultCd = 1,
-                    MessageCode = "C430",
-                    // Update type success
-                };
-
+                else
+                    return new Response
+                    {
+                        resultCd = 1,
+                        MessageCode = "C430",
+                        // Update type success
+                    };
             }
 
             return new Response
@@ -984,7 +1081,6 @@ namespace WebApplication1.Repository.InheritanceRepo
                 MessageCode = "C434",
                 // Update type success
             };
-
         }
     }
 }

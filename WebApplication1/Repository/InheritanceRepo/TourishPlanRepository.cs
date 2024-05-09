@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Globalization;
+﻿using System.Globalization;
+using Microsoft.EntityFrameworkCore;
 using TourishApi.Extension;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
@@ -138,15 +138,26 @@ public class TourishPlanRepository : ITourishPlanRepository
             foreach (var item in entityModel.TourishScheduleList)
             {
                 tourishDataScheduleList.Add(
-                    new TourishSchedule
-                    {
-                        TourishPlanId = item.TourishPlanId,
-                        PlanStatus = item.PlanStatus,
-                        StartDate = item.StartDate,
-                        EndDate = item.EndDate,
-                        CreateDate = DateTime.UtcNow,
-                        UpdateDate = DateTime.UtcNow
-                    }
+                    item.Id.HasValue
+                        ? new TourishSchedule
+                        {
+                            Id = item.Id.Value,
+                            TourishPlanId = item.TourishPlanId,
+                            PlanStatus = item.PlanStatus,
+                            StartDate = item.StartDate,
+                            EndDate = item.EndDate,
+                            CreateDate = item.CreateDate ?? DateTime.UtcNow,
+                            UpdateDate = DateTime.UtcNow,
+                        }
+                        : new TourishSchedule
+                        {
+                            TourishPlanId = item.TourishPlanId,
+                            PlanStatus = item.PlanStatus,
+                            StartDate = item.StartDate,
+                            EndDate = item.EndDate,
+                            CreateDate = item.CreateDate ?? DateTime.UtcNow,
+                            UpdateDate = DateTime.UtcNow,
+                        }
                 );
             }
             tourishPlan.TourishScheduleList = tourishDataScheduleList;
@@ -385,20 +396,20 @@ public class TourishPlanRepository : ITourishPlanRepository
     }
 
     public Response GetAllWithAuthority(
-    string? search,
-    string? category,
-    string? categoryString,
-    string? startingPoint,
-    string? endPoint,
-    string? startingDate,
-    double? priceFrom,
-    double? priceTo,
-    string? sortBy,
-    string? sortDirection,
-    string? userId,
-    int page = 1,
-    int pageSize = 5
-)
+        string? search,
+        string? category,
+        string? categoryString,
+        string? startingPoint,
+        string? endPoint,
+        string? startingDate,
+        double? priceFrom,
+        double? priceTo,
+        string? sortBy,
+        string? sortDirection,
+        string? userId,
+        int page = 1,
+        int pageSize = 5
+    )
     {
         var entityQuery = _context
             .TourishPlan.Include(entity => entity.MovingSchedules)
@@ -667,16 +678,26 @@ public class TourishPlanRepository : ITourishPlanRepository
                 foreach (var item in entityModel.TourishScheduleList)
                 {
                     tourishDataScheduleList.Add(
-                        new TourishSchedule
-                        {
-                            Id = item.Id.Value,
-                            TourishPlanId = item.TourishPlanId,
-                            PlanStatus = item.PlanStatus,
-                            StartDate = item.StartDate,
-                            EndDate = item.EndDate,
-                            CreateDate = item.CreateDate ?? DateTime.UtcNow,
-                            UpdateDate = DateTime.UtcNow,
-                        }
+                        item.Id.HasValue
+                            ? new TourishSchedule
+                            {
+                                Id = item.Id.Value,
+                                TourishPlanId = item.TourishPlanId,
+                                PlanStatus = item.PlanStatus,
+                                StartDate = item.StartDate,
+                                EndDate = item.EndDate,
+                                CreateDate = item.CreateDate ?? DateTime.UtcNow,
+                                UpdateDate = DateTime.UtcNow,
+                            }
+                            : new TourishSchedule
+                            {
+                                TourishPlanId = item.TourishPlanId,
+                                PlanStatus = item.PlanStatus,
+                                StartDate = item.StartDate,
+                                EndDate = item.EndDate,
+                                CreateDate = item.CreateDate ?? DateTime.UtcNow,
+                                UpdateDate = DateTime.UtcNow,
+                            }
                     );
                 }
                 entity.TourishScheduleList = tourishDataScheduleList;
@@ -1078,10 +1099,11 @@ public class TourishPlanRepository : ITourishPlanRepository
     public Response getTopTourRating()
     {
         var entityList = _context
-            .TourishPlan
-            .Include(tour => tour.TourishRatingList)
+            .TourishPlan.Include(tour => tour.TourishRatingList)
             .Where(e => e.TourishRatingList.Count() > 10)
-            .OrderByDescending(entity => entity.TourishRatingList.Sum(e => e.Rating) / entity.TourishRatingList.Count())
+            .OrderByDescending(entity =>
+                entity.TourishRatingList.Sum(e => e.Rating) / entity.TourishRatingList.Count()
+            )
             .ThenByDescending(entity => entity.TourishRatingList.Count())
             .ToList();
 
