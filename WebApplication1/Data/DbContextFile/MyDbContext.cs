@@ -206,6 +206,7 @@ namespace WebApplication1.Data.DbContextFile
                 entity.HasOne(e => e.User)
                 .WithMany(e => e.ScheduleInterestList)
                 .HasForeignKey(e => e.UserId)
+                .IsRequired(false)
                 .HasConstraintName("FK_User_ScheduleInterest");
             });
 

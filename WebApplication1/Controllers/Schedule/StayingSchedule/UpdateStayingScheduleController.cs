@@ -29,10 +29,11 @@ namespace WebApplication1.Controllers.Schedule
         }
 
         [HttpPut("interest")]
-        public async Task<IActionResult> SetInterest(TourishInterestModel tourishInterestModel)
+        public async Task<IActionResult> SetInterest(ScheduleInterestModel interestModel)
         {
-            var response = await _entityService.setScheduleInterest(tourishInterestModel.TourishPlanId,
-                tourishInterestModel.UserId, tourishInterestModel.InterestStatus);
+            string userId = User.FindFirstValue("Id");
+            var response = await _entityService.setScheduleInterest(interestModel.ScheduleId,
+                new Guid(userId), interestModel.InterestStatus);
             return Ok(response);
         }
 

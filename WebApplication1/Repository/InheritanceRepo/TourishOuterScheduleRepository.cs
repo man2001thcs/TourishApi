@@ -332,6 +332,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             var entityQuery = _context
                 .MovingSchedules.Include(entity => entity.InstructionList)
                 .Include(entity => entity.ServiceScheduleList)
+                .Include(entity => entity.ScheduleInterestList)
                 .AsQueryable();
 
             #region Filtering
@@ -378,6 +379,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             var entityQuery = _context
                 .StayingSchedules.Include(entity => entity.InstructionList)
                 .Include(entity => entity.ServiceScheduleList)
+                .Include(entity => entity.ScheduleInterestList)
                 .AsQueryable();
 
             #region Filtering
@@ -424,6 +426,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             var entityQuery = _context
                 .MovingSchedules.Include(entity => entity.InstructionList)
                 .Include(entity => entity.ServiceScheduleList)
+                .Include(entity => entity.ScheduleInterestList)
                 .AsQueryable();
 
             #region Filtering
@@ -483,6 +486,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             var entityQuery = _context
                 .StayingSchedules.Include(entity => entity.InstructionList)
                 .Include(entity => entity.ServiceScheduleList)
+                .Include(entity => entity.ScheduleInterestList)
                 .AsQueryable();
 
             #region Filtering
@@ -911,9 +915,9 @@ namespace WebApplication1.Repository.InheritanceRepo
                 }
                 else
                 {
-                    var insertValue = new TourishInterest
+                    var insertValue = new ScheduleInterest
                     {
-                        TourishPlanId = scheduleId,
+                        MovingScheduleId = scheduleId,
                         UserId = userId,
                         InterestStatus = interestStatus,
                         CreateDate = DateTime.UtcNow,
@@ -953,9 +957,9 @@ namespace WebApplication1.Repository.InheritanceRepo
                 }
                 else
                 {
-                    var insertValue = new TourishInterest
+                    var insertValue = new ScheduleInterest
                     {
-                        TourishPlanId = scheduleId,
+                        StayingScheduleId = scheduleId,
                         UserId = userId,
                         InterestStatus = interestStatus,
                         CreateDate = DateTime.UtcNow,
