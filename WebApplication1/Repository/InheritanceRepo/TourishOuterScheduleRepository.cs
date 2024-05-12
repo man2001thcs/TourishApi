@@ -603,9 +603,9 @@ namespace WebApplication1.Repository.InheritanceRepo
             StayingScheduleModel entityModel
         )
         {
-            var entity = _context.StayingSchedules.Include(entity => entity.ScheduleInterestList).FirstOrDefault(
-                (entity => entity.Id == entityModel.Id)
-            );
+            var entity = _context
+                .StayingSchedules.Include(entity => entity.ScheduleInterestList)
+                .FirstOrDefault((entity => entity.Id == entityModel.Id));
             if (entity != null)
             {
                 entity.Name = entityModel.Name;
@@ -652,6 +652,9 @@ namespace WebApplication1.Repository.InheritanceRepo
                 if (entityModel.ServiceScheduleList != null)
                 {
                     var dataScheduleList = new List<ServiceSchedule>();
+                    //await _context
+                    //    .ServiceSchedule.Where(a => a.StayingScheduleId == entityModel.Id)
+                    //    .ExecuteDeleteAsync();
                     foreach (var item in entityModel.ServiceScheduleList)
                     {
                         dataScheduleList.Add(
@@ -722,9 +725,9 @@ namespace WebApplication1.Repository.InheritanceRepo
             MovingScheduleModel entityModel
         )
         {
-            var entity = _context.MovingSchedules.Include(entity => entity.ScheduleInterestList).FirstOrDefault(
-                (entity => entity.Id == entityModel.Id)
-            );
+            var entity = _context
+                .MovingSchedules.Include(entity => entity.ScheduleInterestList)
+                .FirstOrDefault((entity => entity.Id == entityModel.Id));
             if (entity != null)
             {
                 entity.UpdateDate = DateTime.UtcNow;
@@ -774,6 +777,11 @@ namespace WebApplication1.Repository.InheritanceRepo
                 if (entityModel.ServiceScheduleList != null)
                 {
                     var dataScheduleList = new List<ServiceSchedule>();
+
+                    //await _context
+                    //    .ServiceSchedule.Where(a => a.MovingScheduleId == entityModel.Id)
+                    //    .ExecuteDeleteAsync();
+
                     foreach (var item in entityModel.ServiceScheduleList)
                     {
                         dataScheduleList.Add(
@@ -801,6 +809,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                                 }
                         );
                     }
+
                     entity.ServiceScheduleList = dataScheduleList;
                 }
 
