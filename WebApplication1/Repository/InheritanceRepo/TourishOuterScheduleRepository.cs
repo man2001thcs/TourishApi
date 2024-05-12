@@ -565,11 +565,11 @@ namespace WebApplication1.Repository.InheritanceRepo
 
                 if (!String.IsNullOrEmpty(entityModel.Description))
                     await _blobService.UploadStringBlobAsync(
-                    "eatschedule-content-container",
-                    entityModel.Description ?? "Không có thông tin",
-                    "text/plain",
-                    entity.Id.ToString() ?? "" + ".txt"
-                );
+                        "eatschedule-content-container",
+                        entityModel.Description ?? "Không có thông tin",
+                        "text/plain",
+                        entity.Id.ToString() ?? "" + ".txt"
+                    );
             }
 
             return new Response
@@ -582,7 +582,9 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response getByStayingScheduleId(Guid id)
         {
-            var entity = _context.StayingSchedules.Include(entity => entity.ServiceScheduleList).FirstOrDefault((entity => entity.Id == id));
+            var entity = _context
+                .StayingSchedules.Include(entity => entity.ServiceScheduleList)
+                .FirstOrDefault((entity => entity.Id == id));
 
             return new Response { resultCd = 0, Data = entity };
         }
@@ -601,7 +603,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             StayingScheduleModel entityModel
         )
         {
-            var entity = _context.StayingSchedules.FirstOrDefault(
+            var entity = _context.StayingSchedules.Include(entity => entity.ScheduleInterestList).FirstOrDefault(
                 (entity => entity.Id == entityModel.Id)
             );
             if (entity != null)
@@ -627,6 +629,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                             InterestStatus = InterestStatus.Modifier,
                             User = user,
                             StayingSchedule = entity,
+                            CreateDate = DateTime.UtcNow,
                             UpdateDate = DateTime.UtcNow
                         };
 
@@ -652,27 +655,28 @@ namespace WebApplication1.Repository.InheritanceRepo
                     foreach (var item in entityModel.ServiceScheduleList)
                     {
                         dataScheduleList.Add(
-                            item.Id.HasValue ?
-                            new ServiceSchedule
-                            {
-                                Id = item.Id.Value,
-                                MovingScheduleId = item.MovingScheduleId ?? null,
-                                StayingScheduleId = item.StayingScheduleId ?? null,
-                                Status = item.Status,
-                                StartDate = item.StartDate,
-                                EndDate = item.EndDate,
-                                CreateDate = item.CreateDate ?? DateTime.UtcNow,
-                                UpdateDate = DateTime.UtcNow,
-                            } : new ServiceSchedule
-                            {
-                                MovingScheduleId = item.MovingScheduleId ?? null,
-                                StayingScheduleId = item.StayingScheduleId ?? null,
-                                Status = item.Status,
-                                StartDate = item.StartDate,
-                                EndDate = item.EndDate,
-                                CreateDate = item.CreateDate ?? DateTime.UtcNow,
-                                UpdateDate = DateTime.UtcNow,
-                            }
+                            item.Id.HasValue
+                                ? new ServiceSchedule
+                                {
+                                    Id = item.Id.Value,
+                                    MovingScheduleId = item.MovingScheduleId ?? null,
+                                    StayingScheduleId = item.StayingScheduleId ?? null,
+                                    Status = item.Status,
+                                    StartDate = item.StartDate,
+                                    EndDate = item.EndDate,
+                                    CreateDate = item.CreateDate ?? DateTime.UtcNow,
+                                    UpdateDate = DateTime.UtcNow,
+                                }
+                                : new ServiceSchedule
+                                {
+                                    MovingScheduleId = item.MovingScheduleId ?? null,
+                                    StayingScheduleId = item.StayingScheduleId ?? null,
+                                    Status = item.Status,
+                                    StartDate = item.StartDate,
+                                    EndDate = item.EndDate,
+                                    CreateDate = item.CreateDate ?? DateTime.UtcNow,
+                                    UpdateDate = DateTime.UtcNow,
+                                }
                         );
                     }
                     entity.ServiceScheduleList = dataScheduleList;
@@ -699,7 +703,9 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response getByMovingScheduleId(Guid id)
         {
-            var entity = _context.MovingSchedules.Include(entity => entity.ServiceScheduleList).FirstOrDefault((entity => entity.Id == id));
+            var entity = _context
+                .MovingSchedules.Include(entity => entity.ServiceScheduleList)
+                .FirstOrDefault((entity => entity.Id == id));
 
             return new Response { resultCd = 0, Data = entity };
         }
@@ -716,7 +722,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             MovingScheduleModel entityModel
         )
         {
-            var entity = _context.MovingSchedules.FirstOrDefault(
+            var entity = _context.MovingSchedules.Include(entity => entity.ScheduleInterestList).FirstOrDefault(
                 (entity => entity.Id == entityModel.Id)
             );
             if (entity != null)
@@ -745,6 +751,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                             InterestStatus = InterestStatus.Modifier,
                             User = user,
                             MovingSchedule = entity,
+                            CreateDate = DateTime.UtcNow,
                             UpdateDate = DateTime.UtcNow
                         };
 
@@ -770,27 +777,28 @@ namespace WebApplication1.Repository.InheritanceRepo
                     foreach (var item in entityModel.ServiceScheduleList)
                     {
                         dataScheduleList.Add(
-                            item.Id.HasValue ?
-                            new ServiceSchedule
-                            {
-                                Id = item.Id.Value,
-                                MovingScheduleId = item.MovingScheduleId ?? null,
-                                StayingScheduleId = item.StayingScheduleId ?? null,
-                                Status = item.Status,
-                                StartDate = item.StartDate,
-                                EndDate = item.EndDate,
-                                CreateDate = item.CreateDate ?? DateTime.UtcNow,
-                                UpdateDate = DateTime.UtcNow,
-                            } : new ServiceSchedule
-                            {
-                                MovingScheduleId = item.MovingScheduleId ?? null,
-                                StayingScheduleId = item.StayingScheduleId ?? null,
-                                Status = item.Status,
-                                StartDate = item.StartDate,
-                                EndDate = item.EndDate,
-                                CreateDate = item.CreateDate ?? DateTime.UtcNow,
-                                UpdateDate = DateTime.UtcNow,
-                            }
+                            item.Id.HasValue
+                                ? new ServiceSchedule
+                                {
+                                    Id = item.Id.Value,
+                                    MovingScheduleId = item.MovingScheduleId ?? null,
+                                    StayingScheduleId = item.StayingScheduleId ?? null,
+                                    Status = item.Status,
+                                    StartDate = item.StartDate,
+                                    EndDate = item.EndDate,
+                                    CreateDate = item.CreateDate ?? DateTime.UtcNow,
+                                    UpdateDate = DateTime.UtcNow,
+                                }
+                                : new ServiceSchedule
+                                {
+                                    MovingScheduleId = item.MovingScheduleId ?? null,
+                                    StayingScheduleId = item.StayingScheduleId ?? null,
+                                    Status = item.Status,
+                                    StartDate = item.StartDate,
+                                    EndDate = item.EndDate,
+                                    CreateDate = item.CreateDate ?? DateTime.UtcNow,
+                                    UpdateDate = DateTime.UtcNow,
+                                }
                         );
                     }
                     entity.ServiceScheduleList = dataScheduleList;
@@ -800,11 +808,11 @@ namespace WebApplication1.Repository.InheritanceRepo
 
                 if (!String.IsNullOrEmpty(entityModel.Description))
                     await _blobService.UploadStringBlobAsync(
-                    "movingschedule-content-container",
-                    entityModel.Description ?? "Không có thông tin",
-                    "text/plain",
-                    entity.Id.ToString() ?? "" + ".txt"
-                );
+                        "movingschedule-content-container",
+                        entityModel.Description ?? "Không có thông tin",
+                        "text/plain",
+                        entity.Id.ToString() ?? "" + ".txt"
+                    );
             }
 
             return new Response
@@ -901,17 +909,33 @@ namespace WebApplication1.Repository.InheritanceRepo
 
                 if (existInterest != null)
                 {
-                    existInterest.InterestStatus = interestStatus;
+                    if (
+                        existInterest.InterestStatus == InterestStatus.Creator
+                        || existInterest.InterestStatus == InterestStatus.User
+                    )
+                        return new Response { resultCd = 1, MessageCode = "C416", };
+
+                    if (
+                        existInterest.InterestStatus == InterestStatus.Interest
+                        || existInterest.InterestStatus == InterestStatus.Modifier
+                    )
+                    {
+                        existInterest.InterestStatus = InterestStatus.NotInterested;
+                    }
+                    else if (existInterest.InterestStatus == InterestStatus.NotInterested)
+                    {
+                        existInterest.InterestStatus = InterestStatus.Interest;
+                    }
+
                     existInterest.UpdateDate = DateTime.UtcNow;
 
                     await _context.SaveChangesAsync();
 
-                    return new Response
+                    if (existInterest.InterestStatus == InterestStatus.NotInterested)
                     {
-                        resultCd = 0,
-                        MessageCode = "I415",
-                        // Update type success
-                    };
+                        return new Response { resultCd = 0, MessageCode = "I416", };
+                    }
+                    return new Response { resultCd = 0, MessageCode = "I415", };
                 }
                 else
                 {
@@ -943,17 +967,33 @@ namespace WebApplication1.Repository.InheritanceRepo
 
                 if (existInterest != null)
                 {
-                    existInterest.InterestStatus = interestStatus;
+                    if (
+                        existInterest.InterestStatus == InterestStatus.Creator
+                        || existInterest.InterestStatus == InterestStatus.User
+                    )
+                        return new Response { resultCd = 1, MessageCode = "C416", };
+
+                    if (
+                        existInterest.InterestStatus == InterestStatus.Interest
+                        || existInterest.InterestStatus == InterestStatus.Modifier
+                    )
+                    {
+                        existInterest.InterestStatus = InterestStatus.NotInterested;
+                    }
+                    else if (existInterest.InterestStatus == InterestStatus.NotInterested)
+                    {
+                        existInterest.InterestStatus = InterestStatus.Interest;
+                    }
+
                     existInterest.UpdateDate = DateTime.UtcNow;
 
                     await _context.SaveChangesAsync();
 
-                    return new Response
+                    if (existInterest.InterestStatus == InterestStatus.NotInterested)
                     {
-                        resultCd = 0,
-                        MessageCode = "I415",
-                        // Update type success
-                    };
+                        return new Response { resultCd = 0, MessageCode = "I416", };
+                    }
+                    return new Response { resultCd = 0, MessageCode = "I415", };
                 }
                 else
                 {

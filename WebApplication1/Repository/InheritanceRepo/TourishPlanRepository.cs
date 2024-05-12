@@ -824,7 +824,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                     await _context.AddAsync(eatSchedule);
                     await _context.SaveChangesAsync();
 
-                    var insertString = (String)schedule.description;
+                    var insertString = (String)schedule.description ?? ""; ;
                     var oldId = (String)schedule.id;
 
                     if (oldId != null)
@@ -891,7 +891,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                     await _context.AddAsync(movingSchedule);
                     await _context.SaveChangesAsync();
 
-                    var insertString = (String)schedule.description;
+                    var insertString = (String)schedule.description ?? "";
                     var oldId = (String)schedule.id;
 
                     if (oldId != null)
@@ -955,7 +955,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                     await _context.AddAsync(stayingSchedule);
                     await _context.SaveChangesAsync();
 
-                    var insertString = (String)schedule.description;
+                    var insertString = (String)schedule.description ?? ""; ;
                     var oldId = (String)schedule.id;
 
                     if (oldId != null)
