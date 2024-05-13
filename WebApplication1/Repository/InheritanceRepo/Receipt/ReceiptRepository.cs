@@ -22,7 +22,7 @@ public class ReceiptRepository
         this._context = _context;
     }
 
-    public async Task<Response> AddTourSchedule(FullReceiptInsertModel receiptModel)
+    public async Task<Response> AddTourReceipt(FullReceiptInsertModel receiptModel)
     {
         var totalReceipt = _context.TotalReceiptList.FirstOrDefault(entity =>
             entity.TourishPlanId == receiptModel.TourishPlanId
@@ -160,7 +160,7 @@ public class ReceiptRepository
         }
     }
 
-    public async Task<Response> AddServiceSchedule(FullReceiptInsertModel receiptModel)
+    public async Task<Response> AddServiceReceipt(FullReceiptInsertModel receiptModel)
     {
         var totalReceipt = _context.TotalScheduleReceiptList.FirstOrDefault(entity =>
             entity.MovingScheduleId == receiptModel.MovingScheduleId
@@ -282,7 +282,7 @@ public class ReceiptRepository
 
         if (receiptModel.Email != null)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email.ToString() == receiptModel.Email);
+            var user = _context.Users.FirstOrDefault(u => u.Email == receiptModel.Email);
 
             if (receiptModel.TourishPlanId != null)
             {
@@ -448,7 +448,7 @@ public class ReceiptRepository
 
         if (receiptModel.Email != null)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email.ToString() == receiptModel.Email);
+            var user = _context.Users.FirstOrDefault(u => u.Email == receiptModel.Email);
 
             if (receiptModel.MovingScheduleId != null)
             {

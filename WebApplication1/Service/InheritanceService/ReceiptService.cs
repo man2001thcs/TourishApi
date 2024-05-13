@@ -22,7 +22,7 @@ namespace TourishApi.Service.InheritanceService
             {
                 if (receiptInsertModel.TourishPlanId != null)
                 {
-                    var receiptReturn = await _receiptRepository.AddTourSchedule(
+                    var receiptReturn = await _receiptRepository.AddTourReceipt(
                         receiptInsertModel
                     );
 
@@ -33,7 +33,7 @@ namespace TourishApi.Service.InheritanceService
                 }
                 else
                 {
-                    var receiptReturn = await _receiptRepository.AddServiceSchedule(
+                    var receiptReturn = await _receiptRepository.AddServiceReceipt(
                         receiptInsertModel
                     );
 
