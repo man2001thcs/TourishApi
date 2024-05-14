@@ -137,7 +137,7 @@ public class ReceiptRepository
                     return new Response
                     {
                         resultCd = 0,
-                        MessageCode = "I511",
+                        MessageCode = "I512",
                         returnId = existFullReceipt.FullReceiptId,
                         // Create type success
                     };
@@ -185,8 +185,8 @@ public class ReceiptRepository
             await _context.SaveChangesAsync();
         }
 
-        var existFullReceipt = _context.FullReceiptList.FirstOrDefault(entity =>
-            entity.Email == receiptModel.Email
+        var existFullReceipt = _context.FullScheduleReceiptList.FirstOrDefault(entity =>
+            entity.Email == receiptModel.Email && entity.TotalReceiptId == totalReceipt.TotalReceiptId
         );
 
         var originalPrice = (double)0;
@@ -233,7 +233,7 @@ public class ReceiptRepository
             return new Response
             {
                 resultCd = 0,
-                MessageCode = "I511",
+                MessageCode = "I512",
                 returnId = fullReceipt.FullReceiptId,
                 // Create type success
             };
@@ -533,8 +533,8 @@ public class ReceiptRepository
             originalPrice = schedule.SinglePrice ?? (double)0;
         }
 
-        var existFullReceipt = _context.FullReceiptList.FirstOrDefault(entity =>
-            entity.Email == receiptModel.Email
+        var existFullReceipt = _context.FullScheduleReceiptList.FirstOrDefault(entity =>
+            entity.Email == receiptModel.Email && entity.TotalReceiptId == totalReceipt.TotalReceiptId
         );
 
         if (existFullReceipt == null)
@@ -812,7 +812,7 @@ public class ReceiptRepository
     )
     {
         var receiptQuery = _context
-            .TotalScheduleReceiptList.Include(receipt => receipt.FullReceiptList)
+            .TotalScheduleReceiptList
             .Include(receipt => receipt.FullReceiptList)
             .ThenInclude(receipt => receipt.ServiceSchedule)
             .Include(receipt => receipt.MovingSchedule)
@@ -976,7 +976,7 @@ public class ReceiptRepository
     )
     {
         var receiptQuery = _context
-            .TotalScheduleReceiptList.Include(receipt => receipt.FullReceiptList)
+            .TotalScheduleReceiptList
             .Include(receipt => receipt.FullReceiptList)
             .ThenInclude(receipt => receipt.ServiceSchedule)
             .Include(receipt => receipt.MovingSchedule)
