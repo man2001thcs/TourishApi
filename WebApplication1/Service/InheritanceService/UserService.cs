@@ -542,6 +542,7 @@ namespace WebApplication1.Service.InheritanceService
                     new Claim("Id", user.Id.ToString()),
                     //roles
                     new Claim("Role", user.Role.ToString()),
+                    new Claim(ClaimTypes.Role, user.Role.ToString()),
                     new Claim("Permissions", permissions != null ? JsonSerializer.Serialize(permissions) : string.Empty,JsonClaimValueTypes.JsonArray)
 
                 }),
@@ -597,6 +598,7 @@ namespace WebApplication1.Service.InheritanceService
                     new Claim("Purpose", "signIn"),
                     //roles
                     new Claim("Role", user.Role.ToString()),
+                    new Claim(ClaimTypes.Role, user.Role.ToString()),
                     new Claim("Permissions", permissions != null ? JsonSerializer.Serialize(permissions) : string.Empty,JsonClaimValueTypes.JsonArray)
 
                 }),

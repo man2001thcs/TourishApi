@@ -186,7 +186,8 @@ public class ReceiptRepository
         }
 
         var existFullReceipt = _context.FullScheduleReceiptList.FirstOrDefault(entity =>
-            entity.Email == receiptModel.Email && entity.TotalReceiptId == totalReceipt.TotalReceiptId
+            entity.Email == receiptModel.Email
+            && entity.TotalReceiptId == totalReceipt.TotalReceiptId
         );
 
         var originalPrice = (double)0;
@@ -534,7 +535,8 @@ public class ReceiptRepository
         }
 
         var existFullReceipt = _context.FullScheduleReceiptList.FirstOrDefault(entity =>
-            entity.Email == receiptModel.Email && entity.TotalReceiptId == totalReceipt.TotalReceiptId
+            entity.Email == receiptModel.Email
+            && entity.TotalReceiptId == totalReceipt.TotalReceiptId
         );
 
         if (existFullReceipt == null)
@@ -812,8 +814,7 @@ public class ReceiptRepository
     )
     {
         var receiptQuery = _context
-            .TotalScheduleReceiptList
-            .Include(receipt => receipt.FullReceiptList)
+            .TotalScheduleReceiptList.Include(receipt => receipt.FullReceiptList)
             .ThenInclude(receipt => receipt.ServiceSchedule)
             .Include(receipt => receipt.MovingSchedule)
             .Include(receipt => receipt.StayingSchedule)
@@ -976,8 +977,7 @@ public class ReceiptRepository
     )
     {
         var receiptQuery = _context
-            .TotalScheduleReceiptList
-            .Include(receipt => receipt.FullReceiptList)
+            .TotalScheduleReceiptList.Include(receipt => receipt.FullReceiptList)
             .ThenInclude(receipt => receipt.ServiceSchedule)
             .Include(receipt => receipt.MovingSchedule)
             .Include(receipt => receipt.StayingSchedule)
@@ -1720,7 +1720,6 @@ public class ReceiptRepository
             .Include(entity => entity.TourishSchedule)
             .ThenInclude(entity => entity.TourishPlan)
             .Where(entity => (int)entity.Status < 2)
-            .OrderBy(entity => entity.OriginalPrice * (entity.TotalChildTicket + entity.TotalTicket) * entity.DiscountFloat - entity.DiscountAmount)
             .Select(entity => new
             {
                 GuestName = entity.GuestName,
@@ -1787,24 +1786,19 @@ public class ReceiptRepository
                     && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
                 )
             )
-            .OrderByDescending(entity =>
-                (
-                    entity.OriginalPrice * entity.TotalTicket
-                    + entity.TotalChildTicket * entity.OriginalPrice
-                ) * (1 - entity.DiscountFloat) - entity.DiscountAmount
-            )
-            .Select(entity => new
+            .GroupBy(entity => entity.TotalReceipt.TourishPlan.TourName)
+            .Select(group => new
             {
-                GuestName = entity.GuestName,
-                TotalPrice = (
-                    entity.OriginalPrice * entity.TotalTicket
-                    + entity.TotalChildTicket * entity.OriginalPrice
-                ) * (1 - entity.DiscountFloat) - entity.DiscountAmount,
-                OriginalPrice = entity.OriginalPrice,
-                TotalTicket = entity.TotalTicket,
-                TotalChildTicket = entity.TotalChildTicket,
-                TourishPlan = entity.TotalReceipt.TourishPlan,
+                name = group.Key,
+                gross = group.Sum(entity =>
+                    (
+                        entity.OriginalPrice * entity.TotalTicket
+                        + entity.OriginalPrice * entity.TotalChildTicket
+                    ) * (1 - entity.DiscountFloat)
+                    - entity.DiscountAmount
+                )
             })
+            .OrderByDescending(group => group.gross)
             .ToList();
 
         if (receiptList == null)
@@ -1833,19 +1827,13 @@ public class ReceiptRepository
                     && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
                 )
             )
-            .OrderByDescending(entity => entity.TotalTicket + entity.TotalChildTicket)
-            .Select(entity => new
+            .GroupBy(entity => entity.TotalReceipt.TourishPlan.TourName)
+            .Select(group => new
             {
-                GuestName = entity.GuestName,
-                TotalPrice = (
-                    entity.OriginalPrice * entity.TotalTicket
-                    + entity.TotalChildTicket * entity.OriginalPrice
-                ) * (1 - entity.DiscountFloat) - entity.DiscountAmount,
-                OriginalPrice = entity.OriginalPrice,
-                TotalTicket = entity.TotalTicket,
-                TotalChildTicket = entity.TotalChildTicket,
-                TourishPlan = entity.TotalReceipt.TourishPlan
+                name = group.Key,
+                totalTicket = group.Sum(entity => entity.TotalTicket + entity.TotalChildTicket)
             })
+            .OrderByDescending(group => group.totalTicket)
             .ToList();
 
         if (receiptList == null)
@@ -1874,25 +1862,19 @@ public class ReceiptRepository
                     && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
                 )
             )
-            .OrderByDescending(entity =>
-                (
-                    entity.OriginalPrice * entity.TotalTicket
-                    + entity.TotalChildTicket * entity.OriginalPrice
-                ) * (1 - entity.DiscountFloat) - entity.DiscountAmount
-            )
-            .Select(entity => new
+            .GroupBy(entity => entity.TotalReceipt.MovingSchedule.Name)
+            .Select(group => new
             {
-                GuestName = entity.GuestName,
-                TotalPrice = (
-                    entity.OriginalPrice * entity.TotalTicket
-                    + entity.TotalChildTicket * entity.OriginalPrice
-                ) * (1 - entity.DiscountFloat) - entity.DiscountAmount,
-                OriginalPrice = entity.OriginalPrice,
-                TotalTicket = entity.TotalTicket,
-                TotalChildTicket = entity.TotalChildTicket,
-                MovingSchedule = entity.TotalReceipt.MovingSchedule,
-                ScheduleName = entity.TotalReceipt.MovingSchedule.Name
+                name = group.Key,
+                gross = group.Sum(entity =>
+                    (
+                        entity.OriginalPrice * entity.TotalTicket
+                        + entity.OriginalPrice * entity.TotalChildTicket
+                    ) * (1 - entity.DiscountFloat)
+                    - entity.DiscountAmount
+                )
             })
+            .OrderByDescending(group => group.gross)
             .ToList();
 
         if (receiptList == null)
@@ -1921,25 +1903,19 @@ public class ReceiptRepository
                     && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
                 )
             )
-            .OrderByDescending(entity =>
-                (
-                    entity.OriginalPrice * entity.TotalTicket
-                    + entity.TotalChildTicket * entity.OriginalPrice
-                ) * (1 - entity.DiscountFloat) - entity.DiscountAmount
-            )
-            .Select(entity => new
+            .GroupBy(entity => entity.TotalReceipt.StayingSchedule.Name)
+            .Select(group => new
             {
-                GuestName = entity.GuestName,
-                TotalPrice = (
+                name = group.Key,
+                gross = group.Sum(entity =>
+                    (
                         entity.OriginalPrice * entity.TotalTicket
-                        + entity.TotalChildTicket * entity.OriginalPrice
-                    ) * (1 - entity.DiscountFloat) - entity.DiscountAmount,
-                OriginalPrice = entity.OriginalPrice,
-                TotalTicket = entity.TotalTicket,
-                TotalChildTicket = entity.TotalChildTicket,
-                ScheduleName = entity.TotalReceipt.StayingSchedule.Name,
-                StayingSchedule = entity.TotalReceipt.StayingSchedule
+                        + entity.OriginalPrice * entity.TotalChildTicket
+                    ) * (1 - entity.DiscountFloat)
+                    - entity.DiscountAmount
+                )
             })
+            .OrderByDescending(group => group.gross)
             .ToList();
 
         if (receiptList == null)
@@ -1968,19 +1944,11 @@ public class ReceiptRepository
                     && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
                 )
             )
-            .OrderByDescending(entity => entity.TotalTicket + entity.TotalChildTicket)
-            .Select(entity => new
+            .GroupBy(entity => entity.TotalReceipt.MovingSchedule.Name)
+            .Select(group => new
             {
-                GuestName = entity.GuestName,
-                TotalPrice = (
-                        entity.OriginalPrice * entity.TotalTicket
-                        + entity.TotalChildTicket * entity.OriginalPrice
-                    ) * (1 - entity.DiscountFloat) - entity.DiscountAmount,
-                OriginalPrice = entity.OriginalPrice,
-                TotalTicket = entity.TotalTicket,
-                TotalChildTicket = entity.TotalChildTicket,
-                MovingSchedule = entity.TotalReceipt.MovingSchedule,
-                ScheduleName = entity.TotalReceipt.MovingSchedule.Name
+                name = group.Key,
+                totalTicket = group.Sum(entity => entity.TotalTicket + entity.TotalChildTicket)
             })
             .ToList();
 
@@ -2010,19 +1978,11 @@ public class ReceiptRepository
                     && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
                 )
             )
-            .OrderByDescending(entity => entity.TotalTicket + entity.TotalChildTicket)
-            .Select(entity => new
+            .GroupBy(entity => entity.TotalReceipt.MovingSchedule.Name)
+            .Select(group => new
             {
-                GuestName = entity.GuestName,
-                TotalPrice = (
-                        entity.OriginalPrice * entity.TotalTicket
-                        + entity.TotalChildTicket * entity.OriginalPrice
-                    ) * (1 - entity.DiscountFloat) - entity.DiscountAmount,
-                OriginalPrice = entity.OriginalPrice,
-                TotalTicket = entity.TotalTicket,
-                TotalChildTicket = entity.TotalChildTicket,
-                ScheduleName = entity.TotalReceipt.StayingSchedule.Name,
-                StayingSchedule = entity.TotalReceipt.StayingSchedule
+                name = group.Key,
+                totalTicket = group.Sum(entity => entity.TotalTicket + entity.TotalChildTicket)
             })
             .ToList();
 
@@ -2064,8 +2024,9 @@ public class ReceiptRepository
                 Gross = group.Sum(entity =>
                     (
                         entity.OriginalPrice * entity.TotalTicket
-                        + entity.TotalChildTicket * entity.OriginalPrice
-                    ) * (1 - entity.DiscountFloat) - entity.DiscountAmount
+                        + entity.OriginalPrice * entity.TotalChildTicket
+                    ) * (1 - entity.DiscountFloat)
+                    - entity.DiscountAmount
                 )
             })
             .ToList();
@@ -2108,8 +2069,9 @@ public class ReceiptRepository
                 Gross = group.Sum(entity =>
                     (
                         entity.OriginalPrice * entity.TotalTicket
-                        + entity.TotalChildTicket * entity.OriginalPrice
-                    ) * (1 - entity.DiscountFloat) - entity.DiscountAmount
+                        + entity.OriginalPrice * entity.TotalChildTicket
+                    ) * (1 - entity.DiscountFloat)
+                    - entity.DiscountAmount
                 )
             })
             .ToList();
@@ -2152,8 +2114,9 @@ public class ReceiptRepository
                 Gross = group.Sum(entity =>
                     (
                         entity.OriginalPrice * entity.TotalTicket
-                        + entity.TotalChildTicket * entity.OriginalPrice
-                    ) * (1 - entity.DiscountFloat) - entity.DiscountAmount
+                        + entity.OriginalPrice * entity.TotalChildTicket
+                    ) * (1 - entity.DiscountFloat)
+                    - entity.DiscountAmount
                 )
             })
             .ToList();

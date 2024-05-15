@@ -35,77 +35,77 @@ namespace WebApplication1.Controllers.Receipt
 
 
         [HttpGet("tour/unpaid-client")]
-        [Authorize(Roles = "Admin,AdminManager")]
+        [Authorize(Roles = "Admin, AdminManager")]
         public IActionResult getUnpaidTourClient()
         {
             return Ok(_receiptService.getUnpaidTourClient());
         }
 
         [HttpGet("schedule/unpaid-client")]
-        [Authorize(Roles = "Admin,AdminManager")]
+        [Authorize(Roles = "Admin, AdminManager")]
         public IActionResult getUnpaidScheduleClient()
         {
             return Ok(_receiptService.getUnpaidScheduleClient());
         }
 
         [HttpGet("gross-tour")]
-        [Authorize(Roles = "Admin,AdminManager")]
+        [Authorize(Roles = "Admin, AdminManager")]
         public IActionResult getTopGrossTourInMonth()
         {
             return Ok(_receiptService.getTopGrossTourInMonth());
         }
 
         [HttpGet("total-ticket-tour")]
-        [Authorize(Roles = "Admin,AdminManager")]
+        [Authorize(Roles = "Admin, AdminManager")]
         public IActionResult getTopTicketTourInMonth()
         {
             return Ok(_receiptService.getTopTicketTourInMonth());
         }
 
         [HttpGet("gross-moving-service")]
-        [Authorize(Roles = "Admin,AdminManager")]
+        [Authorize(Roles = "Admin, AdminManager")]
         public IActionResult getTopGrossMovingScheduleInMonth()
         {
             return Ok(_receiptService.getTopGrossMovingScheduleInMonth());
         }
 
         [HttpGet("gross-staying-service")]
-        [Authorize(Roles = "Admin,AdminManager")]
+        [Authorize(Roles = "Admin, AdminManager")]
         public IActionResult getTopGrossStayingScheduleInMonth()
         {
             return Ok(_receiptService.getTopGrossStayingScheduleInMonth());
         }
 
         [HttpGet("total-ticket-moving-service")]
-        [Authorize(Roles = "Admin,AdminManager")]
+        [Authorize(Roles = "Admin, AdminManager")]
         public IActionResult getTopTicketMovingScheduleInMonth()
         {
             return Ok(_receiptService.getTopTicketMovingScheduleInMonth());
         }
 
         [HttpGet("total-ticket-staying-service")]
-        [Authorize(Roles = "Admin,AdminManager")]
+        [Authorize(Roles = "Admin, AdminManager")]
         public IActionResult getTopTicketStayingScheduleInMonth()
         {
             return Ok(_receiptService.getTopTicketStayingScheduleInMonth());
         }
 
         [HttpGet("tourish-plan/total-month-gross")]
-        [Authorize(Roles = "Admin,AdminManager")]
+        [Authorize(Roles = "Admin, AdminManager")]
         public IActionResult getGrossTourishPlanInYear()
         {
             return Ok(_receiptService.getGrossTourishPlanInYear());
         }
 
         [HttpGet("moving-schedule/total-month-gross")]
-        [Authorize(Roles = "Admin,AdminManager")]
+        [Authorize(Roles = "Admin, AdminManager")]
         public IActionResult getGrossMovingScheduleInYear()
         {
             return Ok(_receiptService.getGrossMovingScheduleInYear());
         }
 
         [HttpGet("staying-schedule/total-month-gross")]
-        [Authorize(Roles = "Admin,AdminManager")]
+        [Authorize(Roles = "Admin, AdminManager")]
         public IActionResult getGrossStayingScheduleInYear()
         {
             return Ok(_receiptService.getGrossStayingScheduleInYear());
