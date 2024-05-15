@@ -1720,6 +1720,7 @@ public class ReceiptRepository
             .Include(entity => entity.TourishSchedule)
             .ThenInclude(entity => entity.TourishPlan)
             .Where(entity => (int)entity.Status < 2)
+            .OrderBy(entity => entity.OriginalPrice * (entity.TotalChildTicket + entity.TotalTicket) * entity.DiscountFloat - entity.DiscountAmount)
             .Select(entity => new
             {
                 GuestName = entity.GuestName,
@@ -1789,18 +1790,16 @@ public class ReceiptRepository
             .OrderByDescending(entity =>
                 (
                     entity.OriginalPrice * entity.TotalTicket
-                    + entity.TotalChildTicket * entity.TotalTicket
-                    - entity.DiscountAmount
-                ) * (1 - entity.DiscountFloat)
+                    + entity.TotalChildTicket * entity.OriginalPrice
+                ) * (1 - entity.DiscountFloat) - entity.DiscountAmount
             )
             .Select(entity => new
             {
                 GuestName = entity.GuestName,
                 TotalPrice = (
                     entity.OriginalPrice * entity.TotalTicket
-                    + entity.TotalChildTicket * entity.TotalTicket
-                    - entity.DiscountAmount
-                ) * (1 - entity.DiscountFloat),
+                    + entity.TotalChildTicket * entity.OriginalPrice
+                ) * (1 - entity.DiscountFloat) - entity.DiscountAmount,
                 OriginalPrice = entity.OriginalPrice,
                 TotalTicket = entity.TotalTicket,
                 TotalChildTicket = entity.TotalChildTicket,
@@ -1840,9 +1839,8 @@ public class ReceiptRepository
                 GuestName = entity.GuestName,
                 TotalPrice = (
                     entity.OriginalPrice * entity.TotalTicket
-                    + entity.TotalChildTicket * entity.TotalTicket
-                    - entity.DiscountAmount
-                ) * (1 - entity.DiscountFloat),
+                    + entity.TotalChildTicket * entity.OriginalPrice
+                ) * (1 - entity.DiscountFloat) - entity.DiscountAmount,
                 OriginalPrice = entity.OriginalPrice,
                 TotalTicket = entity.TotalTicket,
                 TotalChildTicket = entity.TotalChildTicket,
@@ -1879,18 +1877,16 @@ public class ReceiptRepository
             .OrderByDescending(entity =>
                 (
                     entity.OriginalPrice * entity.TotalTicket
-                    + entity.TotalChildTicket * entity.TotalTicket
-                    - entity.DiscountAmount
-                ) * (1 - entity.DiscountFloat)
+                    + entity.TotalChildTicket * entity.OriginalPrice
+                ) * (1 - entity.DiscountFloat) - entity.DiscountAmount
             )
             .Select(entity => new
             {
                 GuestName = entity.GuestName,
                 TotalPrice = (
                     entity.OriginalPrice * entity.TotalTicket
-                    + entity.TotalChildTicket * entity.TotalTicket
-                    - entity.DiscountAmount
-                ) * (1 - entity.DiscountFloat),
+                    + entity.TotalChildTicket * entity.OriginalPrice
+                ) * (1 - entity.DiscountFloat) - entity.DiscountAmount,
                 OriginalPrice = entity.OriginalPrice,
                 TotalTicket = entity.TotalTicket,
                 TotalChildTicket = entity.TotalChildTicket,
@@ -1928,18 +1924,16 @@ public class ReceiptRepository
             .OrderByDescending(entity =>
                 (
                     entity.OriginalPrice * entity.TotalTicket
-                    + entity.TotalChildTicket * entity.TotalTicket
-                    - entity.DiscountAmount
-                ) * (1 - entity.DiscountFloat)
+                    + entity.TotalChildTicket * entity.OriginalPrice
+                ) * (1 - entity.DiscountFloat) - entity.DiscountAmount
             )
             .Select(entity => new
             {
                 GuestName = entity.GuestName,
                 TotalPrice = (
-                    entity.OriginalPrice * entity.TotalTicket
-                    + entity.TotalChildTicket * entity.TotalTicket
-                    - entity.DiscountAmount
-                ) * (1 - entity.DiscountFloat),
+                        entity.OriginalPrice * entity.TotalTicket
+                        + entity.TotalChildTicket * entity.OriginalPrice
+                    ) * (1 - entity.DiscountFloat) - entity.DiscountAmount,
                 OriginalPrice = entity.OriginalPrice,
                 TotalTicket = entity.TotalTicket,
                 TotalChildTicket = entity.TotalChildTicket,
@@ -1979,10 +1973,9 @@ public class ReceiptRepository
             {
                 GuestName = entity.GuestName,
                 TotalPrice = (
-                    entity.OriginalPrice * entity.TotalTicket
-                    + entity.TotalChildTicket * entity.TotalTicket
-                    - entity.DiscountAmount
-                ) * (1 - entity.DiscountFloat),
+                        entity.OriginalPrice * entity.TotalTicket
+                        + entity.TotalChildTicket * entity.OriginalPrice
+                    ) * (1 - entity.DiscountFloat) - entity.DiscountAmount,
                 OriginalPrice = entity.OriginalPrice,
                 TotalTicket = entity.TotalTicket,
                 TotalChildTicket = entity.TotalChildTicket,
@@ -2022,10 +2015,9 @@ public class ReceiptRepository
             {
                 GuestName = entity.GuestName,
                 TotalPrice = (
-                    entity.OriginalPrice * entity.TotalTicket
-                    + entity.TotalChildTicket * entity.TotalTicket
-                    - entity.DiscountAmount
-                ) * (1 - entity.DiscountFloat),
+                        entity.OriginalPrice * entity.TotalTicket
+                        + entity.TotalChildTicket * entity.OriginalPrice
+                    ) * (1 - entity.DiscountFloat) - entity.DiscountAmount,
                 OriginalPrice = entity.OriginalPrice,
                 TotalTicket = entity.TotalTicket,
                 TotalChildTicket = entity.TotalChildTicket,
@@ -2072,9 +2064,8 @@ public class ReceiptRepository
                 Gross = group.Sum(entity =>
                     (
                         entity.OriginalPrice * entity.TotalTicket
-                        + entity.TotalChildTicket * entity.TotalTicket
-                        - entity.DiscountAmount
-                    ) * (1 - entity.DiscountFloat)
+                        + entity.TotalChildTicket * entity.OriginalPrice
+                    ) * (1 - entity.DiscountFloat) - entity.DiscountAmount
                 )
             })
             .ToList();
@@ -2117,9 +2108,8 @@ public class ReceiptRepository
                 Gross = group.Sum(entity =>
                     (
                         entity.OriginalPrice * entity.TotalTicket
-                        + entity.TotalChildTicket * entity.TotalTicket
-                        - entity.DiscountAmount
-                    ) * (1 - entity.DiscountFloat)
+                        + entity.TotalChildTicket * entity.OriginalPrice
+                    ) * (1 - entity.DiscountFloat) - entity.DiscountAmount
                 )
             })
             .ToList();
@@ -2162,9 +2152,8 @@ public class ReceiptRepository
                 Gross = group.Sum(entity =>
                     (
                         entity.OriginalPrice * entity.TotalTicket
-                        + entity.TotalChildTicket * entity.TotalTicket
-                        - entity.DiscountAmount
-                    ) * (1 - entity.DiscountFloat)
+                        + entity.TotalChildTicket * entity.OriginalPrice
+                    ) * (1 - entity.DiscountFloat) - entity.DiscountAmount
                 )
             })
             .ToList();
