@@ -109,7 +109,12 @@ public class TourishPlanRepository : ITourishPlanRepository
 
         if (entityModel.TourishCategoryRelations != null)
         {
-            tourishPlan.TourishCategoryRelations = entityModel.TourishCategoryRelations;
+            tourishPlan.TourishCategoryRelations = entityModel.TourishCategoryRelations.Select(
+                entity => new TourishCategoryRelation
+                {
+                    TourishCategoryId = entity.TourishCategory.Id
+                }
+            ).ToList();
         }
 
         if (entityModel.TourishScheduleList != null)
@@ -824,7 +829,8 @@ public class TourishPlanRepository : ITourishPlanRepository
                     await _context.AddAsync(eatSchedule);
                     await _context.SaveChangesAsync();
 
-                    var insertString = (String)schedule.description ?? ""; ;
+                    var insertString = (String)schedule.description ?? "";
+                    ;
                     var oldId = (String)schedule.id;
 
                     if (oldId != null)
@@ -955,7 +961,8 @@ public class TourishPlanRepository : ITourishPlanRepository
                     await _context.AddAsync(stayingSchedule);
                     await _context.SaveChangesAsync();
 
-                    var insertString = (String)schedule.description ?? ""; ;
+                    var insertString = (String)schedule.description ?? "";
+                    ;
                     var oldId = (String)schedule.id;
 
                     if (oldId != null)

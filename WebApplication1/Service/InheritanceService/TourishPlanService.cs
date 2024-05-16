@@ -51,7 +51,7 @@ namespace TourishApi.Service.InheritanceService
                 }
                 else
                 {
-                    var response = new Response { resultCd = 1, MessageCode = "C411", };
+                    var response = new Response { resultCd = 1, MessageCode = "C411", Error="Exist"};
                     return response;
                 }
             }
@@ -61,7 +61,8 @@ namespace TourishApi.Service.InheritanceService
                 {
                     resultCd = 1,
                     MessageCode = "C414",
-                    Error = ex.Message
+                    Error = ex.Message,
+                    Data = ex
                 };
                 return response;
             }

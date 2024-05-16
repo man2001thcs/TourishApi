@@ -1749,8 +1749,8 @@ public class ReceiptRepository
         var receiptList = _context
             .FullScheduleReceiptList.Include(entity => entity.TotalReceipt)
             .Include(entity => entity.TotalReceipt)
-            .Include(entity => entity.ServiceSchedule)
             .ThenInclude(entity => entity.MovingSchedule)
+            .Include(entity => entity.ServiceSchedule)           
             .Where(entity => (int)entity.Status < 2 && entity.TotalReceipt.MovingScheduleId.HasValue)
             .GroupBy(entity => entity.TotalReceipt.MovingSchedule.Name)
             .Select(group => new
@@ -1782,8 +1782,8 @@ public class ReceiptRepository
         var receiptList = _context
             .FullScheduleReceiptList.Include(entity => entity.TotalReceipt)
             .Include(entity => entity.TotalReceipt)
-            .Include(entity => entity.ServiceSchedule)
             .ThenInclude(entity => entity.StayingScheduleId)
+            .Include(entity => entity.ServiceSchedule)          
             .Where(entity => (int)entity.Status < 2 && entity.TotalReceipt.StayingScheduleId.HasValue)
             .GroupBy(entity => entity.TotalReceipt.StayingSchedule.Name)
             .Select(group => new
@@ -2010,7 +2010,7 @@ public class ReceiptRepository
             .Include(entity => entity.TotalReceipt)
             .ThenInclude(entity => entity.StayingSchedule)
             .Where(entity => (int)entity.Status < 3)
-            .Where(entity => entity.TotalReceipt.StayingScheduleId != null)
+            .Where(entity => entity.TotalReceipt.StayingScheduleId.HasValue)
             .Where(entity =>
                 (
                     entity.CreatedDate.Month == DateTime.UtcNow.Month
@@ -2021,7 +2021,7 @@ public class ReceiptRepository
                     && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
                 )
             )
-            .GroupBy(entity => entity.TotalReceipt.MovingSchedule.Name)
+            .GroupBy(entity => entity.TotalReceipt.StayingSchedule.Name)
             .Select(group => new
             {
                 name = group.Key,
