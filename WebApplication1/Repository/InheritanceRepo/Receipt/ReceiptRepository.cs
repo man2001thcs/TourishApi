@@ -1720,13 +1720,19 @@ public class ReceiptRepository
             .Include(entity => entity.TourishSchedule)
             .ThenInclude(entity => entity.TourishPlan)
             .Where(entity => (int)entity.Status < 2)
-            .Select(entity => new
+            .GroupBy(entity => entity.TotalReceipt.TourishPlan.TourName)
+            .Select(group => new
             {
-                GuestName = entity.GuestName,
-                OriginalPrice = entity.OriginalPrice,
-                TotalTicket = entity.TotalTicket,
-                TotalChildTicket = entity.TotalChildTicket,
-                TourishPlan = entity.TotalReceipt.TourishPlan,
+                Name = group.Key,
+                GuestList = group.Select(entity => new
+                {
+                    GuestName = entity.GuestName,
+                    OriginalPrice = entity.OriginalPrice,
+                    TotalTicket = entity.TotalTicket,
+                    TotalChildTicket = entity.TotalChildTicket,
+                    DiscountFloat = entity.DiscountFloat,
+                    DiscountAmount = entity.DiscountAmount
+                }).ToList()
             })
             .ToList();
 
@@ -1738,24 +1744,61 @@ public class ReceiptRepository
         return new Response { resultCd = 0, Data = receiptList };
     }
 
-    public Response getUnpaidScheduleClient()
+    public Response getUnpaidMovingScheduleClient()
     {
         var receiptList = _context
             .FullScheduleReceiptList.Include(entity => entity.TotalReceipt)
             .Include(entity => entity.TotalReceipt)
             .Include(entity => entity.ServiceSchedule)
             .ThenInclude(entity => entity.MovingSchedule)
+            .Where(entity => (int)entity.Status < 2 && entity.TotalReceipt.MovingScheduleId.HasValue)
+            .GroupBy(entity => entity.TotalReceipt.MovingSchedule.Name)
+            .Select(group => new
+            {
+                Name = group.Key,
+                GuestList = group.Select(entity => new
+                {
+                    GuestName = entity.GuestName,
+                    OriginalPrice = entity.OriginalPrice,
+                    TotalTicket = entity.TotalTicket,
+                    TotalChildTicket = entity.TotalChildTicket,
+                    DiscountFloat = entity.DiscountFloat,
+                    DiscountAmount = entity.DiscountAmount
+
+                }).ToList()
+            })
+            .ToList();
+
+        if (receiptList == null)
+        {
+            return new Response { resultCd = 1, Data = new List<FullReceipt>() };
+        }
+
+        return new Response { resultCd = 0, Data = receiptList };
+    }
+
+    public Response getUnpaidStayingScheduleClient()
+    {
+        var receiptList = _context
+            .FullScheduleReceiptList.Include(entity => entity.TotalReceipt)
+            .Include(entity => entity.TotalReceipt)
             .Include(entity => entity.ServiceSchedule)
             .ThenInclude(entity => entity.StayingScheduleId)
-            .Where(entity => (int)entity.Status < 2)
-            .Select(entity => new
+            .Where(entity => (int)entity.Status < 2 && entity.TotalReceipt.StayingScheduleId.HasValue)
+            .GroupBy(entity => entity.TotalReceipt.StayingSchedule.Name)
+            .Select(group => new
             {
-                GuestName = entity.GuestName,
-                OriginalPrice = entity.OriginalPrice,
-                TotalTicket = entity.TotalTicket,
-                TotalChildTicket = entity.TotalChildTicket,
-                MovingSchedule = entity.TotalReceipt.MovingSchedule,
-                StayingSchedule = entity.TotalReceipt.StayingSchedule
+                Name = group.Key,
+                GuestList = group.Select(entity => new
+                {
+                    GuestName = entity.GuestName,
+                    OriginalPrice = entity.OriginalPrice,
+                    TotalTicket = entity.TotalTicket,
+                    TotalChildTicket = entity.TotalChildTicket,
+                    DiscountFloat = entity.DiscountFloat,
+                    DiscountAmount = entity.DiscountAmount
+
+                }).ToList()
             })
             .ToList();
 

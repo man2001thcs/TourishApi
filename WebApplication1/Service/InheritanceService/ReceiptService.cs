@@ -454,11 +454,29 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response getUnpaidScheduleClient()
+        public Response getUnpaidMovingScheduleClient()
         {
             try
             {
-                return _receiptRepository.getUnpaidTourClient();
+                return _receiptRepository.getUnpaidMovingScheduleClient();
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public Response getUnpaidStayingScheduleClient()
+        {
+            try
+            {
+                return _receiptRepository.getUnpaidStayingScheduleClient();
             }
             catch (Exception ex)
             {

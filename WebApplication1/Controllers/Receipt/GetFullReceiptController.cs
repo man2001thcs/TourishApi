@@ -41,11 +41,18 @@ namespace WebApplication1.Controllers.Receipt
             return Ok(_receiptService.getUnpaidTourClient());
         }
 
-        [HttpGet("schedule/unpaid-client")]
+        [HttpGet("moving-schedule/unpaid-client")]
         [Authorize(Roles = "Admin, AdminManager")]
-        public IActionResult getUnpaidScheduleClient()
+        public IActionResult getUnpaidMovingScheduleClient()
         {
-            return Ok(_receiptService.getUnpaidScheduleClient());
+            return Ok(_receiptService.getUnpaidMovingScheduleClient());
+        }
+
+         [HttpGet("staying-schedule/unpaid-client")]
+        [Authorize(Roles = "Admin, AdminManager")]
+        public IActionResult getUnpaidStayingScheduleClient()
+        {
+            return Ok(_receiptService.getUnpaidStayingScheduleClient());
         }
 
         [HttpGet("gross-tour")]
