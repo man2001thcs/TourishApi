@@ -13,8 +13,7 @@ public class ScheduleDateChangeTask
     }
     public async Task ScheduleDateDueTask()
     {
-        var tourishPlanList = _context.TourishPlan.
-            Where(entity => entity.PlanStatus == WebApplication1.Data.PlanStatus.OnGoing).
+        var tourishPlanList = _context.TourishPlan.            
             Include(entity => entity.EatSchedules).
             Include(entity => entity.StayingSchedules).
             Include(entity => entity.MovingSchedules).ToList();

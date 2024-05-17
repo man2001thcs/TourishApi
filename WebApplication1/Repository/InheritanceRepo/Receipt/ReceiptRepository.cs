@@ -1223,47 +1223,6 @@ public class ReceiptRepository
                     await _context.SaveChangesAsync();
                 }
             }
-
-            var totalReceiptComplete = await _context
-                .TotalReceiptList.Where(receipt =>
-                    receipt.TotalReceiptId == receiptModel.TotalReceiptId
-                )
-                .Include(entity => entity.FullReceiptList)
-                .FirstOrDefaultAsync();
-
-            var totalCount = totalReceiptComplete.FullReceiptList.Count();
-
-            var createCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
-                fullReceipt.Status == FullReceiptStatus.Created
-            );
-            var onGoingCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
-                fullReceipt.Status == FullReceiptStatus.AwaitPayment
-            );
-            var complteteCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
-                fullReceipt.Status == FullReceiptStatus.Completed
-            );
-            var cancelCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
-                fullReceipt.Status == FullReceiptStatus.Cancelled
-            );
-
-            if (totalCount == createCount)
-            {
-                totalReceiptComplete.Status = ReceiptStatus.Created;
-            }
-            else if (onGoingCount < totalCount && onGoingCount > 1)
-            {
-                totalReceiptComplete.Status = ReceiptStatus.OnGoing;
-            }
-            else if (complteteCount == totalCount)
-            {
-                totalReceiptComplete.Status = ReceiptStatus.Completed;
-            }
-            else if (cancelCount == totalCount)
-            {
-                totalReceiptComplete.Status = ReceiptStatus.Cancelled;
-            }
-
-            _context.SaveChanges();
         }
 
         return new Response
@@ -1297,47 +1256,6 @@ public class ReceiptRepository
             receipt.UpdateDate = DateTime.UtcNow;
             if (receiptModel.Status == FullReceiptStatus.Completed)
                 receipt.CompleteDate = DateTime.UtcNow;
-
-            var totalReceiptComplete = await _context
-                .TotalReceiptList.Where(receipt =>
-                    receipt.TotalReceiptId == receiptModel.TotalReceiptId
-                )
-                .Include(entity => entity.FullReceiptList)
-                .FirstOrDefaultAsync();
-
-            var totalCount = totalReceiptComplete.FullReceiptList.Count();
-
-            var createCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
-                fullReceipt.Status == FullReceiptStatus.Created
-            );
-            var onGoingCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
-                fullReceipt.Status == FullReceiptStatus.AwaitPayment
-            );
-            var complteteCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
-                fullReceipt.Status == FullReceiptStatus.Completed
-            );
-            var cancelCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
-                fullReceipt.Status == FullReceiptStatus.Cancelled
-            );
-
-            if (totalCount == createCount)
-            {
-                totalReceiptComplete.Status = ReceiptStatus.Created;
-            }
-            else if (onGoingCount < totalCount && onGoingCount > 1)
-            {
-                totalReceiptComplete.Status = ReceiptStatus.OnGoing;
-            }
-            else if (complteteCount == totalCount)
-            {
-                totalReceiptComplete.Status = ReceiptStatus.Completed;
-            }
-            else if (cancelCount == totalCount)
-            {
-                totalReceiptComplete.Status = ReceiptStatus.Cancelled;
-            }
-
-            _context.SaveChanges();
         }
 
         return new Response
@@ -1370,7 +1288,11 @@ public class ReceiptRepository
                 (plan => plan.Id == receipt.TotalReceipt.TourishPlanId)
             );
 
-            if (planExist.PlanStatus == PlanStatus.OnGoing)
+            var scheduleExist = _context.TourishScheduleList.FirstOrDefault(
+                (plan => plan.Id == receipt.TourishScheduleId)
+            );
+
+            if (scheduleExist.PlanStatus == PlanStatus.OnGoing)
             {
                 return new Response
                 {
@@ -1379,7 +1301,7 @@ public class ReceiptRepository
                     returnId = receipt.TotalReceiptId,
                 };
             }
-            else if (planExist.PlanStatus == PlanStatus.Complete)
+            else if (scheduleExist.PlanStatus == PlanStatus.Complete)
             {
                 return new Response
                 {
@@ -1388,7 +1310,7 @@ public class ReceiptRepository
                     returnId = receipt.TotalReceiptId,
                 };
             }
-            else if (planExist.PlanStatus == PlanStatus.Cancel)
+            else if (scheduleExist.PlanStatus == PlanStatus.Cancel)
             {
                 return new Response
                 {
@@ -1493,48 +1415,7 @@ public class ReceiptRepository
 
                     await _context.SaveChangesAsync();
                 }
-            }
-
-            var totalReceiptComplete = await _context
-                .TotalReceiptList.Where(receipt =>
-                    receipt.TotalReceiptId == receiptModel.TotalReceiptId
-                )
-                .Include(entity => entity.FullReceiptList)
-                .FirstOrDefaultAsync();
-
-            var totalCount = totalReceiptComplete.FullReceiptList.Count();
-
-            var createCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
-                fullReceipt.Status == FullReceiptStatus.Created
-            );
-            var onGoingCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
-                fullReceipt.Status == FullReceiptStatus.AwaitPayment
-            );
-            var complteteCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
-                fullReceipt.Status == FullReceiptStatus.Completed
-            );
-            var cancelCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
-                fullReceipt.Status == FullReceiptStatus.Cancelled
-            );
-
-            if (totalCount == createCount)
-            {
-                totalReceiptComplete.Status = ReceiptStatus.Created;
-            }
-            else if (onGoingCount < totalCount && onGoingCount > 1)
-            {
-                totalReceiptComplete.Status = ReceiptStatus.OnGoing;
-            }
-            else if (complteteCount == totalCount)
-            {
-                totalReceiptComplete.Status = ReceiptStatus.Completed;
-            }
-            else if (cancelCount == totalCount)
-            {
-                totalReceiptComplete.Status = ReceiptStatus.Cancelled;
-            }
-
-            _context.SaveChanges();
+            }          
         }
 
         return new Response
@@ -1661,47 +1542,6 @@ public class ReceiptRepository
 
             if (receiptModel.Status == FullReceiptStatus.Completed)
                 receipt.CompleteDate = DateTime.UtcNow;
-
-            var totalReceiptComplete = await _context
-                .TotalReceiptList.Where(receipt =>
-                    receipt.TotalReceiptId == receiptModel.TotalReceiptId
-                )
-                .Include(entity => entity.FullReceiptList)
-                .FirstOrDefaultAsync();
-
-            var totalCount = totalReceiptComplete.FullReceiptList.Count();
-
-            var createCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
-                fullReceipt.Status == FullReceiptStatus.Created
-            );
-            var onGoingCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
-                fullReceipt.Status == FullReceiptStatus.AwaitPayment
-            );
-            var complteteCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
-                fullReceipt.Status == FullReceiptStatus.Completed
-            );
-            var cancelCount = totalReceiptComplete.FullReceiptList.Count(fullReceipt =>
-                fullReceipt.Status == FullReceiptStatus.Cancelled
-            );
-
-            if (totalCount == createCount)
-            {
-                totalReceiptComplete.Status = ReceiptStatus.Created;
-            }
-            else if (onGoingCount < totalCount && onGoingCount > 1)
-            {
-                totalReceiptComplete.Status = ReceiptStatus.OnGoing;
-            }
-            else if (complteteCount == totalCount)
-            {
-                totalReceiptComplete.Status = ReceiptStatus.Completed;
-            }
-            else if (cancelCount == totalCount)
-            {
-                totalReceiptComplete.Status = ReceiptStatus.Cancelled;
-            }
-
-            _context.SaveChanges();
         }
 
         return new Response

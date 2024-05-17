@@ -24,15 +24,11 @@ namespace WebApplication1.Data
         public string SupportNumber { get; set; }
         public int TotalTicket { get; set; }
         public int RemainTicket { get; set; }
-        public PlanStatus PlanStatus { get; set; }
 
         [Column(TypeName = "ntext")]
         public string? Description { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
-
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
 
         public TotalReceipt TotalReceipt { get; set; }
         public ICollection<Notification> NotificationList { get; set; }
@@ -50,7 +46,6 @@ namespace WebApplication1.Data
         public ICollection<Instruction> InstructionList { get; set; }
         public TourishPlan()
         {
-            PlanStatus = PlanStatus.Waiting;
             EatSchedules = new List<EatSchedule>();
             MovingSchedules = new List<MovingSchedule>();
             StayingSchedules = new List<StayingSchedule>();

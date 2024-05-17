@@ -61,9 +61,6 @@ public class TourishPlanRepository : ITourishPlanRepository
             RemainTicket = entityModel.RemainTicket,
             TotalTicket = entityModel.TotalTicket,
             SupportNumber = entityModel.SupportNumber,
-            PlanStatus = entityModel.PlanStatus,
-            StartDate = entityModel.StartDate,
-            EndDate = entityModel.EndDate,
 
             // Description = entityModel.Description,
 
@@ -109,12 +106,12 @@ public class TourishPlanRepository : ITourishPlanRepository
 
         if (entityModel.TourishCategoryRelations != null)
         {
-            tourishPlan.TourishCategoryRelations = entityModel.TourishCategoryRelations.Select(
-                entity => new TourishCategoryRelation
+            tourishPlan.TourishCategoryRelations = entityModel
+                .TourishCategoryRelations.Select(entity => new TourishCategoryRelation
                 {
                     TourishCategoryId = entity.TourishCategory.Id
-                }
-            ).ToList();
+                })
+                .ToList();
         }
 
         if (entityModel.TourishScheduleList != null)
@@ -366,9 +363,11 @@ public class TourishPlanRepository : ITourishPlanRepository
             {
                 logger.LogInformation(dateTime.ToString());
                 entityQuery = entityQuery.Where(entity =>
-                    entity.StartDate.Day == dateTime.Day
-                    && entity.StartDate.Month == dateTime.Month
-                    && entity.StartDate.Year == dateTime.Year
+                    entity.TourishScheduleList.Count(schedule =>
+                        schedule.StartDate.Day == dateTime.Day
+                        && schedule.StartDate.Month == dateTime.Month
+                        && schedule.StartDate.Year == dateTime.Year
+                    ) >= 1
                 );
             }
         }
@@ -524,9 +523,11 @@ public class TourishPlanRepository : ITourishPlanRepository
             {
                 logger.LogInformation(dateTime.ToString());
                 entityQuery = entityQuery.Where(entity =>
-                    entity.StartDate.Day == dateTime.Day
-                    && entity.StartDate.Month == dateTime.Month
-                    && entity.StartDate.Year == dateTime.Year
+                    entity.TourishScheduleList.Count(schedule =>
+                        schedule.StartDate.Day == dateTime.Day
+                        && schedule.StartDate.Month == dateTime.Month
+                        && schedule.StartDate.Year == dateTime.Year
+                    ) >= 1
                 );
             }
         }
@@ -607,10 +608,6 @@ public class TourishPlanRepository : ITourishPlanRepository
             entity.RemainTicket = entityModel.RemainTicket;
             entity.TotalTicket = entityModel.TotalTicket;
             entity.SupportNumber = entityModel.SupportNumber;
-
-            entity.PlanStatus = entityModel.PlanStatus;
-            entity.StartDate = entityModel.StartDate;
-            entity.EndDate = entityModel.EndDate;
 
             var tourishInterest = new TourishInterest();
 
