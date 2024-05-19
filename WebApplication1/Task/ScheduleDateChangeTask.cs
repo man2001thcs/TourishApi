@@ -1,23 +1,66 @@
 ﻿namespace TourishApi.Task;
 
-using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data.DbContextFile;
+using WebApplication1.Data.Schedule;
 
 public class ScheduleDateChangeTask
 {
     private readonly MyDbContext _context;
+
     public ScheduleDateChangeTask(MyDbContext _context)
     {
         this._context = _context;
     }
+
     public async Task ScheduleDateDueTask()
     {
-        var tourishPlanList = _context.TourishPlan.            
-            Include(entity => entity.EatSchedules).
-            Include(entity => entity.StayingSchedules).
-            Include(entity => entity.MovingSchedules).ToList();
+        var onGoingTourScheduleList = _context
+            .TourishScheduleList.Where(entity =>
+                entity.StartDate < DateTime.UtcNow && entity.EndDate > DateTime.UtcNow && (int) entity.PlanStatus < 3
+            )
+            .ToList();
+
+        foreach (var item in onGoingTourScheduleList)
+        {
+            item.PlanStatus = WebApplication1.Data.PlanStatus.OnGoing;
+        }
+
+        var completeTourScheduleList = _context
+            .TourishScheduleList.Where(entity =>
+                entity.EndDate < DateTime.UtcNow && (int) entity.PlanStatus < 3
+            )
+            .ToList();
+
+        foreach (var item in completeTourScheduleList)
+        {
+            item.PlanStatus = WebApplication1.Data.PlanStatus.Complete;
+        }
+
+        var onGoingScheduleScheduleList = _context
+            .ServiceSchedule.Where(entity =>
+                entity.StartDate < DateTime.UtcNow && entity.EndDate > DateTime.UtcNow && (int)entity.Status < 2
+            )
+            .ToList();
+
+        foreach (var item in onGoingScheduleScheduleList)
+        {
+            item.Status = ScheduleStatus.OnGoing;
+        }
+
+        var completeServiceScheduleList = _context
+            .ServiceSchedule.Where(entity =>
+                entity.EndDate < DateTime.UtcNow && (int)entity.Status < 2
+            )
+            .ToList();
+
+        foreach (var item in completeServiceScheduleList)
+        {
+            item.Status = ScheduleStatus.Completed;
+        }
 
 
+        await _context.SaveChangesAsync();
     }
 }
