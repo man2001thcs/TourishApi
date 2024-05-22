@@ -165,7 +165,7 @@ namespace WebApplication1.Service.InheritanceService
             }
 
 
-            var user = _context.Users.FirstOrDefault(p => p.UserName == model.Email);
+            var user = _context.Users.FirstOrDefault(p => p.Email == model.Email);
             var token = await GenerateToken(user);
 
             return new Response
