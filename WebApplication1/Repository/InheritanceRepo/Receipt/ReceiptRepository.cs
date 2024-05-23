@@ -266,6 +266,43 @@ public class ReceiptRepository
             entity.TourishPlanId == receiptModel.TourishPlanId
         );
 
+
+
+        if (receiptModel.TourishPlanId != null)
+        {
+            var scheduleExist = _context
+                .TourishScheduleList.Include(entity => entity.TourishPlanId == receiptModel.TourishPlanId)
+                .FirstOrDefault();
+
+            if (scheduleExist.PlanStatus == PlanStatus.OnGoing)
+            {
+                return new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "C517",
+              
+                };
+            }
+            else if (scheduleExist.PlanStatus == PlanStatus.Complete)
+            {
+                return new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "C518",
+            
+                };
+            }
+            else if (scheduleExist.PlanStatus == PlanStatus.Cancel)
+            {
+                return new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "C519",
+                  
+                };
+            }         
+        }
+
         if (totalReceipt == null)
         {
             totalReceipt = new TotalReceipt
@@ -322,10 +359,10 @@ public class ReceiptRepository
 
         var originalPrice = (double)0;
 
-        if (receiptModel.TourishPlanId != null)
+        if (totalReceipt.TourishPlanId != null)
         {
             var tourishPlan = _context.TourishPlan.FirstOrDefault(entity =>
-                entity.Id == receiptModel.TourishPlanId
+                entity.Id == totalReceipt.TourishPlanId
             );
             originalPrice = GetTotalPrice(tourishPlan);
         }
@@ -1415,7 +1452,7 @@ public class ReceiptRepository
 
                     await _context.SaveChangesAsync();
                 }
-            }          
+            }
         }
 
         return new Response
@@ -1590,7 +1627,7 @@ public class ReceiptRepository
             .FullScheduleReceiptList.Include(entity => entity.TotalReceipt)
             .Include(entity => entity.TotalReceipt)
             .ThenInclude(entity => entity.MovingSchedule)
-            .Include(entity => entity.ServiceSchedule)           
+            .Include(entity => entity.ServiceSchedule)
             .Where(entity => (int)entity.Status < 2 && entity.TotalReceipt.MovingScheduleId.HasValue)
             .GroupBy(entity => entity.TotalReceipt.MovingSchedule.Name)
             .Select(group => new
@@ -1623,7 +1660,7 @@ public class ReceiptRepository
             .FullScheduleReceiptList
             .Include(entity => entity.TotalReceipt)
             .ThenInclude(entity => entity.StayingSchedule)
-            .Include(entity => entity.ServiceSchedule)          
+            .Include(entity => entity.ServiceSchedule)
             .Where(entity => (int)entity.Status < 2 && entity.TotalReceipt.StayingScheduleId.HasValue)
             .GroupBy(entity => entity.TotalReceipt.StayingSchedule.Name)
             .Select(group => new
