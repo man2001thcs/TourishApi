@@ -1620,9 +1620,9 @@ public class ReceiptRepository
     public Response getUnpaidStayingScheduleClient()
     {
         var receiptList = _context
-            .FullScheduleReceiptList.Include(entity => entity.TotalReceipt)
+            .FullScheduleReceiptList
             .Include(entity => entity.TotalReceipt)
-            .ThenInclude(entity => entity.StayingScheduleId)
+            .ThenInclude(entity => entity.StayingSchedule)
             .Include(entity => entity.ServiceSchedule)          
             .Where(entity => (int)entity.Status < 2 && entity.TotalReceipt.StayingScheduleId.HasValue)
             .GroupBy(entity => entity.TotalReceipt.StayingSchedule.Name)
