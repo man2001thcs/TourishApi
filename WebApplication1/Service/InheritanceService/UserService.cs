@@ -41,8 +41,48 @@ namespace WebApplication1.Service.InheritanceService
 
             logger.LogInformation("Test: " + hashInputPassword ?? "");
 
-            if (hashInputPassword != user.Password) //không đúng
+            if (user.LockoutEnd != null)
             {
+                if (user.LockoutEnd > DateTime.UtcNow)
+                {
+                    return new Response
+                    {
+                        resultCd = 1,
+                        MessageCode = "C001ne",
+                        Error = user.LockoutEnd.ToString()
+                    };
+                }
+            }
+
+            if (hashInputPassword != user.PasswordHash) //không đúng
+            {
+                user.AccessFailedCount++;
+
+                if (user.AccessFailedCount >= 4 && user.LockoutEnd != null) {
+                    var timeNow = DateTime.UtcNow.AddMinutes(15);
+                    user.LockoutEnd = timeNow;
+                    await _context.SaveChangesAsync();
+
+                    return new Response
+                    {
+                        resultCd = 1,
+                        MessageCode = "C001-m4"
+                    };
+                }
+
+                if (user.AccessFailedCount >= 8)
+                {
+                    var timeNow = DateTime.UtcNow.AddHours(2);
+                    user.LockoutEnd = timeNow;
+                    await _context.SaveChangesAsync();
+
+                    return new Response
+                    {
+                        resultCd = 1,
+                        MessageCode = "C001-h2"
+                    };
+                }
+                
                 return new Response
                 {
                     resultCd = 1,
@@ -52,8 +92,11 @@ namespace WebApplication1.Service.InheritanceService
 
             var generateSalt = GenerateSalt();
             var newHashInputPassword = ConvertToStringFromByteArray(HashPassword(model.Password, generateSalt));
-            user.Password = newHashInputPassword;
+            user.PasswordHash = newHashInputPassword;
             user.PasswordSalt = ConvertToStringFromByteArray(generateSalt);
+            user.AccessFailedCount = 0;
+            user.LockoutEnd = null;
+
 
             await _context.SaveChangesAsync();
             //cấp token
@@ -69,7 +112,7 @@ namespace WebApplication1.Service.InheritanceService
 
         public async Task<Response> CheckExist(String userName)
         {
-            var user = _context.Users.SingleOrDefault(p => p.UserName == userName);
+            var user = _context.Users.FirstOrDefault(p => p.UserName == userName);
             if (user == null) //không đúng
             {
                 return new Response
@@ -151,7 +194,7 @@ namespace WebApplication1.Service.InheritanceService
                 {
                     UserName = model.Email,
                     Email = model.Email,
-                    Password = "None",
+                    PasswordHash = "None",
                     PasswordSalt = "None",
                     PhoneNumber = model.PhoneNumber,
                     Role = UserRole.User,
@@ -188,7 +231,7 @@ namespace WebApplication1.Service.InheritanceService
                 {
                     UserName = model.UserName,
                     Email = model.Email,
-                    Password = hashInputPassword,
+                    PasswordHash = hashInputPassword,
                     PasswordSalt = ConvertToStringFromByteArray(generateSalt),
                     PhoneNumber = model.PhoneNumber,
                     Role = UserRole.New,

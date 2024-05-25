@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using WebApplication1.Data.Authentication;
 using WebApplication1.Data.Chat;
@@ -12,14 +13,14 @@ namespace WebApplication1.Data
     }
 
     [Table("User")]
-    public class User
+    public class User : IdentityUser<Guid>
     {
         [Key]
         public Guid Id { get; set; }
         [Required]
         public string UserName { get; set; }
         [Required]
-        public string Password { get; set; }
+        public string PasswordHash { get; set; }
         [Required]
         public string PasswordSalt { get; set; }
         [Required]
@@ -28,6 +29,8 @@ namespace WebApplication1.Data
         public required string FullName { get; set; }
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
+        public int AccessFailedCount { get; set; }
+        public DateTime? LockoutEnd { get; set; }
 
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }

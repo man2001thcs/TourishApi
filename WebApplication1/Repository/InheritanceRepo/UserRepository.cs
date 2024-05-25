@@ -131,7 +131,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 userExist.Address = model.Address ?? userExist.Address;
                 userExist.Role = model.Role ?? userExist.Role;
 
-                if (userExist.Password != "None")
+                if (userExist.PasswordHash != "None")
                 {
                     userExist.Email = model.Email;
                 }
@@ -159,9 +159,9 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 userExist.UpdateDate = DateTime.UtcNow;
 
-                if (userExist.Password != "None")
+                if (userExist.PasswordHash != "None")
                 {
-                    userExist.Password = model.NewPassword;
+                    userExist.PasswordHash = model.NewPassword;
                     userExist.PasswordSalt = model.PasswordSalt;
                 }
 
@@ -188,9 +188,9 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 userExist.UpdateDate = DateTime.UtcNow;
 
-                if (userExist.Password != "None")
+                if (userExist.PasswordHash != "None")
                 {
-                    userExist.Password = model.NewPassword;
+                    userExist.PasswordHash = model.NewPassword;
                     userExist.PasswordSalt = model.PasswordSalt;
                 }
 
