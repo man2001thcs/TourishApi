@@ -13,7 +13,7 @@ namespace WebApplication1.Data
     }
 
     [Table("User")]
-    public class User : IdentityUser<Guid>
+    public class User
     {
         [Key]
         public Guid Id { get; set; }
