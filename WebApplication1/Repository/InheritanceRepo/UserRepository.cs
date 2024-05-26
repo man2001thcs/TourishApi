@@ -192,6 +192,8 @@ namespace WebApplication1.Repository.InheritanceRepo
                 {
                     userExist.PasswordHash = model.NewPassword;
                     userExist.PasswordSalt = model.PasswordSalt;
+                    userExist.AccessFailedCount = 0;
+                    userExist.LockoutEnd = null;
                 }
 
                 await _context.SaveChangesAsync();
