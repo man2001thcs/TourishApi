@@ -10,16 +10,18 @@ namespace WebApplication1.Repository.InheritanceRepo
     public class UserRepository : IUserRepository
     {
         private readonly MyDbContext _context;
+        private readonly ILogger<UserRepository> logger;
         public static int PAGE_SIZE { get; set; } = 5;
-        public UserRepository(MyDbContext _context)
+
+        public UserRepository(MyDbContext _context, ILogger<UserRepository> _logger)
         {
             this._context = _context;
+            this.logger = _logger;
         }
 
         public Response Delete(Guid id)
         {
-            var deleteEntity = _context.Users.FirstOrDefault((entity
-               => entity.Id == id));
+            var deleteEntity = _context.Users.FirstOrDefault((entity => entity.Id == id));
             if (deleteEntity != null)
             {
                 _context.Remove(deleteEntity);
@@ -30,11 +32,18 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 resultCd = 0,
                 MessageCode = "I003",
-                // Delete type success               
+                // Delete type success
             };
         }
 
-        public Response GetAll(string? search, int type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
+        public Response GetAll(
+            string? search,
+            int type,
+            string? sortBy,
+            string? sortDirection,
+            int page = 1,
+            int pageSize = 5
+        )
         {
             var entityQuery = _context.Users.AsQueryable();
 
@@ -70,57 +79,59 @@ namespace WebApplication1.Repository.InheritanceRepo
                 count = result.TotalCount,
             };
             return entityVM;
-
         }
 
         public Response getById(Guid id, int? type)
         {
-            var entity = _context.Users.FirstOrDefault((entity
-                => entity.Id == id && (int)entity.Role == type));
-
-            return new Response
+            if (type != null)
             {
-                resultCd = 0,
-                Data = entity
-            };
+                var entity = _context.Users.FirstOrDefault(
+                    (entity => entity.Id == id && (int)entity.Role == type)
+                );
+
+                return new Response { resultCd = 0, Data = entity };
+            }
+            else
+            {
+                var entity = _context.Users.FirstOrDefault((entity => entity.Id == id));
+
+                return new Response { resultCd = 0, Data = entity };
+            }
         }
 
         public Response getByName(String name, int? type)
         {
-            var entity = _context.Users.FirstOrDefault((entity
-                => entity.UserName == name && (int)entity.Role == type));
+            var entity = _context.Users.FirstOrDefault(
+                (entity => entity.UserName == name && (int)entity.Role == type)
+            );
 
-            return new Response
-            {
-                resultCd = 0,
-                Data = entity
-            };
+            return new Response { resultCd = 0, Data = entity };
         }
 
-        public async Task<Response> UpdateInfo(UserRole userRoleAuthority, Boolean isSelfUpdate, UserUpdateModel model)
+        public async Task<Response> UpdateInfo(
+            UserRole userRoleAuthority,
+            Boolean isSelfUpdate,
+            UserUpdateModel model
+        )
         {
             var userExist = _context.Users.FirstOrDefault(p => p.UserName == model.UserName);
+
+            logger.LogInformation(userExist.ToString());
 
             if ((int)userRoleAuthority == (int)userExist.Role)
             {
                 if (!isSelfUpdate)
                 {
-                    return new Response
-                    {
-                        resultCd = 1,
-                        MessageCode = "C015",
-                    };
+                    return new Response { resultCd = 1, MessageCode = "C015", };
                 }
             }
 
-            if ((int)userRoleAuthority < (int)userExist.Role || (int)userRoleAuthority < (int)model.Role)
+            if (
+                (int)userRoleAuthority < (int)userExist.Role
+                || (int)userRoleAuthority < (int)model.Role
+            )
             {
-                return new Response
-                {
-                    resultCd = 1,
-                    MessageCode = "C015",
-                };
-
+                return new Response { resultCd = 1, MessageCode = "C015", };
             }
 
             if (userExist != null) //không đúng
@@ -138,18 +149,10 @@ namespace WebApplication1.Repository.InheritanceRepo
 
                 await _context.SaveChangesAsync();
 
-                return new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "I011",
-                };
+                return new Response { resultCd = 0, MessageCode = "I011", };
             }
 
-            return new Response
-            {
-                resultCd = 0,
-                MessageCode = "C011",
-            };
+            return new Response { resultCd = 0, MessageCode = "C011", };
         }
 
         public async Task<Response> UpdatePassword(UserUpdatePasswordModel model)
@@ -167,18 +170,10 @@ namespace WebApplication1.Repository.InheritanceRepo
 
                 await _context.SaveChangesAsync();
 
-                return new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "I012",
-                };
+                return new Response { resultCd = 0, MessageCode = "I012", };
             }
 
-            return new Response
-            {
-                resultCd = 0,
-                MessageCode = "C012",
-            };
+            return new Response { resultCd = 0, MessageCode = "C012", };
         }
 
         public async Task<Response> ReclaimPassword(UserReclaimPasswordModel model)
@@ -198,18 +193,10 @@ namespace WebApplication1.Repository.InheritanceRepo
 
                 await _context.SaveChangesAsync();
 
-                return new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "I012",
-                };
+                return new Response { resultCd = 0, MessageCode = "I012", };
             }
 
-            return new Response
-            {
-                resultCd = 0,
-                MessageCode = "C012",
-            };
+            return new Response { resultCd = 0, MessageCode = "C012", };
         }
     }
 }

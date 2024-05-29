@@ -365,7 +365,7 @@ namespace WebApplication1.Service.InheritanceService
             var enumValue = (UserRole)Enum.Parse(typeof(UserRole), role);
 
             var user = _context.Users.SingleOrDefault(p =>
-                p.UserName == model.UserName && p.Role == enumValue
+                p.UserName == model.UserName && p.Role == model.Role
             );
             if (user == null)
             {

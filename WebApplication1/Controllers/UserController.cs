@@ -94,8 +94,8 @@ namespace WebApplication1.Controllers
             return Ok(_userService.GetUserList(bearer_token, search, type, sortBy, sortDirection, page, pageSize));
         }
 
-        [Authorize(Policy = "GetUserAccess")]
-        [HttpPost("GetUser")]
+        [Authorize(Roles ="Admin, AdminManager")]
+        [HttpGet("GetUser")]
         public IActionResult GetUser(Guid id, int type)
         {
             var bearer_token = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
