@@ -193,6 +193,18 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                         Id = guestConHis.GuestCon.Id,
                         Connected = guestConHis.GuestCon.Connected,
                         GuestEmail = guestConHis.GuestCon.GuestEmail,
+                        GuestMessages = guestConHis.GuestCon.GuestMessages.Select(element => new GuestMessageModel
+                        {
+                            Content = element.Content,
+                            CreateDate = element.CreateDate,
+                            UpdateDate = element.UpdateDate,
+                            Id = element.Id,
+                            IsDeleted = element.IsDeleted,
+                            IsRead = element.IsRead,
+                            Side = element.AdminMessageCon != null ? 1 : 2,
+                            State = 2
+                        })
+                    .ToList(),
                         GuestName = guestConHis.GuestCon.GuestName,
                         GuestPhoneNumber = guestConHis.GuestCon.GuestPhoneNumber,
                         ConnectionID = guestConHis.GuestCon.ConnectionID,
@@ -313,6 +325,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                     .ToList();
 
                     resultDto.GuestMessages = messageList;
+                    resultDto.GuestMessageCon.GuestMessages = messageList.OrderByDescending(entity => entity.CreateDate).ToList();
                 }
 
 

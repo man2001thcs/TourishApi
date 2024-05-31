@@ -16,6 +16,8 @@ namespace WebApplication1.Repository.Interface
         Task<Response> Add(TourishPlanInsertModel entityModel, String id);
         Task<Response> Update(TourishPlanUpdateModel entityModel, String id);
         Task<string> getDescription(string containerName, string blobName);
+
+        Boolean checkArrangeScheduleFromUser(String email, Guid tourishPlanId);
         Response Delete(Guid id);
         Response getTourInterest(Guid tourId, Guid userId);
         Task<Response> setTourInterest(Guid tourId, Guid userId, InterestStatus interestStatus);

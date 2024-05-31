@@ -842,6 +842,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 var entity = await _context
                     .MovingSchedules.Where(entity => entity.Id == id)
                     .Include(tour => tour.ScheduleInterestList)
+                    .ThenInclude(entity => entity.User)
                     .FirstOrDefaultAsync();
                 if (entity == null)
                 {
@@ -855,6 +856,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 var entity = await _context
                     .StayingSchedules.Where(entity => entity.Id == id)
                     .Include(tour => tour.ScheduleInterestList)
+                    .ThenInclude(entity => entity.User)
                     .FirstOrDefaultAsync();
                 if (entity == null)
                 {
@@ -1134,6 +1136,30 @@ namespace WebApplication1.Repository.InheritanceRepo
                 MessageCode = "C434",
                 // Update type success
             };
+        }
+
+        public Boolean checkArrangeScheduleFromUser(String email, Guid scheduleId, ScheduleType scheduleType)
+        {
+            if (scheduleType == ScheduleType.MovingSchedule)
+            {
+                var count = _context.FullScheduleReceiptList.Include(entity => entity.ServiceSchedule).Include(entity => entity.TotalReceipt).Where(entity => entity.Email == email
+                    && entity.TotalReceipt.MovingScheduleId == scheduleId
+                    && entity.ServiceSchedule.EndDate >= DateTime.UtcNow).Count();
+
+                if (count >= 1) return true;
+
+            }
+            else if (scheduleType == ScheduleType.StayingSchedule)
+            {
+                var count = _context.FullScheduleReceiptList.Include(entity => entity.ServiceSchedule).Include(entity => entity.TotalReceipt).Where(entity => entity.Email == email
+                    && entity.TotalReceipt.StayingScheduleId == scheduleId
+                    && entity.ServiceSchedule.EndDate >= DateTime.UtcNow).Count();
+
+                if (count >= 1) return true;
+
+            }
+
+            return false;
         }
     }
 }

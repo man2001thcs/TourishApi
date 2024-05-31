@@ -789,7 +789,7 @@ public class TourishPlanRepository : ITourishPlanRepository
     {
         var entity = await _context
             .TourishPlan.Where(entity => entity.Id == id)
-            .Include(tour => tour.TourishInterestList)
+            .Include(tour => tour.TourishInterestList).ThenInclude(entity => entity.User)
             .FirstOrDefaultAsync();
         if (entity == null)
         {
@@ -1112,5 +1112,16 @@ public class TourishPlanRepository : ITourishPlanRepository
             .ToList();
 
         return new Response { resultCd = 0, Data = entityList };
+    }
+
+    public Boolean checkArrangeScheduleFromUser(String email, Guid tourishPlanId)
+    {
+        var count = _context.FullReceiptList.Include(entity => entity.TourishSchedule).Include(entity => entity.TotalReceipt).Where(entity => entity.Email == email
+        && entity.TotalReceipt.TourishPlanId == tourishPlanId
+        && entity.TourishSchedule.EndDate >= DateTime.UtcNow).Count();
+
+        if (count >= 1) return true;
+
+        return false;
     }
 }

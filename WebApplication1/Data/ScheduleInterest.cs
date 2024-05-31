@@ -14,7 +14,7 @@ namespace WebApplication1.Data
         public InterestStatus InterestStatus { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
-        public User User { get; set; }
+        public User? User { get; set; }
         public MovingSchedule? MovingSchedule { get; set; }
         public StayingSchedule? StayingSchedule { get; set; }
     }

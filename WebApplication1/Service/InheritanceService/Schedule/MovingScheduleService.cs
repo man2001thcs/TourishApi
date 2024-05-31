@@ -151,6 +151,13 @@ namespace TourishApi.Service.InheritanceService.Schedule
 
                     foreach (var interest in interestList)
                     {
+                        if (interest.User.Role == UserRole.User)
+                        {
+                            var isInNeedOfNotify = _entityRepository.checkArrangeScheduleFromUser(interest.User.Email, entityModel.Id, ScheduleType.MovingSchedule);
+                            if (!isInNeedOfNotify) continue;
+                        }
+                        
+
                         var notification = new NotificationModel
                         {
                             UserCreateId = new Guid(userId),
