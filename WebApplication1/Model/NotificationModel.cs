@@ -7,6 +7,7 @@
         public Guid? UserReceiveId { get; set; }
         public string Content { get; set; }
         public string? ContentCode { get; set; }
+        public Boolean IsGenerate { get; set; }
         public Guid? TourishPlanId { get; set; }
         public Guid? MovingScheduleId { get; set; }
         public Guid? StayingScheduleId { get; set; }

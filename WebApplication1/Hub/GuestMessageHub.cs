@@ -124,6 +124,7 @@ namespace SignalR.Hub
                         returnMess.CreateDate = messageEntity.CreateDate;
                         returnMess.Side = 1;
                         await Clients.Client(Context.ConnectionId).SendMessageToUser(adminId, email, returnMess);
+
                         returnMess.State = 2;
                         returnMess.Side = 2;
                         await Clients.Client(connection.ConnectionID).SendMessageToAdmin(adminId, email, returnMess);
@@ -158,12 +159,18 @@ namespace SignalR.Hub
             var guestPhoneNumber = (string)Context.GetHttpContext().Request.Query["guestPhoneNumber"];
             var token = Context.GetHttpContext().Request.Query["token"];
 
-            var tokenClaim = (ClaimsPrincipal)_userService.checkIfTokenFormIsValid(token).Data;
-
-            var userId = tokenClaim.FindFirstValue("Id");
-            var userRole = tokenClaim.FindFirstValue("Role") ?? "";
+           
             if (!adminId.IsNullOrEmpty())
             {
+                var tokenClaim = (ClaimsPrincipal)_userService.checkIfTokenFormIsValid(token).Data;
+                if (tokenClaim == null)
+                {
+                    Context.Abort();
+                }
+
+                var userId = tokenClaim.FindFirstValue("Id");
+                var userRole = tokenClaim.FindFirstValue("Role") ?? "";
+
                 if (userRole != "Admin" && userRole != "AdminManager")
                 {
                     Context.Abort();

@@ -15,6 +15,7 @@ namespace WebApplication1.Data
         public Boolean IsDeleted { get; set; }
         public DateTime? CreateDate { get; set; }
         public DateTime? UpdateDate { get; set; }
+        public Boolean IsGenerate { get; set; }
 
         public Guid? TourishPlanId { get; set; }
         public Guid? MovingScheduleId { get; set; }
