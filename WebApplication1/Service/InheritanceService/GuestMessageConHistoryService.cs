@@ -90,11 +90,11 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response getByGuestConId(string connectionId)
+        public async Task<Response> getByGuestConId(string connectionId)
         {
             try
             {
-                var entity = _entityRepository.getByGuestConId(connectionId);
+                var entity = await _entityRepository.getByGuestConId(connectionId);
                 if (entity.Data == null)
                 {
                     var response = new Response { resultCd = 1, MessageCode = "C1110", };

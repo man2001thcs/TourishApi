@@ -63,7 +63,7 @@ namespace SignalR.Hub
                         var returnMess = message;
                         returnMess.State = 1;
                         returnMess.Id = messageEntity.Id;
-                        returnMess.CreateDate = messageEntity.CreateDate;
+                        returnMess.CreateDate = DateTime.UtcNow;
                         returnMess.Side = 1;
                         await Clients.Client(Context.ConnectionId).SendMessageToAdmin(adminId, email, returnMess);
                         returnMess.State = 2;
@@ -121,7 +121,7 @@ namespace SignalR.Hub
                         var returnMess = message;
                         returnMess.State = 1;
                         returnMess.Id = messageEntity.Id;
-                        returnMess.CreateDate = messageEntity.CreateDate;
+                        returnMess.CreateDate = DateTime.UtcNow;
                         returnMess.Side = 1;
                         await Clients.Client(Context.ConnectionId).SendMessageToUser(adminId, email, returnMess);
 

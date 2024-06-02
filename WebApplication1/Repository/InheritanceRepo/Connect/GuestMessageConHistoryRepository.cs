@@ -60,7 +60,8 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
         public Response GetAll(
             string? search,
             int? type,
-            string? sortBy, string? sortDirection,
+            string? sortBy,
+            string? sortDirection,
             int page = 1,
             int pageSize = 5
         )
@@ -145,7 +146,8 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
         public Response GetAllForAdmin(
             string? search,
             int? type,
-            string? sortBy, string? sortDirection,
+            string? sortBy,
+            string? sortDirection,
             int page = 1,
             int pageSize = 5
         )
@@ -193,18 +195,19 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                         Id = guestConHis.GuestCon.Id,
                         Connected = guestConHis.GuestCon.Connected,
                         GuestEmail = guestConHis.GuestCon.GuestEmail,
-                        GuestMessages = guestConHis.GuestCon.GuestMessages.Select(element => new GuestMessageModel
-                        {
-                            Content = element.Content,
-                            CreateDate = element.CreateDate,
-                            UpdateDate = element.UpdateDate,
-                            Id = element.Id,
-                            IsDeleted = element.IsDeleted,
-                            IsRead = element.IsRead,
-                            Side = element.AdminMessageCon != null ? 1 : 2,
-                            State = 2
-                        })
-                    .ToList(),
+                        GuestMessages = guestConHis
+                            .GuestCon.GuestMessages.Select(element => new GuestMessageModel
+                            {
+                                Content = element.Content,
+                                CreateDate = element.CreateDate,
+                                UpdateDate = element.UpdateDate,
+                                Id = element.Id,
+                                IsDeleted = element.IsDeleted,
+                                IsRead = element.IsRead,
+                                Side = element.AdminMessageCon != null ? 1 : 2,
+                                State = 2
+                            })
+                            .ToList(),
                         GuestName = guestConHis.GuestCon.GuestName,
                         GuestPhoneNumber = guestConHis.GuestCon.GuestPhoneNumber,
                         ConnectionID = guestConHis.GuestCon.ConnectionID,
@@ -251,7 +254,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
             return new Response { resultCd = 0, Data = entity };
         }
 
-        public Response getByGuestConId(string connectionId)
+        public async Task<Response> getByGuestConId(string connectionId)
         {
             try
             {
@@ -262,11 +265,13 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                     .ThenInclude(entity => entity.Admin)
                     .Include(entity => entity.AdminCon)
                     .ThenInclude(entity => entity.GuestMessages)
+                    .OrderByDescending(entity => entity.CreateDate)
                     .Where(entity => entity.GuestCon.ConnectionID == connectionId);
 
                 var resultDtoQuery = entity.Select(guestConHis => new GuestMessageConHistoryDTOModel
                 {
                     Id = guestConHis.Id,
+
                     GuestMessageCon = new GuestMessageConDTOModel
                     {
                         Id = guestConHis.GuestCon.Id,
@@ -278,6 +283,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                         UserAgent = guestConHis.GuestCon.UserAgent,
                         CreateDate = guestConHis.GuestCon.CreateDate
                     },
+
                     AdminMessageCon =
                         guestConHis.AdminCon != null
                             ? new AdminMessageConDTOModel
@@ -298,42 +304,51 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                     CloseDate = guestConHis.CloseDate,
                 });
 
-                var resultDto = resultDtoQuery.FirstOrDefault();
+                var resultDtoList = await resultDtoQuery.ToListAsync();
+
+                var resultDto = await resultDtoQuery.FirstOrDefaultAsync();
 
                 if (resultDto.AdminMessageCon != null)
                 {
                     var messageList = _context
-                    .GuestMessages.Include(entity => entity.AdminMessageCon)
-                    .Include(entity => entity.GuestMessageCon)
-                    .Where(entity =>
-                        entity.GuestMessageCon.ConnectionID
-                            == resultDto.GuestMessageCon.ConnectionID
-                        || entity.AdminMessageCon.ConnectionID
-                            == resultDto.AdminMessageCon.ConnectionID
-                    )
-                    .Select(element => new GuestMessageModel
-                    {
-                        Content = element.Content,
-                        CreateDate = element.CreateDate,
-                        UpdateDate = element.UpdateDate,
-                        Id = element.Id,
-                        IsDeleted = element.IsDeleted,
-                        IsRead = element.IsRead,
-                        Side = element.AdminMessageCon != null ? 1 : 2,
-                        State = 2
-                    })
-                    .ToList();
+                        .GuestMessages.Include(entity => entity.AdminMessageCon)
+                        .Include(entity => entity.GuestMessageCon)
+                        .Where(entity =>
+                            entity.GuestMessageCon.ConnectionID == connectionId
+                            || resultDtoQuery.Count(entity1 =>
+                                entity1.AdminMessageCon.ConnectionID
+                                == entity.AdminMessageCon.ConnectionID
+                            ) >= 1
+                        )
+                        .Select(element => new GuestMessageModel
+                        {
+                            Content = element.Content,
+                            CreateDate = element.CreateDate,
+                            UpdateDate = element.UpdateDate,
+                            Id = element.Id,
+                            IsDeleted = element.IsDeleted,
+                            IsRead = element.IsRead,
+                            Side = element.AdminMessageConId != null ? 1 : 2,
+                            State = 2
+                        })
+                        .ToList();
 
                     resultDto.GuestMessages = messageList;
-                    resultDto.GuestMessageCon.GuestMessages = messageList.OrderByDescending(entity => entity.CreateDate).ToList();
+                    resultDto.GuestMessageCon.GuestMessages = messageList
+                        .OrderByDescending(entity => entity.CreateDate)
+                        .ToList();
                 }
-
 
                 return new Response { resultCd = 0, Data = resultDto, };
             }
             catch (Exception ex)
             {
-                return new Response { resultCd = 0, Data = ex, Error = ex.Message };
+                return new Response
+                {
+                    resultCd = 0,
+                    Data = ex,
+                    Error = ex.Message
+                };
             }
         }
 

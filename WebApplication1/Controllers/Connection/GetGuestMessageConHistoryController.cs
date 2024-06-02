@@ -33,9 +33,9 @@ public class GetGuestMessageConHistoryController : ControllerBase
 
     // GET: api/<ValuesController>
     [HttpGet("guest-connection")]
-    public IActionResult GetByGuestConId(string connectionId)
+    public async Task<IActionResult> GetByGuestConId(string connectionId)
     {
-        return Ok(_entityService.getByGuestConId(connectionId));
+        return Ok(await _entityService.getByGuestConId(connectionId));
 
     }
 
