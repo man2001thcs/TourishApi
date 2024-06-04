@@ -22,13 +22,13 @@ namespace WebApplication1.Controllers.Receipt
 
 
         [HttpGet("tour/{id}")]
-        public IActionResult GetFullTourReceiptById(Guid id)
+        public IActionResult GetFullTourReceiptById(int id)
         {
             return Ok(_receiptService.GetFullTourReceiptById(id));
         }
 
         [HttpGet("schedule/{id}")]
-        public IActionResult GetFullScheduleReceiptById(Guid id)
+        public IActionResult GetFullScheduleReceiptById(int id)
         {
             return Ok(_receiptService.GetFullScheduleReceiptById(id));
         }

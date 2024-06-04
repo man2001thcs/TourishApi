@@ -1,4 +1,5 @@
 ﻿using WebApplication1.Data.Receipt;
+using WebApplication1.Model.Payment;
 using WebApplication1.Model.Receipt;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.InheritanceRepo.Receipt;
@@ -22,9 +23,7 @@ namespace TourishApi.Service.InheritanceService
             {
                 if (receiptInsertModel.TourishPlanId != null)
                 {
-                    var receiptReturn = await _receiptRepository.AddTourReceipt(
-                        receiptInsertModel
-                    );
+                    var receiptReturn = await _receiptRepository.AddTourReceipt(receiptInsertModel);
 
                     var receiptReturnId = (Guid)receiptReturn.returnId;
 
@@ -106,7 +105,7 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response DeleteTourReceiptById(Guid id)
+        public Response DeleteTourReceiptById(int id)
         {
             try
             {
@@ -121,7 +120,7 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response DeleteScheduleReceiptById(Guid id)
+        public Response DeleteScheduleReceiptById(int id)
         {
             try
             {
@@ -136,7 +135,7 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response GetFullTourReceiptById(Guid id)
+        public Response GetFullTourReceiptById(int id)
         {
             try
             {
@@ -163,7 +162,7 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response GetFullScheduleReceiptById(Guid id)
+        public Response GetFullScheduleReceiptById(int id)
         {
             try
             {
@@ -639,6 +638,50 @@ namespace TourishApi.Service.InheritanceService
             try
             {
                 return _receiptRepository.getGrossTourishPlanInYear();
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public Response thirdPartyPaymentFullServiceReceiptStatusChange(
+            PaymentChangeStatusReq paymentChangeStatusReq
+        )
+        {
+            try
+            {
+                return _receiptRepository.thirdPartyPaymentFullServiceReceiptStatusChange(
+                    paymentChangeStatusReq
+                );
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public Response thirdPartyPaymentFullReceiptStatusChange(
+            PaymentChangeStatusReq paymentChangeStatusReq
+        )
+        {
+            try
+            {
+                return _receiptRepository.thirdPartyPaymentFullReceiptStatusChange(
+                    paymentChangeStatusReq
+                );
             }
             catch (Exception ex)
             {

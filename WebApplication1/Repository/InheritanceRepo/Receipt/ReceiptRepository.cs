@@ -6,6 +6,7 @@ using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Receipt;
 using WebApplication1.Data.Schedule;
 using WebApplication1.Model;
+using WebApplication1.Model.Payment;
 using WebApplication1.Model.Receipt;
 using WebApplication1.Model.VirtualModel;
 
@@ -102,23 +103,11 @@ public class ReceiptRepository
                     await _context.FullReceiptList.AddAsync(fullReceipt);
                     await _context.SaveChangesAsync();
 
-                    return new Response
-                    {
-                        resultCd = 0,
-                        MessageCode = "I511",
-                        returnId = fullReceipt.FullReceiptId,
-                        // Create type success
-                    };
+                    return new Response { resultCd = 0, MessageCode = "I511", };
                 }
                 else
                 {
-                    return new Response
-                    {
-                        resultCd = 0,
-                        MessageCode = "C515",
-                        returnId = fullReceipt.FullReceiptId,
-                        // Out of ticket
-                    };
+                    return new Response { resultCd = 0, MessageCode = "C515", };
                 }
             }
             else
@@ -134,23 +123,11 @@ public class ReceiptRepository
                 {
                     await _context.SaveChangesAsync();
 
-                    return new Response
-                    {
-                        resultCd = 0,
-                        MessageCode = "I512",
-                        returnId = existFullReceipt.FullReceiptId,
-                        // Create type success
-                    };
+                    return new Response { resultCd = 0, MessageCode = "I512", };
                 }
                 else
                 {
-                    return new Response
-                    {
-                        resultCd = 0,
-                        MessageCode = "C515",
-                        returnId = existFullReceipt.FullReceiptId,
-                        // Out of ticket
-                    };
+                    return new Response { resultCd = 0, MessageCode = "C515", };
                 }
             }
         }
@@ -231,13 +208,7 @@ public class ReceiptRepository
             await _context.AddAsync(fullReceipt);
             await _context.SaveChangesAsync();
 
-            return new Response
-            {
-                resultCd = 0,
-                MessageCode = "I512",
-                returnId = fullReceipt.FullReceiptId,
-                // Create type success
-            };
+            return new Response { resultCd = 0, MessageCode = "I512", };
         }
         else
         {
@@ -250,13 +221,7 @@ public class ReceiptRepository
 
             await _context.SaveChangesAsync();
 
-            return new Response
-            {
-                resultCd = 0,
-                MessageCode = "I511",
-                returnId = existFullReceipt.FullReceiptId,
-                // Create type success
-            };
+            return new Response { resultCd = 0, MessageCode = "I511", };
         }
     }
 
@@ -266,41 +231,26 @@ public class ReceiptRepository
             entity.TourishPlanId == receiptModel.TourishPlanId
         );
 
-
-
         if (receiptModel.TourishPlanId != null)
         {
             var scheduleExist = _context
-                .TourishScheduleList.Include(entity => entity.TourishPlanId == receiptModel.TourishPlanId)
+                .TourishScheduleList.Include(entity =>
+                    entity.TourishPlanId == receiptModel.TourishPlanId
+                )
                 .FirstOrDefault();
 
             if (scheduleExist.PlanStatus == PlanStatus.OnGoing)
             {
-                return new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "C517",
-              
-                };
+                return new Response { resultCd = 0, MessageCode = "C517", };
             }
             else if (scheduleExist.PlanStatus == PlanStatus.Complete)
             {
-                return new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "C518",
-            
-                };
+                return new Response { resultCd = 0, MessageCode = "C518", };
             }
             else if (scheduleExist.PlanStatus == PlanStatus.Cancel)
             {
-                return new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "C519",
-                  
-                };
-            }         
+                return new Response { resultCd = 0, MessageCode = "C519", };
+            }
         }
 
         if (totalReceipt == null)
@@ -404,7 +354,6 @@ public class ReceiptRepository
                 {
                     resultCd = 0,
                     MessageCode = "I511",
-                    returnId = fullReceipt.FullReceiptId,
                     Data = fullReceipt
                     // Create type success
                 };
@@ -415,7 +364,6 @@ public class ReceiptRepository
                 {
                     resultCd = 0,
                     MessageCode = "C515",
-                    returnId = existFullReceipt.FullReceiptId,
                     // Out of ticket
                 };
             }
@@ -442,7 +390,6 @@ public class ReceiptRepository
                 {
                     resultCd = 0,
                     MessageCode = "I512",
-                    returnId = existFullReceipt.FullReceiptId,
                     // Create type success
                 };
             }
@@ -452,7 +399,6 @@ public class ReceiptRepository
                 {
                     resultCd = 0,
                     MessageCode = "C515",
-                    returnId = existFullReceipt.FullReceiptId,
                     // Out of ticket
                 };
             }
@@ -603,7 +549,6 @@ public class ReceiptRepository
             {
                 resultCd = 0,
                 MessageCode = "I511",
-                returnId = fullReceipt.FullReceiptId,
                 Data = fullReceipt
                 // Create type success
             };
@@ -619,12 +564,7 @@ public class ReceiptRepository
 
             await _context.SaveChangesAsync();
 
-            return new Response
-            {
-                resultCd = 0,
-                MessageCode = "I512",
-                returnId = existFullReceipt.FullReceiptId,
-            };
+            return new Response { resultCd = 0, MessageCode = "I512", };
         }
     }
 
@@ -659,7 +599,7 @@ public class ReceiptRepository
         return totalPrice;
     }
 
-    public Response DeleteTourReceipt(Guid id)
+    public Response DeleteTourReceipt(int id)
     {
         var receipt = _context
             .FullReceiptList.Include(entity => entity.TotalReceipt)
@@ -685,7 +625,7 @@ public class ReceiptRepository
         };
     }
 
-    public Response DeleteScheduleReceipt(Guid id)
+    public Response DeleteScheduleReceipt(int id)
     {
         var receipt = _context
             .FullScheduleReceiptList.Include(entity => entity.TotalReceipt)
@@ -1118,7 +1058,7 @@ public class ReceiptRepository
         return new Response { resultCd = 0, Data = receipt };
     }
 
-    public Response getFullTourReceiptById(Guid id)
+    public Response getFullTourReceiptById(int id)
     {
         var receipt = _context
             .FullReceiptList.Where(receipt => receipt.FullReceiptId == id)
@@ -1134,7 +1074,7 @@ public class ReceiptRepository
         return new Response { resultCd = 0, Data = receipt };
     }
 
-    public Response getFullScheduleReceiptById(Guid id)
+    public Response getFullScheduleReceiptById(int id)
     {
         var receipt = _context
             .FullScheduleReceiptList.Where(receipt => receipt.FullReceiptId == id)
@@ -1203,8 +1143,7 @@ public class ReceiptRepository
                         return new Response
                         {
                             resultCd = 0,
-                            MessageCode = "C515",
-                            returnId = receipt.TotalReceiptId,
+                            MessageCode = "C515"
                             // Out of ticket
                         };
                     }
@@ -1230,13 +1169,7 @@ public class ReceiptRepository
                     }
                     else
                     {
-                        return new Response
-                        {
-                            resultCd = 0,
-                            MessageCode = "C515",
-                            returnId = receipt.TotalReceiptId,
-                            // Out of ticket
-                        };
+                        return new Response { resultCd = 0, MessageCode = "C515", };
                     }
                 }
             }
@@ -1313,12 +1246,7 @@ public class ReceiptRepository
         {
             if (receiptModel.Status == FullReceiptStatus.Cancelled)
             {
-                return new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "C516",
-                    returnId = receipt.TotalReceiptId,
-                };
+                return new Response { resultCd = 0, MessageCode = "C516", };
             }
 
             var planExist = _context.TourishPlan.FirstOrDefault(
@@ -1331,30 +1259,15 @@ public class ReceiptRepository
 
             if (scheduleExist.PlanStatus == PlanStatus.OnGoing)
             {
-                return new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "C517",
-                    returnId = receipt.TotalReceiptId,
-                };
+                return new Response { resultCd = 0, MessageCode = "C517", };
             }
             else if (scheduleExist.PlanStatus == PlanStatus.Complete)
             {
-                return new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "C518",
-                    returnId = receipt.TotalReceiptId,
-                };
+                return new Response { resultCd = 0, MessageCode = "C518", };
             }
             else if (scheduleExist.PlanStatus == PlanStatus.Cancel)
             {
-                return new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "C519",
-                    returnId = receipt.TotalReceiptId,
-                };
+                return new Response { resultCd = 0, MessageCode = "C519", };
             }
 
             var oldTotalTicket = receipt.TotalTicket;
@@ -1362,12 +1275,7 @@ public class ReceiptRepository
             receipt.GuestName = receiptModel.GuestName;
             if (receipt.Status == FullReceiptStatus.Completed)
             {
-                return new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "C520",
-                    returnId = receipt.TotalReceiptId,
-                };
+                return new Response { resultCd = 0, MessageCode = "C520", };
             }
             receipt.Status = receiptModel.Status;
             receipt.TotalTicket = receiptModel.TotalTicket;
@@ -1397,7 +1305,6 @@ public class ReceiptRepository
                         {
                             resultCd = 0,
                             MessageCode = "C515",
-                            returnId = receipt.TotalReceiptId,
                             // Out of ticket
                         };
                     }
@@ -1427,7 +1334,6 @@ public class ReceiptRepository
                         {
                             resultCd = 0,
                             MessageCode = "C515",
-                            returnId = receipt.TotalReceiptId,
                             // Out of ticket
                         };
                     }
@@ -1473,12 +1379,7 @@ public class ReceiptRepository
         {
             if (receiptModel.Status == FullReceiptStatus.Cancelled)
             {
-                return new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "C516",
-                    returnId = receipt.TotalReceiptId,
-                };
+                return new Response { resultCd = 0, MessageCode = "C516", };
             }
 
             if (receiptModel.MovingScheduleId != null)
@@ -1489,40 +1390,20 @@ public class ReceiptRepository
 
                 if (scheduleExist.Status == ScheduleStatus.OnGoing)
                 {
-                    return new Response
-                    {
-                        resultCd = 0,
-                        MessageCode = "C517",
-                        returnId = receipt.TotalReceiptId,
-                    };
+                    return new Response { resultCd = 0, MessageCode = "C517", };
                 }
                 else if (scheduleExist.Status == ScheduleStatus.Completed)
                 {
-                    return new Response
-                    {
-                        resultCd = 0,
-                        MessageCode = "C518",
-                        returnId = receipt.TotalReceiptId,
-                    };
+                    return new Response { resultCd = 0, MessageCode = "C518", };
                 }
                 else if (scheduleExist.Status == ScheduleStatus.Cancelled)
                 {
-                    return new Response
-                    {
-                        resultCd = 0,
-                        MessageCode = "C519",
-                        returnId = receipt.TotalReceiptId,
-                    };
+                    return new Response { resultCd = 0, MessageCode = "C519", };
                 }
 
                 if (receipt.Status == FullReceiptStatus.Completed)
                 {
-                    return new Response
-                    {
-                        resultCd = 0,
-                        MessageCode = "C520",
-                        returnId = receipt.TotalReceiptId,
-                    };
+                    return new Response { resultCd = 0, MessageCode = "C520", };
                 }
             }
             else if (receiptModel.StayingScheduleId != null)
@@ -1537,7 +1418,7 @@ public class ReceiptRepository
                     {
                         resultCd = 0,
                         MessageCode = "C517",
-                        returnId = receipt.TotalReceiptId,
+                     
                     };
                 }
                 else if (scheduleExist.Status == ScheduleStatus.Completed)
@@ -1546,7 +1427,7 @@ public class ReceiptRepository
                     {
                         resultCd = 0,
                         MessageCode = "C518",
-                        returnId = receipt.TotalReceiptId,
+                 
                     };
                 }
                 else if (scheduleExist.Status == ScheduleStatus.Cancelled)
@@ -1555,7 +1436,7 @@ public class ReceiptRepository
                     {
                         resultCd = 0,
                         MessageCode = "C519",
-                        returnId = receipt.TotalReceiptId,
+                  
                     };
                 }
 
@@ -1565,7 +1446,7 @@ public class ReceiptRepository
                     {
                         resultCd = 0,
                         MessageCode = "C520",
-                        returnId = receipt.TotalReceiptId,
+                      
                     };
                 }
             }
@@ -1601,15 +1482,17 @@ public class ReceiptRepository
             .Select(group => new
             {
                 Name = group.Key,
-                GuestList = group.Select(entity => new
-                {
-                    GuestName = entity.GuestName,
-                    OriginalPrice = entity.OriginalPrice,
-                    TotalTicket = entity.TotalTicket,
-                    TotalChildTicket = entity.TotalChildTicket,
-                    DiscountFloat = entity.DiscountFloat,
-                    DiscountAmount = entity.DiscountAmount
-                }).ToList()
+                GuestList = group
+                    .Select(entity => new
+                    {
+                        GuestName = entity.GuestName,
+                        OriginalPrice = entity.OriginalPrice,
+                        TotalTicket = entity.TotalTicket,
+                        TotalChildTicket = entity.TotalChildTicket,
+                        DiscountFloat = entity.DiscountFloat,
+                        DiscountAmount = entity.DiscountAmount
+                    })
+                    .ToList()
             })
             .ToList();
 
@@ -1628,21 +1511,24 @@ public class ReceiptRepository
             .Include(entity => entity.TotalReceipt)
             .ThenInclude(entity => entity.MovingSchedule)
             .Include(entity => entity.ServiceSchedule)
-            .Where(entity => (int)entity.Status < 2 && entity.TotalReceipt.MovingScheduleId.HasValue)
+            .Where(entity =>
+                (int)entity.Status < 2 && entity.TotalReceipt.MovingScheduleId.HasValue
+            )
             .GroupBy(entity => entity.TotalReceipt.MovingSchedule.Name)
             .Select(group => new
             {
                 Name = group.Key,
-                GuestList = group.Select(entity => new
-                {
-                    GuestName = entity.GuestName,
-                    OriginalPrice = entity.OriginalPrice,
-                    TotalTicket = entity.TotalTicket,
-                    TotalChildTicket = entity.TotalChildTicket,
-                    DiscountFloat = entity.DiscountFloat,
-                    DiscountAmount = entity.DiscountAmount
-
-                }).ToList()
+                GuestList = group
+                    .Select(entity => new
+                    {
+                        GuestName = entity.GuestName,
+                        OriginalPrice = entity.OriginalPrice,
+                        TotalTicket = entity.TotalTicket,
+                        TotalChildTicket = entity.TotalChildTicket,
+                        DiscountFloat = entity.DiscountFloat,
+                        DiscountAmount = entity.DiscountAmount
+                    })
+                    .ToList()
             })
             .ToList();
 
@@ -1657,25 +1543,27 @@ public class ReceiptRepository
     public Response getUnpaidStayingScheduleClient()
     {
         var receiptList = _context
-            .FullScheduleReceiptList
-            .Include(entity => entity.TotalReceipt)
+            .FullScheduleReceiptList.Include(entity => entity.TotalReceipt)
             .ThenInclude(entity => entity.StayingSchedule)
             .Include(entity => entity.ServiceSchedule)
-            .Where(entity => (int)entity.Status < 2 && entity.TotalReceipt.StayingScheduleId.HasValue)
+            .Where(entity =>
+                (int)entity.Status < 2 && entity.TotalReceipt.StayingScheduleId.HasValue
+            )
             .GroupBy(entity => entity.TotalReceipt.StayingSchedule.Name)
             .Select(group => new
             {
                 Name = group.Key,
-                GuestList = group.Select(entity => new
-                {
-                    GuestName = entity.GuestName,
-                    OriginalPrice = entity.OriginalPrice,
-                    TotalTicket = entity.TotalTicket,
-                    TotalChildTicket = entity.TotalChildTicket,
-                    DiscountFloat = entity.DiscountFloat,
-                    DiscountAmount = entity.DiscountAmount
-
-                }).ToList()
+                GuestList = group
+                    .Select(entity => new
+                    {
+                        GuestName = entity.GuestName,
+                        OriginalPrice = entity.OriginalPrice,
+                        TotalTicket = entity.TotalTicket,
+                        TotalChildTicket = entity.TotalChildTicket,
+                        DiscountFloat = entity.DiscountFloat,
+                        DiscountAmount = entity.DiscountAmount
+                    })
+                    .ToList()
             })
             .ToList();
 
@@ -2047,5 +1935,49 @@ public class ReceiptRepository
         }
 
         return new Response { resultCd = 0, Data = receiptGrossByMonth };
+    }
+
+    public Response thirdPartyPaymentFullReceiptStatusChange(
+        PaymentChangeStatusReq paymentChangeStatusReq
+    )
+    {
+        var existFullReceipt = _context.FullReceiptList.FirstOrDefault(entity =>
+            entity.FullReceiptId.ToString() == paymentChangeStatusReq.orderCode
+        );
+
+        if (existFullReceipt != null)
+        {
+            if (paymentChangeStatusReq.status.Equals("PAID"))
+                existFullReceipt.Status = FullReceiptStatus.Completed;
+            existFullReceipt.PaymentId = paymentChangeStatusReq.id;
+
+            _context.SaveChanges();
+
+            return new Response { resultCd = 0, MessageCode = "I514" };
+        }
+
+        return new Response { resultCd = 0, MessageCode = "C521" };
+    }
+
+    public Response thirdPartyPaymentFullServiceReceiptStatusChange(
+        PaymentChangeStatusReq paymentChangeStatusReq
+    )
+    {
+        var existFullReceipt = _context.FullScheduleReceiptList.FirstOrDefault(entity =>
+            entity.FullReceiptId.ToString() == paymentChangeStatusReq.orderCode
+        );
+
+        if (existFullReceipt != null)
+        {
+            if (paymentChangeStatusReq.status.Equals("PAID"))
+                existFullReceipt.Status = FullReceiptStatus.Completed;
+            existFullReceipt.PaymentId = paymentChangeStatusReq.id;
+
+            _context.SaveChanges();
+
+            return new Response { resultCd = 0, MessageCode = "I514" };
+        }
+
+        return new Response { resultCd = 0, MessageCode = "C521" };
     }
 }

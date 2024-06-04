@@ -12,7 +12,7 @@ namespace WebApplication1.Data.Receipt
     public class FullReceipt
     {
         [Key]
-        public Guid FullReceiptId { get; set; }
+        public int FullReceiptId { get; set; }
         public Guid TotalReceiptId { get; set; }
         public Guid? TourishScheduleId { get; set; }
         public string GuestName { get; set; }
@@ -29,6 +29,8 @@ namespace WebApplication1.Data.Receipt
         public DateTime? CompleteDate { get; set; }
         public float DiscountFloat { get; set; }
         public double DiscountAmount { get; set; }
+        public string? PaymentId { get; set; }
+
         // Relationship
         public TotalReceipt TotalReceipt { get; set; }
         public TourishSchedule TourishSchedule { get; set; }

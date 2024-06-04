@@ -10,7 +10,7 @@ namespace WebApplication1.Model.Receipt
 
         public Guid? TourishScheduleId { get; set; }
         public Guid? ServiceScheduleId { get; set; }
-        public Guid FullReceiptId { get; set; }
+        public int FullReceiptId { get; set; }
         public Guid TotalReceiptId { get; set; }
         public string GuestName { get; set; }
         public string PhoneNumber { get; set; }
@@ -51,7 +51,7 @@ namespace WebApplication1.Model.Receipt
 
         public Guid? TourishScheduleId { get; set; }
         public Guid? ServiceScheduleId { get; set; }
-        public Guid FullReceiptId { get; set; }
+        public int FullReceiptId { get; set; }
         public Guid TotalReceiptId { get; set; }
         public string GuestName { get; set; }
         public double OriginalPrice { get; set; }

@@ -22,14 +22,14 @@ namespace WebApplication1.Controllers.Receipt
 
         [HttpDelete("tour/{id}")]
         [Authorize(Policy = "DeleteReceiptAccess")]
-        public IActionResult DeleteTourReceiptById(Guid id)
+        public IActionResult DeleteTourReceiptById(int id)
         {
             return Ok(_receiptService.DeleteTourReceiptById(id));
         }
 
         [HttpDelete("schedule/{id}")]
         [Authorize(Policy = "DeleteReceiptAccess")]
-        public IActionResult DeleteScheduleReceiptById(Guid id)
+        public IActionResult DeleteScheduleReceiptById(int id)
         {
             return Ok(_receiptService.DeleteScheduleReceiptById(id));
         }

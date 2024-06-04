@@ -9,9 +9,11 @@ using SignalR.Hub;
 using System.Text;
 using TourishApi.Service.InheritanceService;
 using TourishApi.Service.InheritanceService.Schedule;
+using TourishApi.Service.Payment;
 using TourishApi.Task;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Model;
+using WebApplication1.Model.Payment;
 using WebApplication1.Repository.InheritanceRepo;
 using WebApplication1.Repository.InheritanceRepo.Connect;
 using WebApplication1.Repository.InheritanceRepo.Receipt;
@@ -101,6 +103,9 @@ namespace MyWebApiApp
             services.AddScoped<ReceiptService>();
             services.AddScoped<UserService>();
 
+            services.AddScoped<PaymentService>();
+            services.AddHttpClient<PaymentService>();
+
             services.AddTransient<ISendMailService, SendMailService>();
 
             services.AddScoped<MovingScheduleService>();
@@ -112,6 +117,7 @@ namespace MyWebApiApp
 
             services.Configure<AppSetting>(Configuration.GetSection("AppSettings"));
             services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+            services.Configure<PayOsSetting>(Configuration.GetSection("PayOsSetting"));
 
             var secretKey = Configuration["AppSettings:SecretKey"];
             var secretKeyBytes = Encoding.UTF8.GetBytes(secretKey);
