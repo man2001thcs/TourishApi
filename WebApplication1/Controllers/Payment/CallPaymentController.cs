@@ -1,8 +1,10 @@
 ﻿using System.Threading.Channels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using TourishApi.Service.InheritanceService;
 using TourishApi.Service.Payment;
+using WebApplication1.Model;
 using WebApplication1.Model.Payment;
 using WebApplication1.Model.VirtualModel;
 using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
@@ -17,13 +19,15 @@ namespace WebApplication1.Controllers.Payment
     {
         private readonly PaymentService _paymentService;
         private readonly ReceiptService _receiptService;
+        private readonly AppSetting _appSettings;
 
         private readonly char[] delimiter = new char[] { ';' };
 
-        public CallPaymentController(PaymentService paymentService, ReceiptService receiptService)
+        public CallPaymentController(PaymentService paymentService, ReceiptService receiptService, IOptionsMonitor<AppSetting> optionsMonitor)
         {
             _paymentService = paymentService;
             _receiptService = receiptService;
+            _appSettings = optionsMonitor.CurrentValue;
         }
 
         [HttpPost("request")]
@@ -61,7 +65,9 @@ namespace WebApplication1.Controllers.Payment
             request.status = status;
             request.cancel = cancel;
 
-            return Ok(_receiptService.thirdPartyPaymentFullReceiptStatusChange(request));
+            _receiptService.thirdPartyPaymentFullReceiptStatusChange(request);
+
+            return Redirect(_appSettings.ClientUrl + "/user/receipt/list");
         }
 
         [Authorize]
@@ -81,7 +87,9 @@ namespace WebApplication1.Controllers.Payment
             request.status = status;
             request.cancel = cancel;
 
-            return Ok(_receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(request));
+            _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(request);
+
+            return Redirect(_appSettings.ClientUrl + "/user/receipt/list");
         }
     }
 }
