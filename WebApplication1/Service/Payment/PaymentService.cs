@@ -50,20 +50,55 @@ namespace TourishApi.Service.Payment
                 - existReceipt.DiscountAmount
             );
 
-            insertReq.returnUrl = _appSettings.BaseUrl + "/CallPayment/pay-os/update/tour";
-            insertReq.cancelUrl = _appSettings.BaseUrl + "/CallPayment/pay-os/update/tour";
+            insertReq.returnUrl = _appSettings.BaseUrl + "/api/CallPayment/pay-os/update/tour";
+            insertReq.cancelUrl = _appSettings.BaseUrl + "/api/CallPayment/pay-os/update/tour";
 
             insertReq.buyerName = existReceipt.GuestName;
             insertReq.buyerAddress = "";
             insertReq.items = null;
             insertReq.description = "Roxanne tour hanh toán";
 
-            return await MakePaymentAsync(insertReq);
+            var response = await MakePaymentAsync(insertReq, payOsSettings.ClientId, payOsSettings.ApiKey, payOsSettings.ChecksumKey);
+
+            _receiptService.thirdPartyPaymentFullReceiptStatusChange(response.data.paymentLinkId, response.data.orderCode.ToString(), response.data.status);
+
+            return response;
+        }
+
+        public async Task<PaymentResponse> CancelTourPaymentAsync(string id, string reason)
+        {
+
+            var response = await CancelPaymentAsync(id, reason, payOsSettings.ClientId, payOsSettings.ApiKey);
+            _receiptService.thirdPartyPaymentFullReceiptStatusChange(response.data.paymentLinkId, response.data.orderCode.ToString(), response.data.status);
+
+            return response;
+        }
+
+        public async Task<PaymentGetResponse> GetTourPaymentRequest(string id)
+        {
+            var response = await GetPaymentRequest(id, payOsSettings.ClientId, payOsSettings.ApiKey);
+
+            _receiptService.thirdPartyPaymentFullReceiptStatusChange(response.data.id, response.data.orderCode.ToString(), response.data.status);
+            return response;
+        }
+
+        public async Task<PaymentResponse> CancelServicePaymentAsync(string id, string reason)
+        {
+            var response = await CancelPaymentAsync(id, reason, payOsSettings.ServiceClientId, payOsSettings.ServiceApiKey);
+            _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(response.data.paymentLinkId, response.data.orderCode.ToString(), response.data.status);
+            return response;
+        }
+
+        public async Task<PaymentGetResponse> GetServicePaymentRequest(string id)
+        {
+            var response = await GetPaymentRequest(id, payOsSettings.ServiceClientId, payOsSettings.ServiceApiKey);
+            _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(response.data.id, response.data.orderCode.ToString(), response.data.status);
+            return response;
         }
 
         public async Task<PaymentResponse> MakeServicePaymentAsync(PaymentRequest paymentRequest)
         {
-            FullReceipt existReceipt = (FullReceipt)
+            FullScheduleReceipt existReceipt = (FullScheduleReceipt)
                 _receiptService.GetFullScheduleReceiptById(paymentRequest.orderCode).Data;
 
             PaymentRequest insertReq = paymentRequest;
@@ -77,18 +112,22 @@ namespace TourishApi.Service.Payment
                 - existReceipt.DiscountAmount
             );
 
-            insertReq.returnUrl = _appSettings.BaseUrl + "/CallPayment/pay-os/update/tour";
-            insertReq.cancelUrl = _appSettings.BaseUrl + "/CallPayment/pay-os/update/tour";
+            insertReq.returnUrl = _appSettings.BaseUrl + "/api/CallPayment/pay-os/update/service";
+            insertReq.cancelUrl = _appSettings.BaseUrl + "/api/CallPayment/pay-os/update/service";
 
             insertReq.buyerName = existReceipt.GuestName;
             insertReq.buyerAddress = "";
             insertReq.items = null;
             insertReq.description = "Roxanne tour thanh toán";
 
-            return await MakePaymentAsync(insertReq);
+            var response = await MakePaymentAsync(insertReq, payOsSettings.ServiceClientId, payOsSettings.ServiceApiKey, payOsSettings.ServiceChecksumKey);
+
+            _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(response.data.paymentLinkId, response.data.orderCode.ToString(), response.data.status);
+
+            return response;
         }
 
-        public async Task<PaymentResponse> MakePaymentAsync(PaymentRequest paymentRequest)
+        public async Task<PaymentResponse> MakePaymentAsync(PaymentRequest paymentRequest, string clientId, string apiKey, string checkSumKey)
         {
             if (paymentRequest == null)
             {
@@ -108,7 +147,8 @@ namespace TourishApi.Service.Payment
                 paymentRequest.cancelUrl,
                 paymentRequest.description,
                 paymentRequest.orderCode,
-                paymentRequest.returnUrl
+                paymentRequest.returnUrl,
+                checkSumKey
             );
 
             logger.LogInformation(JsonSerializer.Serialize(insertReq));
@@ -121,8 +161,8 @@ namespace TourishApi.Service.Payment
             );
 
             // Thêm header x-client-idx-api-key
-            _httpClient.DefaultRequestHeaders.Add("x-client-id", payOsSettings.ClientId);
-            _httpClient.DefaultRequestHeaders.Add("x-api-key", payOsSettings.ApiKey);
+            _httpClient.DefaultRequestHeaders.Add("x-client-id", clientId);
+            _httpClient.DefaultRequestHeaders.Add("x-api-key", apiKey);
 
             // Gọi API POST
             var response = await _httpClient.PostAsync(
@@ -142,12 +182,66 @@ namespace TourishApi.Service.Payment
             return responseData;
         }
 
+        public async Task<PaymentResponse> CancelPaymentAsync(string id, string reason, string clientId, string apiKey)
+        {
+
+            var insertReq = new PaymentCancelRequest();
+            insertReq.cancellationReason = reason;
+
+
+            // Tạo request body từ paymentRequest
+            var requestBody = new StringContent(
+                JsonSerializer.Serialize(insertReq),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            // Thêm header x-client-idx-api-key
+            _httpClient.DefaultRequestHeaders.Add("x-client-id", clientId);
+            _httpClient.DefaultRequestHeaders.Add("x-api-key", apiKey);
+
+            // Gọi API POST
+            var response = await _httpClient.PostAsync(
+                $"https://api-merchant.payos.vn/v2/payment-requests/{id}/cancel",
+                requestBody
+            );
+
+            // Đảm bảo response thành công
+            response.EnsureSuccessStatusCode();
+
+            // Đọc response content
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            // Deserialize responseContent to PaymentResponse object
+            var responseData = JsonSerializer.Deserialize<PaymentResponse>(responseContent);
+
+            return responseData;
+        }
+
+        public async Task<PaymentGetResponse> GetPaymentRequest(string id, string clientId, string apiKey)
+        {
+            // Thêm header x-client-idx-api-key
+            _httpClient.DefaultRequestHeaders.Add("x-client-id", clientId);
+            _httpClient.DefaultRequestHeaders.Add("x-api-key", apiKey);
+
+            var response = await _httpClient.GetAsync($"https://api-merchant.payos.vn/v2/payment-requests/{id}");
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            logger.LogInformation(responseContent);
+
+            var responseData = JsonSerializer.Deserialize<PaymentGetResponse>(responseContent);
+
+            return responseData;
+        }
+
         public string GenerateSignature(
             string amount,
             string cancelUrl,
             string description,
             int orderCode,
-            string returnUrl
+            string returnUrl,
+            string checkSumKey
         )
         {
             // Construct the data string in the specified format and sort alphabetically
@@ -156,7 +250,7 @@ namespace TourishApi.Service.Payment
             //var sortedDataString = SortStringAlphabetically(dataString);
 
             // Convert checksum key and data to bytes
-            var keyBytes = Encoding.UTF8.GetBytes(payOsSettings.ChecksumKey);
+            var keyBytes = Encoding.UTF8.GetBytes(checkSumKey);
             var dataBytes = Encoding.UTF8.GetBytes(dataString);
 
             // Compute the HMAC_SHA256 hash

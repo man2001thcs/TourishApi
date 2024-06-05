@@ -23,7 +23,7 @@ namespace WebApplication1.Controllers.Receipt
 
         // GET: api/<ValuesController>
         [HttpGet("tour")]
-        public IActionResult GetAll(string? tourishPlanId, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
+        public IActionResult GetAll(string? tourishPlanId, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, FullReceiptStatus status = FullReceiptStatus.Created)
         {
             return Ok(_receiptService.GetAllTourReceipt(tourishPlanId, sortBy, sortDirection, page, pageSize, status));
 
@@ -33,7 +33,7 @@ namespace WebApplication1.Controllers.Receipt
         [HttpGet("schedule")]
         public IActionResult GetAll(string? movingScheduleId,
             string? stayingScheduleId,
-            ScheduleType? scheduleType, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
+            ScheduleType? scheduleType, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, FullReceiptStatus status = FullReceiptStatus.Created)
         {
             return Ok(_receiptService.GetAllScheduleReceipt(movingScheduleId, stayingScheduleId, scheduleType, sortBy, sortDirection, page, pageSize, status));
 
@@ -41,14 +41,14 @@ namespace WebApplication1.Controllers.Receipt
 
         // GET: api/<ValuesController>
         [HttpGet("user/tour")]
-        public IActionResult GetAllTourReceiptForUser(string? email, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
+        public IActionResult GetAllTourReceiptForUser(string? email, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, FullReceiptStatus status = FullReceiptStatus.Created)
         {
             return Ok(_receiptService.GetAllTourReceiptForUser(email, sortBy, sortDirection, page, pageSize, status));
 
         }
 
         [HttpGet("user/schedule")]
-        public IActionResult GetAllScheduleReceiptForUser(string? email, ScheduleType? scheduleType, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, ReceiptStatus status = ReceiptStatus.Created)
+        public IActionResult GetAllScheduleReceiptForUser(string? email, ScheduleType? scheduleType, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5, FullReceiptStatus status = FullReceiptStatus.Created)
         {
             return Ok(_receiptService.GetAllScheduleReceiptForUser(email, scheduleType, sortBy, sortDirection, page, pageSize, status));
 

@@ -1,4 +1,5 @@
-﻿using WebApplication1.Data.Receipt;
+﻿using TourishApi.Service.Payment;
+using WebApplication1.Data.Receipt;
 using WebApplication1.Model.Payment;
 using WebApplication1.Model.Receipt;
 using WebApplication1.Model.VirtualModel;
@@ -25,8 +26,6 @@ namespace TourishApi.Service.InheritanceService
                 {
                     var receiptReturn = await _receiptRepository.AddTourReceipt(receiptInsertModel);
 
-                    var receiptReturnId = (Guid)receiptReturn.returnId;
-
                     var response = new Response { resultCd = 0, MessageCode = "I511", };
                     return response;
                 }
@@ -36,7 +35,6 @@ namespace TourishApi.Service.InheritanceService
                         receiptInsertModel
                     );
 
-                    var receiptReturnId = (Guid)receiptReturn.returnId;
 
                     var response = new Response { resultCd = 0, MessageCode = "I511", };
                     return response;
@@ -66,7 +64,6 @@ namespace TourishApi.Service.InheritanceService
                     var receiptReturn = await _receiptRepository.AddTourReceiptForClient(
                         receiptInsertModel
                     );
-                    var receiptReturnId = (Guid)receiptReturn.returnId;
 
                     var response = new Response
                     {
@@ -81,7 +78,6 @@ namespace TourishApi.Service.InheritanceService
                     var receiptReturn = await _receiptRepository.AddScheduleReceiptForClient(
                         receiptInsertModel
                     );
-                    var receiptReturnId = (Guid)receiptReturn.returnId;
 
                     var response = new Response
                     {
@@ -195,7 +191,7 @@ namespace TourishApi.Service.InheritanceService
             string? sortDirection,
             int page = 1,
             int pageSize = 5,
-            ReceiptStatus status = ReceiptStatus.Created
+            FullReceiptStatus status = FullReceiptStatus.Created
         )
         {
             try
@@ -230,7 +226,7 @@ namespace TourishApi.Service.InheritanceService
             string? sortDirection,
             int page = 1,
             int pageSize = 5,
-            ReceiptStatus status = ReceiptStatus.Created
+            FullReceiptStatus status = FullReceiptStatus.Created
         )
         {
             try
@@ -265,7 +261,7 @@ namespace TourishApi.Service.InheritanceService
             string? sortDirection,
             int page = 1,
             int pageSize = 5,
-            ReceiptStatus status = ReceiptStatus.Created
+            FullReceiptStatus status = FullReceiptStatus.Created
         )
         {
             try
@@ -299,7 +295,7 @@ namespace TourishApi.Service.InheritanceService
             string? sortDirection,
             int page = 1,
             int pageSize = 5,
-            ReceiptStatus status = ReceiptStatus.Created
+            FullReceiptStatus status = FullReceiptStatus.Created
         )
         {
             try
@@ -652,13 +648,14 @@ namespace TourishApi.Service.InheritanceService
         }
 
         public Response thirdPartyPaymentFullServiceReceiptStatusChange(
-            PaymentChangeStatusReq paymentChangeStatusReq
+            string paymentId,
+        string orderId, string status
         )
         {
             try
             {
                 return _receiptRepository.thirdPartyPaymentFullServiceReceiptStatusChange(
-                    paymentChangeStatusReq
+                    paymentId, orderId, status
                 );
             }
             catch (Exception ex)
@@ -674,13 +671,14 @@ namespace TourishApi.Service.InheritanceService
         }
 
         public Response thirdPartyPaymentFullReceiptStatusChange(
-            PaymentChangeStatusReq paymentChangeStatusReq
+            string paymentId,
+        string orderId, string status
         )
         {
             try
             {
                 return _receiptRepository.thirdPartyPaymentFullReceiptStatusChange(
-                    paymentChangeStatusReq
+                    paymentId, orderId, status
                 );
             }
             catch (Exception ex)

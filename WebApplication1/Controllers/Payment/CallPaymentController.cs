@@ -30,11 +30,11 @@ namespace WebApplication1.Controllers.Payment
             _appSettings = optionsMonitor.CurrentValue;
         }
 
-        [HttpPost("request")]
-        public async Task<IActionResult> CreateNew(PaymentRequest request)
-        {
-            return Ok(await _paymentService.MakePaymentAsync(request));
-        }
+        // [HttpPost("request")]
+        // public async Task<IActionResult> CreateNew(PaymentRequest request)
+        // {
+        //     return Ok(await _paymentService.MakePaymentAsync(request));
+        // }
 
         [HttpPost("tour/request")]
         public async Task<IActionResult> CreateNewTourReq(PaymentRequest request)
@@ -48,46 +48,50 @@ namespace WebApplication1.Controllers.Payment
             return Ok(await _paymentService.MakeServicePaymentAsync(request));
         }
 
-        [Authorize]
+        [HttpPost("tour/request/cancel")]
+        public async Task<IActionResult> CancelTourReq(PaymentCancelRequest request)
+        {
+            return Ok(await _paymentService.CancelTourPaymentAsync(request.id, request.cancellationReason));
+        }
+
+        [HttpPost("service/request/cancel")]
+        public async Task<IActionResult> CancelServiceReq(PaymentCancelRequest request)
+        {
+            return Ok(await _paymentService.CancelServicePaymentAsync(request.id, request.cancellationReason));
+        }
+
+        [HttpGet("tour/request")]
+        public async Task<IActionResult> GetTourReq(string id)
+        {
+            return Ok(await _paymentService.GetTourPaymentRequest(id));
+        }
+
+        [HttpGet("service/request")]
+        public async Task<IActionResult> GetServiceReq(string id)
+        {
+            return Ok(await _paymentService.GetServicePaymentRequest(id));
+        }
+
         [HttpGet("pay-os/update/tour")]
         public async Task<IActionResult> UpdateReceipt(
             string id,
-            string code,
             string orderCode,
-            bool cancel,
             string status
         )
         {
-            var request = new PaymentChangeStatusReq();
-            request.id = id;
-            request.code = code;
-            request.orderCode = orderCode;
-            request.status = status;
-            request.cancel = cancel;
-
-            _receiptService.thirdPartyPaymentFullReceiptStatusChange(request);
+            _receiptService.thirdPartyPaymentFullReceiptStatusChange(id, orderCode, status);
 
             return Redirect(_appSettings.ClientUrl + "/user/receipt/list");
         }
 
-        [Authorize]
         [HttpGet("pay-os/update/service")]
         public async Task<IActionResult> UpdateServiceReceipt(
             string id,
-            string code,
             string orderCode,
-            bool cancel,
             string status
         )
         {
-            var request = new PaymentChangeStatusReq();
-            request.id = id;
-            request.code = code;
-            request.orderCode = orderCode;
-            request.status = status;
-            request.cancel = cancel;
-
-            _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(request);
+            _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(id, orderCode, status);
 
             return Redirect(_appSettings.ClientUrl + "/user/receipt/list");
         }

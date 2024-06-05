@@ -49,7 +49,7 @@ public class ReceiptRepository
         }
 
         var existFullReceipt = _context.FullReceiptList.FirstOrDefault(entity =>
-            entity.Email == receiptModel.Email
+            entity.Email == receiptModel.Email && (int)entity.Status < 2 && entity.TotalReceiptId == totalReceipt.TotalReceiptId
         );
 
         if (planExist != null)
@@ -164,7 +164,7 @@ public class ReceiptRepository
 
         var existFullReceipt = _context.FullScheduleReceiptList.FirstOrDefault(entity =>
             entity.Email == receiptModel.Email
-            && entity.TotalReceiptId == totalReceipt.TotalReceiptId
+            && (int)entity.Status < 2 && entity.TotalReceiptId == totalReceipt.TotalReceiptId
         );
 
         var originalPrice = (double)0;
@@ -318,7 +318,7 @@ public class ReceiptRepository
         }
 
         var existFullReceipt = _context.FullReceiptList.FirstOrDefault(entity =>
-            entity.Email == receiptModel.Email
+            entity.Email == receiptModel.Email && (int)entity.Status < 2 && entity.TotalReceiptId == totalReceipt.TotalReceiptId
         );
 
         if (existFullReceipt == null)
@@ -519,7 +519,7 @@ public class ReceiptRepository
 
         var existFullReceipt = _context.FullScheduleReceiptList.FirstOrDefault(entity =>
             entity.Email == receiptModel.Email
-            && entity.TotalReceiptId == totalReceipt.TotalReceiptId
+            && entity.TotalReceiptId == totalReceipt.TotalReceiptId && (int)entity.Status < 2
         );
 
         if (existFullReceipt == null)
@@ -710,7 +710,7 @@ public class ReceiptRepository
 
     public Response GetAllTourReceipt(
         string? tourishPlanId,
-        ReceiptStatus? status,
+        FullReceiptStatus? status,
         string? sortBy,
         string? sortDirection,
         int page = 1,
@@ -737,7 +737,7 @@ public class ReceiptRepository
 
         if (status != null)
         {
-            receiptQuery = receiptQuery.Where(receipt => receipt.Status == status);
+            receiptQuery = receiptQuery.Where(receipt => receipt.FullReceiptList.Where(fullReceipt => (int)fullReceipt.Status == (int)status).Count() >= 1);
         }
         #endregion
 
@@ -763,7 +763,9 @@ public class ReceiptRepository
             Status = entity.Status,
             Description = entity.Description,
             CompleteDate = entity.CompleteDate,
-            FullReceiptList = entity.FullReceiptList,
+            FullReceiptList = entity
+                .FullReceiptList.Where(entity => (int)entity.Status == (int)status)
+                .ToList(),
             TourishPlan = entity.TourishPlan,
             CreatedDate = entity.CreatedDate,
             UpdateDate = entity.UpdateDate,
@@ -783,7 +785,7 @@ public class ReceiptRepository
         string? movingScheduleId,
         string? stayingScheduleId,
         ScheduleType? scheduleType,
-        ReceiptStatus? status,
+        FullReceiptStatus? status,
         string? sortBy,
         string? sortDirection,
         int page = 1,
@@ -823,7 +825,7 @@ public class ReceiptRepository
 
         if (status != null)
         {
-            receiptQuery = receiptQuery.Where(receipt => receipt.Status == status);
+            receiptQuery = receiptQuery.Where(receipt => receipt.FullReceiptList.Where(fullReceipt => (int)fullReceipt.Status == (int)status).Count() >= 1);
         }
         #endregion
 
@@ -850,7 +852,9 @@ public class ReceiptRepository
             Status = entity.Status,
             Description = entity.Description,
             CompleteDate = entity.CompleteDate,
-            FullReceiptList = entity.FullReceiptList,
+            FullReceiptList = entity
+                .FullReceiptList.Where(entity => (int)entity.Status == (int)status)
+                .ToList(),
             StayingSchedule = entity.StayingSchedule,
             MovingSchedule = entity.MovingSchedule,
             CreatedDate = entity.CreatedDate,
@@ -869,7 +873,7 @@ public class ReceiptRepository
 
     public Response GetAllTourReceiptForUser(
         string? email,
-        ReceiptStatus? status,
+        FullReceiptStatus? status,
         string? sortBy,
         string? sortDirection,
         int page = 1,
@@ -896,7 +900,7 @@ public class ReceiptRepository
 
         if (!string.IsNullOrEmpty(status.ToString()))
         {
-            receiptQuery = receiptQuery.Where(receipt => receipt.Status == status);
+            receiptQuery = receiptQuery.Where(receipt => receipt.FullReceiptList.Where(fullReceipt => fullReceipt.Email == email && (int)fullReceipt.Status == (int)status).Count() >= 1);
         }
 
         #endregion
@@ -925,7 +929,7 @@ public class ReceiptRepository
             CompleteDate = entity.CompleteDate,
 
             FullReceiptList = entity
-                .FullReceiptList.Where(entity => entity.Email == email)
+                .FullReceiptList.Where(entity => entity.Email == email && entity.Status == status)
                 .ToList(),
 
             TourishPlan = entity.TourishPlan,
@@ -946,7 +950,7 @@ public class ReceiptRepository
     public Response GetAllScheduleReceiptForUser(
         string? email,
         ScheduleType? scheduleType,
-        ReceiptStatus? status,
+        FullReceiptStatus? status,
         string? sortBy,
         string? sortDirection,
         int page = 1,
@@ -970,7 +974,7 @@ public class ReceiptRepository
 
         if (!string.IsNullOrEmpty(status.ToString()))
         {
-            receiptQuery = receiptQuery.Where(receipt => receipt.Status == status);
+            receiptQuery = receiptQuery.Where(receipt => receipt.FullReceiptList.Where(fullReceipt => fullReceipt.Email == email && (int)fullReceipt.Status == (int)status).Count() >= 1);
         }
 
         if (scheduleType != null)
@@ -1010,7 +1014,7 @@ public class ReceiptRepository
             CompleteDate = entity.CompleteDate,
 
             FullReceiptList = entity
-                .FullReceiptList.Where(entity => entity.Email == email)
+                .FullReceiptList.Where(entity => entity.Email == email && (int)entity.Status == (int)status)
                 .ToList(),
 
             StayingSchedule = entity.StayingSchedule,
@@ -1418,7 +1422,7 @@ public class ReceiptRepository
                     {
                         resultCd = 0,
                         MessageCode = "C517",
-                     
+
                     };
                 }
                 else if (scheduleExist.Status == ScheduleStatus.Completed)
@@ -1427,7 +1431,7 @@ public class ReceiptRepository
                     {
                         resultCd = 0,
                         MessageCode = "C518",
-                 
+
                     };
                 }
                 else if (scheduleExist.Status == ScheduleStatus.Cancelled)
@@ -1436,7 +1440,7 @@ public class ReceiptRepository
                     {
                         resultCd = 0,
                         MessageCode = "C519",
-                  
+
                     };
                 }
 
@@ -1446,7 +1450,7 @@ public class ReceiptRepository
                     {
                         resultCd = 0,
                         MessageCode = "C520",
-                      
+
                     };
                 }
             }
@@ -1937,19 +1941,22 @@ public class ReceiptRepository
         return new Response { resultCd = 0, Data = receiptGrossByMonth };
     }
 
-    public Response thirdPartyPaymentFullReceiptStatusChange(
-        PaymentChangeStatusReq paymentChangeStatusReq
+    public Response thirdPartyPaymentFullReceiptStatusChange(string paymentId,
+        string orderId, string status
     )
     {
         var existFullReceipt = _context.FullReceiptList.FirstOrDefault(entity =>
-            entity.FullReceiptId.ToString() == paymentChangeStatusReq.orderCode
+            entity.FullReceiptId.ToString() == orderId
         );
 
         if (existFullReceipt != null)
         {
-            if (paymentChangeStatusReq.status.Equals("PAID"))
+            existFullReceipt.PaymentId = paymentId;
+            if (status.Equals("PAID"))
                 existFullReceipt.Status = FullReceiptStatus.Completed;
-            existFullReceipt.PaymentId = paymentChangeStatusReq.id;
+            if (status.Equals("CANCELLED"))
+                existFullReceipt.Status = FullReceiptStatus.Cancelled;
+
 
             _context.SaveChanges();
 
@@ -1960,19 +1967,23 @@ public class ReceiptRepository
     }
 
     public Response thirdPartyPaymentFullServiceReceiptStatusChange(
-        PaymentChangeStatusReq paymentChangeStatusReq
+        string paymentId,
+        string orderId, string status
     )
     {
         var existFullReceipt = _context.FullScheduleReceiptList.FirstOrDefault(entity =>
-            entity.FullReceiptId.ToString() == paymentChangeStatusReq.orderCode
+            entity.FullReceiptId.ToString() == orderId
         );
+
+
 
         if (existFullReceipt != null)
         {
-            if (paymentChangeStatusReq.status.Equals("PAID"))
+            existFullReceipt.PaymentId = paymentId;
+            if (status.Equals("PAID"))
                 existFullReceipt.Status = FullReceiptStatus.Completed;
-            existFullReceipt.PaymentId = paymentChangeStatusReq.id;
-
+            if (status.Equals("CANCELLED"))
+                existFullReceipt.Status = FullReceiptStatus.Cancelled;
             _context.SaveChanges();
 
             return new Response { resultCd = 0, MessageCode = "I514" };
