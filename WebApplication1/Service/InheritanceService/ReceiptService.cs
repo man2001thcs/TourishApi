@@ -65,13 +65,7 @@ namespace TourishApi.Service.InheritanceService
                         receiptInsertModel
                     );
 
-                    var response = new Response
-                    {
-                        resultCd = 0,
-                        MessageCode = "I511",
-                        Data = receiptReturn.Data
-                    };
-                    return response;
+                    return receiptReturn;
                 }
                 else
                 {
@@ -79,13 +73,7 @@ namespace TourishApi.Service.InheritanceService
                         receiptInsertModel
                     );
 
-                    var response = new Response
-                    {
-                        resultCd = 0,
-                        MessageCode = "I511",
-                        Data = receiptReturn.Data
-                    };
-                    return response;
+                    return receiptReturn;
                 }
             }
             catch (Exception ex)

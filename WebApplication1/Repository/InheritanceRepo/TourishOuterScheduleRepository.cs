@@ -589,6 +589,17 @@ namespace WebApplication1.Repository.InheritanceRepo
             return new Response { resultCd = 0, Data = entity };
         }
 
+        public Response clientGetByStayingScheduleId(Guid id)
+        {
+            var entity = _context
+                .StayingSchedules.Include(entity => entity.ServiceScheduleList)
+                .FirstOrDefault((entity => entity.Id == id));
+
+            entity.ServiceScheduleList = entity.ServiceScheduleList.Where(entity => entity.Status == ScheduleStatus.Created).ToList();
+
+            return new Response { resultCd = 0, Data = entity };
+        }
+
         public Response getByNameStayingSchedule(string name)
         {
             var entity = _context.StayingSchedules.FirstOrDefault(
@@ -709,6 +720,17 @@ namespace WebApplication1.Repository.InheritanceRepo
             var entity = _context
                 .MovingSchedules.Include(entity => entity.ServiceScheduleList)
                 .FirstOrDefault((entity => entity.Id == id));
+
+            return new Response { resultCd = 0, Data = entity };
+        }
+
+        public Response clientGetByMovingScheduleId(Guid id)
+        {
+            var entity = _context
+                .MovingSchedules.Include(entity => entity.ServiceScheduleList)
+                .FirstOrDefault((entity => entity.Id == id));
+
+            entity.ServiceScheduleList = entity.ServiceScheduleList.Where(entity => entity.Status == ScheduleStatus.Created).ToList();
 
             return new Response { resultCd = 0, Data = entity };
         }

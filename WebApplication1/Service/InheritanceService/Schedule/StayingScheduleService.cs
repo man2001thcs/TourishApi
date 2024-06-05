@@ -139,6 +139,37 @@ namespace TourishApi.Service.InheritanceService.Schedule
                 return response;
             }
         }
+        public Response clientGetById(Guid id)
+        {
+            try
+            {
+                var entity = _entityRepository.clientGetByStayingScheduleId(id);
+                if (entity.Data == null)
+                {
+                    var response = new Response
+                    {
+                        resultCd = 1,
+                        MessageCode = "C430",
+                    };
+                    return response;
+                }
+                else
+                {
+                    return entity;
+                }
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C434",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
 
         public async Task<Response> UpdateEntityById(string userId, StayingScheduleModel entityModel)
         {

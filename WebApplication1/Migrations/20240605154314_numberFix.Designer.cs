@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data.DbContextFile;
 
@@ -11,9 +12,11 @@ using WebApplication1.Data.DbContextFile;
 namespace TourishApi.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240605154314_numberFix")]
+    partial class numberFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -553,7 +556,9 @@ namespace TourishApi.Migrations
 
                     b.HasIndex("TotalReceiptId");
 
-                    b.HasIndex("TourishScheduleId");
+                    b.HasIndex("TourishScheduleId")
+                        .IsUnique()
+                        .HasFilter("[TourishScheduleId] IS NOT NULL");
 
                     b.ToTable("FullReceipt", (string)null);
                 });
@@ -622,7 +627,9 @@ namespace TourishApi.Migrations
 
                     b.HasKey("FullReceiptId");
 
-                    b.HasIndex("ServiceScheduleId");
+                    b.HasIndex("ServiceScheduleId")
+                        .IsUnique()
+                        .HasFilter("[ServiceScheduleId] IS NOT NULL");
 
                     b.HasIndex("TotalReceiptId");
 
@@ -1604,8 +1611,8 @@ namespace TourishApi.Migrations
                         .HasConstraintName("FK_TotalReceipt_FullReceipt");
 
                     b.HasOne("WebApplication1.Data.TourishSchedule", "TourishSchedule")
-                        .WithMany("FullReceiptList")
-                        .HasForeignKey("TourishScheduleId")
+                        .WithOne("FullReceipt")
+                        .HasForeignKey("WebApplication1.Data.Receipt.FullReceipt", "TourishScheduleId")
                         .HasConstraintName("FK_FullReceipt_TourishSchedule");
 
                     b.Navigation("TotalReceipt");
@@ -1616,8 +1623,8 @@ namespace TourishApi.Migrations
             modelBuilder.Entity("WebApplication1.Data.Receipt.FullScheduleReceipt", b =>
                 {
                     b.HasOne("WebApplication1.Data.ServiceSchedule", "ServiceSchedule")
-                        .WithMany("FullScheduleReceiptList")
-                        .HasForeignKey("ServiceScheduleId")
+                        .WithOne("FullScheduleReceipt")
+                        .HasForeignKey("WebApplication1.Data.Receipt.FullScheduleReceipt", "ServiceScheduleId")
                         .HasConstraintName("FK_FullScheduleReceipt_ServiceSchedule");
 
                     b.HasOne("WebApplication1.Data.Receipt.TotalScheduleReceipt", "TotalReceipt")
@@ -1900,7 +1907,7 @@ namespace TourishApi.Migrations
 
             modelBuilder.Entity("WebApplication1.Data.ServiceSchedule", b =>
                 {
-                    b.Navigation("FullScheduleReceiptList");
+                    b.Navigation("FullScheduleReceipt");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.TourishCategory", b =>
@@ -1936,7 +1943,7 @@ namespace TourishApi.Migrations
 
             modelBuilder.Entity("WebApplication1.Data.TourishSchedule", b =>
                 {
-                    b.Navigation("FullReceiptList");
+                    b.Navigation("FullReceipt");
                 });
 
             modelBuilder.Entity("WebApplication1.Data.User", b =>

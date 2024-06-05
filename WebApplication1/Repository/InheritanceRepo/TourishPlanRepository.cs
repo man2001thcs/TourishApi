@@ -58,8 +58,6 @@ public class TourishPlanRepository : ITourishPlanRepository
             TourName = entityModel.TourName,
             StartingPoint = entityModel.StartingPoint,
             EndPoint = entityModel.EndPoint,
-            RemainTicket = entityModel.RemainTicket,
-            TotalTicket = entityModel.TotalTicket,
             SupportNumber = entityModel.SupportNumber,
 
             // Description = entityModel.Description,
@@ -117,53 +115,9 @@ public class TourishPlanRepository : ITourishPlanRepository
         if (entityModel.TourishScheduleList != null)
         {
             var tourishDataScheduleList = new List<TourishSchedule>();
-            foreach (var item in entityModel.TourishScheduleList)
-            {
-                tourishDataScheduleList.Add(
-                    new TourishSchedule
-                    {
-                        TourishPlanId = item.TourishPlanId,
-                        PlanStatus = item.PlanStatus,
-                        StartDate = item.StartDate,
-                        EndDate = item.EndDate,
-                        CreateDate = DateTime.UtcNow,
-                        UpdateDate = DateTime.UtcNow
-                    }
-                );
-            }
+            
             tourishPlan.TourishScheduleList = tourishDataScheduleList;
-        }
-
-        if (entityModel.TourishScheduleList != null)
-        {
-            var tourishDataScheduleList = new List<TourishSchedule>();
-            foreach (var item in entityModel.TourishScheduleList)
-            {
-                tourishDataScheduleList.Add(
-                    item.Id.HasValue
-                        ? new TourishSchedule
-                        {
-                            Id = item.Id.Value,
-                            TourishPlanId = item.TourishPlanId,
-                            PlanStatus = item.PlanStatus,
-                            StartDate = item.StartDate,
-                            EndDate = item.EndDate,
-                            CreateDate = item.CreateDate ?? DateTime.UtcNow,
-                            UpdateDate = DateTime.UtcNow,
-                        }
-                        : new TourishSchedule
-                        {
-                            TourishPlanId = item.TourishPlanId,
-                            PlanStatus = item.PlanStatus,
-                            StartDate = item.StartDate,
-                            EndDate = item.EndDate,
-                            CreateDate = item.CreateDate ?? DateTime.UtcNow,
-                            UpdateDate = DateTime.UtcNow,
-                        }
-                );
-            }
-            tourishPlan.TourishScheduleList = tourishDataScheduleList;
-        }
+        }        
 
         tourishPlan.InstructionList = initiateInstructionList();
 
@@ -581,6 +535,31 @@ public class TourishPlanRepository : ITourishPlanRepository
         return new Response { resultCd = 0, Data = entity };
     }
 
+    public Response clientGetById(Guid id)
+    {
+        var entity = _context
+            .TourishPlan.Where(entity => entity.Id == id)
+            .Include(entity => entity.EatSchedules)
+            .Include(entity => entity.StayingSchedules)
+            .Include(entity => entity.MovingSchedules)
+            .Include(entity => entity.InstructionList)
+            .Include(entity => entity.TourishScheduleList)
+            .Include(entity => entity.TourishCategoryRelations)
+            .ThenInclude(entity => entity.TourishCategory)
+            .Include(entity => entity.TotalReceipt)
+            .ThenInclude(entity => entity.FullReceiptList)
+            .FirstOrDefault();
+
+        if (entity == null)
+        {
+            return null;
+        }
+
+        entity.TourishScheduleList = entity.TourishScheduleList.Where(entity => entity.PlanStatus == PlanStatus.ConfirmInfo).ToList();
+
+        return new Response { resultCd = 0, Data = entity };
+    }
+
     public Response getByName(String TourName)
     {
         var entity = _context.TourishPlan.FirstOrDefault((entity => entity.TourName == TourName));
@@ -605,8 +584,6 @@ public class TourishPlanRepository : ITourishPlanRepository
             entity.StartingPoint = entityModel.StartingPoint;
             entity.EndPoint = entityModel.EndPoint;
 
-            entity.RemainTicket = entityModel.RemainTicket;
-            entity.TotalTicket = entityModel.TotalTicket;
             entity.SupportNumber = entityModel.SupportNumber;
 
             var tourishInterest = new TourishInterest();
@@ -648,31 +625,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                     .ExecuteDeleteAsync();
                 await _context.SaveChangesAsync();
                 entity.TourishCategoryRelations = entityModel.TourishCategoryRelations;
-            }
-
-            //if (entityModel.TourishScheduleList != null)
-            //{
-            //    await _context
-            //        .TourishScheduleList.Where(a => a.TourishPlanId == entityModel.Id)
-            //        .ExecuteDeleteAsync();
-            //    await _context.SaveChangesAsync();
-            //    var tourishDataScheduleList = new List<TourishSchedule>();
-            //    foreach (var item in entityModel.TourishScheduleList)
-            //    {
-            //        tourishDataScheduleList.Add(
-            //            new TourishSchedule
-            //            {
-            //                TourishPlanId = item.TourishPlanId,
-            //                PlanStatus = item.PlanStatus,
-            //                StartDate = item.StartDate,
-            //                EndDate = item.EndDate,
-            //                CreateDate = item.CreateDate ?? DateTime.UtcNow,
-            //                UpdateDate = DateTime.UtcNow,
-            //            }
-            //        );
-            //    }
-            //    entity.TourishScheduleList = tourishDataScheduleList;
-            //}
+            }          
 
             if (entityModel.TourishScheduleList != null)
             {
@@ -687,6 +640,8 @@ public class TourishPlanRepository : ITourishPlanRepository
                                 TourishPlanId = item.TourishPlanId,
                                 PlanStatus = item.PlanStatus,
                                 StartDate = item.StartDate,
+                                RemainTicket = item.RemainTicket,
+                                TotalTicket = item.TotalTicket, 
                                 EndDate = item.EndDate,
                                 CreateDate = item.CreateDate ?? DateTime.UtcNow,
                                 UpdateDate = DateTime.UtcNow,
@@ -696,6 +651,8 @@ public class TourishPlanRepository : ITourishPlanRepository
                                 TourishPlanId = item.TourishPlanId,
                                 PlanStatus = item.PlanStatus,
                                 StartDate = item.StartDate,
+                                RemainTicket = item.RemainTicket,
+                                TotalTicket = item.TotalTicket,
                                 EndDate = item.EndDate,
                                 CreateDate = item.CreateDate ?? DateTime.UtcNow,
                                 UpdateDate = DateTime.UtcNow,

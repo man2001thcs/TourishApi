@@ -9,8 +9,6 @@ namespace WebApplication1.Model
         public string? TourName { get; set; }
         public string StartingPoint { get; set; }
         public string EndPoint { get; set; }
-        public int TotalTicket { get; set; }
-        public int RemainTicket { get; set; }
         public string SupportNumber { get; set; }
         public string? Description { get; set; }
         public DateTime CreateDate { get; set; }
@@ -23,8 +21,6 @@ namespace WebApplication1.Model
         public string? TourName { get; set; }
         public string StartingPoint { get; set; }
         public string EndPoint { get; set; }
-        public int TotalTicket { get; set; }
-        public int RemainTicket { get; set; }
         public string SupportNumber { get; set; }
         public string? Description { get; set; }
         public List<TourishScheduleModel>? TourishScheduleList { get; set; }
@@ -43,8 +39,6 @@ namespace WebApplication1.Model
         public string? TourName { get; set; }
         public string StartingPoint { get; set; }
         public string EndPoint { get; set; }
-        public int TotalTicket { get; set; }
-        public int RemainTicket { get; set; }
         public string SupportNumber { get; set; }
         public string? Description { get; set; }
 

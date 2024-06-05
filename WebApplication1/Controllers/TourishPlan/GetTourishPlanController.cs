@@ -41,6 +41,12 @@ namespace WebApplication1.Controllers.TourishPlan
             return Ok(_entityService.GetById(id));
         }
 
+        [HttpGet("client/{id}")]
+        public IActionResult ClientGetById(Guid id)
+        {
+            return Ok(_entityService.clientGetById(id));
+        }
+
         [HttpGet("interest")]
         public IActionResult GetById(Guid tourishPlanId, Guid userId)
         {

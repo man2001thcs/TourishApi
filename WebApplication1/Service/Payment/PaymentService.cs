@@ -56,43 +56,98 @@ namespace TourishApi.Service.Payment
             insertReq.buyerName = existReceipt.GuestName;
             insertReq.buyerAddress = "";
             insertReq.items = null;
-            insertReq.description = "Roxanne tour hanh toán";
+            insertReq.description = "Roxanne tour thanh toán";
 
-            var response = await MakePaymentAsync(insertReq, payOsSettings.ClientId, payOsSettings.ApiKey, payOsSettings.ChecksumKey);
+            var response = await MakePaymentAsync(
+                insertReq,
+                payOsSettings.ClientId,
+                payOsSettings.ApiKey,
+                payOsSettings.ChecksumKey
+            );
 
-            _receiptService.thirdPartyPaymentFullReceiptStatusChange(response.data.paymentLinkId, response.data.orderCode.ToString(), response.data.status);
+            logger.LogInformation(JsonSerializer.Serialize(response));
+
+            if (response.data != null)
+                _receiptService.thirdPartyPaymentFullReceiptStatusChange(
+                    response.data.paymentLinkId,
+                    response.data.orderCode.ToString(),
+                    response.data.status
+                );
 
             return response;
         }
 
         public async Task<PaymentResponse> CancelTourPaymentAsync(string id, string reason)
         {
-
-            var response = await CancelPaymentAsync(id, reason, payOsSettings.ClientId, payOsSettings.ApiKey);
-            _receiptService.thirdPartyPaymentFullReceiptStatusChange(response.data.paymentLinkId, response.data.orderCode.ToString(), response.data.status);
+            var response = await CancelPaymentAsync(
+                id,
+                reason,
+                payOsSettings.ClientId,
+                payOsSettings.ApiKey
+            );
+            if (response.data != null)
+                _receiptService.thirdPartyPaymentFullReceiptStatusChange(
+                    response.data.paymentLinkId,
+                    response.data.orderCode.ToString(),
+                    response.data.status
+                );
 
             return response;
         }
 
         public async Task<PaymentGetResponse> GetTourPaymentRequest(string id)
         {
-            var response = await GetPaymentRequest(id, payOsSettings.ClientId, payOsSettings.ApiKey);
+            var response = await GetPaymentRequest(
+                id,
+                payOsSettings.ClientId,
+                payOsSettings.ApiKey
+            );
 
-            _receiptService.thirdPartyPaymentFullReceiptStatusChange(response.data.id, response.data.orderCode.ToString(), response.data.status);
+            logger.LogInformation(JsonSerializer.Serialize(response));
+
+            if (response.data != null)
+                _receiptService.thirdPartyPaymentFullReceiptStatusChange(
+                    response.data.id,
+                    response.data.orderCode.ToString(),
+                    response.data.status
+                );
             return response;
         }
 
         public async Task<PaymentResponse> CancelServicePaymentAsync(string id, string reason)
         {
-            var response = await CancelPaymentAsync(id, reason, payOsSettings.ServiceClientId, payOsSettings.ServiceApiKey);
-            _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(response.data.paymentLinkId, response.data.orderCode.ToString(), response.data.status);
+            var response = await CancelPaymentAsync(
+                id,
+                reason,
+                payOsSettings.ServiceClientId,
+                payOsSettings.ServiceApiKey
+            );
+            if (response.data != null)
+                logger.LogInformation(JsonSerializer.Serialize(response));
+            if (response.data != null)
+                _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(
+                    response.data.paymentLinkId,
+                    response.data.orderCode.ToString(),
+                    response.data.status
+                );
             return response;
         }
 
         public async Task<PaymentGetResponse> GetServicePaymentRequest(string id)
         {
-            var response = await GetPaymentRequest(id, payOsSettings.ServiceClientId, payOsSettings.ServiceApiKey);
-            _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(response.data.id, response.data.orderCode.ToString(), response.data.status);
+            var response = await GetPaymentRequest(
+                id,
+                payOsSettings.ServiceClientId,
+                payOsSettings.ServiceApiKey
+            );
+            if (response.data != null)
+                logger.LogInformation(JsonSerializer.Serialize(response));
+            if (response.data != null)
+                _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(
+                    response.data.id,
+                    response.data.orderCode.ToString(),
+                    response.data.status
+                );
             return response;
         }
 
@@ -120,14 +175,28 @@ namespace TourishApi.Service.Payment
             insertReq.items = null;
             insertReq.description = "Roxanne tour thanh toán";
 
-            var response = await MakePaymentAsync(insertReq, payOsSettings.ServiceClientId, payOsSettings.ServiceApiKey, payOsSettings.ServiceChecksumKey);
-
-            _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(response.data.paymentLinkId, response.data.orderCode.ToString(), response.data.status);
+            var response = await MakePaymentAsync(
+                insertReq,
+                payOsSettings.ServiceClientId,
+                payOsSettings.ServiceApiKey,
+                payOsSettings.ServiceChecksumKey
+            );
+            if (response.data != null)
+                _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(
+                    response.data.paymentLinkId,
+                    response.data.orderCode.ToString(),
+                    response.data.status
+                );
 
             return response;
         }
 
-        public async Task<PaymentResponse> MakePaymentAsync(PaymentRequest paymentRequest, string clientId, string apiKey, string checkSumKey)
+        public async Task<PaymentResponse> MakePaymentAsync(
+            PaymentRequest paymentRequest,
+            string clientId,
+            string apiKey,
+            string checkSumKey
+        )
         {
             if (paymentRequest == null)
             {
@@ -182,12 +251,15 @@ namespace TourishApi.Service.Payment
             return responseData;
         }
 
-        public async Task<PaymentResponse> CancelPaymentAsync(string id, string reason, string clientId, string apiKey)
+        public async Task<PaymentResponse> CancelPaymentAsync(
+            string id,
+            string reason,
+            string clientId,
+            string apiKey
+        )
         {
-
             var insertReq = new PaymentCancelRequest();
             insertReq.cancellationReason = reason;
-
 
             // Tạo request body từ paymentRequest
             var requestBody = new StringContent(
@@ -218,13 +290,19 @@ namespace TourishApi.Service.Payment
             return responseData;
         }
 
-        public async Task<PaymentGetResponse> GetPaymentRequest(string id, string clientId, string apiKey)
+        public async Task<PaymentGetResponse> GetPaymentRequest(
+            string id,
+            string clientId,
+            string apiKey
+        )
         {
             // Thêm header x-client-idx-api-key
             _httpClient.DefaultRequestHeaders.Add("x-client-id", clientId);
             _httpClient.DefaultRequestHeaders.Add("x-api-key", apiKey);
 
-            var response = await _httpClient.GetAsync($"https://api-merchant.payos.vn/v2/payment-requests/{id}");
+            var response = await _httpClient.GetAsync(
+                $"https://api-merchant.payos.vn/v2/payment-requests/{id}"
+            );
 
             var responseContent = await response.Content.ReadAsStringAsync();
 

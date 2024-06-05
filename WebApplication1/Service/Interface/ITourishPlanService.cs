@@ -18,6 +18,7 @@ namespace TourishApi.Service.Interface
             int pageSize
         );
         public Response GetById(Guid id);
+        public Response clientGetById(Guid id);
         public Task<Response> UpdateEntityById(string userId, TourishPlanUpdateModel entityModel);
         public Response DeleteById(Guid id);
     }

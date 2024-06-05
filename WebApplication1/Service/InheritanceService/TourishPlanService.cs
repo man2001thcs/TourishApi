@@ -186,6 +186,33 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
+        public Response clientGetById(Guid id)
+        {
+            try
+            {
+                var entity = _entityRepository.clientGetById(id);
+                if (entity.Data == null)
+                {
+                    var response = new Response { resultCd = 1, MessageCode = "C410", };
+                    return response;
+                }
+                else
+                {
+                    return entity;
+                }
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C414",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
         public async Task<Response> UpdateEntityById(
             string userId,
             TourishPlanUpdateModel entityModel

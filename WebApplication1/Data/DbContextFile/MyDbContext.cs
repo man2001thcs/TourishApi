@@ -305,9 +305,9 @@ namespace WebApplication1.Data.DbContextFile
 
 
                 entity.HasOne(e => e.TourishSchedule)
-               .WithOne(e => e.FullReceipt)
+               .WithMany(e => e.FullReceiptList)
                .IsRequired(false)
-               .HasForeignKey<FullReceipt>(e => e.TourishScheduleId)
+               .HasForeignKey(e => e.TourishScheduleId)
                .HasConstraintName("FK_FullReceipt_TourishSchedule");
 
 
@@ -360,9 +360,9 @@ namespace WebApplication1.Data.DbContextFile
                 entity.Property(e => e.CreatedDate).IsRequired().HasDefaultValueSql("getutcdate()");
 
                 entity.HasOne(e => e.ServiceSchedule)
-               .WithOne(e => e.FullScheduleReceipt)
+               .WithMany(e => e.FullScheduleReceiptList)
                .IsRequired(false)
-               .HasForeignKey<FullScheduleReceipt>(e => e.ServiceScheduleId)
+               .HasForeignKey(e => e.ServiceScheduleId)
                .HasConstraintName("FK_FullScheduleReceipt_ServiceSchedule");
 
             });

@@ -57,6 +57,12 @@ namespace WebApplication1.Controllers.Schedule
             return Ok(_entityService.GetById(id));
         }
 
+        [HttpGet("client/{id}")]
+        public IActionResult clientGetById(Guid id)
+        {
+            return Ok(_entityService.clientGetById(id));
+        }
+
         [HttpGet("interest")]
         public IActionResult GetById(Guid scheduleId, Guid userId)
         {

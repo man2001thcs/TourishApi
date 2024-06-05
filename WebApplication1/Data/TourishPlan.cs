@@ -22,8 +22,6 @@ namespace WebApplication1.Data
         public string StartingPoint { get; set; }
         public string EndPoint { get; set; }
         public string SupportNumber { get; set; }
-        public int TotalTicket { get; set; }
-        public int RemainTicket { get; set; }
 
         [Column(TypeName = "ntext")]
         public string? Description { get; set; }

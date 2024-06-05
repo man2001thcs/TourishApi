@@ -11,7 +11,7 @@
         public int? AveragePoint { get; set; }
 
         public Guid? returnId { get; set; }
-
+        public int? curId { get; set; }
         public string? type { get; set; }
 
         public int? count { get; set; }

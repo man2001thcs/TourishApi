@@ -15,7 +15,7 @@ namespace WebApplication1.Data
         public DateTime EndDate { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
-        public FullScheduleReceipt? FullScheduleReceipt { get; set; }
+        public ICollection<FullScheduleReceipt>? FullScheduleReceiptList { get; set; }
         public MovingSchedule? MovingSchedule { get; set; }
         public StayingSchedule? StayingSchedule { get; set; }
     }
