@@ -103,4 +103,33 @@
         public string? id { get; set; }
         public string? cancellationReason { get; set; }
     }
+
+    public class PaymentWebHookRequest
+    {
+        public string code { get; set; }
+        public string dDesc { get; set; }
+        public PaymentWebHookData data { get; set; }
+        public string signature { get; set; }
+    }
+
+    public class PaymentWebHookData
+    {
+        public int orderCode { get; set; }
+        public int amount { get; set; }
+        public string description { get; set; }
+        public string accountNumber { get; set; }
+        public string reference { get; set; }
+        public DateTime transactionDateTime { get; set; }
+        public string currency { get; set; }
+        public string paymentLinkId { get; set; }
+        public string code { get; set; }
+        public string desc { get; set; }
+        public string counterAccountBankId { get; set; }
+        public string counterAccountBankName { get; set; }
+        public string counterAccountName { get; set; }
+        public string counterAccountNumber { get; set; }
+        public string virtualAccountName { get; set; }
+        public string virtualAccountNumber { get; set; }
+    }
 }
+

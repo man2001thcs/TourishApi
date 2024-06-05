@@ -23,7 +23,11 @@ namespace WebApplication1.Controllers.Payment
 
         private readonly char[] delimiter = new char[] { ';' };
 
-        public CallPaymentController(PaymentService paymentService, ReceiptService receiptService, IOptionsMonitor<AppSetting> optionsMonitor)
+        public CallPaymentController(
+            PaymentService paymentService,
+            ReceiptService receiptService,
+            IOptionsMonitor<AppSetting> optionsMonitor
+        )
         {
             _paymentService = paymentService;
             _receiptService = receiptService;
@@ -51,13 +55,20 @@ namespace WebApplication1.Controllers.Payment
         [HttpPost("tour/request/cancel")]
         public async Task<IActionResult> CancelTourReq(PaymentCancelRequest request)
         {
-            return Ok(await _paymentService.CancelTourPaymentAsync(request.id, request.cancellationReason));
+            return Ok(
+                await _paymentService.CancelTourPaymentAsync(request.id, request.cancellationReason)
+            );
         }
 
         [HttpPost("service/request/cancel")]
         public async Task<IActionResult> CancelServiceReq(PaymentCancelRequest request)
         {
-            return Ok(await _paymentService.CancelServicePaymentAsync(request.id, request.cancellationReason));
+            return Ok(
+                await _paymentService.CancelServicePaymentAsync(
+                    request.id,
+                    request.cancellationReason
+                )
+            );
         }
 
         [HttpGet("tour/request")]
@@ -73,11 +84,7 @@ namespace WebApplication1.Controllers.Payment
         }
 
         [HttpGet("pay-os/update/tour")]
-        public async Task<IActionResult> UpdateReceipt(
-            string id,
-            string orderCode,
-            string status
-        )
+        public async Task<IActionResult> UpdateReceipt(string id, string orderCode, string status)
         {
             _receiptService.thirdPartyPaymentFullReceiptStatusChange(id, orderCode, status);
 
@@ -94,6 +101,19 @@ namespace WebApplication1.Controllers.Payment
             _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(id, orderCode, status);
 
             return Redirect(_appSettings.ClientUrl + "/user/receipt/list");
+        }
+
+        [HttpPost("pay-os/web-hook/tour")]
+        public async Task<IActionResult> WebHookTour(PaymentWebHookRequest paymentWebHookRequest)
+        {
+            if (paymentWebHookRequest.data.code.Equals("00"))
+                _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(
+                    paymentWebHookRequest.data.paymentLinkId,
+                    paymentWebHookRequest.data.orderCode.ToString(),
+                    "PAID"
+                );
+
+            return Ok(paymentWebHookRequest);
         }
     }
 }

@@ -3,6 +3,8 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using TourishApi.Service.InheritanceService;
 using WebApplication1.Data.Receipt;
 using WebApplication1.Model;
@@ -65,7 +67,7 @@ namespace TourishApi.Service.Payment
                 payOsSettings.ChecksumKey
             );
 
-            logger.LogInformation(JsonSerializer.Serialize(response));
+            logger.LogInformation(System.Text.Json.JsonSerializer.Serialize(response));
 
             if (response.data != null)
                 _receiptService.thirdPartyPaymentFullReceiptStatusChange(
@@ -103,7 +105,7 @@ namespace TourishApi.Service.Payment
                 payOsSettings.ApiKey
             );
 
-            logger.LogInformation(JsonSerializer.Serialize(response));
+            logger.LogInformation(System.Text.Json.JsonSerializer.Serialize(response));
 
             if (response.data != null)
                 _receiptService.thirdPartyPaymentFullReceiptStatusChange(
@@ -123,7 +125,7 @@ namespace TourishApi.Service.Payment
                 payOsSettings.ServiceApiKey
             );
             if (response.data != null)
-                logger.LogInformation(JsonSerializer.Serialize(response));
+                logger.LogInformation(System.Text.Json.JsonSerializer.Serialize(response));
             if (response.data != null)
                 _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(
                     response.data.paymentLinkId,
@@ -141,7 +143,7 @@ namespace TourishApi.Service.Payment
                 payOsSettings.ServiceApiKey
             );
             if (response.data != null)
-                logger.LogInformation(JsonSerializer.Serialize(response));
+                logger.LogInformation(System.Text.Json.JsonSerializer.Serialize(response));
             if (response.data != null)
                 _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(
                     response.data.id,
@@ -220,11 +222,11 @@ namespace TourishApi.Service.Payment
                 checkSumKey
             );
 
-            logger.LogInformation(JsonSerializer.Serialize(insertReq));
+            logger.LogInformation(System.Text.Json.JsonSerializer.Serialize(insertReq));
 
             // Tạo request body từ paymentRequest
             var requestBody = new StringContent(
-                JsonSerializer.Serialize(insertReq),
+                System.Text.Json.JsonSerializer.Serialize(insertReq),
                 Encoding.UTF8,
                 "application/json"
             );
@@ -246,7 +248,7 @@ namespace TourishApi.Service.Payment
             var responseContent = await response.Content.ReadAsStringAsync();
 
             // Deserialize responseContent to PaymentResponse object
-            var responseData = JsonSerializer.Deserialize<PaymentResponse>(responseContent);
+            var responseData = System.Text.Json.JsonSerializer.Deserialize<PaymentResponse>(responseContent);
 
             return responseData;
         }
@@ -263,7 +265,7 @@ namespace TourishApi.Service.Payment
 
             // Tạo request body từ paymentRequest
             var requestBody = new StringContent(
-                JsonSerializer.Serialize(insertReq),
+                System.Text.Json.JsonSerializer.Serialize(insertReq),
                 Encoding.UTF8,
                 "application/json"
             );
@@ -285,7 +287,7 @@ namespace TourishApi.Service.Payment
             var responseContent = await response.Content.ReadAsStringAsync();
 
             // Deserialize responseContent to PaymentResponse object
-            var responseData = JsonSerializer.Deserialize<PaymentResponse>(responseContent);
+            var responseData = System.Text.Json.JsonSerializer.Deserialize<PaymentResponse>(responseContent);
 
             return responseData;
         }
@@ -308,7 +310,7 @@ namespace TourishApi.Service.Payment
 
             logger.LogInformation(responseContent);
 
-            var responseData = JsonSerializer.Deserialize<PaymentGetResponse>(responseContent);
+            var responseData = System.Text.Json.JsonSerializer.Deserialize<PaymentGetResponse>(responseContent);
 
             return responseData;
         }
@@ -338,6 +340,45 @@ namespace TourishApi.Service.Payment
                 var hashString = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
 
                 return hashString;
+            }
+        }
+
+        public Dictionary<string, object> SortObjDataByKey(Dictionary<string, object> data)
+        {
+            return data.OrderBy(kv => kv.Key)
+                       .ToDictionary(kv => kv.Key, kv => kv.Value);
+        }
+
+        public string ConvertObjToQueryStr(Dictionary<string, object> data)
+        {
+            var sortedData = SortObjDataByKey(data);
+            var queryString = string.Join("&", sortedData.Select(kv =>
+            {
+                var value = kv.Value ?? string.Empty;
+                if (value is JArray jArray)
+                {
+                    value = JsonConvert.SerializeObject(jArray.OrderBy(x => x.ToString()));
+                }
+                return $"{kv.Key}={value}";
+            }));
+            return queryString;
+        }
+
+        public bool IsValidData(PaymentWebHookData data, string currentSignature, string checksumKey)
+        {
+            var dataDict = JObject.FromObject(data).ToObject<Dictionary<string, object>>();
+            var sortedDataByKey = SortObjDataByKey(dataDict);
+            var dataQueryStr = ConvertObjToQueryStr(sortedDataByKey);
+            var dataToSignature = ComputeHmacSha256(dataQueryStr, checksumKey);
+            return dataToSignature == currentSignature;
+        }
+
+        public string ComputeHmacSha256(string data, string key)
+        {
+            using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(key)))
+            {
+                var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
+                return BitConverter.ToString(hash).Replace("-", "").ToLower();
             }
         }
     }
