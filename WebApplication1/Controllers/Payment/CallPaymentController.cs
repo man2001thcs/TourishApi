@@ -83,10 +83,50 @@ namespace WebApplication1.Controllers.Payment
             return Ok(await _paymentService.GetServicePaymentRequest(id));
         }
 
+
+        [Authorize]
+        [HttpGet("tour/check-request")]
+        public async Task<IActionResult> RedirectTourReq(string id)
+        {
+            var paymentId = await _paymentService.CheckTourRequest(id);
+
+            if (paymentId.Length > 0)
+                return Ok(new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "I510"
+                });
+            else return Ok(new Response
+            {
+                resultCd = 0,
+                MessageCode = "I515-m"
+            });
+
+        }
+
+        [Authorize]
+        [HttpGet("service/check-request")]
+        public async Task<IActionResult> RedirectServiceReq(string id)
+        {
+            var paymentId = await _paymentService.CheckServiceRequest(id);
+            if (paymentId.Length > 0)
+                return Ok(new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "I510"
+                });
+            else return Ok(new Response
+            {
+                resultCd = 0,
+                MessageCode = "I515-m"
+            });
+
+        }
+
         [HttpGet("pay-os/update/tour")]
         public async Task<IActionResult> UpdateReceipt(string id, string orderCode, string status)
         {
-            _receiptService.thirdPartyPaymentFullReceiptStatusChange(id, orderCode, status);
+            await _receiptService.thirdPartyPaymentFullReceiptStatusChange(id, orderCode, status);
 
             return Redirect(_appSettings.ClientUrl + "/user/receipt/list");
         }
@@ -98,7 +138,7 @@ namespace WebApplication1.Controllers.Payment
             string status
         )
         {
-            _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(id, orderCode, status);
+            await _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(id, orderCode, status);
 
             return Redirect(_appSettings.ClientUrl + "/user/receipt/list");
         }
@@ -108,12 +148,12 @@ namespace WebApplication1.Controllers.Payment
         {
             var isSignatureTrue = _paymentService.isTourWebHookReqValid(paymentWebHookRequest.data, paymentWebHookRequest.signature);
 
-            if (isSignatureTrue && paymentWebHookRequest.data.code.Equals("00"))
-                _receiptService.thirdPartyPaymentFullReceiptStatusChange(
-                    paymentWebHookRequest.data.paymentLinkId,
-                    paymentWebHookRequest.data.orderCode.ToString(),
-                    "PAID"
-                );
+            // if (isSignatureTrue && paymentWebHookRequest.data.code.Equals("00"))
+            //     await _receiptService.thirdPartyPaymentFullReceiptStatusChange(
+            //         paymentWebHookRequest.data.paymentLinkId,
+            //         paymentWebHookRequest.data.orderCode.ToString(),
+            //         "PAID"
+            //     );
 
             return Ok(paymentWebHookRequest);
         }
@@ -123,12 +163,12 @@ namespace WebApplication1.Controllers.Payment
         {
             var isSignatureTrue = _paymentService.isServiceWebHookReqValid(paymentWebHookRequest.data, paymentWebHookRequest.signature);
 
-            if (isSignatureTrue && paymentWebHookRequest.data.code.Equals("00"))
-                _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(
-                    paymentWebHookRequest.data.paymentLinkId,
-                    paymentWebHookRequest.data.orderCode.ToString(),
-                    "PAID"
-                );
+            // if (isSignatureTrue && paymentWebHookRequest.data.code.Equals("00"))
+            //     await _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(
+            //         paymentWebHookRequest.data.paymentLinkId,
+            //         paymentWebHookRequest.data.orderCode.ToString(),
+            //         "PAID"
+            //     );
 
             return Ok(paymentWebHookRequest);
         }

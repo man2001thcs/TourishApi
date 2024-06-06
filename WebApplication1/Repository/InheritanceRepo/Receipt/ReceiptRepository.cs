@@ -9,6 +9,7 @@ using WebApplication1.Model;
 using WebApplication1.Model.Payment;
 using WebApplication1.Model.Receipt;
 using WebApplication1.Model.VirtualModel;
+using WebApplication1.Service;
 
 namespace WebApplication1.Repository.InheritanceRepo.Receipt;
 
@@ -1921,7 +1922,7 @@ public class ReceiptRepository
         return new Response { resultCd = 0, Data = receiptGrossByMonth };
     }
 
-    public Response thirdPartyPaymentFullReceiptStatusChange(
+    public async Task<Response> thirdPartyPaymentFullReceiptStatusChange(
         string paymentId,
         string orderId,
         string status
@@ -1933,8 +1934,13 @@ public class ReceiptRepository
 
         if (existFullReceipt != null)
         {
-            existFullReceipt.PaymentId = paymentId;
-            
+            if (status.Equals("PENDING"))
+            {
+                existFullReceipt.Status = FullReceiptStatus.AwaitPayment;
+                existFullReceipt.PaymentId = paymentId;
+                await _context.SaveChangesAsync();
+            }
+
             if (status.Equals("PAID"))
             {
                 existFullReceipt.CompleteDate = DateTime.UtcNow;
@@ -1945,10 +1951,11 @@ public class ReceiptRepository
 
                 if (existSchedule != null)
                 {
-                    if (existSchedule.RemainTicket >= existFullReceipt.TotalTicket && (int)existFullReceipt.Status <= 1)
+                    if (existSchedule.RemainTicket >= (existFullReceipt.TotalTicket + existFullReceipt.TotalChildTicket)
+                        && (int)existFullReceipt.Status <= 1)
                     {
                         existSchedule.RemainTicket =
-                            existSchedule.RemainTicket - existFullReceipt.TotalTicket;
+                            existSchedule.RemainTicket - (existFullReceipt.TotalTicket + existFullReceipt.TotalChildTicket);
                     }
                     else
                     {
@@ -1957,16 +1964,18 @@ public class ReceiptRepository
                 }
 
                 existFullReceipt.Status = FullReceiptStatus.Completed;
-                _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             }
 
             if (status.Equals("CANCELLED"))
             {
                 existFullReceipt.CompleteDate = DateTime.UtcNow;
                 existFullReceipt.Status = FullReceiptStatus.Cancelled;
+
+                await _context.SaveChangesAsync();
             }
 
-            _context.SaveChanges();
+
 
             return new Response { resultCd = 0, MessageCode = "I514" };
         }
@@ -1974,7 +1983,7 @@ public class ReceiptRepository
         return new Response { resultCd = 1, MessageCode = "C521" };
     }
 
-    public Response thirdPartyPaymentFullServiceReceiptStatusChange(
+    public async Task<Response> thirdPartyPaymentFullServiceReceiptStatusChange(
         string paymentId,
         string orderId,
         string status
@@ -1986,25 +1995,31 @@ public class ReceiptRepository
 
         if (existFullReceipt != null)
         {
-            existFullReceipt.PaymentId = paymentId;
+            if (status.Equals("PENDING"))
+            {
+                existFullReceipt.PaymentId = paymentId;
+                existFullReceipt.Status = FullReceiptStatus.AwaitPayment;
+                await _context.SaveChangesAsync();
+            }
 
             if (status.Equals("PAID"))
             {
                 existFullReceipt.Status = FullReceiptStatus.Completed;
                 existFullReceipt.CompleteDate = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
             }
 
             if (status.Equals("CANCELLED"))
             {
                 existFullReceipt.Status = FullReceiptStatus.Cancelled;
                 existFullReceipt.CompleteDate = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
             }
-
-            _context.SaveChanges();
 
             return new Response { resultCd = 0, MessageCode = "I514" };
         }
 
         return new Response { resultCd = 1, MessageCode = "C521" };
     }
+    
 }

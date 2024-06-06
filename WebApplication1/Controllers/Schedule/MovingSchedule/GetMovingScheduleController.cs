@@ -23,6 +23,8 @@ namespace WebApplication1.Controllers.Schedule
         public IActionResult GetAll(
             string? search,
             int? type,
+             double? priceFrom,
+            double? priceTo,
             string? sortBy,
             string? sortDirection,
             int page = 1,
@@ -30,7 +32,7 @@ namespace WebApplication1.Controllers.Schedule
         )
         {
             return Ok(
-                _entityService.GetAll(search, type, sortBy, sortDirection, "", page, pageSize)
+                _entityService.GetAll(search, type, priceFrom, priceTo, sortBy, sortDirection, "", page, pageSize)
             );
         }
 
@@ -39,6 +41,8 @@ namespace WebApplication1.Controllers.Schedule
         public IActionResult GetAllWithAuthority(
             string? search,
             int? type,
+             double? priceFrom,
+            double? priceTo,
             string? sortBy,
             string? sortDirection,
             int page = 1,
@@ -47,7 +51,7 @@ namespace WebApplication1.Controllers.Schedule
         {
             string userId = User.FindFirstValue("Id");
             return Ok(
-                _entityService.GetAll(search, type, sortBy, sortDirection, userId, page, pageSize)
+                _entityService.GetAll(search, type, priceFrom, priceTo, sortBy, sortDirection, userId, page, pageSize)
             );
         }
 

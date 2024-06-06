@@ -10,6 +10,10 @@ using WebApplication1.Data.Receipt;
 using WebApplication1.Model;
 using WebApplication1.Model.Payment;
 using WebApplication1.Service.InheritanceService;
+using Azure.Storage.Queues.Models;
+using MailKit;
+using WebApplication1.Service;
+using WebApplication1.Model.VirtualModel;
 
 namespace TourishApi.Service.Payment
 {
@@ -70,7 +74,7 @@ namespace TourishApi.Service.Payment
             logger.LogInformation(System.Text.Json.JsonSerializer.Serialize(response));
 
             if (response.data != null)
-                _receiptService.thirdPartyPaymentFullReceiptStatusChange(
+                await _receiptService.thirdPartyPaymentFullReceiptStatusChange(
                     response.data.paymentLinkId,
                     response.data.orderCode.ToString(),
                     response.data.status
@@ -87,8 +91,9 @@ namespace TourishApi.Service.Payment
                 payOsSettings.ClientId,
                 payOsSettings.ApiKey
             );
+
             if (response.data != null)
-                _receiptService.thirdPartyPaymentFullReceiptStatusChange(
+                await _receiptService.thirdPartyPaymentFullReceiptStatusChange(
                     response.data.paymentLinkId,
                     response.data.orderCode.ToString(),
                     response.data.status
@@ -108,12 +113,44 @@ namespace TourishApi.Service.Payment
             logger.LogInformation(System.Text.Json.JsonSerializer.Serialize(response));
 
             if (response.data != null)
-                _receiptService.thirdPartyPaymentFullReceiptStatusChange(
+                await _receiptService.thirdPartyPaymentFullReceiptStatusChange(
                     response.data.id,
                     response.data.orderCode.ToString(),
                     response.data.status
                 );
             return response;
+        }
+
+        public async Task<String> CheckTourRequest(string orderId)
+        {
+            FullReceipt existReceipt = (FullReceipt)
+                _receiptService.GetFullTourReceiptById(int.Parse(orderId)).Data;
+
+            if (existReceipt != null)
+            {
+                if (existReceipt.TourishSchedule.RemainTicket < (existReceipt.TotalTicket + existReceipt.TotalChildTicket))
+                {
+                    await CancelTourPaymentAsync(orderId, "Không đủ vé để thực hiện giao dịch");
+
+                    return "";
+                }
+                else return existReceipt.PaymentId ?? "";
+            }
+            return "";
+
+        }
+
+        public async Task<String> CheckServiceRequest(string orderId)
+        {
+            FullScheduleReceipt existReceipt = (FullScheduleReceipt)
+                _receiptService.GetFullScheduleReceiptById(int.Parse(orderId)).Data;
+
+            if (existReceipt != null)
+            {
+                return existReceipt.PaymentId ?? "";
+            }
+            return "";
+
         }
 
         public async Task<PaymentResponse> CancelServicePaymentAsync(string id, string reason)
@@ -145,7 +182,7 @@ namespace TourishApi.Service.Payment
             if (response.data != null)
                 logger.LogInformation(System.Text.Json.JsonSerializer.Serialize(response));
             if (response.data != null)
-                _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(
+                await _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(
                     response.data.id,
                     response.data.orderCode.ToString(),
                     response.data.status
@@ -184,7 +221,7 @@ namespace TourishApi.Service.Payment
                 payOsSettings.ServiceChecksumKey
             );
             if (response.data != null)
-                _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(
+                await _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(
                     response.data.paymentLinkId,
                     response.data.orderCode.ToString(),
                     response.data.status
@@ -206,7 +243,7 @@ namespace TourishApi.Service.Payment
             }
             PaymentRequest insertReq = paymentRequest;
 
-            insertReq.expiredAt = DateTimeOffset.UtcNow.AddDays(1).ToUnixTimeSeconds();
+            insertReq.expiredAt = DateTimeOffset.UtcNow.AddDays(7).ToUnixTimeSeconds();
 
             if (insertReq.returnUrl == null)
                 insertReq.returnUrl = "https://roxanne-tour.pro/";
@@ -315,11 +352,13 @@ namespace TourishApi.Service.Payment
             return responseData;
         }
 
-        public bool isTourWebHookReqValid(PaymentWebHookData data, string signature){
+        public bool isTourWebHookReqValid(PaymentWebHookData data, string signature)
+        {
             return IsValidData(data, signature, payOsSettings.ChecksumKey);
         }
 
-        public bool isServiceWebHookReqValid(PaymentWebHookData data, string signature){
+        public bool isServiceWebHookReqValid(PaymentWebHookData data, string signature)
+        {
             return IsValidData(data, signature, payOsSettings.ServiceChecksumKey);
         }
 

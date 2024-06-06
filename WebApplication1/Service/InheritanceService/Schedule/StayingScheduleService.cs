@@ -82,13 +82,14 @@ namespace TourishApi.Service.InheritanceService.Schedule
             }
         }
 
-        public Response GetAll(string? search, int? type, string? sortBy, string? sortDirection, string? userId, int page = 1, int pageSize = 5)
+        public Response GetAll(string? search, int? type, double? priceFrom,
+            double? priceTo, string? sortBy, string? sortDirection, string? userId, int page = 1, int pageSize = 5)
         {
             try
             {
                 if (String.IsNullOrEmpty(userId))
                 {
-                    var entityList = _entityRepository.GetAllStayingSchedule(search, type, sortBy, sortDirection, page, pageSize);
+                    var entityList = _entityRepository.GetAllStayingSchedule(search, type, priceFrom, priceTo, sortBy, sortDirection, page, pageSize);
                     return entityList;
                 }
                 else

@@ -323,6 +323,8 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response GetAllMovingSchedule(
             string? search,
             int? type,
+            double? priceFrom,
+            double? priceTo,
             string? sortBy,
             string? sortDirection,
             int page = 1,
@@ -340,6 +342,24 @@ namespace WebApplication1.Repository.InheritanceRepo
             if (!string.IsNullOrEmpty(search))
             {
                 entityQuery = entityQuery.Where(entity => entity.BranchName.Contains(search));
+            }
+
+            if (priceFrom != null)
+            {
+                entityQuery = entityQuery.Where(entity =>
+                    (
+                        entity.SinglePrice
+                    ) >= priceFrom
+                );
+
+                if (priceTo != null)
+                {
+                    entityQuery = entityQuery.Where(entity =>
+                        (
+                            entity.SinglePrice
+                        ) <= priceTo
+                    );
+                }
             }
             #endregion
 
@@ -370,6 +390,8 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response GetAllStayingSchedule(
             string? search,
             int? type,
+             double? priceFrom,
+            double? priceTo,
             string? sortBy,
             string? sortDirection,
             int page = 1,
@@ -386,6 +408,24 @@ namespace WebApplication1.Repository.InheritanceRepo
             if (!string.IsNullOrEmpty(search))
             {
                 entityQuery = entityQuery.Where(entity => entity.PlaceName.Contains(search));
+            }
+
+            if (priceFrom != null)
+            {
+                entityQuery = entityQuery.Where(entity =>
+                    (
+                        entity.SinglePrice
+                    ) >= priceFrom
+                );
+
+                if (priceTo != null)
+                {
+                    entityQuery = entityQuery.Where(entity =>
+                        (
+                            entity.SinglePrice
+                        ) <= priceTo
+                    );
+                }
             }
             #endregion
 
