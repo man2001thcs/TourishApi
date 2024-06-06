@@ -115,9 +115,9 @@ public class TourishPlanRepository : ITourishPlanRepository
         if (entityModel.TourishScheduleList != null)
         {
             var tourishDataScheduleList = new List<TourishSchedule>();
-            
+
             tourishPlan.TourishScheduleList = tourishDataScheduleList;
-        }        
+        }
 
         tourishPlan.InstructionList = initiateInstructionList();
 
@@ -555,7 +555,9 @@ public class TourishPlanRepository : ITourishPlanRepository
             return null;
         }
 
-        entity.TourishScheduleList = entity.TourishScheduleList.Where(entity => entity.PlanStatus == PlanStatus.ConfirmInfo).ToList();
+        entity.TourishScheduleList = entity
+            .TourishScheduleList.Where(entity => entity.PlanStatus == PlanStatus.ConfirmInfo)
+            .ToList();
 
         return new Response { resultCd = 0, Data = entity };
     }
@@ -625,7 +627,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                     .ExecuteDeleteAsync();
                 await _context.SaveChangesAsync();
                 entity.TourishCategoryRelations = entityModel.TourishCategoryRelations;
-            }          
+            }
 
             if (entityModel.TourishScheduleList != null)
             {
@@ -641,7 +643,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                                 PlanStatus = item.PlanStatus,
                                 StartDate = item.StartDate,
                                 RemainTicket = item.RemainTicket,
-                                TotalTicket = item.TotalTicket, 
+                                TotalTicket = item.TotalTicket,
                                 EndDate = item.EndDate,
                                 CreateDate = item.CreateDate ?? DateTime.UtcNow,
                                 UpdateDate = DateTime.UtcNow,
@@ -746,7 +748,8 @@ public class TourishPlanRepository : ITourishPlanRepository
     {
         var entity = await _context
             .TourishPlan.Where(entity => entity.Id == id)
-            .Include(tour => tour.TourishInterestList).ThenInclude(entity => entity.User)
+            .Include(tour => tour.TourishInterestList)
+            .ThenInclude(entity => entity.User)
             .FirstOrDefaultAsync();
         if (entity == null)
         {
@@ -809,7 +812,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                     {
                         await blobService.UploadStringBlobAsync(
                             "eatschedule-content-container",
-                            "Không có thông tin",
+                            (String)schedule.description ?? "Không có thông tin",
                             "text/plain",
                             eatSchedule.Id.ToString() ?? "" + ".txt"
                         );
@@ -876,7 +879,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                     {
                         await blobService.UploadStringBlobAsync(
                             "movingschedule-content-container",
-                            "Không có thông tin",
+                            (String)schedule.description ?? "Không có thông tin",
                             "text/plain",
                             movingSchedule.Id.ToString() ?? "" + ".txt"
                         );
@@ -941,7 +944,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                     {
                         await blobService.UploadStringBlobAsync(
                             "stayingschedule-content-container",
-                            "Không có thông tin",
+                            (String)schedule.description ?? "Không có thông tin",
                             "text/plain",
                             stayingSchedule.Id.ToString() ?? "" + ".txt"
                         );
@@ -1073,11 +1076,18 @@ public class TourishPlanRepository : ITourishPlanRepository
 
     public Boolean checkArrangeScheduleFromUser(String email, Guid tourishPlanId)
     {
-        var count = _context.FullReceiptList.Include(entity => entity.TourishSchedule).Include(entity => entity.TotalReceipt).Where(entity => entity.Email == email
-        && entity.TotalReceipt.TourishPlanId == tourishPlanId
-        && entity.TourishSchedule.EndDate >= DateTime.UtcNow).Count();
+        var count = _context
+            .FullReceiptList.Include(entity => entity.TourishSchedule)
+            .Include(entity => entity.TotalReceipt)
+            .Where(entity =>
+                entity.Email == email
+                && entity.TotalReceipt.TourishPlanId == tourishPlanId
+                && entity.TourishSchedule.EndDate >= DateTime.UtcNow
+            )
+            .Count();
 
-        if (count >= 1) return true;
+        if (count >= 1)
+            return true;
 
         return false;
     }
