@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using TourishApi.Service.InheritanceService;
 using TourishApi.Service.Payment;
+using WebApplication1.Data.Receipt;
 using WebApplication1.Model;
 using WebApplication1.Model.Payment;
 using WebApplication1.Model.VirtualModel;
@@ -83,7 +84,6 @@ namespace WebApplication1.Controllers.Payment
             return Ok(await _paymentService.GetServicePaymentRequest(id));
         }
 
-
         [Authorize]
         [HttpGet("tour/check-request")]
         public async Task<IActionResult> RedirectTourReq(string id)
@@ -91,17 +91,9 @@ namespace WebApplication1.Controllers.Payment
             var paymentId = await _paymentService.CheckTourRequest(id);
 
             if (paymentId.Length > 0)
-                return Ok(new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "I510"
-                });
-            else return Ok(new Response
-            {
-                resultCd = 0,
-                MessageCode = "I515-m"
-            });
-
+                return Ok(new Response { resultCd = 0, MessageCode = "I510" });
+            else
+                return Ok(new Response { resultCd = 0, MessageCode = "I515-m" });
         }
 
         [Authorize]
@@ -110,17 +102,9 @@ namespace WebApplication1.Controllers.Payment
         {
             var paymentId = await _paymentService.CheckServiceRequest(id);
             if (paymentId.Length > 0)
-                return Ok(new Response
-                {
-                    resultCd = 0,
-                    MessageCode = "I510"
-                });
-            else return Ok(new Response
-            {
-                resultCd = 0,
-                MessageCode = "I515-m"
-            });
-
+                return Ok(new Response { resultCd = 0, MessageCode = "I510" });
+            else
+                return Ok(new Response { resultCd = 0, MessageCode = "I515-m" });
         }
 
         [HttpGet("pay-os/update/tour")]
@@ -138,15 +122,35 @@ namespace WebApplication1.Controllers.Payment
             string status
         )
         {
-            await _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(id, orderCode, status);
+            await _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(
+                id,
+                orderCode,
+                status
+            );
 
-            return Redirect(_appSettings.ClientUrl + "/user/receipt/list");
+            var receipt = (FullScheduleReceipt)
+                _receiptService.GetFullScheduleReceiptById(int.Parse(orderCode)).Data;
+
+            //if (receipt == null)
+            //{
+            //    if (receipt.ServiceSchedule.MovingScheduleId != null)
+            //        return Redirect(_appSettings.ClientUrl + "/user/moving/receipt/list");
+            //    else
+            //        return Redirect(_appSettings.ClientUrl + "/user/staying/receipt/list");
+            //}
+
+            //return Redirect(_appSettings.ClientUrl + "/user/moving/receipt/list");
+
+            return Ok();
         }
 
         [HttpPost("pay-os/web-hook/tour")]
         public async Task<IActionResult> WebHookTour(PaymentWebHookRequest paymentWebHookRequest)
         {
-            var isSignatureTrue = _paymentService.isTourWebHookReqValid(paymentWebHookRequest.data, paymentWebHookRequest.signature);
+            var isSignatureTrue = _paymentService.isTourWebHookReqValid(
+                paymentWebHookRequest.data,
+                paymentWebHookRequest.signature
+            );
 
             // if (isSignatureTrue && paymentWebHookRequest.data.code.Equals("00"))
             //     await _receiptService.thirdPartyPaymentFullReceiptStatusChange(
@@ -161,7 +165,10 @@ namespace WebApplication1.Controllers.Payment
         [HttpPost("pay-os/web-hook/service")]
         public async Task<IActionResult> WebHookService(PaymentWebHookRequest paymentWebHookRequest)
         {
-            var isSignatureTrue = _paymentService.isServiceWebHookReqValid(paymentWebHookRequest.data, paymentWebHookRequest.signature);
+            var isSignatureTrue = _paymentService.isServiceWebHookReqValid(
+                paymentWebHookRequest.data,
+                paymentWebHookRequest.signature
+            );
 
             // if (isSignatureTrue && paymentWebHookRequest.data.code.Equals("00"))
             //     await _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(

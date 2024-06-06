@@ -7,6 +7,8 @@ namespace WebApplication1.Model
         public Guid? Id { get; set; }
         public Guid? MovingScheduleId { get; set; }
         public Guid? StayingScheduleId { get; set; }
+        public int TotalTicket { get; set; }
+        public int RemainTicket { get; set; }
         public ScheduleStatus Status { get; set; }
         public DateTime StartDate { get; set; }
 

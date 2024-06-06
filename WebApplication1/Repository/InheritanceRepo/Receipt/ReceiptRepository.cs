@@ -1,6 +1,7 @@
 ﻿using Google.Api.Gax;
 using Microsoft.EntityFrameworkCore;
 using TourishApi.Extension;
+using TourishApi.Service.Payment;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Receipt;
@@ -16,12 +17,14 @@ namespace WebApplication1.Repository.InheritanceRepo.Receipt;
 public class ReceiptRepository
 {
     private readonly MyDbContext _context;
+    private readonly ILogger<ReceiptRepository> logger;
     public static int PAGE_SIZE { get; set; } = 5;
     private readonly char[] delimiter = new char[] { ';' };
 
-    public ReceiptRepository(MyDbContext _context)
+    public ReceiptRepository(MyDbContext _context, ILogger<ReceiptRepository> _logger)
     {
         this._context = _context;
+        this.logger = _logger;
     }
 
     public async Task<Response> AddTourReceipt(FullReceiptInsertModel receiptModel)
@@ -108,7 +111,10 @@ public class ReceiptRepository
                     UpdateDate = DateTime.UtcNow
                 };
 
-                if (existSchedule.RemainTicket >= receiptModel.TotalTicket)
+                if (
+                    existSchedule.RemainTicket
+                    >= receiptModel.TotalTicket + receiptModel.TotalChildTicket
+                )
                 {
                     await _context.FullReceiptList.AddAsync(fullReceipt);
                     await _context.SaveChangesAsync();
@@ -122,23 +128,7 @@ public class ReceiptRepository
             }
             else
             {
-                existFullReceipt.GuestName = receiptModel.GuestName;
-                existFullReceipt.PhoneNumber = receiptModel.PhoneNumber;
-                existFullReceipt.TotalTicket = receiptModel.TotalTicket;
-                existFullReceipt.TotalChildTicket = receiptModel.TotalChildTicket;
-                existFullReceipt.OriginalPrice = originalPrice;
-                existFullReceipt.UpdateDate = DateTime.UtcNow;
-
-                if (existSchedule.RemainTicket >= receiptModel.TotalTicket)
-                {
-                    await _context.SaveChangesAsync();
-
-                    return new Response { resultCd = 0, MessageCode = "I512", };
-                }
-                else
-                {
-                    return new Response { resultCd = 1, MessageCode = "C515", };
-                }
+                return new Response { resultCd = 1, MessageCode = "C522" };
             }
         }
         else
@@ -152,6 +142,10 @@ public class ReceiptRepository
         var totalReceipt = _context.TotalScheduleReceiptList.FirstOrDefault(entity =>
             entity.MovingScheduleId == receiptModel.MovingScheduleId
             && entity.StayingScheduleId == receiptModel.StayingScheduleId
+        );
+
+        var existSchedule = _context.ServiceSchedule.FirstOrDefault(entity =>
+            entity.Id == receiptModel.ServiceScheduleId
         );
 
         if (totalReceipt == null)
@@ -216,23 +210,24 @@ public class ReceiptRepository
                 UpdateDate = DateTime.UtcNow
             };
 
-            await _context.AddAsync(fullReceipt);
-            await _context.SaveChangesAsync();
+            if (
+                existSchedule.RemainTicket
+                >= receiptModel.TotalTicket + receiptModel.TotalChildTicket
+            )
+            {
+                await _context.FullScheduleReceiptList.AddAsync(fullReceipt);
+                await _context.SaveChangesAsync();
 
-            return new Response { resultCd = 0, MessageCode = "I512", };
+                return new Response { resultCd = 0, MessageCode = "I511", };
+            }
+            else
+            {
+                return new Response { resultCd = 1, MessageCode = "C515", };
+            }
         }
         else
         {
-            existFullReceipt.GuestName = receiptModel.GuestName;
-            existFullReceipt.PhoneNumber = receiptModel.PhoneNumber;
-            existFullReceipt.TotalTicket = receiptModel.TotalTicket;
-            existFullReceipt.TotalChildTicket = receiptModel.TotalChildTicket;
-            existFullReceipt.OriginalPrice = originalPrice;
-            existFullReceipt.UpdateDate = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            return new Response { resultCd = 0, MessageCode = "I511", };
+            return new Response { resultCd = 1, MessageCode = "C522" };
         }
     }
 
@@ -362,8 +357,10 @@ public class ReceiptRepository
                 UpdateDate = DateTime.UtcNow
             };
 
-
-            if (existSchedule.RemainTicket >= receiptModel.TotalTicket)
+            if (
+                existSchedule.RemainTicket
+                >= receiptModel.TotalTicket + receiptModel.TotalChildTicket
+            )
             {
                 await _context.FullReceiptList.AddAsync(fullReceipt);
                 await _context.SaveChangesAsync();
@@ -399,6 +396,10 @@ public class ReceiptRepository
         var totalReceipt = _context.TotalScheduleReceiptList.FirstOrDefault(entity =>
             entity.MovingScheduleId == receiptModel.MovingScheduleId
             && entity.StayingScheduleId == receiptModel.StayingScheduleId
+        );
+
+        var existSchedule = _context.ServiceSchedule.FirstOrDefault(entity =>
+            entity.Id == receiptModel.ServiceScheduleId
         );
 
         if (totalReceipt == null)
@@ -530,16 +531,25 @@ public class ReceiptRepository
                 UpdateDate = DateTime.UtcNow
             };
 
-            await _context.AddAsync(fullReceipt);
-            await _context.SaveChangesAsync();
-
-            return new Response
+            if (
+                existSchedule.RemainTicket
+                >= receiptModel.TotalTicket + receiptModel.TotalChildTicket
+            )
             {
-                resultCd = 0,
-                MessageCode = "I511",
-                curId = fullReceipt.FullReceiptId,
-                // Create type success
-            };
+                await _context.FullScheduleReceiptList.AddAsync(fullReceipt);
+                await _context.SaveChangesAsync();
+
+                return new Response
+                {
+                    resultCd = 0,
+                    MessageCode = "I511",
+                    curId = fullReceipt.FullReceiptId,
+                };
+            }
+            else
+            {
+                return new Response { resultCd = 1, MessageCode = "C515", };
+            }
         }
         else
         {
@@ -589,12 +599,11 @@ public class ReceiptRepository
                 entity.Id == receipt.TourishScheduleId
             );
 
-            var plan = _context.TourishPlan.FirstOrDefault(
-                (plan => plan.Id == receipt.TotalReceipt.TourishPlanId)
-            );
-            if (plan != null)
+            if (existSchedule != null)
             {
-                existSchedule.RemainTicket = existSchedule.RemainTicket + receipt.TotalTicket;
+                if (receipt.Status == FullReceiptStatus.Completed)
+                    existSchedule.RemainTicket =
+                    existSchedule.RemainTicket + receipt.TotalTicket + receipt.TotalChildTicket;
             }
             _context.Remove(receipt);
             _context.SaveChanges();
@@ -615,6 +624,17 @@ public class ReceiptRepository
             .FirstOrDefault((receipt => receipt.FullReceiptId == id));
         if (receipt != null)
         {
+            var existSchedule = _context.ServiceSchedule.FirstOrDefault(entity =>
+                entity.Id == receipt.ServiceScheduleId
+            );
+
+            if (existSchedule != null)
+            {
+                if (receipt.Status == FullReceiptStatus.Completed)
+                    existSchedule.RemainTicket =
+                        existSchedule.RemainTicket + receipt.TotalTicket + receipt.TotalChildTicket;
+            }
+
             _context.Remove(receipt);
             _context.SaveChanges();
         }
@@ -1103,7 +1123,7 @@ public class ReceiptRepository
                 entity.Id == receipt.TourishScheduleId
             );
 
-            var oldTotalTicket = receipt.TotalTicket;
+            var oldTotalTicket = receipt.TotalTicket + receipt.TotalChildTicket;
 
             receipt.GuestName = receiptModel.GuestName;
             receipt.Status = receiptModel.Status;
@@ -1141,7 +1161,10 @@ public class ReceiptRepository
                 {
                     if (existSchedule.RemainTicket >= receiptModel.TotalTicket)
                     {
-                        existSchedule.RemainTicket = existSchedule.RemainTicket - receiptModel.TotalTicket;
+                        existSchedule.RemainTicket =
+                            existSchedule.RemainTicket
+                            - receiptModel.TotalTicket
+                            - receiptModel.TotalChildTicket;
 
                         await _context.SaveChangesAsync();
                     }
@@ -1164,11 +1187,13 @@ public class ReceiptRepository
             {
                 if (existSchedule != null)
                 {
-                    if (existSchedule.RemainTicket + oldTotalTicket >= receiptModel.TotalTicket
-                    )
+                    if (existSchedule.RemainTicket + oldTotalTicket >= receiptModel.TotalTicket)
                     {
                         existSchedule.RemainTicket =
-                            existSchedule.RemainTicket - receiptModel.TotalTicket + oldTotalTicket;
+                            existSchedule.RemainTicket
+                            - receiptModel.TotalTicket
+                            - receiptModel.TotalChildTicket
+                            + oldTotalTicket;
 
                         await _context.SaveChangesAsync();
                     }
@@ -1181,7 +1206,7 @@ public class ReceiptRepository
 
             if (
                 receipt.Status == FullReceiptStatus.Completed
-                && receiptModel.Status == FullReceiptStatus.Cancelled
+                && receiptModel.Status != FullReceiptStatus.Completed
             )
             {
                 if (existSchedule != null)
@@ -1215,7 +1240,11 @@ public class ReceiptRepository
             .FirstOrDefault((receipt => receipt.FullReceiptId == receiptModel.FullReceiptId));
         if (receipt != null)
         {
-            var oldTotalTicket = receipt.TotalTicket;
+            var existSchedule = _context.ServiceSchedule.FirstOrDefault(entity =>
+                entity.Id == receipt.ServiceScheduleId
+            );
+
+            var oldTotalTicket = receipt.TotalTicket + receipt.TotalChildTicket;
 
             receipt.GuestName = receiptModel.GuestName;
             receipt.Status = receiptModel.Status;
@@ -1231,6 +1260,92 @@ public class ReceiptRepository
             receipt.UpdateDate = DateTime.UtcNow;
             if (receiptModel.Status == FullReceiptStatus.Completed)
                 receipt.CompleteDate = DateTime.UtcNow;
+
+            if (
+                receipt.Status != FullReceiptStatus.Completed
+                && receiptModel.Status != FullReceiptStatus.Completed
+            )
+            {
+                await _context.SaveChangesAsync();
+            }
+
+            if (
+                receipt.Status != FullReceiptStatus.Completed
+                && receiptModel.Status == FullReceiptStatus.Completed
+            )
+            {
+                if (existSchedule != null)
+                {
+                    if (
+                        existSchedule.RemainTicket
+                        >= receiptModel.TotalTicket + receiptModel.TotalChildTicket
+                    )
+                    {
+                        existSchedule.RemainTicket =
+                            existSchedule.RemainTicket
+                            - receiptModel.TotalTicket
+                            - receiptModel.TotalChildTicket;
+
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        return new Response
+                        {
+                            resultCd = 1,
+                            MessageCode = "C515"
+                            // Out of ticket
+                        };
+                    }
+                }
+            }
+
+            if (
+                receipt.Status == FullReceiptStatus.Completed
+                && receiptModel.Status == FullReceiptStatus.Completed
+            )
+            {
+                if (existSchedule != null)
+                {
+                    if (
+                        existSchedule.RemainTicket + oldTotalTicket
+                        >= receiptModel.TotalTicket + receiptModel.TotalChildTicket
+                    )
+                    {
+                        existSchedule.RemainTicket =
+                            existSchedule.RemainTicket
+                            - receiptModel.TotalTicket
+                            - receiptModel.TotalChildTicket
+                            + oldTotalTicket;
+
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        return new Response { resultCd = 1, MessageCode = "C515", };
+                    }
+                }
+            }
+
+            if (
+                receipt.Status == FullReceiptStatus.Completed
+                && receiptModel.Status != FullReceiptStatus.Completed
+            )
+            {
+                if (existSchedule != null)
+                {
+                    if (existSchedule.RemainTicket + oldTotalTicket <= existSchedule.TotalTicket)
+                    {
+                        existSchedule.RemainTicket = existSchedule.RemainTicket + oldTotalTicket;
+                    }
+                    else
+                    {
+                        existSchedule.RemainTicket = existSchedule.TotalTicket;
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
+            }
         }
 
         return new Response
@@ -1249,9 +1364,19 @@ public class ReceiptRepository
 
         if (receipt != null)
         {
+            if (receiptModel.Status == FullReceiptStatus.AwaitPayment)
+            {
+                return new Response { resultCd = 1, MessageCode = "C516-p", };
+            }
+
+            if (receiptModel.Status == FullReceiptStatus.Completed)
+            {
+                return new Response { resultCd = 1, MessageCode = "C516-c", };
+            }
+
             if (receiptModel.Status == FullReceiptStatus.Cancelled)
             {
-                return new Response { resultCd = 1, MessageCode = "C516", };
+                return new Response { resultCd = 1, MessageCode = "C516-h", };
             }
 
             var planExist = _context.TourishPlan.FirstOrDefault(
@@ -1275,95 +1400,13 @@ public class ReceiptRepository
                 return new Response { resultCd = 1, MessageCode = "C519", };
             }
 
-            var oldTotalTicket = receipt.TotalTicket;
-
-            receipt.GuestName = receiptModel.GuestName;
-            if (receipt.Status == FullReceiptStatus.Completed)
-            {
-                return new Response { resultCd = 1, MessageCode = "C520", };
-            }
             receipt.Status = receiptModel.Status;
             receipt.TotalTicket = receiptModel.TotalTicket;
             receipt.TotalChildTicket = receiptModel.TotalChildTicket;
             receipt.TourishScheduleId = receiptModel.TourishScheduleId;
-
             receipt.UpdateDate = DateTime.UtcNow;
-            if (receiptModel.Status == FullReceiptStatus.Completed)
-                receipt.CompleteDate = DateTime.UtcNow;
 
-            if (
-                receipt.Status != FullReceiptStatus.Completed
-                && receiptModel.Status == FullReceiptStatus.Completed
-            )
-            {
-                if (planExist != null)
-                {
-                    //if (planExist != null && planExist.RemainTicket >= receiptModel.TotalTicket)
-                    //{
-                    //    planExist.RemainTicket = planExist.RemainTicket - receiptModel.TotalTicket;
-
-                    //    await _context.SaveChangesAsync();
-                    //}
-                    //else
-                    //{
-                    //    return new Response
-                    //    {
-                    //        resultCd = 1,
-                    //        MessageCode = "C515",
-                    //        // Out of ticket
-                    //    };
-                    //}
-                }
-            }
-
-            if (
-                receipt.Status == FullReceiptStatus.Completed
-                && receiptModel.Status == FullReceiptStatus.Completed
-            )
-            {
-                //if (planExist != null)
-                //{
-                //    if (
-                //        planExist != null
-                //        && planExist.RemainTicket + oldTotalTicket >= receiptModel.TotalTicket
-                //    )
-                //    {
-                //        planExist.RemainTicket =
-                //            planExist.RemainTicket - receiptModel.TotalTicket + oldTotalTicket;
-
-                //        await _context.SaveChangesAsync();
-                //    }
-                //    else
-                //    {
-                //        return new Response
-                //        {
-                //            resultCd = 1,
-                //            MessageCode = "C515",
-                //            // Out of ticket
-                //        };
-                //    }
-                //}
-            }
-
-            if (
-                receipt.Status == FullReceiptStatus.Completed
-                && receiptModel.Status == FullReceiptStatus.Cancelled
-            )
-            {
-                //if (planExist != null)
-                //{
-                //    if (planExist.RemainTicket + oldTotalTicket <= planExist.TotalTicket)
-                //    {
-                //        planExist.RemainTicket = planExist.RemainTicket + oldTotalTicket;
-                //    }
-                //    else
-                //    {
-                //        planExist.RemainTicket = planExist.TotalTicket;
-                //    }
-
-                //    await _context.SaveChangesAsync();
-                //}
-            }
+            await _context.SaveChangesAsync();
         }
 
         return new Response
@@ -1382,9 +1425,19 @@ public class ReceiptRepository
 
         if (receipt != null)
         {
+            if (receiptModel.Status == FullReceiptStatus.AwaitPayment)
+            {
+                return new Response { resultCd = 1, MessageCode = "C516-p", };
+            }
+
+            if (receiptModel.Status == FullReceiptStatus.Completed)
+            {
+                return new Response { resultCd = 1, MessageCode = "C516-c", };
+            }
+
             if (receiptModel.Status == FullReceiptStatus.Cancelled)
             {
-                return new Response { resultCd = 1, MessageCode = "C516", };
+                return new Response { resultCd = 1, MessageCode = "C516-h", };
             }
 
             if (receiptModel.MovingScheduleId != null)
@@ -1436,15 +1489,13 @@ public class ReceiptRepository
                 }
             }
 
-            receipt.GuestName = receiptModel.GuestName;
             receipt.Status = receiptModel.Status;
             receipt.TotalTicket = receiptModel.TotalTicket;
             receipt.TotalChildTicket = receiptModel.TotalChildTicket;
             receipt.ServiceScheduleId = receiptModel.ServiceScheduleId;
             receipt.UpdateDate = DateTime.UtcNow;
 
-            if (receiptModel.Status == FullReceiptStatus.Completed)
-                receipt.CompleteDate = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
         }
 
         return new Response
@@ -1586,7 +1637,7 @@ public class ReceiptRepository
                 gross = group.Sum(entity =>
                     (
                         entity.OriginalPrice * entity.TotalTicket
-                        + entity.OriginalPrice * entity.TotalChildTicket
+                        + entity.OriginalPrice * entity.TotalChildTicket / 2
                     ) * (1 - entity.DiscountFloat)
                     - entity.DiscountAmount
                 )
@@ -1662,7 +1713,7 @@ public class ReceiptRepository
                 gross = group.Sum(entity =>
                     (
                         entity.OriginalPrice * entity.TotalTicket
-                        + entity.OriginalPrice * entity.TotalChildTicket
+                        + entity.OriginalPrice * entity.TotalChildTicket / 2
                     ) * (1 - entity.DiscountFloat)
                     - entity.DiscountAmount
                 )
@@ -1703,7 +1754,7 @@ public class ReceiptRepository
                 gross = group.Sum(entity =>
                     (
                         entity.OriginalPrice * entity.TotalTicket
-                        + entity.OriginalPrice * entity.TotalChildTicket
+                        + entity.OriginalPrice * entity.TotalChildTicket / 2
                     ) * (1 - entity.DiscountFloat)
                     - entity.DiscountAmount
                 )
@@ -1817,7 +1868,7 @@ public class ReceiptRepository
                 Gross = group.Sum(entity =>
                     (
                         entity.OriginalPrice * entity.TotalTicket
-                        + entity.OriginalPrice * entity.TotalChildTicket
+                        + entity.OriginalPrice * entity.TotalChildTicket / 2
                     ) * (1 - entity.DiscountFloat)
                     - entity.DiscountAmount
                 )
@@ -1862,7 +1913,7 @@ public class ReceiptRepository
                 Gross = group.Sum(entity =>
                     (
                         entity.OriginalPrice * entity.TotalTicket
-                        + entity.OriginalPrice * entity.TotalChildTicket
+                        + entity.OriginalPrice * entity.TotalChildTicket / 2
                     ) * (1 - entity.DiscountFloat)
                     - entity.DiscountAmount
                 )
@@ -1907,7 +1958,7 @@ public class ReceiptRepository
                 Gross = group.Sum(entity =>
                     (
                         entity.OriginalPrice * entity.TotalTicket
-                        + entity.OriginalPrice * entity.TotalChildTicket
+                        + entity.OriginalPrice * entity.TotalChildTicket / 2
                     ) * (1 - entity.DiscountFloat)
                     - entity.DiscountAmount
                 )
@@ -1946,16 +1997,20 @@ public class ReceiptRepository
                 existFullReceipt.CompleteDate = DateTime.UtcNow;
 
                 var existSchedule = _context.TourishScheduleList.FirstOrDefault(entity =>
-                entity.Id == existFullReceipt.TourishScheduleId
+                    entity.Id == existFullReceipt.TourishScheduleId
                 );
 
                 if (existSchedule != null)
                 {
-                    if (existSchedule.RemainTicket >= (existFullReceipt.TotalTicket + existFullReceipt.TotalChildTicket)
-                        && (int)existFullReceipt.Status <= 1)
+                    if (
+                        existSchedule.RemainTicket
+                            >= (existFullReceipt.TotalTicket + existFullReceipt.TotalChildTicket)
+                        && (int)existFullReceipt.Status <= 1
+                    )
                     {
                         existSchedule.RemainTicket =
-                            existSchedule.RemainTicket - (existFullReceipt.TotalTicket + existFullReceipt.TotalChildTicket);
+                            existSchedule.RemainTicket
+                            - (existFullReceipt.TotalTicket + existFullReceipt.TotalChildTicket);
                     }
                     else
                     {
@@ -1975,8 +2030,6 @@ public class ReceiptRepository
                 await _context.SaveChangesAsync();
             }
 
-
-
             return new Response { resultCd = 0, MessageCode = "I514" };
         }
 
@@ -1995,6 +2048,8 @@ public class ReceiptRepository
 
         if (existFullReceipt != null)
         {
+            logger.LogInformation("Tester was here -1");
+
             if (status.Equals("PENDING"))
             {
                 existFullReceipt.PaymentId = paymentId;
@@ -2003,7 +2058,32 @@ public class ReceiptRepository
             }
 
             if (status.Equals("PAID"))
-            {
+            {              
+                var existSchedule = _context.ServiceSchedule.FirstOrDefault(entity =>
+                    entity.Id == existFullReceipt.ServiceScheduleId
+                );
+                logger.LogInformation("Tester was here 0");
+
+                if (existSchedule != null)
+                {
+                    logger.LogInformation("Tester was here 1: " + existFullReceipt.Status);
+                    if (
+                        existSchedule.RemainTicket
+                            >= (existFullReceipt.TotalTicket + existFullReceipt.TotalChildTicket)
+                        && (int)existFullReceipt.Status <= 1
+                    )
+                    {
+                        existSchedule.RemainTicket =
+                            existSchedule.RemainTicket
+                            - (existFullReceipt.TotalTicket + existFullReceipt.TotalChildTicket);
+                    }
+                    else
+                    {
+                        logger.LogInformation("Tester was here 2");
+                        return new Response { resultCd = 1, MessageCode = "C515", };
+                    }
+                }
+
                 existFullReceipt.Status = FullReceiptStatus.Completed;
                 existFullReceipt.CompleteDate = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
@@ -2021,5 +2101,4 @@ public class ReceiptRepository
 
         return new Response { resultCd = 1, MessageCode = "C521" };
     }
-    
 }

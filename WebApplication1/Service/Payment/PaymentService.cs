@@ -51,7 +51,7 @@ namespace TourishApi.Service.Payment
             insertReq.amount = (int)(
                 (
                     existReceipt.OriginalPrice * existReceipt.TotalTicket
-                    + existReceipt.OriginalPrice * existReceipt.TotalChildTicket
+                    + existReceipt.OriginalPrice * existReceipt.TotalChildTicket / 2
                 ) * (1 - existReceipt.DiscountFloat)
                 - existReceipt.DiscountAmount
             );
@@ -201,7 +201,7 @@ namespace TourishApi.Service.Payment
             insertReq.amount = (int)(
                 (
                     existReceipt.OriginalPrice * existReceipt.TotalTicket
-                    + existReceipt.OriginalPrice * existReceipt.TotalChildTicket
+                    + existReceipt.OriginalPrice * existReceipt.TotalChildTicket / 2
                 ) * (1 - existReceipt.DiscountFloat)
                 - existReceipt.DiscountAmount
             );

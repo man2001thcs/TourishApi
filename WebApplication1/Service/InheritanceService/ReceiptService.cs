@@ -19,7 +19,7 @@ namespace TourishApi.Service.InheritanceService
         private readonly ReceiptRepository _receiptRepository;
         private readonly ISendMailService _sendMailService;
         private readonly TourishPlanService _tourishPlanService;
-
+        private readonly ILogger<ReceiptService> logger;
         private readonly MovingScheduleService _movingScheduleService;
         private readonly StayingScheduleService _stayingScheduleService;
 
@@ -28,6 +28,7 @@ namespace TourishApi.Service.InheritanceService
         public ReceiptService(ReceiptRepository receiptRepository, ISendMailService sendMailService,
         MovingScheduleService movingScheduleService,
         StayingScheduleService stayingScheduleService,
+        ILogger<ReceiptService> _logger,
         TourishPlanService tourishPlanService)
         {
             _receiptRepository = receiptRepository;
@@ -35,6 +36,7 @@ namespace TourishApi.Service.InheritanceService
             _tourishPlanService = tourishPlanService;
             _movingScheduleService = movingScheduleService;
             _stayingScheduleService = stayingScheduleService;
+            logger = _logger;
         }
 
         public async Task<Response> CreateNew(FullReceiptInsertModel receiptInsertModel)
@@ -672,6 +674,8 @@ namespace TourishApi.Service.InheritanceService
 
                         if (status.Equals("PAID"))
                             await SendServiceReceiptToEmail(orderId);
+
+                        return response;
                     }
 
                 }
@@ -707,6 +711,8 @@ namespace TourishApi.Service.InheritanceService
 
                         if (status.Equals("PAID"))
                             await SendTourReceiptToEmail(orderId);
+
+                        return response;
                     }
 
                 }
@@ -714,6 +720,8 @@ namespace TourishApi.Service.InheritanceService
             }
             catch (Exception ex)
             {
+                logger.LogError(ex.Message);
+
                 var response = new Response
                 {
                     resultCd = 1,

@@ -5,7 +5,7 @@ namespace WebApplication1.Data.Schedule
 {
     public enum ScheduleStatus
     {
-        Created = 0, OnGoing = 1, Completed = 2, Cancelled = 3
+        Created = 0, ConfirmInfo = 1, OnGoing = 2, Completed = 3, Cancelled = 4
     }
 
     [Table("EatSchedule")]

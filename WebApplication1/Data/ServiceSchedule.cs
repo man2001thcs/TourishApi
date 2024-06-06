@@ -11,6 +11,8 @@ namespace WebApplication1.Data
         public Guid? MovingScheduleId { get; set; }
         public Guid? StayingScheduleId { get; set; }
         public ScheduleStatus Status { get; set; }
+        public int TotalTicket { get; set; }
+        public int RemainTicket { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public DateTime CreateDate { get; set; }

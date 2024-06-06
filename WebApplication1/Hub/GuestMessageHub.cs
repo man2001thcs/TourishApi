@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SignalR.Hub.Client;
-using System.Security.Claims;
 using TourishApi.Service.InheritanceService;
 using WebApplication1.Data;
 using WebApplication1.Data.Chat;
@@ -21,7 +21,12 @@ namespace SignalR.Hub
         private readonly NotificationService _notificationService;
         private readonly UserService _userService;
 
-        public GuestMessageHub(MyDbContext context, IOptionsMonitor<AppSetting> optionsMonitor, NotificationService notificationService, UserService userService)
+        public GuestMessageHub(
+            MyDbContext context,
+            IOptionsMonitor<AppSetting> optionsMonitor,
+            NotificationService notificationService,
+            UserService userService
+        )
         {
             _context = context;
             _notificationService = notificationService;
@@ -37,10 +42,18 @@ namespace SignalR.Hub
         {
             try
             {
-                var conHis = _context.GuestMessageConHisList.Include(u => u.GuestCon).Include(u => u.AdminCon).ThenInclude(u => u.Admin).
-                    OrderByDescending(connection => connection.CreateDate).
-                    Where(u => u.GuestCon.GuestEmail == email && u.GuestCon.Connected && u.AdminCon.Connected && u.AdminCon.Admin.Id == adminId)
-                                        .FirstOrDefault();
+                var conHis = _context
+                    .GuestMessageConHisList.Include(u => u.GuestCon)
+                    .Include(u => u.AdminCon)
+                    .ThenInclude(u => u.Admin)
+                    .OrderByDescending(connection => connection.CreateDate)
+                    .Where(u =>
+                        u.GuestCon.GuestEmail == email
+                        && u.GuestCon.Connected
+                        && u.AdminCon.Connected
+                        && u.AdminCon.Admin.Id == adminId
+                    )
+                    .FirstOrDefault();
                 if (conHis != null)
                 {
                     var messageEntity = new GuestMessage
@@ -56,7 +69,6 @@ namespace SignalR.Hub
                     await _context.AddAsync(messageEntity);
                     await _context.SaveChangesAsync();
 
-
                     var connection = conHis.GuestCon;
                     if (connection != null)
                     {
@@ -65,29 +77,32 @@ namespace SignalR.Hub
                         returnMess.Id = messageEntity.Id;
                         returnMess.CreateDate = DateTime.UtcNow;
                         returnMess.Side = 1;
-                        await Clients.Client(Context.ConnectionId).SendMessageToAdmin(adminId, email, returnMess);
+                        await Clients
+                            .Client(Context.ConnectionId)
+                            .SendMessageToAdmin(adminId, email, returnMess);
                         returnMess.State = 2;
                         returnMess.Side = 2;
-                        await Clients.Client(connection.ConnectionID).SendMessageToUser(adminId, email, returnMess);
-
-
+                        await Clients
+                            .Client(connection.ConnectionID)
+                            .SendMessageToUser(adminId, email, returnMess);
                     }
                 }
             }
             catch (Exception ex)
             {
-                var connectionAdmin = _context.AdminMessageConList
-                    .OrderByDescending(connection => connection.CreateDate)
+                var connectionAdmin = _context
+                    .AdminMessageConList.OrderByDescending(connection => connection.CreateDate)
                     .FirstOrDefault(u => u.AdminId == adminId && u.Connected);
 
                 if (connectionAdmin != null)
                 {
                     var returnMess = message;
                     returnMess.State = 3;
-                    await Clients.Client(Context.ConnectionId).SendMessageToUser(adminId, email, returnMess);
+                    await Clients
+                        .Client(Context.ConnectionId)
+                        .SendMessageToUser(adminId, email, returnMess);
                 }
                 //await Clients.Client(connection.ConnectionID).SendOffersToUser(userId, null);
-
             }
         }
 
@@ -95,10 +110,18 @@ namespace SignalR.Hub
         {
             try
             {
-                var conHis = _context.GuestMessageConHisList.Include(u => u.GuestCon).Include(u => u.AdminCon).ThenInclude(u => u.Admin).
-                    OrderByDescending(connection => connection.CreateDate).
-                    Where(u => u.GuestCon.GuestEmail == email && u.GuestCon.Connected && u.AdminCon.Connected && u.AdminCon.Admin.Id == adminId)
-                                        .FirstOrDefault();
+                var conHis = _context
+                    .GuestMessageConHisList.Include(u => u.GuestCon)
+                    .Include(u => u.AdminCon)
+                    .ThenInclude(u => u.Admin)
+                    .OrderByDescending(connection => connection.CreateDate)
+                    .Where(u =>
+                        u.GuestCon.GuestEmail == email
+                        && u.GuestCon.Connected
+                        && u.AdminCon.Connected
+                        && u.AdminCon.Admin.Id == adminId
+                    )
+                    .FirstOrDefault();
 
                 if (conHis != null)
                 {
@@ -123,32 +146,34 @@ namespace SignalR.Hub
                         returnMess.Id = messageEntity.Id;
                         returnMess.CreateDate = DateTime.UtcNow;
                         returnMess.Side = 1;
-                        await Clients.Client(Context.ConnectionId).SendMessageToUser(adminId, email, returnMess);
+                        await Clients
+                            .Client(Context.ConnectionId)
+                            .SendMessageToUser(adminId, email, returnMess);
 
                         returnMess.State = 2;
                         returnMess.Side = 2;
-                        await Clients.Client(connection.ConnectionID).SendMessageToAdmin(adminId, email, returnMess);
-
-
+                        await Clients
+                            .Client(connection.ConnectionID)
+                            .SendMessageToAdmin(adminId, email, returnMess);
                     }
                 }
             }
             catch (Exception ex)
             {
-                var connectionGuest = _context.GuestMessageConList
-                   .OrderByDescending(connection => connection.CreateDate)
-                   .FirstOrDefault(u => u.GuestEmail == email && u.Connected);
+                var connectionGuest = _context
+                    .GuestMessageConList.OrderByDescending(connection => connection.CreateDate)
+                    .FirstOrDefault(u => u.GuestEmail == email && u.Connected);
 
                 if (connectionGuest != null)
                 {
                     var returnMess = message;
                     returnMess.State = 3;
-                    await Clients.Client(Context.ConnectionId).SendMessageToUser(adminId, email, returnMess);
+                    await Clients
+                        .Client(Context.ConnectionId)
+                        .SendMessageToUser(adminId, email, returnMess);
                 }
                 //await Clients.Client(connection.ConnectionID).SendOffersToUser(userId, null);
-
             }
-
         }
 
         public override async Task OnConnectedAsync()
@@ -156,10 +181,10 @@ namespace SignalR.Hub
             var adminId = (string)Context.GetHttpContext().Request.Query["adminId"];
             var guestEmail = (string)Context.GetHttpContext().Request.Query["guestEmail"];
             var guestName = (string)Context.GetHttpContext().Request.Query["guestName"];
-            var guestPhoneNumber = (string)Context.GetHttpContext().Request.Query["guestPhoneNumber"];
+            var guestPhoneNumber = (string)
+                Context.GetHttpContext().Request.Query["guestPhoneNumber"];
             var token = Context.GetHttpContext().Request.Query["token"];
 
-           
             if (!adminId.IsNullOrEmpty())
             {
                 var tokenClaim = (ClaimsPrincipal)_userService.checkIfTokenFormIsValid(token).Data;
@@ -177,8 +202,9 @@ namespace SignalR.Hub
                 }
                 else
                 {
-                    var admin = _context.Users.Include(u => u.NotificationConList)
-                    .SingleOrDefault(u => u.Id.ToString() == adminId);
+                    var admin = _context
+                        .Users.Include(u => u.NotificationConList)
+                        .SingleOrDefault(u => u.Id.ToString() == adminId);
 
                     if (admin != null)
                     {
@@ -186,30 +212,71 @@ namespace SignalR.Hub
                         {
                             AdminId = new Guid(adminId),
                             ConnectionID = Context.ConnectionId,
-                            UserAgent = Context.GetHttpContext().Request.Headers["User-Agent"].ToString(),
+                            UserAgent = Context
+                                .GetHttpContext()
+                                .Request.Headers["User-Agent"]
+                                .ToString(),
                             Connected = true,
                             CreateDate = DateTime.UtcNow
                         };
 
                         await _context.AddAsync(adminCon);
 
-                        var conHis = _context.GuestMessageConHisList.Include(u => u.GuestCon).OrderByDescending(connection => connection.CreateDate)
-                                            .FirstOrDefault(u => u.GuestCon.GuestEmail == guestEmail && u.GuestCon.GuestPhoneNumber == guestPhoneNumber && u.GuestCon.Connected);
+                        var conHis = _context
+                            .GuestMessageConHisList.Include(u => u.GuestCon)
+                            .OrderByDescending(connection => connection.CreateDate)
+                            .FirstOrDefault(u =>
+                                u.GuestCon.GuestEmail == guestEmail
+                                && u.GuestCon.GuestPhoneNumber == guestPhoneNumber
+                                && u.GuestCon.Connected
+                            );
 
-                        conHis.AdminCon = adminCon;
-                        var adminInfo = new AdminMessageConDTOModel
+                        if (conHis.AdminCon != null)
                         {
-                            AdminId = adminCon.AdminId,
-                            ConnectionID = Context.ConnectionId,
-                            AdminFullName = admin.FullName,
-                            Connected = true
-                        };
-                        await Clients.Client(conHis.GuestCon.ConnectionID).NotifyNewCon(adminId, adminInfo);
-                        await _context.SaveChangesAsync();
+                            var oldMessageList = _context
+                                .GuestMessages.Include(entity => entity.AdminMessageCon)
+                                .Where(entity =>
+                                    entity.AdminMessageCon.ConnectionID
+                                    == conHis.AdminCon.ConnectionID
+                                )
+                                .ToList();
+
+                            foreach (var message in oldMessageList)
+                            {
+                                message.AdminMessageConId = adminCon.Id;
+                            }
+
+                            conHis.AdminCon = adminCon;
+                            var adminInfo = new AdminMessageConDTOModel
+                            {
+                                AdminId = adminCon.AdminId,
+                                ConnectionID = Context.ConnectionId,
+                                AdminFullName = admin.FullName,
+                                Connected = true
+                            };
+                            await Clients
+                                .Client(conHis.GuestCon.ConnectionID)
+                                .NotifyNewCon(adminId, adminInfo);
+                            await _context.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            conHis.AdminCon = adminCon;
+                            var adminInfo = new AdminMessageConDTOModel
+                            {
+                                AdminId = adminCon.AdminId,
+                                ConnectionID = Context.ConnectionId,
+                                AdminFullName = admin.FullName,
+                                Connected = true
+                            };
+                            await Clients
+                                .Client(conHis.GuestCon.ConnectionID)
+                                .NotifyNewCon(adminId, adminInfo);
+                            await _context.SaveChangesAsync();
+                        }
                     }
                 }
             }
-
             else if (!guestEmail.IsNullOrEmpty())
             {
                 var guestCon = new GuestMessageCon
@@ -232,7 +299,11 @@ namespace SignalR.Hub
                 await _context.AddAsync(hisCon);
                 await _context.SaveChangesAsync();
 
-                var adminConList = await _context.NotificationConList.Where(entity => entity.User.Role == UserRole.Admin && entity.Connected).ToListAsync();
+                var adminConList = await _context
+                    .NotificationConList.Where(entity =>
+                        entity.User.Role == UserRole.Admin && entity.Connected
+                    )
+                    .ToListAsync();
                 foreach (var adminCon in adminConList)
                 {
                     var notification = new NotificationModel
@@ -256,17 +327,21 @@ namespace SignalR.Hub
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-
-            var connectionAdmin = _context.AdminMessageConList.Include(entity => entity.GuestMessageConHis).OrderByDescending(entity => entity.CreateDate).FirstOrDefault(u => u.ConnectionID == Context.ConnectionId);
+            var connectionAdmin = _context
+                .AdminMessageConList.Include(entity => entity.GuestMessageConHis)
+                .OrderByDescending(entity => entity.CreateDate)
+                .FirstOrDefault(u => u.ConnectionID == Context.ConnectionId);
             if (connectionAdmin != null)
             {
                 connectionAdmin.Connected = false;
                 connectionAdmin.GuestMessageConHis.CloseDate = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
-
             }
 
-            var guestConnection = _context.GuestMessageConList.Include(entity => entity.GuestMessageConHis).OrderByDescending(entity => entity.CreateDate).FirstOrDefault(u => u.ConnectionID == Context.ConnectionId);
+            var guestConnection = _context
+                .GuestMessageConList.Include(entity => entity.GuestMessageConHis)
+                .OrderByDescending(entity => entity.CreateDate)
+                .FirstOrDefault(u => u.ConnectionID == Context.ConnectionId);
             if (guestConnection != null)
             {
                 guestConnection.Connected = false;
