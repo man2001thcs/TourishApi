@@ -131,17 +131,15 @@ namespace WebApplication1.Controllers.Payment
             var receipt = (FullScheduleReceipt)
                 _receiptService.GetFullScheduleReceiptById(int.Parse(orderCode)).Data;
 
-            //if (receipt == null)
-            //{
-            //    if (receipt.ServiceSchedule.MovingScheduleId != null)
-            //        return Redirect(_appSettings.ClientUrl + "/user/moving/receipt/list");
-            //    else
-            //        return Redirect(_appSettings.ClientUrl + "/user/staying/receipt/list");
-            //}
+            if (receipt == null)
+            {
+                if (receipt.ServiceSchedule.MovingScheduleId != null)
+                    return Redirect(_appSettings.ClientUrl + "/user/moving/receipt/list");
+                else
+                    return Redirect(_appSettings.ClientUrl + "/user/staying/receipt/list");
+            }
 
-            //return Redirect(_appSettings.ClientUrl + "/user/moving/receipt/list");
-
-            return Ok();
+            return Redirect(_appSettings.ClientUrl + "/user/moving/receipt/list");
         }
 
         [HttpPost("pay-os/web-hook/tour")]
