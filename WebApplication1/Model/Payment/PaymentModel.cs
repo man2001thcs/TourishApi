@@ -119,7 +119,7 @@
         public string description { get; set; }
         public string accountNumber { get; set; }
         public string reference { get; set; }
-        public DateTime transactionDateTime { get; set; }
+        public string transactionDateTime { get; set; }
         public string currency { get; set; }
         public string paymentLinkId { get; set; }
         public string code { get; set; }
