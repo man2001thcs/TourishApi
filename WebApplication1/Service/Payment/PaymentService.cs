@@ -315,6 +315,14 @@ namespace TourishApi.Service.Payment
             return responseData;
         }
 
+        public bool isTourWebHookReqValid(PaymentWebHookData data, string signature){
+            return IsValidData(data, signature, payOsSettings.ChecksumKey);
+        }
+
+        public bool isServiceWebHookReqValid(PaymentWebHookData data, string signature){
+            return IsValidData(data, signature, payOsSettings.ServiceChecksumKey);
+        }
+
         public string GenerateSignature(
             string amount,
             string cancelUrl,
@@ -343,13 +351,13 @@ namespace TourishApi.Service.Payment
             }
         }
 
-        public Dictionary<string, object> SortObjDataByKey(Dictionary<string, object> data)
+        private Dictionary<string, object> SortObjDataByKey(Dictionary<string, object> data)
         {
             return data.OrderBy(kv => kv.Key)
                        .ToDictionary(kv => kv.Key, kv => kv.Value);
         }
 
-        public string ConvertObjToQueryStr(Dictionary<string, object> data)
+        private string ConvertObjToQueryStr(Dictionary<string, object> data)
         {
             var sortedData = SortObjDataByKey(data);
             var queryString = string.Join("&", sortedData.Select(kv =>
@@ -364,7 +372,7 @@ namespace TourishApi.Service.Payment
             return queryString;
         }
 
-        public bool IsValidData(PaymentWebHookData data, string currentSignature, string checksumKey)
+        private bool IsValidData(PaymentWebHookData data, string currentSignature, string checksumKey)
         {
             var dataDict = JObject.FromObject(data).ToObject<Dictionary<string, object>>();
             var sortedDataByKey = SortObjDataByKey(dataDict);
@@ -373,7 +381,7 @@ namespace TourishApi.Service.Payment
             return dataToSignature == currentSignature;
         }
 
-        public string ComputeHmacSha256(string data, string key)
+        private string ComputeHmacSha256(string data, string key)
         {
             using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(key)))
             {

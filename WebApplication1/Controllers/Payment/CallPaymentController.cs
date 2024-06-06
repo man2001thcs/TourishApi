@@ -106,7 +106,24 @@ namespace WebApplication1.Controllers.Payment
         [HttpPost("pay-os/web-hook/tour")]
         public async Task<IActionResult> WebHookTour(PaymentWebHookRequest paymentWebHookRequest)
         {
-            if (paymentWebHookRequest.data.code.Equals("00"))
+            var isSignatureTrue = _paymentService.isTourWebHookReqValid(paymentWebHookRequest.data, paymentWebHookRequest.signature);
+
+            if (isSignatureTrue && paymentWebHookRequest.data.code.Equals("00"))
+                _receiptService.thirdPartyPaymentFullReceiptStatusChange(
+                    paymentWebHookRequest.data.paymentLinkId,
+                    paymentWebHookRequest.data.orderCode.ToString(),
+                    "PAID"
+                );
+
+            return Ok(paymentWebHookRequest);
+        }
+
+        [HttpPost("pay-os/web-hook/service")]
+        public async Task<IActionResult> WebHookService(PaymentWebHookRequest paymentWebHookRequest)
+        {
+            var isSignatureTrue = _paymentService.isServiceWebHookReqValid(paymentWebHookRequest.data, paymentWebHookRequest.signature);
+
+            if (isSignatureTrue && paymentWebHookRequest.data.code.Equals("00"))
                 _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(
                     paymentWebHookRequest.data.paymentLinkId,
                     paymentWebHookRequest.data.orderCode.ToString(),

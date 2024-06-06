@@ -536,7 +536,7 @@ public class ReceiptRepository
             {
                 resultCd = 0,
                 MessageCode = "I511",
-                Data = fullReceipt.FullReceiptId
+                curId = fullReceipt.FullReceiptId,
                 // Create type success
             };
         }
@@ -632,8 +632,8 @@ public class ReceiptRepository
             (receipt => receipt.TourishPlanId == tourishPlanId)
         );
         if (receipt != null)
-        {        
-            _context.Remove(receipt);           
+        {
+            _context.Remove(receipt);
 
             _context.SaveChanges();
         }
@@ -1934,9 +1934,9 @@ public class ReceiptRepository
         if (existFullReceipt != null)
         {
             existFullReceipt.PaymentId = paymentId;
+            
             if (status.Equals("PAID"))
             {
-                existFullReceipt.Status = FullReceiptStatus.Completed;
                 existFullReceipt.CompleteDate = DateTime.UtcNow;
 
                 var existSchedule = _context.TourishScheduleList.FirstOrDefault(entity =>
@@ -1945,18 +1945,19 @@ public class ReceiptRepository
 
                 if (existSchedule != null)
                 {
-                    if (existSchedule.RemainTicket >= existFullReceipt.TotalTicket)
+                    if (existSchedule.RemainTicket >= existFullReceipt.TotalTicket && (int)existFullReceipt.Status <= 1)
                     {
                         existSchedule.RemainTicket =
                             existSchedule.RemainTicket - existFullReceipt.TotalTicket;
-
-                        _context.SaveChangesAsync();
                     }
                     else
                     {
                         return new Response { resultCd = 1, MessageCode = "C515", };
                     }
                 }
+
+                existFullReceipt.Status = FullReceiptStatus.Completed;
+                _context.SaveChangesAsync();
             }
 
             if (status.Equals("CANCELLED"))
@@ -1986,6 +1987,7 @@ public class ReceiptRepository
         if (existFullReceipt != null)
         {
             existFullReceipt.PaymentId = paymentId;
+
             if (status.Equals("PAID"))
             {
                 existFullReceipt.Status = FullReceiptStatus.Completed;
