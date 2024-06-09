@@ -220,8 +220,10 @@ namespace MyWebApiApp
 
             });
 
+            //services.AddHangfire(config =>
+            //    config.UseSqlServerStorage(Configuration.GetConnectionString("AzureDb")));
             services.AddHangfire(config =>
-                config.UseSqlServerStorage(Configuration.GetConnectionString("AzureDb")));
+               config.UseSqlServerStorage(Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING")));
 
             services.AddSwaggerGen(c =>
             {
