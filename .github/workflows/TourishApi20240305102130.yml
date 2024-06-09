@@ -51,6 +51,6 @@ jobs:
         publish-profile: ${{ secrets.TourishApi20240305102130_4D47 }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
       env:       
-       AZURE_DATABASE_STRING: ${{ secrets.AZURE_DATABASE_STRING }}
-       AZURE_REDIS_STRING: ${{ secrets.AZURE_REDIS_STRING }}
-       AZURE_BLOB_STRING: ${{ secrets.AZURE_BLOB_STRING }}
+        AZURE_DATABASE_STRING: ${{ secrets.AZURE_DATABASE_STRING }}
+        AZURE_REDIS_STRING: ${{ secrets.AZURE_REDIS_STRING }}
+        AZURE_BLOB_STRING: ${{ secrets.AZURE_BLOB_STRING }}
