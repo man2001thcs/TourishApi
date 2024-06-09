@@ -62,8 +62,9 @@ namespace MyWebApiApp
             );
 
             services.AddDbContext<MyDbContext>(option =>
-            {
-                option.UseSqlServer(Configuration.GetConnectionString("AzureDb"));
+            {               
+                // option.UseSqlServer(Configuration.GetConnectionString("AzureDb"));
+                option.UseSqlServer(Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING"));
 
                 option.UseTriggers(triggerOptions =>
                 {
@@ -72,9 +73,11 @@ namespace MyWebApiApp
                 });
             });
 
-            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Configuration.GetConnectionString("Redis")));
+            //services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Configuration.GetConnectionString("Redis")));
+            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("AZURE_REDIS_STRING")));
 
-            services.AddScoped(x => new BlobServiceClient(Configuration.GetValue<string>("AzureBlobStorage")));
+            //services.AddScoped(x => new BlobServiceClient(Configuration.GetValue<string>("AzureBlobStorage")));
+            services.AddScoped(x => new BlobServiceClient(Environment.GetEnvironmentVariable("AZURE_BLOB_STRING")));
 
             // Repo
             services.AddScoped<RestHouseContactRepository>();
