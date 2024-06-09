@@ -20,7 +20,7 @@ namespace WebApplication1.Controllers.Schedule
 
         // GET: api/<ValuesController>
         [HttpGet]
-        public IActionResult GetAll(
+        public async Task<IActionResult> GetAll(
             string? search,
             int? type,
              double? priceFrom,
@@ -32,13 +32,13 @@ namespace WebApplication1.Controllers.Schedule
         )
         {
             return Ok(
-                _entityService.GetAll(search, type, priceFrom, priceTo, sortBy, sortDirection, "", page, pageSize)
+                await _entityService.GetAll(search, type, priceFrom, priceTo, sortBy, sortDirection, "", page, pageSize)
             );
         }
 
         [HttpGet("with-authority")]
         [Authorize]
-        public IActionResult GetAllWithAuthority(
+        public async Task<IActionResult> GetAllWithAuthority(
             string? search,
             int? type,
              double? priceFrom,
@@ -51,7 +51,7 @@ namespace WebApplication1.Controllers.Schedule
         {
             string userId = User.FindFirstValue("Id");
             return Ok(
-                _entityService.GetAll(search, type, priceFrom, priceTo, sortBy, sortDirection, userId, page, pageSize)
+                await _entityService.GetAll(search, type, priceFrom, priceTo, sortBy, sortDirection, userId, page, pageSize)
             );
         }
 
@@ -62,9 +62,9 @@ namespace WebApplication1.Controllers.Schedule
         }
 
         [HttpGet("client/{id}")]
-        public IActionResult clientGetById(Guid id)
+        public async Task<IActionResult> clientGetById(Guid id)
         {
-            return Ok(_entityService.clientGetById(id));
+            return Ok(await _entityService.clientGetById(id));
         }
 
         [HttpGet("interest")]

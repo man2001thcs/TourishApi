@@ -229,8 +229,6 @@ public class TourishPlanRepository : ITourishPlanRepository
             .Include(entity => entity.TourishInterestList)
             .Include(entity => entity.TourishCategoryRelations)
             .ThenInclude(entity => entity.TourishCategory)
-            .Include(entity => entity.TotalReceipt)
-            .ThenInclude(entity => entity.FullReceiptList)
             .AsQueryable();
 
         #region Filtering
@@ -546,8 +544,6 @@ public class TourishPlanRepository : ITourishPlanRepository
             .Include(entity => entity.TourishScheduleList)
             .Include(entity => entity.TourishCategoryRelations)
             .ThenInclude(entity => entity.TourishCategory)
-            .Include(entity => entity.TotalReceipt)
-            .ThenInclude(entity => entity.FullReceiptList)
             .FirstOrDefault();
 
         if (entity == null)

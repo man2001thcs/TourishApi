@@ -1,4 +1,7 @@
-﻿using TourishApi.Service.Interface;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using StackExchange.Redis;
+using TourishApi.Service.Interface;
 using WebApplication1.Data;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
@@ -10,14 +13,17 @@ namespace TourishApi.Service.InheritanceService
     {
         private readonly ITourishPlanRepository _entityRepository;
         private readonly NotificationService _notificationService;
+        private readonly IDatabase _redisDatabase;
 
         public TourishPlanService(
             ITourishPlanRepository tourishPlanRepository,
-            NotificationService notificationService
+            NotificationService notificationService,
+            IConnectionMultiplexer connectionMultiplexer
         )
         {
             _entityRepository = tourishPlanRepository;
             _notificationService = notificationService;
+            _redisDatabase = connectionMultiplexer.GetDatabase();
         }
 
         public async Task<Response> CreateNew(string userId, TourishPlanInsertModel entityModel)
@@ -52,7 +58,12 @@ namespace TourishApi.Service.InheritanceService
                 }
                 else
                 {
-                    var response = new Response { resultCd = 1, MessageCode = "C411", Error = "Exist" };
+                    var response = new Response
+                    {
+                        resultCd = 1,
+                        MessageCode = "C411",
+                        Error = "Exist"
+                    };
                     return response;
                 }
             }
@@ -91,7 +102,7 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response GetAll(
+        public async Task<Response> GetAll(
             string? search,
             string? category,
             string? categoryString,
@@ -111,7 +122,23 @@ namespace TourishApi.Service.InheritanceService
             {
                 if (String.IsNullOrEmpty(userId))
                 {
-                    var entityList = _entityRepository.GetAll(
+                    string cacheKey =
+                        $"tourish_plan_list_{search ?? ""}_{category ?? ""}_{categoryString ?? ""}_{startingPoint ?? ""}_{endPoint ?? ""}_{startingDate ?? ""}_{priceFrom ?? 0}_{priceTo ?? 0}_{sortBy ?? ""}_{sortDirection ?? ""}_page_{page}_pageSize_{pageSize}";
+                    string cachedValue = await _redisDatabase.StringGetAsync(cacheKey);
+
+                    if (!string.IsNullOrEmpty(cachedValue))
+                    {
+                        var resultCache =
+                            JsonConvert.DeserializeObject<WebApplication1.Model.VirtualModel.Response>(
+                                cachedValue
+                            );
+                        if (resultCache != null)
+                        {
+                            return resultCache;
+                        }
+                    }
+
+                    var result = _entityRepository.GetAll(
                         search,
                         category,
                         categoryString,
@@ -125,7 +152,22 @@ namespace TourishApi.Service.InheritanceService
                         page,
                         pageSize
                     );
-                    return entityList;
+                    string resultJson = JsonConvert.SerializeObject(
+                        result,
+                        new JsonSerializerSettings
+                        {
+                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                            ContractResolver = new CamelCasePropertyNamesContractResolver()
+                        }
+                    );
+
+                    // Cache the result in Redis
+                    await _redisDatabase.StringSetAsync(
+                        cacheKey,
+                        resultJson,
+                        TimeSpan.FromMinutes(60)
+                    ); // Cache for 10 minutes
+                    return result;
                 }
                 else
                 {
@@ -146,6 +188,58 @@ namespace TourishApi.Service.InheritanceService
                     );
                     return entityList;
                 }
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C414",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public async Task<Response> clientGetById(Guid id)
+        {
+            try
+            {
+                string cacheKey = $"tourish_plan_{id}";
+                string cachedValue = await _redisDatabase.StringGetAsync(cacheKey);
+
+                if (!string.IsNullOrEmpty(cachedValue))
+                {
+                    var resultCache =
+                        JsonConvert.DeserializeObject<WebApplication1.Model.VirtualModel.Response>(
+                            cachedValue
+                        );
+                    if (resultCache != null)
+                    {
+                        return resultCache;
+                    }
+                }
+
+                var result = _entityRepository.getById(id);
+                if (result.Data == null)
+                {
+                    var response = new Response { resultCd = 1, MessageCode = "C410", };
+                    return response;
+                }
+
+                string resultJson = JsonConvert.SerializeObject(
+                    result,
+                    new JsonSerializerSettings
+                    {
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                        ContractResolver = new CamelCasePropertyNamesContractResolver()
+                    }
+                );
+
+                // Cache the result in Redis
+                await _redisDatabase.StringSetAsync(cacheKey, resultJson, TimeSpan.FromMinutes(60)); // Cache for 10 minutes
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -186,33 +280,6 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response clientGetById(Guid id)
-        {
-            try
-            {
-                var entity = _entityRepository.clientGetById(id);
-                if (entity.Data == null)
-                {
-                    var response = new Response { resultCd = 1, MessageCode = "C410", };
-                    return response;
-                }
-                else
-                {
-                    return entity;
-                }
-            }
-            catch (Exception ex)
-            {
-                var response = new Response
-                {
-                    resultCd = 1,
-                    MessageCode = "C414",
-                    Error = ex.Message
-                };
-                return response;
-            }
-        }
-
         public async Task<Response> UpdateEntityById(
             string userId,
             TourishPlanUpdateModel entityModel
@@ -229,10 +296,13 @@ namespace TourishApi.Service.InheritanceService
                     {
                         if (interest.User.Role == UserRole.User)
                         {
-                            var isInNeedOfNotify = _entityRepository.checkArrangeScheduleFromUser(interest.User.Email, entityModel.Id);
-                            if (!isInNeedOfNotify) continue;
+                            var isInNeedOfNotify = _entityRepository.checkArrangeScheduleFromUser(
+                                interest.User.Email,
+                                entityModel.Id
+                            );
+                            if (!isInNeedOfNotify)
+                                continue;
                         }
-
 
                         var notification = new NotificationModel
                         {
@@ -271,13 +341,49 @@ namespace TourishApi.Service.InheritanceService
         }
 
         public async Task<Response> getDescription(string containerName, string blobName)
-        {
-            var response = new Response
+        {          
+            var result = new Response
             {
                 resultCd = 0,
                 Data = await _entityRepository.getDescription(containerName, blobName)
             };
-            return response;
+
+            return result;
+        }
+
+        public async Task<Response> clientGetDescription(string containerName, string blobName)
+        {
+            string cacheKey = $"tourish_plan_des_{containerName}_{blobName}";
+            string cachedValue = await _redisDatabase.StringGetAsync(cacheKey);
+
+            if (!string.IsNullOrEmpty(cachedValue))
+            {
+                var resultCache =
+                    JsonConvert.DeserializeObject<WebApplication1.Model.VirtualModel.Response>(
+                        cachedValue
+                    );
+                if (resultCache != null)
+                {
+                    return resultCache;
+                }
+            }
+
+            var result = new Response
+            {
+                resultCd = 0,
+                Data = await _entityRepository.getDescription(containerName, blobName)
+            };
+
+            string resultJson = JsonConvert.SerializeObject(result, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            });
+
+            // Cache the result in Redis
+            await _redisDatabase.StringSetAsync(cacheKey, resultJson, TimeSpan.FromMinutes(10));
+
+            return result;
         }
 
         public Response getTourInterest(Guid tourId, Guid userId)

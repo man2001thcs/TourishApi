@@ -1,4 +1,7 @@
-﻿using WebApplication1.Data;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using StackExchange.Redis;
+using WebApplication1.Data;
 using WebApplication1.Model;
 using WebApplication1.Model.Schedule;
 using WebApplication1.Model.VirtualModel;
@@ -10,11 +13,17 @@ namespace TourishApi.Service.InheritanceService.Schedule
     {
         private readonly TourishOuterScheduleRepository _entityRepository;
         private readonly NotificationService _notificationService;
+        private readonly IDatabase _redisDatabase;
 
-        public MovingScheduleService(TourishOuterScheduleRepository entityRepository, NotificationService notificationService)
+        public MovingScheduleService(
+            TourishOuterScheduleRepository entityRepository,
+            NotificationService notificationService,
+            IConnectionMultiplexer connectionMultiplexer
+        )
         {
             _entityRepository = entityRepository;
             _notificationService = notificationService;
+            _redisDatabase = connectionMultiplexer.GetDatabase();
         }
 
         public async Task<Response> CreateNew(string userId, MovingScheduleModel entityModel)
@@ -82,22 +91,78 @@ namespace TourishApi.Service.InheritanceService.Schedule
             }
         }
 
-        public Response GetAll(string? search, int? type, double? priceFrom,
-            double? priceTo, string? sortBy, string? sortDirection, string? userId, int page = 1, int pageSize = 5)
+        public async Task<Response> GetAll(
+            string? search,
+            int? type,
+            double? priceFrom,
+            double? priceTo,
+            string? sortBy,
+            string? sortDirection,
+            string? userId,
+            int page = 1,
+            int pageSize = 5
+        )
         {
             try
             {
                 if (String.IsNullOrEmpty(userId))
                 {
-                    var entityList = _entityRepository.GetAllMovingSchedule(search, type, priceFrom, priceTo, sortBy, sortDirection, page, pageSize);
-                    return entityList;
+                    string cacheKey =
+                        $"moving_service_list_{search ?? ""}_{type ?? 0}_{priceFrom ?? 0}_{priceTo ?? 0}_{sortBy ?? ""}_{sortDirection ?? ""}_page_{page}_pageSize_{pageSize}";
+                    string cachedValue = await _redisDatabase.StringGetAsync(cacheKey);
+
+                    if (!string.IsNullOrEmpty(cachedValue))
+                    {
+                        var resultCache =
+                            JsonConvert.DeserializeObject<WebApplication1.Model.VirtualModel.Response>(
+                                cachedValue
+                            );
+                        if (resultCache != null)
+                        {
+                            return resultCache;
+                        }
+                    }
+
+                    var result = _entityRepository.GetAllMovingSchedule(
+                        search,
+                        type,
+                        priceFrom,
+                        priceTo,
+                        sortBy,
+                        sortDirection,
+                        page,
+                        pageSize
+                    );
+                    string resultJson = JsonConvert.SerializeObject(
+                        result,
+                        new JsonSerializerSettings
+                        {
+                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                            ContractResolver = new CamelCasePropertyNamesContractResolver()
+                        }
+                    );
+
+                    // Cache the result in Redis
+                    await _redisDatabase.StringSetAsync(
+                        cacheKey,
+                        resultJson,
+                        TimeSpan.FromMinutes(60)
+                    ); // Cache for 10 minutes
+                    return result;                 
                 }
                 else
                 {
-                    var entityList = _entityRepository.GetAllMovingScheduleWithAuthority(search, type, sortBy, sortDirection, userId, page, pageSize);
+                    var entityList = _entityRepository.GetAllMovingScheduleWithAuthority(
+                        search,
+                        type,
+                        sortBy,
+                        sortDirection,
+                        userId,
+                        page,
+                        pageSize
+                    );
                     return entityList;
                 }
-
             }
             catch (Exception ex)
             {
@@ -118,11 +183,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
                 var entity = _entityRepository.getByMovingScheduleId(id);
                 if (entity.Data == null)
                 {
-                    var response = new Response
-                    {
-                        resultCd = 1,
-                        MessageCode = "C430",
-                    };
+                    var response = new Response { resultCd = 1, MessageCode = "C430", };
                     return response;
                 }
                 else
@@ -142,24 +203,45 @@ namespace TourishApi.Service.InheritanceService.Schedule
             }
         }
 
-        public Response clientGetById(Guid id)
+        public async Task<Response> clientGetById(Guid id)
         {
             try
             {
-                var entity = _entityRepository.clientGetByMovingScheduleId(id);
-                if (entity.Data == null)
+                string cacheKey = $"moving_service_{id}";
+                string cachedValue = await _redisDatabase.StringGetAsync(cacheKey);
+
+                if (!string.IsNullOrEmpty(cachedValue))
                 {
-                    var response = new Response
+                    var resultCache =
+                        JsonConvert.DeserializeObject<WebApplication1.Model.VirtualModel.Response>(
+                            cachedValue
+                        );
+                    if (resultCache != null)
                     {
-                        resultCd = 1,
-                        MessageCode = "C430",
-                    };
+                        return resultCache;
+                    }
+                }
+
+                var result = _entityRepository.clientGetByMovingScheduleId(id);
+                if (result.Data == null)
+                {
+                    var response = new Response { resultCd = 1, MessageCode = "C430", };
                     return response;
                 }
-                else
-                {
-                    return entity;
-                }
+
+                string resultJson = JsonConvert.SerializeObject(
+                    result,
+                    new JsonSerializerSettings
+                    {
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                        ContractResolver = new CamelCasePropertyNamesContractResolver()
+                    }
+                );
+
+                // Cache the result in Redis
+                await _redisDatabase.StringSetAsync(cacheKey, resultJson, TimeSpan.FromMinutes(60)); // Cache for 10 minutes
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -180,16 +262,23 @@ namespace TourishApi.Service.InheritanceService.Schedule
                 var response = await _entityRepository.UpdateMovingSchedule(userId, entityModel);
                 if (response.MessageCode == "I432")
                 {
-                    var interestList = await _entityRepository.getScheduleInterest(entityModel.Id, ScheduleType.MovingSchedule);
+                    var interestList = await _entityRepository.getScheduleInterest(
+                        entityModel.Id,
+                        ScheduleType.MovingSchedule
+                    );
 
                     foreach (var interest in interestList)
                     {
                         if (interest.User.Role == UserRole.User)
                         {
-                            var isInNeedOfNotify = _entityRepository.checkArrangeScheduleFromUser(interest.User.Email, entityModel.Id, ScheduleType.MovingSchedule);
-                            if (!isInNeedOfNotify) continue;
+                            var isInNeedOfNotify = _entityRepository.checkArrangeScheduleFromUser(
+                                interest.User.Email,
+                                entityModel.Id,
+                                ScheduleType.MovingSchedule
+                            );
+                            if (!isInNeedOfNotify)
+                                continue;
                         }
-
 
                         var notification = new NotificationModel
                         {
@@ -208,7 +297,8 @@ namespace TourishApi.Service.InheritanceService.Schedule
                         // _notificationService.CreateNew(notification);
 
                         await _notificationService.CreateNewAsync(interest.UserId, notification);
-                    };
+                    }
+                    ;
                 }
 
                 return response;
@@ -227,12 +317,25 @@ namespace TourishApi.Service.InheritanceService.Schedule
 
         public Response getScheduleInterest(Guid scheduleId, Guid userId)
         {
-            return _entityRepository.getScheduleInterest(scheduleId, ScheduleType.MovingSchedule, userId);
+            return _entityRepository.getScheduleInterest(
+                scheduleId,
+                ScheduleType.MovingSchedule,
+                userId
+            );
         }
 
-        public Task<Response> setScheduleInterest(Guid scheduleId, Guid userId, InterestStatus interestStatus)
+        public Task<Response> setScheduleInterest(
+            Guid scheduleId,
+            Guid userId,
+            InterestStatus interestStatus
+        )
         {
-            return _entityRepository.setScheduleInterest(scheduleId, ScheduleType.MovingSchedule, userId, interestStatus);
+            return _entityRepository.setScheduleInterest(
+                scheduleId,
+                ScheduleType.MovingSchedule,
+                userId,
+                interestStatus
+            );
         }
 
         public async Task<Response> UpdateInstructionList(
@@ -243,4 +346,3 @@ namespace TourishApi.Service.InheritanceService.Schedule
         }
     }
 }
-

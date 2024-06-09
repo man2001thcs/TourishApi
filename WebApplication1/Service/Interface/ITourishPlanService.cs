@@ -6,7 +6,7 @@ namespace TourishApi.Service.Interface
     public interface ITourishPlanService
     {
         public Task<Response> CreateNew(string userId, TourishPlanInsertModel entityModel);
-        public Response GetAll(
+        public Task<Response> GetAll(
             string? search,
             string? category, string? categoryString,
             string? startingPoint, string? endPoint, string? startingDate,
@@ -18,7 +18,7 @@ namespace TourishApi.Service.Interface
             int pageSize
         );
         public Response GetById(Guid id);
-        public Response clientGetById(Guid id);
+        public Task<Response> clientGetById(Guid id);
         public Task<Response> UpdateEntityById(string userId, TourishPlanUpdateModel entityModel);
         public Response DeleteById(Guid id);
     }

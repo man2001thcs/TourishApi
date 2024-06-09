@@ -51,6 +51,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 resultCd = 0,
                 MessageCode = "I431",
+                returnId = addValue.Id
                 // Create type success
             };
         }
@@ -134,6 +135,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 resultCd = 0,
                 MessageCode = "I431",
+                returnId = addValue.Id
                 // Create type success
             };
         }
@@ -213,6 +215,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 resultCd = 0,
                 MessageCode = "I431",
+                returnId = addValue.Id
                 // Create type success
             };
         }
@@ -294,6 +297,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             var entityQuery = _context.EatSchedules.AsQueryable();
 
             #region Filtering
+            entityQuery = entityQuery.Where(entity => entity.TourishPlan == null);
             if (!string.IsNullOrEmpty(search))
             {
                 entityQuery = entityQuery.Where(entity => entity.PlaceName.Contains(search));
@@ -343,6 +347,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             #region Filtering
             entityQuery = entityQuery.Where(entity => entity.TourishPlan == null);
+
             if (!string.IsNullOrEmpty(search))
             {
                 entityQuery = entityQuery.Where(entity => entity.BranchName.Contains(search));
@@ -350,19 +355,11 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             if (priceFrom != null)
             {
-                entityQuery = entityQuery.Where(entity =>
-                    (
-                        entity.SinglePrice
-                    ) >= priceFrom
-                );
+                entityQuery = entityQuery.Where(entity => (entity.SinglePrice) >= priceFrom);
 
                 if (priceTo != null)
                 {
-                    entityQuery = entityQuery.Where(entity =>
-                        (
-                            entity.SinglePrice
-                        ) <= priceTo
-                    );
+                    entityQuery = entityQuery.Where(entity => (entity.SinglePrice) <= priceTo);
                 }
             }
             #endregion
@@ -394,7 +391,7 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response GetAllStayingSchedule(
             string? search,
             int? type,
-             double? priceFrom,
+            double? priceFrom,
             double? priceTo,
             string? sortBy,
             string? sortDirection,
@@ -409,6 +406,8 @@ namespace WebApplication1.Repository.InheritanceRepo
                 .AsQueryable();
 
             #region Filtering
+            entityQuery = entityQuery.Where(entity => entity.TourishPlanId == null);
+
             if (!string.IsNullOrEmpty(search))
             {
                 entityQuery = entityQuery.Where(entity => entity.PlaceName.Contains(search));
@@ -416,19 +415,11 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             if (priceFrom != null)
             {
-                entityQuery = entityQuery.Where(entity =>
-                    (
-                        entity.SinglePrice
-                    ) >= priceFrom
-                );
+                entityQuery = entityQuery.Where(entity => (entity.SinglePrice) >= priceFrom);
 
                 if (priceTo != null)
                 {
-                    entityQuery = entityQuery.Where(entity =>
-                        (
-                            entity.SinglePrice
-                        ) <= priceTo
-                    );
+                    entityQuery = entityQuery.Where(entity => (entity.SinglePrice) <= priceTo);
                 }
             }
             #endregion
@@ -481,7 +472,6 @@ namespace WebApplication1.Repository.InheritanceRepo
             }
             if (!string.IsNullOrEmpty(userId))
             {
-                // Lọc trên danh sách TourishInterestList của từng đối tượng TourishPlan
                 foreach (var schedule in entityQuery)
                 {
                     schedule.ScheduleInterestList = schedule
@@ -534,6 +524,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 .AsQueryable();
 
             #region Filtering
+            entityQuery = entityQuery.Where(entity => entity.TourishPlan == null);
             if (!string.IsNullOrEmpty(search))
             {
                 entityQuery = entityQuery.Where(entity => entity.PlaceName.Contains(search));
@@ -639,7 +630,9 @@ namespace WebApplication1.Repository.InheritanceRepo
                 .StayingSchedules.Include(entity => entity.ServiceScheduleList)
                 .FirstOrDefault((entity => entity.Id == id));
 
-            entity.ServiceScheduleList = entity.ServiceScheduleList.Where(entity => entity.Status == ScheduleStatus.Created).ToList();
+            entity.ServiceScheduleList = entity
+                .ServiceScheduleList.Where(entity => entity.Status == ScheduleStatus.Created)
+                .ToList();
 
             return new Response { resultCd = 0, Data = entity };
         }
@@ -778,7 +771,9 @@ namespace WebApplication1.Repository.InheritanceRepo
                 .MovingSchedules.Include(entity => entity.ServiceScheduleList)
                 .FirstOrDefault((entity => entity.Id == id));
 
-            entity.ServiceScheduleList = entity.ServiceScheduleList.Where(entity => entity.Status == ScheduleStatus.Created).ToList();
+            entity.ServiceScheduleList = entity
+                .ServiceScheduleList.Where(entity => entity.Status == ScheduleStatus.Created)
+                .ToList();
 
             return new Response { resultCd = 0, Data = entity };
         }
@@ -1212,25 +1207,41 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Boolean checkArrangeScheduleFromUser(String email, Guid scheduleId, ScheduleType scheduleType)
+        public Boolean checkArrangeScheduleFromUser(
+            String email,
+            Guid scheduleId,
+            ScheduleType scheduleType
+        )
         {
             if (scheduleType == ScheduleType.MovingSchedule)
             {
-                var count = _context.FullScheduleReceiptList.Include(entity => entity.ServiceSchedule).Include(entity => entity.TotalReceipt).Where(entity => entity.Email == email
-                    && entity.TotalReceipt.MovingScheduleId == scheduleId
-                    && entity.ServiceSchedule.EndDate >= DateTime.UtcNow).Count();
+                var count = _context
+                    .FullScheduleReceiptList.Include(entity => entity.ServiceSchedule)
+                    .Include(entity => entity.TotalReceipt)
+                    .Where(entity =>
+                        entity.Email == email
+                        && entity.TotalReceipt.MovingScheduleId == scheduleId
+                        && entity.ServiceSchedule.EndDate >= DateTime.UtcNow
+                    )
+                    .Count();
 
-                if (count >= 1) return true;
-
+                if (count >= 1)
+                    return true;
             }
             else if (scheduleType == ScheduleType.StayingSchedule)
             {
-                var count = _context.FullScheduleReceiptList.Include(entity => entity.ServiceSchedule).Include(entity => entity.TotalReceipt).Where(entity => entity.Email == email
-                    && entity.TotalReceipt.StayingScheduleId == scheduleId
-                    && entity.ServiceSchedule.EndDate >= DateTime.UtcNow).Count();
+                var count = _context
+                    .FullScheduleReceiptList.Include(entity => entity.ServiceSchedule)
+                    .Include(entity => entity.TotalReceipt)
+                    .Where(entity =>
+                        entity.Email == email
+                        && entity.TotalReceipt.StayingScheduleId == scheduleId
+                        && entity.ServiceSchedule.EndDate >= DateTime.UtcNow
+                    )
+                    .Count();
 
-                if (count >= 1) return true;
-
+                if (count >= 1)
+                    return true;
             }
 
             return false;

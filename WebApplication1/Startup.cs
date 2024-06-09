@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SignalR.Hub;
+using StackExchange.Redis;
 using System.Text;
 using TourishApi.Service.InheritanceService;
 using TourishApi.Service.InheritanceService.Schedule;
@@ -70,6 +71,8 @@ namespace MyWebApiApp
                     triggerOptions.AddTrigger<MessageConTrigger>();
                 });
             });
+
+            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Configuration.GetConnectionString("Redis")));
 
             services.AddScoped(x => new BlobServiceClient(Configuration.GetValue<string>("AzureBlobStorage")));
 
