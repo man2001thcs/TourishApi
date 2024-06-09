@@ -44,7 +44,7 @@ namespace WebApplication1.Controllers.TourishPlan
             int pageSize = 5
         )
         {         
-            var result = _entityService.GetAll(
+            var result = await _entityService.GetAll(
                 search,
                 category,
                 categoryString,
@@ -65,7 +65,7 @@ namespace WebApplication1.Controllers.TourishPlan
 
         [HttpGet("with-authority")]
         [Authorize]
-        public IActionResult GetAllWithAuthority(
+        public async Task<IActionResult> GetAllWithAuthority(
             string? search,
             string? category,
             string? categoryString,
@@ -82,7 +82,7 @@ namespace WebApplication1.Controllers.TourishPlan
         {
             string userId = User.FindFirstValue("Id");
             return Ok(
-                _entityService.GetAll(
+                await _entityService.GetAll(
                     search,
                     category,
                     categoryString,
