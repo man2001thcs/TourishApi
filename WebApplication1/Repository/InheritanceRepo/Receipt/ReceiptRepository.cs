@@ -603,7 +603,7 @@ public class ReceiptRepository
             {
                 if (receipt.Status == FullReceiptStatus.Completed)
                     existSchedule.RemainTicket =
-                    existSchedule.RemainTicket + receipt.TotalTicket + receipt.TotalChildTicket;
+                        existSchedule.RemainTicket + receipt.TotalTicket + receipt.TotalChildTicket;
             }
             _context.Remove(receipt);
             _context.SaveChanges();
@@ -1688,6 +1688,44 @@ public class ReceiptRepository
         return new Response { resultCd = 0, Data = receiptList };
     }
 
+    public Response getTicketOfTourInMonth(Guid tourishPlanId)
+    {
+        var receiptList = _context
+            .FullReceiptList.Include(entity => entity.TotalReceipt)
+            .Include(entity => entity.TotalReceipt)
+            .Include(entity => entity.TourishSchedule)
+            .ThenInclude(entity => entity.TourishPlan)
+            .Where(entity =>
+                (int)entity.Status < 3 && entity.TotalReceipt.TourishPlanId == tourishPlanId
+            )
+            .Where(entity =>
+                (
+                    entity.CreatedDate.Month == DateTime.UtcNow.Month
+                    && entity.CreatedDate.Year == DateTime.UtcNow.Year
+                )
+                || (
+                    (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month
+                    || entity.CompleteDate.Value.Month == DateTime.UtcNow.Month - 1)
+                        && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
+                )
+            )
+            .GroupBy(entity => entity.TotalReceipt.TourishPlan.TourName)
+            .Select(group => new
+            {
+                name = group.Key,
+                totalTicket = group.Sum(entity => entity.TotalTicket + entity.TotalChildTicket)
+            })
+            .OrderByDescending(group => group.totalTicket)
+            .FirstOrDefault();
+
+        if (receiptList == null)
+        {
+            return new Response { resultCd = 1, Data = new FullReceipt() };
+        }
+
+        return new Response { resultCd = 0, Data = receiptList };
+    }
+
     public Response getTopGrossMovingScheduleInMonth()
     {
         var receiptList = _context
@@ -2058,7 +2096,7 @@ public class ReceiptRepository
             }
 
             if (status.Equals("PAID"))
-            {              
+            {
                 var existSchedule = _context.ServiceSchedule.FirstOrDefault(entity =>
                     entity.Id == existFullReceipt.ServiceScheduleId
                 );

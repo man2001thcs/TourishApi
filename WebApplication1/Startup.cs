@@ -1,4 +1,5 @@
-﻿using Azure.Storage.Blobs;
+﻿using System.Text;
+using Azure.Storage.Blobs;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
@@ -7,7 +8,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SignalR.Hub;
 using StackExchange.Redis;
-using System.Text;
 using TourishApi.Service.InheritanceService;
 using TourishApi.Service.InheritanceService.Schedule;
 using TourishApi.Service.Payment;
@@ -40,31 +40,41 @@ namespace MyWebApiApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowAngularOrigins",
-                builder =>
-                {
-                    builder.WithOrigins("http://localhost:4200")
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .SetIsOriginAllowed((host) => true)
-                   .AllowCredentials();
-                });
+                options.AddPolicy(
+                    "AllowAngularOrigins",
+                    builder =>
+                    {
+                        builder
+                            .WithOrigins("http://localhost:4200")
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .SetIsOriginAllowed((host) => true)
+                            .AllowCredentials();
+                    }
+                );
             });
 
             services.AddControllers();
 
-            services.AddControllers().AddNewtonsoftJson(options =>
-                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-            );
+            services
+                .AddControllers()
+                .AddNewtonsoftJson(options =>
+                    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft
+                        .Json
+                        .ReferenceLoopHandling
+                        .Ignore
+                );
 
             services.AddDbContext<MyDbContext>(option =>
-            {               
+            {
                 // option.UseSqlServer(Configuration.GetConnectionString("AzureDb"));
-                option.UseSqlServer(Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING"));
+                option.UseSqlServer(
+                    Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING")
+                        ?? "Data Source=tcp:tourishapidbserver.database.windows.net,1433;Initial Catalog=TourishApi_db;User Id=thanagor@tourishapidbserver;Password=Lunafreya2702"
+                );
+                // option.UseSqlServer(Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING"));
 
                 option.UseTriggers(triggerOptions =>
                 {
@@ -74,10 +84,36 @@ namespace MyWebApiApp
             });
 
             //services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Configuration.GetConnectionString("Redis")));
-            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("AZURE_REDIS_STRING")));
+            //services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("AZURE_REDIS_STRING")));
+            services.AddSingleton<IConnectionMultiplexer>(
+                ConnectionMultiplexer.Connect(
+                    Environment.GetEnvironmentVariable("AZURE_REDIS_STRING")
+                        ?? "roxanne-tourish-redis.redis.cache.windows.net:6380,password=jpabhwVGRpbxSNuBYwN8fUMUbGTBtRsCaAzCaO4cmS4=,ssl=True,abortConnect=False"
+                )
+            );
 
             //services.AddScoped(x => new BlobServiceClient(Configuration.GetValue<string>("AzureBlobStorage")));
-            services.AddScoped(x => new BlobServiceClient(Environment.GetEnvironmentVariable("AZURE_BLOB_STRING")));
+            //services.AddScoped(x => new BlobServiceClient(
+            //    Environment.GetEnvironmentVariable("AZURE_BLOB_STRING")
+            //));
+            services.AddScoped(x => new BlobServiceClient(
+                Environment.GetEnvironmentVariable("AZURE_BLOB_STRING")
+                    ?? "DefaultEndpointsProtocol=https;AccountName=bookstore1storage;AccountKey=/bNFtqxxZ5brakdZkw2Dk8FAWHi9a8WcQqENipaOTXjBdsFxWqJMXZuz9hnE/yRKimnQHlHtdWkh+AStmoOCgQ==;BlobEndpoint=https://bookstore1storage.blob.core.windows.net/;TableEndpoint=https://bookstore1storage.table.core.windows.net/;QueueEndpoint=https://bookstore1storage.queue.core.windows.net/;FileEndpoint=https://bookstore1storage.file.core.windows.net/"
+            ));
+
+            //services.AddHangfire(config =>
+            //    config.UseSqlServerStorage(Configuration.GetConnectionString("AzureDb")));
+            //services.AddHangfire(config =>
+            //    config.UseSqlServerStorage(
+            //        Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING")
+            //    )
+            //);
+            services.AddHangfire(config =>
+                config.UseSqlServerStorage(
+                    Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING")
+                        ?? "Data Source=tcp:tourishapidbserver.database.windows.net,1433;Initial Catalog=TourishApi_db;User Id=thanagor@tourishapidbserver;Password=Lunafreya2702"
+                )
+            );
 
             // Repo
             services.AddScoped<RestHouseContactRepository>();
@@ -128,7 +164,8 @@ namespace MyWebApiApp
             var secretKey = Configuration["AppSettings:SecretKey"];
             var secretKeyBytes = Encoding.UTF8.GetBytes(secretKey);
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opt =>
                 {
                     opt.TokenValidationParameters = new TokenValidationParameters
@@ -149,81 +186,134 @@ namespace MyWebApiApp
             // Book permission
             services.AddAuthorization(options =>
             {
+                options.AddPolicy(
+                    "CreateMovingContactAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.CREATE_MOVING_CONTACT)
+                );
+                options.AddPolicy(
+                    "UpdateMovingContactAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.UPDATE_MOVING_CONTACT)
+                );
+                options.AddPolicy(
+                    "DeleteMovingContactAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.DELETE_MOVING_CONTACT)
+                );
 
-                options.AddPolicy("CreateMovingContactAccess", policy =>
-                                 policy.RequireClaim("Permissions", PolicyTerm.CREATE_MOVING_CONTACT));
-                options.AddPolicy("UpdateMovingContactAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_MOVING_CONTACT));
-                options.AddPolicy("DeleteMovingContactAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_MOVING_CONTACT));
+                options.AddPolicy(
+                    "CreateRestHouseContactAccess",
+                    policy =>
+                        policy.RequireClaim("Permissions", PolicyTerm.CREATE_RESTHOUSE_CONTACT)
+                );
+                options.AddPolicy(
+                    "UpdateRestHouseContactAccess",
+                    policy =>
+                        policy.RequireClaim("Permissions", PolicyTerm.UPDATE_RESTHOUSE_CONTACT)
+                );
+                options.AddPolicy(
+                    "DeleteRestHouseContactAccess",
+                    policy =>
+                        policy.RequireClaim("Permissions", PolicyTerm.DELETE_RESTHOUSE_CONTACT)
+                );
 
-                options.AddPolicy("CreateRestHouseContactAccess", policy =>
-                          policy.RequireClaim("Permissions", PolicyTerm.CREATE_RESTHOUSE_CONTACT));
-                options.AddPolicy("UpdateRestHouseContactAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_RESTHOUSE_CONTACT));
-                options.AddPolicy("DeleteRestHouseContactAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_RESTHOUSE_CONTACT));
+                options.AddPolicy(
+                    "CreateRestaurantAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.CREATE_RESTAURANT)
+                );
+                options.AddPolicy(
+                    "UpdateRestaurantAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.UPDATE_RESTAURANT)
+                );
+                options.AddPolicy(
+                    "DeleteRestaurantAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.DELETE_RESTAURANT)
+                );
 
-                options.AddPolicy("CreateRestaurantAccess", policy =>
-                       policy.RequireClaim("Permissions", PolicyTerm.CREATE_RESTAURANT));
-                options.AddPolicy("UpdateRestaurantAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_RESTAURANT));
-                options.AddPolicy("DeleteRestaurantAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_RESTAURANT));
+                options.AddPolicy(
+                    "CreateTourishPlanAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.CREATE_TOURISH_PLAN)
+                );
+                options.AddPolicy(
+                    "UpdateTourishPlanAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.UPDATE_TOURISH_PLAN)
+                );
+                options.AddPolicy(
+                    "DeleteTourishPlanAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.DELETE_TOURISH_PLAN)
+                );
 
-                options.AddPolicy("CreateTourishPlanAccess", policy =>
-                       policy.RequireClaim("Permissions", PolicyTerm.CREATE_TOURISH_PLAN));
-                options.AddPolicy("UpdateTourishPlanAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_TOURISH_PLAN));
-                options.AddPolicy("DeleteTourishPlanAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_TOURISH_PLAN));
+                options.AddPolicy(
+                    "CreateTourishCategoryAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.CREATE_TOURISH_CATEGORY)
+                );
+                options.AddPolicy(
+                    "UpdateTourishCategoryAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.UPDATE_TOURISH_CATEGORY)
+                );
+                options.AddPolicy(
+                    "DeleteTourishCategoryAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.DELETE_TOURISH_CATEGORY)
+                );
 
-                options.AddPolicy("CreateTourishCategoryAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.CREATE_TOURISH_CATEGORY));
-                options.AddPolicy("UpdateTourishCategoryAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_TOURISH_CATEGORY));
-                options.AddPolicy("DeleteTourishCategoryAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_TOURISH_CATEGORY));
+                options.AddPolicy(
+                    "CreateReceiptAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.CREATE_RECEIPT)
+                );
+                options.AddPolicy(
+                    "UpdateReceiptAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.UPDATE_RECEIPT)
+                );
+                options.AddPolicy(
+                    "DeleteReceiptAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.DELETE_RECEIPT)
+                );
 
-                options.AddPolicy("CreateReceiptAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.CREATE_RECEIPT));
-                options.AddPolicy("UpdateReceiptAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_RECEIPT));
-                options.AddPolicy("DeleteReceiptAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_RECEIPT));
+                options.AddPolicy(
+                    "CreateMessageAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.CREATE_MESSAGE)
+                );
+                options.AddPolicy(
+                    "UpdateMessageAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.UPDATE_MESSAGE)
+                );
+                options.AddPolicy(
+                    "DeleteMessageAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.DELETE_MESSAGE)
+                );
 
+                options.AddPolicy(
+                    "CreateNotificationAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.CREATE_NOTIFICATION)
+                );
+                options.AddPolicy(
+                    "UpdateNotificationAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.UPDATE_NOTIFICATION)
+                );
+                options.AddPolicy(
+                    "DeleteNotificationAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.DELETE_NOTIFICATION)
+                );
 
-                options.AddPolicy("CreateMessageAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.CREATE_MESSAGE));
-                options.AddPolicy("UpdateMessageAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_MESSAGE));
-                options.AddPolicy("DeleteMessageAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_MESSAGE));
-
-                options.AddPolicy("CreateNotificationAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.CREATE_NOTIFICATION));
-                options.AddPolicy("UpdateNotificationAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_NOTIFICATION));
-                options.AddPolicy("DeleteNotificationAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.DELETE_NOTIFICATION));
-
-                options.AddPolicy("UpdateUserPasswordAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_PASSWORD_USER));
-                options.AddPolicy("UpdateUserInfoAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.UPDATE_INFO_USER));
-                options.AddPolicy("GetUserListAccess", policy =>
-                                  policy.RequireClaim("Permissions", PolicyTerm.GET_USER_LIST));
-                options.AddPolicy("GetUserAccess", policy =>
-                                 policy.RequireClaim("Permissions", PolicyTerm.GET_USER));
-                options.AddPolicy("SelfGetUserAccess", policy =>
-                                 policy.RequireClaim("Permissions", PolicyTerm.SELF_GET_USER));
-
+                options.AddPolicy(
+                    "UpdateUserPasswordAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.UPDATE_PASSWORD_USER)
+                );
+                options.AddPolicy(
+                    "UpdateUserInfoAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.UPDATE_INFO_USER)
+                );
+                options.AddPolicy(
+                    "GetUserListAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.GET_USER_LIST)
+                );
+                options.AddPolicy(
+                    "GetUserAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.GET_USER)
+                );
+                options.AddPolicy(
+                    "SelfGetUserAccess",
+                    policy => policy.RequireClaim("Permissions", PolicyTerm.SELF_GET_USER)
+                );
             });
-
-            //services.AddHangfire(config =>
-            //    config.UseSqlServerStorage(Configuration.GetConnectionString("AzureDb")));
-            services.AddHangfire(config =>
-               config.UseSqlServerStorage(Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING")));
 
             services.AddSwaggerGen(c =>
             {
@@ -235,12 +325,13 @@ namespace MyWebApiApp
         [Obsolete]
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseDeveloperExceptionPage();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWebApiApp v1"));
+                app.UseSwaggerUI(c =>
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyWebApiApp v1")
+                );
             }
 
             if (!env.IsDevelopment())
@@ -261,7 +352,11 @@ namespace MyWebApiApp
             app.UseHangfireServer();
             app.UseHangfireDashboard();
 
-            RecurringJob.AddOrUpdate<ScheduleDateChangeTask>("MyScheduledTask", x => x.ScheduleDateDueTask(), Cron.DayInterval(2));
+            RecurringJob.AddOrUpdate<ScheduleDateChangeTask>(
+                "MyScheduledTask",
+                x => x.ScheduleDateDueTask(),
+                Cron.DayInterval(2)
+            );
 
             app.UseEndpoints(endpoints =>
             {

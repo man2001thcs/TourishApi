@@ -14,12 +14,10 @@ namespace WebApplication1.Controllers.Receipt
 
         private readonly char[] delimiter = new char[] { ';' };
 
-        public GetFullReceiptController(ReceiptService receiptService
-            )
+        public GetFullReceiptController(ReceiptService receiptService)
         {
             _receiptService = receiptService;
         }
-
 
         [HttpGet("tour/{id}")]
         public IActionResult GetFullTourReceiptById(int id)
@@ -32,7 +30,6 @@ namespace WebApplication1.Controllers.Receipt
         {
             return Ok(_receiptService.GetFullScheduleReceiptById(id));
         }
-
 
         [HttpGet("tour/unpaid-client")]
         [Authorize(Roles = "Admin, AdminManager")]
@@ -48,7 +45,7 @@ namespace WebApplication1.Controllers.Receipt
             return Ok(_receiptService.getUnpaidMovingScheduleClient());
         }
 
-         [HttpGet("staying-schedule/unpaid-client")]
+        [HttpGet("staying-schedule/unpaid-client")]
         [Authorize(Roles = "Admin, AdminManager")]
         public IActionResult getUnpaidStayingScheduleClient()
         {
@@ -63,10 +60,16 @@ namespace WebApplication1.Controllers.Receipt
         }
 
         [HttpGet("total-ticket-tour")]
-        [Authorize(Roles = "Admin, AdminManager")]
+        [Authorize]
         public IActionResult getTopTicketTourInMonth()
         {
             return Ok(_receiptService.getTopTicketTourInMonth());
+        }
+
+        [HttpGet("total-ticket-of-tour")]
+        public async Task<IActionResult> getTicketOfTourInMonth(Guid tourishPlanId)
+        {
+            return Ok(await _receiptService.getTicketOfTourInMonth(tourishPlanId));
         }
 
         [HttpGet("gross-moving-service")]

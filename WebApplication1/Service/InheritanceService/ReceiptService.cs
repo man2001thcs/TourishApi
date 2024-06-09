@@ -1,5 +1,8 @@
 ﻿using MailKit;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Org.BouncyCastle.Utilities;
+using StackExchange.Redis;
 using TourishApi.Service.InheritanceService.Schedule;
 using TourishApi.Service.Payment;
 using WebApplication1.Data;
@@ -22,6 +25,7 @@ namespace TourishApi.Service.InheritanceService
         private readonly ILogger<ReceiptService> logger;
         private readonly MovingScheduleService _movingScheduleService;
         private readonly StayingScheduleService _stayingScheduleService;
+        private readonly IDatabase _redisDatabase;
 
         private readonly char[] delimiter = new char[] { ';' };
 
@@ -29,6 +33,7 @@ namespace TourishApi.Service.InheritanceService
         MovingScheduleService movingScheduleService,
         StayingScheduleService stayingScheduleService,
         ILogger<ReceiptService> _logger,
+        IConnectionMultiplexer connectionMultiplexer,
         TourishPlanService tourishPlanService)
         {
             _receiptRepository = receiptRepository;
@@ -36,6 +41,7 @@ namespace TourishApi.Service.InheritanceService
             _tourishPlanService = tourishPlanService;
             _movingScheduleService = movingScheduleService;
             _stayingScheduleService = stayingScheduleService;
+            _redisDatabase = connectionMultiplexer.GetDatabase();
             logger = _logger;
         }
 
@@ -643,6 +649,58 @@ namespace TourishApi.Service.InheritanceService
             try
             {
                 return _receiptRepository.getGrossTourishPlanInYear();
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C514",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public async Task<Response> getTicketOfTourInMonth(Guid tourishPlanId)
+        {
+            try
+            {
+                string cacheKey = $"tourish_plan_total_ticket_{tourishPlanId}";
+                string cachedValue = await _redisDatabase.StringGetAsync(cacheKey);
+
+                if (!string.IsNullOrEmpty(cachedValue))
+                {
+                    var resultCache =
+                        JsonConvert.DeserializeObject<WebApplication1.Model.VirtualModel.Response>(
+                            cachedValue
+                        );
+                    if (resultCache != null)
+                    {
+                        return resultCache;
+                    }
+                }
+
+                var result = _receiptRepository.getTicketOfTourInMonth(tourishPlanId);
+                if (result.Data == null)
+                {
+                    var response = new Response { resultCd = 1, MessageCode = "C514", };
+                    return response;
+                }
+
+                string resultJson = JsonConvert.SerializeObject(
+                    result,
+                    new JsonSerializerSettings
+                    {
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                        ContractResolver = new CamelCasePropertyNamesContractResolver()
+                    }
+                );
+
+                // Cache the result in Redis
+                await _redisDatabase.StringSetAsync(cacheKey, resultJson, TimeSpan.FromMinutes(60));
+
+                return result;
             }
             catch (Exception ex)
             {
