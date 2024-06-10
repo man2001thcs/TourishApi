@@ -39,6 +39,20 @@ namespace TourishApi.Service.Payment
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             payOsSettings = _payOsSettings.Value;
+
+            if (payOsSettings.ClientId.Length <= 0)
+            {
+                payOsSettings = new PayOsSetting
+                {
+                    ClientId = Environment.GetEnvironmentVariable("PAY_OS_CLIENT_ID"),
+                    ApiKey = Environment.GetEnvironmentVariable("PAY_OS_API_KEY"),
+                    ChecksumKey = Environment.GetEnvironmentVariable("PAY_OS_CHECKSUM_KEY"),
+                    ServiceClientId = Environment.GetEnvironmentVariable("PAY_OS_SERVICE_CLIENT_ID"),
+                    ServiceApiKey = Environment.GetEnvironmentVariable("PAY_OS_SERVICE_API_KEY"),
+                    ServiceChecksumKey = Environment.GetEnvironmentVariable("PAY_OS_SERVICE_CHECKSUM_KEY")
+                };
+            }
+
             logger = _logger;
             _receiptService = receiptService;
             _appSettings = appSettings.Value;
