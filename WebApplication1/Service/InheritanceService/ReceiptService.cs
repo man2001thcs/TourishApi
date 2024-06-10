@@ -12,9 +12,10 @@ using WebApplication1.Model;
 using WebApplication1.Model.Payment;
 using WebApplication1.Model.Receipt;
 using WebApplication1.Model.VirtualModel;
-using WebApplication1.Repository.InheritanceRepo;
 using WebApplication1.Repository.InheritanceRepo.Receipt;
+using WebApplication1.Repository.Interface;
 using WebApplication1.Service;
+using WebApplication1.Service.InheritanceService;
 
 namespace TourishApi.Service.InheritanceService
 {
@@ -27,19 +28,22 @@ namespace TourishApi.Service.InheritanceService
         private readonly MovingScheduleService _movingScheduleService;
         private readonly StayingScheduleService _stayingScheduleService;
         private readonly NotificationService _notificationService;
-        private readonly UserRepository _userRepository;
+        private readonly UserService _userService;
         private readonly IDatabase _redisDatabase;
 
         private readonly char[] delimiter = new char[] { ';' };
 
-        public ReceiptService(ReceiptRepository receiptRepository, ISendMailService sendMailService,
-        MovingScheduleService movingScheduleService,
-        StayingScheduleService stayingScheduleService,
-        ILogger<ReceiptService> _logger,
-        IConnectionMultiplexer connectionMultiplexer,
-        NotificationService notificationService,
-        UserRepository userRepository,
-        TourishPlanService tourishPlanService)
+        public ReceiptService(
+            ReceiptRepository receiptRepository,
+            ISendMailService sendMailService,
+            MovingScheduleService movingScheduleService,
+            StayingScheduleService stayingScheduleService,
+            ILogger<ReceiptService> _logger,
+            IConnectionMultiplexer connectionMultiplexer,
+            NotificationService notificationService,
+            UserService userService,
+            TourishPlanService tourishPlanService
+        )
         {
             _receiptRepository = receiptRepository;
             _sendMailService = sendMailService;
@@ -47,7 +51,7 @@ namespace TourishApi.Service.InheritanceService
             _movingScheduleService = movingScheduleService;
             _stayingScheduleService = stayingScheduleService;
             _notificationService = notificationService;
-            _userRepository = userRepository;
+            _userService = userService;
             _redisDatabase = connectionMultiplexer.GetDatabase();
             logger = _logger;
         }
@@ -68,7 +72,6 @@ namespace TourishApi.Service.InheritanceService
                     var receiptReturn = await _receiptRepository.AddServiceReceipt(
                         receiptInsertModel
                     );
-
 
                     var response = new Response { resultCd = 0, MessageCode = "I511", };
                     return response;
@@ -723,30 +726,37 @@ namespace TourishApi.Service.InheritanceService
 
         public async Task<Response> thirdPartyPaymentFullServiceReceiptStatusChange(
             string paymentId,
-        string orderId, string status
+            string orderId,
+            string status
         )
         {
             try
             {
-                var existReceipt = (FullScheduleReceipt)_receiptRepository.getFullScheduleReceiptById(int.Parse(orderId)).Data;
+                var existReceipt = (FullScheduleReceipt)
+                    _receiptRepository.getFullScheduleReceiptById(int.Parse(orderId)).Data;
                 if (existReceipt != null)
                 {
                     if ((int)existReceipt.Status < 2)
                     {
-                        var response = await _receiptRepository.thirdPartyPaymentFullServiceReceiptStatusChange(
-                                                                paymentId, orderId, status
-                                                            );
+                        var response =
+                            await _receiptRepository.thirdPartyPaymentFullServiceReceiptStatusChange(
+                                paymentId,
+                                orderId,
+                                status
+                            );
 
                         if (status.Equals("PAID"))
                         {
                             await SendServiceReceiptToEmail(orderId);
-                            await sendServicePaymentNotify(existReceipt.Email, existReceipt.ServiceSchedule.MovingScheduleId, existReceipt.ServiceSchedule.StayingScheduleId);
+                            await sendServicePaymentNotify(
+                                existReceipt.Email,
+                                existReceipt.ServiceSchedule.MovingScheduleId,
+                                existReceipt.ServiceSchedule.StayingScheduleId
+                            );
                         }
-
 
                         return response;
                     }
-
                 }
                 return new Response();
             }
@@ -764,30 +774,36 @@ namespace TourishApi.Service.InheritanceService
 
         public async Task<Response> thirdPartyPaymentFullReceiptStatusChange(
             string paymentId,
-        string orderId, string status
+            string orderId,
+            string status
         )
         {
             try
             {
-                var existReceipt = (FullReceipt)_receiptRepository.getFullTourReceiptById(int.Parse(orderId)).Data;
+                var existReceipt = (FullReceipt)
+                    _receiptRepository.getFullTourReceiptById(int.Parse(orderId)).Data;
                 if (existReceipt != null)
                 {
                     if ((int)existReceipt.Status < 2)
                     {
-                        var response = await _receiptRepository.thirdPartyPaymentFullReceiptStatusChange(
-                                                                paymentId, orderId, status
-                                                            );
+                        var response =
+                            await _receiptRepository.thirdPartyPaymentFullReceiptStatusChange(
+                                paymentId,
+                                orderId,
+                                status
+                            );
 
                         if (status.Equals("PAID"))
                         {
                             await SendTourReceiptToEmail(orderId);
-                            await sendTourPaymentNotify(existReceipt.Email, existReceipt.TourishSchedule.TourishPlanId);
+                            await sendTourPaymentNotify(
+                                existReceipt.Email,
+                                existReceipt.TourishSchedule.TourishPlanId
+                            );
                         }
-
 
                         return response;
                     }
-
                 }
                 return new Response();
             }
@@ -807,7 +823,7 @@ namespace TourishApi.Service.InheritanceService
 
         public async Task<Response> sendTourPaymentNotify(string email, Guid tourishPlanId)
         {
-            var user = (User)_userRepository.getByEmail(email).Data;
+            var user = (User)_userService.getUserByEmail(email).Data;
 
             if (user != null)
             {
@@ -831,12 +847,15 @@ namespace TourishApi.Service.InheritanceService
             }
 
             return new Response();
-
         }
 
-        public async Task<Response> sendServicePaymentNotify(string email, Guid? movingServiceId, Guid? stayingServiceId)
+        public async Task<Response> sendServicePaymentNotify(
+            string email,
+            Guid? movingServiceId,
+            Guid? stayingServiceId
+        )
         {
-            var user = (User)_userRepository.getByEmail(email).Data;
+            var user = (User)_userService.getUserByEmail(email).Data;
 
             if (user != null)
             {
@@ -865,68 +884,85 @@ namespace TourishApi.Service.InheritanceService
         {
             try
             {
-                var existReceipt = (FullReceipt)_receiptRepository.getFullTourReceiptById(int.Parse(orderId)).Data;
+                var existReceipt = (FullReceipt)
+                    _receiptRepository.getFullTourReceiptById(int.Parse(orderId)).Data;
 
                 if (existReceipt != null)
                 {
-                    var totalPrice = (existReceipt.OriginalPrice * existReceipt.TotalTicket
-                        + existReceipt.OriginalPrice * existReceipt.TotalChildTicket) * (1 - existReceipt.DiscountFloat)
-                    - existReceipt.DiscountAmount;
+                    var totalPrice =
+                        (
+                            existReceipt.OriginalPrice * existReceipt.TotalTicket
+                            + existReceipt.OriginalPrice * existReceipt.TotalChildTicket
+                        ) * (1 - existReceipt.DiscountFloat)
+                        - existReceipt.DiscountAmount;
 
-                    var tourishPlan = (TourishPlan)_tourishPlanService.GetById(existReceipt.TourishSchedule.TourishPlanId).Data;
+                    var tourishPlan = (TourishPlan)
+                        _tourishPlanService
+                            .GetById(existReceipt.TourishSchedule.TourishPlanId)
+                            .Data;
 
                     var mailContent = new MailContent
                     {
                         To = existReceipt.Email,
                         Subject = "Roxanne: Thanh toán thành công: " + tourishPlan.TourName,
                         Body =
-                        "<html>"
-                        + "<head>"
-                        + "<style>"
-                        + "body { font-family: Arial, sans-serif; background-color: #f4f4f4; }"
-                        + ".container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1); }"
-                        + ".message { margin-bottom: 20px; }"
-                        + ".message p { margin: 0; font-size: 16px; margin-bottom: 10px; }"
-                        + ".btn { display: inline-block; background-color: #007bff; color: #fff !important; text-decoration: none; padding: 10px 20px; border-radius: 5px; }"
-                        + "table { width: 100%; border-collapse: collapse; margin-top: 20px; }"
-                        + "table, th, td { border: 1px solid #ddd; }"
-                        + "th, td { padding: 12px; text-align: left; }"
-                        + "th { background-color: #f2f2f2; }"
-                        + "</style>"
-                        + "</head>"
-                        + "<body>"
-                        + "<div class='container'>"
-                        + "<div class='message'>"
-                        + "<p style='font-size: 18px; margin-bottom: 10px;'>Xin chào <strong>"
-                        + existReceipt.GuestName
-                        + "</strong>.</p>"
-                        + "<p style='font-size: 18px; margin-bottom: 10px;'>Xin cảm ơn bạn đã thanh toán dịch vụ của chúng tôi. Sau đây là chi tiết thông tin hóa đơn: </p>"
-                        + "<table>"
-                        + "<tr>"
-                        + "<th>Số vé người lớn</th>"
-                        + "<td>" + existReceipt.TotalTicket + "</td>"
-                        + "</tr>"
-                        + "<tr>"
-                        + "<th>Số vé trẻ em</th>"
-                        + "<td>" + existReceipt.TotalChildTicket + "</td>"
-                        + "</tr>"
-                        + "<tr>"
-                        + "<th>Tổng giá</th>"
-                        + "<td>" + totalPrice + "</td>"
-                        + "</tr>"
-                        + "<tr>"
-                        + "<th>Tên tour</th>"
-                        + "<td>" + tourishPlan.TourName + "</td>"
-                        + "</tr>"
-                        + "<tr>"
-                        + "<th>Giá đơn vé</th>"
-                        + "<td>" + existReceipt.OriginalPrice + "</td>"
-                        + "</tr>"
-                        + "</table>"
-                        + "</div>"
-                        + "</div>"
-                        + "</body>"
-                        + "</html>"
+                            "<html>"
+                            + "<head>"
+                            + "<style>"
+                            + "body { font-family: Arial, sans-serif; background-color: #f4f4f4; }"
+                            + ".container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1); }"
+                            + ".message { margin-bottom: 20px; }"
+                            + ".message p { margin: 0; font-size: 16px; margin-bottom: 10px; }"
+                            + ".btn { display: inline-block; background-color: #007bff; color: #fff !important; text-decoration: none; padding: 10px 20px; border-radius: 5px; }"
+                            + "table { width: 100%; border-collapse: collapse; margin-top: 20px; }"
+                            + "table, th, td { border: 1px solid #ddd; }"
+                            + "th, td { padding: 12px; text-align: left; }"
+                            + "th { background-color: #f2f2f2; }"
+                            + "</style>"
+                            + "</head>"
+                            + "<body>"
+                            + "<div class='container'>"
+                            + "<div class='message'>"
+                            + "<p style='font-size: 18px; margin-bottom: 10px;'>Xin chào <strong>"
+                            + existReceipt.GuestName
+                            + "</strong>.</p>"
+                            + "<p style='font-size: 18px; margin-bottom: 10px;'>Xin cảm ơn bạn đã thanh toán dịch vụ của chúng tôi. Sau đây là chi tiết thông tin hóa đơn: </p>"
+                            + "<table>"
+                            + "<tr>"
+                            + "<th>Số vé người lớn</th>"
+                            + "<td>"
+                            + existReceipt.TotalTicket
+                            + "</td>"
+                            + "</tr>"
+                            + "<tr>"
+                            + "<th>Số vé trẻ em</th>"
+                            + "<td>"
+                            + existReceipt.TotalChildTicket
+                            + "</td>"
+                            + "</tr>"
+                            + "<tr>"
+                            + "<th>Tổng giá</th>"
+                            + "<td>"
+                            + totalPrice
+                            + "</td>"
+                            + "</tr>"
+                            + "<tr>"
+                            + "<th>Tên tour</th>"
+                            + "<td>"
+                            + tourishPlan.TourName
+                            + "</td>"
+                            + "</tr>"
+                            + "<tr>"
+                            + "<th>Giá đơn vé</th>"
+                            + "<td>"
+                            + existReceipt.OriginalPrice
+                            + "</td>"
+                            + "</tr>"
+                            + "</table>"
+                            + "</div>"
+                            + "</div>"
+                            + "</body>"
+                            + "</html>"
                     };
 
                     return await _sendMailService.SendMail(mailContent);
@@ -944,26 +980,39 @@ namespace TourishApi.Service.InheritanceService
         {
             try
             {
-                var existReceipt = (FullScheduleReceipt)_receiptRepository.getFullScheduleReceiptById(int.Parse(orderId)).Data;
+                var existReceipt = (FullScheduleReceipt)
+                    _receiptRepository.getFullScheduleReceiptById(int.Parse(orderId)).Data;
 
                 if (existReceipt != null)
                 {
-                    var totalPrice = (existReceipt.OriginalPrice * existReceipt.TotalTicket
-                        + existReceipt.OriginalPrice * existReceipt.TotalChildTicket) * (1 - existReceipt.DiscountFloat)
-                    - existReceipt.DiscountAmount;
+                    var totalPrice =
+                        (
+                            existReceipt.OriginalPrice * existReceipt.TotalTicket
+                            + existReceipt.OriginalPrice * existReceipt.TotalChildTicket
+                        ) * (1 - existReceipt.DiscountFloat)
+                        - existReceipt.DiscountAmount;
 
                     var serviceName = "";
                     if (existReceipt.ServiceSchedule.MovingScheduleId != null)
                     {
-                        var schedule = (MovingSchedule)_movingScheduleService.GetById(existReceipt.ServiceSchedule.MovingScheduleId ?? new Guid()).Data;
+                        var schedule = (MovingSchedule)
+                            _movingScheduleService
+                                .GetById(
+                                    existReceipt.ServiceSchedule.MovingScheduleId ?? new Guid()
+                                )
+                                .Data;
 
                         if (schedule != null)
                             serviceName = schedule.Name;
                     }
-
                     else if (existReceipt.ServiceSchedule.StayingScheduleId != null)
                     {
-                        var schedule = (StayingSchedule)_stayingScheduleService.GetById(existReceipt.ServiceSchedule.StayingScheduleId ?? new Guid()).Data;
+                        var schedule = (StayingSchedule)
+                            _stayingScheduleService
+                                .GetById(
+                                    existReceipt.ServiceSchedule.StayingScheduleId ?? new Guid()
+                                )
+                                .Data;
 
                         if (schedule != null)
                             serviceName = schedule.Name;
@@ -974,53 +1023,63 @@ namespace TourishApi.Service.InheritanceService
                         To = existReceipt.Email,
                         Subject = "Roxanne: Thanh toán thành công: " + serviceName,
                         Body =
-                        "<html>"
-                        + "<head>"
-                        + "<style>"
-                        + "body { font-family: Arial, sans-serif; background-color: #f4f4f4; }"
-                        + ".container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1); }"
-                        + ".message { margin-bottom: 20px; }"
-                        + ".message p { margin: 0; font-size: 16px; margin-bottom: 10px; }"
-                        + ".btn { display: inline-block; background-color: #007bff; color: #fff !important; text-decoration: none; padding: 10px 20px; border-radius: 5px; }"
-                        + "table { width: 100%; border-collapse: collapse; margin-top: 20px; }"
-                        + "table, th, td { border: 1px solid #ddd; }"
-                        + "th, td { padding: 12px; text-align: left; }"
-                        + "th { background-color: #f2f2f2; }"
-                        + "</style>"
-                        + "</head>"
-                        + "<body>"
-                        + "<div class='container'>"
-                        + "<div class='message'>"
-                        + "<p style='font-size: 18px; margin-bottom: 10px;'>Xin chào <strong>"
-                        + existReceipt.GuestName
-                        + "</strong>.</p>"
-                        + "<p style='font-size: 18px; margin-bottom: 10px;'>Xin cảm ơn bạn đã thanh toán dịch vụ của chúng tôi. Sau đây là chi tiết thông tin hóa đơn: </p>"
-                        + "<table>"
-                        + "<tr>"
-                        + "<th>Số vé người lớn</th>"
-                        + "<td>" + existReceipt.TotalTicket + "</td>"
-                        + "</tr>"
-                        + "<tr>"
-                        + "<th>Số vé trẻ em</th>"
-                        + "<td>" + existReceipt.TotalChildTicket + "</td>"
-                        + "</tr>"
-                        + "<tr>"
-                        + "<th>Tổng giá</th>"
-                        + "<td>" + totalPrice + "</td>"
-                        + "</tr>"
-                        + "<tr>"
-                        + "<th>Tên dịch vụ</th>"
-                        + "<td>" + serviceName + "</td>"
-                        + "</tr>"
-                        + "<tr>"
-                        + "<th>Giá đơn vé</th>"
-                        + "<td>" + existReceipt.OriginalPrice + "</td>"
-                        + "</tr>"
-                        + "</table>"
-                        + "</div>"
-                        + "</div>"
-                        + "</body>"
-                        + "</html>"
+                            "<html>"
+                            + "<head>"
+                            + "<style>"
+                            + "body { font-family: Arial, sans-serif; background-color: #f4f4f4; }"
+                            + ".container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1); }"
+                            + ".message { margin-bottom: 20px; }"
+                            + ".message p { margin: 0; font-size: 16px; margin-bottom: 10px; }"
+                            + ".btn { display: inline-block; background-color: #007bff; color: #fff !important; text-decoration: none; padding: 10px 20px; border-radius: 5px; }"
+                            + "table { width: 100%; border-collapse: collapse; margin-top: 20px; }"
+                            + "table, th, td { border: 1px solid #ddd; }"
+                            + "th, td { padding: 12px; text-align: left; }"
+                            + "th { background-color: #f2f2f2; }"
+                            + "</style>"
+                            + "</head>"
+                            + "<body>"
+                            + "<div class='container'>"
+                            + "<div class='message'>"
+                            + "<p style='font-size: 18px; margin-bottom: 10px;'>Xin chào <strong>"
+                            + existReceipt.GuestName
+                            + "</strong>.</p>"
+                            + "<p style='font-size: 18px; margin-bottom: 10px;'>Xin cảm ơn bạn đã thanh toán dịch vụ của chúng tôi. Sau đây là chi tiết thông tin hóa đơn: </p>"
+                            + "<table>"
+                            + "<tr>"
+                            + "<th>Số vé người lớn</th>"
+                            + "<td>"
+                            + existReceipt.TotalTicket
+                            + "</td>"
+                            + "</tr>"
+                            + "<tr>"
+                            + "<th>Số vé trẻ em</th>"
+                            + "<td>"
+                            + existReceipt.TotalChildTicket
+                            + "</td>"
+                            + "</tr>"
+                            + "<tr>"
+                            + "<th>Tổng giá</th>"
+                            + "<td>"
+                            + totalPrice
+                            + "</td>"
+                            + "</tr>"
+                            + "<tr>"
+                            + "<th>Tên dịch vụ</th>"
+                            + "<td>"
+                            + serviceName
+                            + "</td>"
+                            + "</tr>"
+                            + "<tr>"
+                            + "<th>Giá đơn vé</th>"
+                            + "<td>"
+                            + existReceipt.OriginalPrice
+                            + "</td>"
+                            + "</tr>"
+                            + "</table>"
+                            + "</div>"
+                            + "</div>"
+                            + "</body>"
+                            + "</html>"
                     };
 
                     return await _sendMailService.SendMail(mailContent);

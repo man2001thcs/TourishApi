@@ -117,7 +117,7 @@ namespace WebApplication1.Controllers.Payment
             if (await _userService.validatePaymentToken(token, orderCode, ""))
                 await _receiptService.thirdPartyPaymentFullReceiptStatusChange(id, orderCode, status);
 
-            return Redirect(_appSettings.ClientUrl + "/user/receipt/list");
+            return Redirect(_appSettings.ClientUrl + "/user/receipt/list?active=2");
         }
 
         [HttpGet("pay-os/update/service/{token}")]
@@ -141,12 +141,12 @@ namespace WebApplication1.Controllers.Payment
             if (receipt == null)
             {
                 if (receipt.ServiceSchedule.MovingScheduleId != null)
-                    return Redirect(_appSettings.ClientUrl + "/user/moving/receipt/list");
+                    return Redirect(_appSettings.ClientUrl + "/user/moving/receipt/list?active=2");
                 else
-                    return Redirect(_appSettings.ClientUrl + "/user/staying/receipt/list");
+                    return Redirect(_appSettings.ClientUrl + "/user/staying/receipt/list?active=2");
             }
 
-            return Redirect(_appSettings.ClientUrl + "/user/moving/receipt/list");
+            return Redirect(_appSettings.ClientUrl + "/user/moving/receipt/list?active=2");
         }
 
         [HttpPost("pay-os/web-hook/tour")]

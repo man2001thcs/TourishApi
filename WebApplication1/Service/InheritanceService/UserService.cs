@@ -66,18 +66,27 @@ namespace WebApplication1.Service.InheritanceService
                             int hours = (int)difference.TotalHours;
                             int minutes = difference.Minutes;
                             Console.WriteLine($"{hours} giờ {minutes} phút");
-                            return new Response { resultCd = 1, MessageCode = $"C001-ex-{hours}-{minutes}", };
+                            return new Response
+                            {
+                                resultCd = 1,
+                                MessageCode = $"C001-ex-{hours}-{minutes}",
+                            };
                         }
                         else
                         {
                             int minutes = (int)difference.TotalMinutes;
                             Console.WriteLine($"{minutes} phút");
 
-                            return new Response { resultCd = 1, MessageCode = $"C001-ex-0-{minutes}", };
+                            return new Response
+                            {
+                                resultCd = 1,
+                                MessageCode = $"C001-ex-0-{minutes}",
+                            };
                         }
                     }
                 }
-                else user.LockoutEnd = null;
+                else
+                    user.LockoutEnd = null;
             }
 
             if (hashInputPassword != user.PasswordHash) //không đúng
@@ -824,10 +833,13 @@ namespace WebApplication1.Service.InheritanceService
             return false;
         }
 
-        public async Task<TokenModel> GeneratePaymentToken(string email, string fullReceiptId, string fullServiceReceiptId)
+        public async Task<TokenModel> GeneratePaymentToken(
+            string email,
+            string fullReceiptId,
+            string fullServiceReceiptId
+        )
         {
-            var user = await _context.Users.FirstOrDefaultAsync(p => p.Email == email
-            );
+            var user = await _context.Users.FirstOrDefaultAsync(p => p.Email == email);
 
             if (user != null)
             {
@@ -840,17 +852,17 @@ namespace WebApplication1.Service.InheritanceService
                     Subject = new ClaimsIdentity(
                         new[]
                         {
-                        new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                        new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                        new Claim("UserName", user.UserName),
-                        new Claim("Id", user.Id.ToString()),
-                        new Claim("Purpose", "payment"),
-                         new Claim("FullReceiptId", fullReceiptId),
-                          new Claim("FullServiceReceiptId", fullServiceReceiptId),
-                        //roles
-                        new Claim("Role", user.Role.ToString()),
-                        new Claim(ClaimTypes.Role, user.Role.ToString()),
+                            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                            new Claim("UserName", user.UserName),
+                            new Claim("Id", user.Id.ToString()),
+                            new Claim("Purpose", "payment"),
+                            new Claim("FullReceiptId", fullReceiptId),
+                            new Claim("FullServiceReceiptId", fullServiceReceiptId),
+                            //roles
+                            new Claim("Role", user.Role.ToString()),
+                            new Claim(ClaimTypes.Role, user.Role.ToString()),
                         }
                     ),
                     Issuer = _appSettings.Issuer,
@@ -877,11 +889,15 @@ namespace WebApplication1.Service.InheritanceService
 
                 return new TokenModel { AccessToken = accessToken, RefreshToken = null, };
             }
-
-            else return new TokenModel { AccessToken = "", RefreshToken = null, };
+            else
+                return new TokenModel { AccessToken = "", RefreshToken = null, };
         }
 
-        public async Task<bool> validatePaymentToken(string bearerToken, string fullReceiptId, string fullServiceReceiptId)
+        public async Task<bool> validatePaymentToken(
+            string bearerToken,
+            string fullReceiptId,
+            string fullServiceReceiptId
+        )
         {
             var checkResult = checkIfTokenFormIsValid(bearerToken);
             if (checkResult.resultCd == 0)
@@ -903,9 +919,14 @@ namespace WebApplication1.Service.InheritanceService
                 if (purpose == "payment")
                 {
                     var fullReceiptIdInToken = tokenInverification.FindFirstValue("FullReceiptId");
-                    var fullServiceReceiptIdInToken = tokenInverification.FindFirstValue("FullServiceReceiptId");
+                    var fullServiceReceiptIdInToken = tokenInverification.FindFirstValue(
+                        "FullServiceReceiptId"
+                    );
 
-                    if (fullReceiptId != fullReceiptIdInToken || fullServiceReceiptId != fullServiceReceiptIdInToken)
+                    if (
+                        fullReceiptId != fullReceiptIdInToken
+                        || fullServiceReceiptId != fullServiceReceiptIdInToken
+                    )
                     {
                         return false;
                     }
@@ -1267,6 +1288,18 @@ namespace WebApplication1.Service.InheritanceService
                     MessageCode = "C009",
                     Error = ex.Message
                 };
+            }
+        }
+
+        public Response getUserByEmail(string email)
+        {
+            try
+            {
+                return _userRepository.getByEmail(email);
+            }
+            catch (Exception ex)
+            {
+                return new Response();
             }
         }
 
