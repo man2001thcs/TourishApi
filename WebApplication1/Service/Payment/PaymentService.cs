@@ -24,13 +24,17 @@ namespace TourishApi.Service.Payment
         private readonly AppSetting _appSettings;
         private readonly ILogger<PaymentService> logger;
         private readonly ReceiptService _receiptService;
+        private readonly UserService _userService;
+        private readonly NotificationService _notificationService;
 
         public PaymentService(
             HttpClient httpClient,
             IOptions<PayOsSetting> _payOsSettings,
             ILogger<PaymentService> _logger,
             IOptions<AppSetting> appSettings,
-            ReceiptService receiptService
+            ReceiptService receiptService,
+            UserService userService,
+            NotificationService notificationService
         )
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
@@ -38,6 +42,8 @@ namespace TourishApi.Service.Payment
             logger = _logger;
             _receiptService = receiptService;
             _appSettings = appSettings.Value;
+            _userService = userService;
+            _notificationService = notificationService;
         }
 
         public async Task<PaymentResponse> MakeTourPaymentAsync(PaymentRequest paymentRequest)
@@ -56,8 +62,10 @@ namespace TourishApi.Service.Payment
                 - existReceipt.DiscountAmount
             );
 
-            insertReq.returnUrl = _appSettings.BaseUrl + "/api/CallPayment/pay-os/update/tour";
-            insertReq.cancelUrl = _appSettings.BaseUrl + "/api/CallPayment/pay-os/update/tour";
+            var token = await _userService.GeneratePaymentToken(paymentRequest.buyerEmail, paymentRequest.orderCode.ToString(), "");
+
+            insertReq.returnUrl = _appSettings.BaseUrl + "/api/CallPayment/pay-os/update/tour/" + token.AccessToken;
+            insertReq.cancelUrl = _appSettings.BaseUrl + "/api/CallPayment/pay-os/update/tour/" + token.AccessToken;
 
             insertReq.buyerName = existReceipt.GuestName;
             insertReq.buyerAddress = "";
@@ -206,8 +214,10 @@ namespace TourishApi.Service.Payment
                 - existReceipt.DiscountAmount
             );
 
-            insertReq.returnUrl = _appSettings.BaseUrl + "/api/CallPayment/pay-os/update/service";
-            insertReq.cancelUrl = _appSettings.BaseUrl + "/api/CallPayment/pay-os/update/service";
+            var token = await _userService.GeneratePaymentToken(paymentRequest.buyerEmail, "", paymentRequest.orderCode.ToString());
+
+            insertReq.returnUrl = _appSettings.BaseUrl + "/api/CallPayment/pay-os/update/service/" + token.AccessToken;
+            insertReq.cancelUrl = _appSettings.BaseUrl + "/api/CallPayment/pay-os/update/service/" + token.AccessToken;
 
             insertReq.buyerName = existReceipt.GuestName;
             insertReq.buyerAddress = "";

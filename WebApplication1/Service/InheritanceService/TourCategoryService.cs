@@ -1,4 +1,7 @@
-﻿using TourishApi.Service.Interface;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using StackExchange.Redis;
+using TourishApi.Service.Interface;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.InheritanceRepo;
@@ -9,10 +12,12 @@ namespace TourishApi.Service.InheritanceService
         : IBaseService<TourishCategoryRepository, TourishCategoryModel>
     {
         private readonly TourishCategoryRepository _entityRepository;
+        private readonly IDatabase _redisDatabase;
 
-        public TourishCategoryService(TourishCategoryRepository airPlaneRepository)
+        public TourishCategoryService(TourishCategoryRepository airPlaneRepository, IConnectionMultiplexer connectionMultiplexer)
         {
             _entityRepository = airPlaneRepository;
+            _redisDatabase = connectionMultiplexer.GetDatabase();
         }
 
         public Response CreateNew(TourishCategoryModel entityModel)
@@ -131,6 +136,65 @@ namespace TourishApi.Service.InheritanceService
                 var response = _entityRepository.Update(TourishCategoryModel);
 
                 return response;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C424",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public async Task<Response> clientGetAll(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
+        {
+            try
+            {
+                String cacheKey =
+                        $"tourish_category_list_{search ?? ""}_{type ?? 0}_{sortBy ?? ""}_{sortDirection ?? ""}_page_{page}_pageSize_{pageSize}";
+                string cachedValue = await _redisDatabase.StringGetAsync(cacheKey);
+
+                if (!string.IsNullOrEmpty(cachedValue))
+                {
+                    var resultCache =
+                        JsonConvert.DeserializeObject<WebApplication1.Model.VirtualModel.Response>(
+                            cachedValue
+                        );
+                    if (resultCache != null)
+                    {
+                        return resultCache;
+                    }
+                }
+
+                var result = _entityRepository.clientGetAll(
+                search,
+                type,
+                sortBy,
+                sortDirection,
+                page,
+                pageSize
+            );
+
+                string resultJson = JsonConvert.SerializeObject(
+                    result,
+                    new JsonSerializerSettings
+                    {
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                        ContractResolver = new CamelCasePropertyNamesContractResolver()
+                    }
+                );
+
+                // Cache the result in Redis
+                await _redisDatabase.StringSetAsync(
+                    cacheKey,
+                    resultJson,
+                    TimeSpan.FromMinutes(60)
+                ); // Cache for 10 minutes
+
+                return result;
             }
             catch (Exception ex)
             {

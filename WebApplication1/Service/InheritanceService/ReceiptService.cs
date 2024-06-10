@@ -12,6 +12,7 @@ using WebApplication1.Model;
 using WebApplication1.Model.Payment;
 using WebApplication1.Model.Receipt;
 using WebApplication1.Model.VirtualModel;
+using WebApplication1.Repository.InheritanceRepo;
 using WebApplication1.Repository.InheritanceRepo.Receipt;
 using WebApplication1.Service;
 
@@ -25,6 +26,8 @@ namespace TourishApi.Service.InheritanceService
         private readonly ILogger<ReceiptService> logger;
         private readonly MovingScheduleService _movingScheduleService;
         private readonly StayingScheduleService _stayingScheduleService;
+        private readonly NotificationService _notificationService;
+        private readonly UserRepository _userRepository;
         private readonly IDatabase _redisDatabase;
 
         private readonly char[] delimiter = new char[] { ';' };
@@ -34,6 +37,8 @@ namespace TourishApi.Service.InheritanceService
         StayingScheduleService stayingScheduleService,
         ILogger<ReceiptService> _logger,
         IConnectionMultiplexer connectionMultiplexer,
+        NotificationService notificationService,
+        UserRepository userRepository,
         TourishPlanService tourishPlanService)
         {
             _receiptRepository = receiptRepository;
@@ -41,6 +46,8 @@ namespace TourishApi.Service.InheritanceService
             _tourishPlanService = tourishPlanService;
             _movingScheduleService = movingScheduleService;
             _stayingScheduleService = stayingScheduleService;
+            _notificationService = notificationService;
+            _userRepository = userRepository;
             _redisDatabase = connectionMultiplexer.GetDatabase();
             logger = _logger;
         }
@@ -731,7 +738,11 @@ namespace TourishApi.Service.InheritanceService
                                                             );
 
                         if (status.Equals("PAID"))
+                        {
                             await SendServiceReceiptToEmail(orderId);
+                            await sendServicePaymentNotify(existReceipt.Email, existReceipt.ServiceSchedule.MovingScheduleId, existReceipt.ServiceSchedule.StayingScheduleId);
+                        }
+
 
                         return response;
                     }
@@ -768,7 +779,11 @@ namespace TourishApi.Service.InheritanceService
                                                             );
 
                         if (status.Equals("PAID"))
+                        {
                             await SendTourReceiptToEmail(orderId);
+                            await sendTourPaymentNotify(existReceipt.Email, existReceipt.TourishSchedule.TourishPlanId);
+                        }
+
 
                         return response;
                     }
@@ -788,6 +803,62 @@ namespace TourishApi.Service.InheritanceService
                 };
                 return response;
             }
+        }
+
+        public async Task<Response> sendTourPaymentNotify(string email, Guid tourishPlanId)
+        {
+            var user = (User)_userRepository.getByEmail(email).Data;
+
+            if (user != null)
+            {
+                var notification = new NotificationModel
+                {
+                    UserCreateId = user.Id,
+                    UserReceiveId = user.Id,
+                    TourishPlanId = tourishPlanId,
+                    IsGenerate = true,
+                    Content = "",
+                    ContentCode = "I511",
+                    IsRead = false,
+                    IsDeleted = false,
+                    CreateDate = DateTime.UtcNow,
+                    UpdateDate = DateTime.UtcNow
+                };
+
+                // _notificationService.CreateNew(notification);
+
+                return await _notificationService.CreateNewAsync(user.Id, notification);
+            }
+
+            return new Response();
+
+        }
+
+        public async Task<Response> sendServicePaymentNotify(string email, Guid? movingServiceId, Guid? stayingServiceId)
+        {
+            var user = (User)_userRepository.getByEmail(email).Data;
+
+            if (user != null)
+            {
+                var notification = new NotificationModel
+                {
+                    UserCreateId = user.Id,
+                    UserReceiveId = user.Id,
+                    MovingScheduleId = movingServiceId,
+                    StayingScheduleId = stayingServiceId,
+                    IsGenerate = true,
+                    Content = "",
+                    ContentCode = "I511",
+                    IsRead = false,
+                    IsDeleted = false,
+                    CreateDate = DateTime.UtcNow,
+                    UpdateDate = DateTime.UtcNow
+                };
+
+                return await _notificationService.CreateNewAsync(user.Id, notification);
+            }
+
+            return new Response();
         }
 
         public async Task<Response> SendTourReceiptToEmail(string orderId)

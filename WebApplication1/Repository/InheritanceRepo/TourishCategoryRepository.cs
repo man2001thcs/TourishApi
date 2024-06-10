@@ -1,4 +1,6 @@
-﻿using TourishApi.Extension;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+using TourishApi.Extension;
 using TourishApi.Repository.Interface;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
@@ -65,6 +67,50 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 entityQuery = entityQuery.Where(entity => entity.Name.Contains(search));
             }
+            #endregion
+
+            #region Sorting
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
+                {
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
+                }
+            }
+            #endregion
+
+            #region Paging
+            var result = PaginatorModel<TourishCategory>.Create(entityQuery, page, pageSize);
+            #endregion
+
+            var entityVM = new Response
+            {
+                resultCd = 0,
+                Data = result.ToList(),
+                count = result.TotalCount,
+            };
+            return entityVM;
+
+        }
+
+        public Response clientGetAll(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
+        {
+            var entityQuery = _context.TourishCategories.AsQueryable();
+
+            #region Filtering
+            entityQuery = entityQuery.Where(entity => _context.TourishPlan.Include(entity1 => entity1.TourishCategoryRelations).
+            Include(entity1 => entity1.TourishScheduleList).
+            Where(entity2 => entity2.TourishCategoryRelations
+            .Where(entity3 => entity3.TourishCategoryId == entity.Id).Count() >= 1 && entity2.TourishScheduleList
+            .Where(entity4 => entity4.PlanStatus == PlanStatus.ConfirmInfo).Count() >= 1)
+            .Count() >= 1);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                entityQuery = entityQuery.Where(entity => entity.Name.Contains(search));
+            }
+
             #endregion
 
             #region Sorting

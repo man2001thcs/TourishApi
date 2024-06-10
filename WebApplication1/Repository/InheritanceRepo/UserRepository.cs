@@ -99,6 +99,15 @@ namespace WebApplication1.Repository.InheritanceRepo
             }
         }
 
+        public Response getByEmail(string email)
+        {
+
+            var entity = _context.Users.FirstOrDefault((entity => entity.Email == email));
+
+            return new Response { resultCd = 0, Data = entity };
+
+        }
+
         public Response getByName(String name, int? type)
         {
             var entity = _context.Users.FirstOrDefault(

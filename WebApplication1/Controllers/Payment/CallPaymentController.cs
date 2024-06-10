@@ -8,6 +8,7 @@ using WebApplication1.Data.Receipt;
 using WebApplication1.Model;
 using WebApplication1.Model.Payment;
 using WebApplication1.Model.VirtualModel;
+using WebApplication1.Service.InheritanceService;
 using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -20,6 +21,7 @@ namespace WebApplication1.Controllers.Payment
     {
         private readonly PaymentService _paymentService;
         private readonly ReceiptService _receiptService;
+        private readonly UserService _userService;
         private readonly AppSetting _appSettings;
 
         private readonly char[] delimiter = new char[] { ';' };
@@ -27,12 +29,14 @@ namespace WebApplication1.Controllers.Payment
         public CallPaymentController(
             PaymentService paymentService,
             ReceiptService receiptService,
+            UserService userService,
             IOptionsMonitor<AppSetting> optionsMonitor
         )
         {
             _paymentService = paymentService;
             _receiptService = receiptService;
             _appSettings = optionsMonitor.CurrentValue;
+            _userService = userService;
         }
 
         // [HttpPost("request")]
@@ -107,26 +111,29 @@ namespace WebApplication1.Controllers.Payment
                 return Ok(new Response { resultCd = 0, MessageCode = "I515-m" });
         }
 
-        [HttpGet("pay-os/update/tour")]
-        public async Task<IActionResult> UpdateReceipt(string id, string orderCode, string status)
+        [HttpGet("pay-os/update/tour/{token}")]
+        public async Task<IActionResult> UpdateReceipt(string id, string orderCode, string status, string token)
         {
-            await _receiptService.thirdPartyPaymentFullReceiptStatusChange(id, orderCode, status);
+            if (await _userService.validatePaymentToken(token, orderCode, ""))
+                await _receiptService.thirdPartyPaymentFullReceiptStatusChange(id, orderCode, status);
 
             return Redirect(_appSettings.ClientUrl + "/user/receipt/list");
         }
 
-        [HttpGet("pay-os/update/service")]
+        [HttpGet("pay-os/update/service/{token}")]
         public async Task<IActionResult> UpdateServiceReceipt(
             string id,
             string orderCode,
-            string status
+            string status,
+            string token
         )
         {
-            await _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(
-                id,
-                orderCode,
-                status
-            );
+            if (await _userService.validatePaymentToken(token, "", orderCode))
+                await _receiptService.thirdPartyPaymentFullServiceReceiptStatusChange(
+                    id,
+                    orderCode,
+                    status
+                );
 
             var receipt = (FullScheduleReceipt)
                 _receiptService.GetFullScheduleReceiptById(int.Parse(orderCode)).Data;

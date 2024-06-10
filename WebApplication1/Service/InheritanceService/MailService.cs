@@ -17,6 +17,7 @@ public class SendMailService : ISendMailService
     public SendMailService(IOptions<MailSettings> _mailSettings, ILogger<SendMailService> _logger)
     {
         mailSettings = _mailSettings.Value;
+        mailSettings.Password = mailSettings.Password.Length > 0 ? mailSettings.Password : Environment.GetEnvironmentVariable("MAIL_SMTP_PASSWORD");
         logger = _logger;
         logger.LogInformation("Create SendMailService");
     }

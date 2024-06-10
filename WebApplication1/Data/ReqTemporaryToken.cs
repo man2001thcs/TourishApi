@@ -5,7 +5,7 @@ namespace WebApplication1.Data
 {
     public enum TokenPurpose
     {
-        SignIn = 0, Reclaim = 1
+        SignIn = 0, Reclaim = 1, Payment = 2
     }
 
     [Table("ReqTemporaryToken")]

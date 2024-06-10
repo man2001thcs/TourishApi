@@ -24,6 +24,13 @@ namespace WebApplication1.Controllers.TourCategory
 
         }
 
+        [HttpGet("client")]
+        public async Task<IActionResult> clientGetAll(string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
+        {
+            return Ok(await _entityService.clientGetAll(search, type, sortBy, sortDirection, page, pageSize));
+
+        }
+
         [HttpGet("{id}")]
         public IActionResult GetById(Guid id)
         {

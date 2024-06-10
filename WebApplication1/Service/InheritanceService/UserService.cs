@@ -824,6 +824,100 @@ namespace WebApplication1.Service.InheritanceService
             return false;
         }
 
+        public async Task<TokenModel> GeneratePaymentToken(string email, string fullReceiptId, string fullServiceReceiptId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(p => p.Email == email
+            );
+
+            if (user != null)
+            {
+                var jwtTokenHandler = new JwtSecurityTokenHandler();
+
+                var secretKeyBytes = Encoding.UTF8.GetBytes(_appSettings.SecretKey);
+
+                var tokenDescription = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(
+                        new[]
+                        {
+                        new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                        new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                        new Claim("UserName", user.UserName),
+                        new Claim("Id", user.Id.ToString()),
+                        new Claim("Purpose", "payment"),
+                         new Claim("FullReceiptId", fullReceiptId),
+                          new Claim("FullServiceReceiptId", fullServiceReceiptId),
+                        //roles
+                        new Claim("Role", user.Role.ToString()),
+                        new Claim(ClaimTypes.Role, user.Role.ToString()),
+                        }
+                    ),
+                    Issuer = _appSettings.Issuer,
+                    Expires = DateTime.UtcNow.AddDays(7),
+                    SigningCredentials = new SigningCredentials(
+                        new SymmetricSecurityKey(secretKeyBytes),
+                        SecurityAlgorithms.HmacSha512Signature
+                    )
+                };
+
+                var token = jwtTokenHandler.CreateToken(tokenDescription);
+                var accessToken = jwtTokenHandler.WriteToken(token);
+
+                var reqToken = new ReqTemporaryToken
+                {
+                    Token = accessToken,
+                    IsActivated = true,
+                    CreateDate = DateTime.UtcNow,
+                    Purpose = TokenPurpose.Payment
+                };
+
+                await _context.ReqTemporaryTokens.AddAsync(reqToken);
+                await _context.SaveChangesAsync();
+
+                return new TokenModel { AccessToken = accessToken, RefreshToken = null, };
+            }
+
+            else return new TokenModel { AccessToken = "", RefreshToken = null, };
+        }
+
+        public async Task<bool> validatePaymentToken(string bearerToken, string fullReceiptId, string fullServiceReceiptId)
+        {
+            var checkResult = checkIfTokenFormIsValid(bearerToken);
+            if (checkResult.resultCd == 0)
+            {
+                var existToken = _context
+                    .ReqTemporaryTokens.Where(entity =>
+                        entity.Token == bearerToken && entity.Purpose == TokenPurpose.Payment
+                    )
+                    .OrderByDescending(entity => entity.CreateDate)
+                    .FirstOrDefault();
+
+                if (existToken == null)
+                    return false;
+                if (!existToken.IsActivated)
+                    return false;
+
+                var tokenInverification = (ClaimsPrincipal)checkResult.Data;
+                var purpose = tokenInverification.FindFirstValue("Purpose");
+                if (purpose == "payment")
+                {
+                    var fullReceiptIdInToken = tokenInverification.FindFirstValue("FullReceiptId");
+                    var fullServiceReceiptIdInToken = tokenInverification.FindFirstValue("FullServiceReceiptId");
+
+                    if (fullReceiptId != fullReceiptIdInToken || fullServiceReceiptId != fullServiceReceiptIdInToken)
+                    {
+                        return false;
+                    }
+
+                    existToken.IsActivated = false;
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private string[] getPermission(UserRole role)
         {
             var permissions = new List<string>();

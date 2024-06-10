@@ -87,6 +87,20 @@ namespace SignalR.Hub
                             .SendMessageToUser(adminId, email, returnMess);
                     }
                 }
+                else
+                {
+
+                    var returnMess = new GuestMessageModel();
+                    returnMess.Content = "Kết nối đã đóng bởi khách hàng";
+                    returnMess.CreateDate = DateTime.UtcNow;
+                    returnMess.State = 2;
+                    returnMess.Side = 2;
+                    returnMess.IsClosed = true;
+                    await Clients
+                                        .Client(Context.ConnectionId)
+                                        .SendMessageToAdmin(adminId, email, returnMess);
+
+                }
             }
             catch (Exception ex)
             {
@@ -223,7 +237,7 @@ namespace SignalR.Hub
                         await _context.AddAsync(adminCon);
 
                         var conHis = _context
-                            .GuestMessageConHisList.Include(u => u.GuestCon)
+                            .GuestMessageConHisList.Include(u => u.GuestCon).Include(u => u.AdminCon)
                             .OrderByDescending(connection => connection.CreateDate)
                             .FirstOrDefault(u =>
                                 u.GuestCon.GuestEmail == guestEmail
@@ -236,8 +250,8 @@ namespace SignalR.Hub
                             var oldMessageList = _context
                                 .GuestMessages.Include(entity => entity.AdminMessageCon)
                                 .Where(entity =>
-                                    entity.AdminMessageCon.ConnectionID
-                                    == conHis.AdminCon.ConnectionID
+                                    entity.AdminMessageConId
+                                    == conHis.AdminConId
                                 )
                                 .ToList();
 
@@ -245,6 +259,8 @@ namespace SignalR.Hub
                             {
                                 message.AdminMessageConId = adminCon.Id;
                             }
+
+                             await _context.SaveChangesAsync();
 
                             conHis.AdminCon = adminCon;
                             var adminInfo = new AdminMessageConDTOModel
@@ -339,7 +355,7 @@ namespace SignalR.Hub
             }
 
             var guestConnection = _context
-                .GuestMessageConList.Include(entity => entity.GuestMessageConHis)
+                .GuestMessageConList.Include(entity => entity.GuestMessageConHis).ThenInclude(entity => entity.AdminCon)
                 .OrderByDescending(entity => entity.CreateDate)
                 .FirstOrDefault(u => u.ConnectionID == Context.ConnectionId);
             if (guestConnection != null)
@@ -347,6 +363,25 @@ namespace SignalR.Hub
                 guestConnection.Connected = false;
                 guestConnection.GuestMessageConHis.CloseDate = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
+
+                var adminConnection = _context
+                .AdminMessageConList.Include(entity => entity.GuestMessageConHis).ThenInclude(entity => entity.GuestCon).Include(entity => entity.Admin)
+                .OrderByDescending(entity => entity.CreateDate)
+                .FirstOrDefault(u => u.Connected && u.GuestMessageConHis.GuestConId == guestConnection.Id);
+
+                if (adminConnection != null)
+                {
+                    var returnMess = new GuestMessageModel();
+                    returnMess.Content = "Kết nối đã đóng bởi khách hàng";
+                    returnMess.CreateDate = DateTime.UtcNow;
+                    returnMess.State = 2;
+                    returnMess.Side = 2;
+                    returnMess.IsClosed = true;
+                    
+                    await Clients
+                                        .Client(adminConnection.ConnectionID)
+                                        .SendMessageToAdmin(adminConnection.Admin.Id, adminConnection.Admin.Email, returnMess);
+                }
             }
 
             await base.OnDisconnectedAsync(exception);
