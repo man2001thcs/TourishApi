@@ -368,16 +368,11 @@ public class TourishPlanRepository : ITourishPlanRepository
     )
     {
         var entityQuery = _context
-            .TourishPlan.Include(entity => entity.MovingSchedules)
-            .Include(entity => entity.EatSchedules)
-            .Include(entity => entity.StayingSchedules)
-            .Include(entity => entity.InstructionList)
+            .TourishPlan
             .Include(entity => entity.TourishScheduleList)
             .Include(entity => entity.TourishInterestList)
             .Include(entity => entity.TourishCategoryRelations)
             .ThenInclude(entity => entity.TourishCategory)
-            .Include(entity => entity.TotalReceipt)
-            .ThenInclude(entity => entity.FullReceiptList)
             .AsQueryable();
 
         #region Filtering

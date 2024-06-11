@@ -707,7 +707,7 @@ public class ReceiptRepository
 
     public Response GetAllTourReceipt(
         string? tourishPlanId,
-        FullReceiptStatus? status,
+        FullReceiptStatus status,
         string? sortBy,
         string? sortDirection,
         int page = 1,
@@ -764,9 +764,11 @@ public class ReceiptRepository
             Status = entity.Status,
             Description = entity.Description,
             CompleteDate = entity.CompleteDate,
-            FullReceiptList = entity
-                .FullReceiptList.Where(entity => (int)entity.Status == (int)status)
-                .ToList(),
+            FullReceiptList = status != null
+                ? entity
+                    .FullReceiptList.Where(fullReceipt => (int)fullReceipt.Status == (int)status)
+                    .ToList()
+                : entity.FullReceiptList.ToList(),
             TourishPlan = entity.TourishPlan,
             CreatedDate = entity.CreatedDate,
             UpdateDate = entity.UpdateDate,
@@ -775,7 +777,7 @@ public class ReceiptRepository
         var receiptVM = new Response
         {
             resultCd = 0,
-            Data = result.ToList(),
+            Data = resultDto.ToList(),
             count = result.TotalCount,
         };
 
@@ -869,7 +871,7 @@ public class ReceiptRepository
         var receiptVM = new Response
         {
             resultCd = 0,
-            Data = result.ToList(),
+            Data = resultDto.ToList(),
             count = result.TotalCount,
         };
 
@@ -1704,9 +1706,11 @@ public class ReceiptRepository
                     && entity.CreatedDate.Year == DateTime.UtcNow.Year
                 )
                 || (
-                    (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month
-                    || entity.CompleteDate.Value.Month == DateTime.UtcNow.Month - 1)
-                        && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
+                    (
+                        entity.CompleteDate.Value.Month == DateTime.UtcNow.Month
+                        || entity.CompleteDate.Value.Month == DateTime.UtcNow.Month - 1
+                    )
+                    && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
                 )
             )
             .GroupBy(entity => entity.TotalReceipt.TourishPlan.TourName)
