@@ -71,11 +71,7 @@ namespace MyWebApiApp
             services.AddDbContext<MyDbContext>(option =>
             {
                 // option.UseSqlServer(Configuration.GetConnectionString("AzureDb"));
-                option.UseSqlServer(
-                    Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING")
-                        ?? "Data Source=tcp:tourishapidbserver.database.windows.net,1433;Initial Catalog=TourishApi_db;User Id=thanagor@tourishapidbserver;Password=Lunafreya2702"
-                );
-                // option.UseSqlServer(Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING"));
+                option.UseSqlServer(Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING") ?? Configuration.GetConnectionString("AzureDb"));
 
                 option.UseTriggers(triggerOptions =>
                 {
@@ -85,40 +81,25 @@ namespace MyWebApiApp
             });
 
             //services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Configuration.GetConnectionString("Redis")));
-            //services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("AZURE_REDIS_STRING")));
-            services.AddSingleton<IConnectionMultiplexer>(
-                ConnectionMultiplexer.Connect(
-                    Environment.GetEnvironmentVariable("AZURE_REDIS_STRING")
-                        ?? "roxanne-tourish-redis.redis.cache.windows.net:6380,password=jpabhwVGRpbxSNuBYwN8fUMUbGTBtRsCaAzCaO4cmS4=,ssl=True,abortConnect=False"
-                )
-            );
+            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("AZURE_REDIS_STRING") ?? Configuration.GetConnectionString("Redis")));
 
             //services.AddScoped(x => new BlobServiceClient(Configuration.GetValue<string>("AzureBlobStorage")));
-            //services.AddScoped(x => new BlobServiceClient(
-            //    Environment.GetEnvironmentVariable("AZURE_BLOB_STRING")
-            //));
             services.AddScoped(x => new BlobServiceClient(
-                Environment.GetEnvironmentVariable("AZURE_BLOB_STRING")
-                    ?? "DefaultEndpointsProtocol=https;AccountName=bookstore1storage;AccountKey=/bNFtqxxZ5brakdZkw2Dk8FAWHi9a8WcQqENipaOTXjBdsFxWqJMXZuz9hnE/yRKimnQHlHtdWkh+AStmoOCgQ==;BlobEndpoint=https://bookstore1storage.blob.core.windows.net/;TableEndpoint=https://bookstore1storage.table.core.windows.net/;QueueEndpoint=https://bookstore1storage.queue.core.windows.net/;FileEndpoint=https://bookstore1storage.file.core.windows.net/"
+                Environment.GetEnvironmentVariable("AZURE_BLOB_STRING") ?? Configuration.GetValue<string>("AzureBlobStorage")
             ));
 
             //services.AddHangfire(config =>
             //    config.UseSqlServerStorage(Configuration.GetConnectionString("AzureDb")));
-            //services.AddHangfire(config =>
-            //    config.UseSqlServerStorage(
-            //        Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING")
-            //    )
-            //);
             services.AddHangfire(config =>
                 config.UseSqlServerStorage(
-                    Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING")
-                        ?? "Data Source=tcp:tourishapidbserver.database.windows.net,1433;Initial Catalog=TourishApi_db;User Id=thanagor@tourishapidbserver;Password=Lunafreya2702"
+                    Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING") ?? Configuration.GetConnectionString("AzureDb")
                 )
             );
 
             services.AddGeminiClient(config =>
             {
-                config.ApiKey = "AIzaSyCgbwEUfMtMgdJqpj0mbczzIjAHi74eE-A";
+                config.ApiKey = Environment.GetEnvironmentVariable("GOOGLE_CHAT_KEY")
+                        ?? "";
                 config.ImageBaseUrl = "CURRENTLY_IMAGE_BASE_URL";
                 config.TextBaseUrl = "https://generativelanguage.googleapis.com/v1/models/gemini-pro";
             });

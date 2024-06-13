@@ -1,4 +1,7 @@
 ﻿using System.Security.Claims;
+using DotnetGeminiSDK.Client.Interfaces;
+using DotnetGeminiSDK.Model.Request;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -20,17 +23,20 @@ namespace SignalR.Hub
         private readonly MyDbContext _context;
         private readonly NotificationService _notificationService;
         private readonly UserService _userService;
+        private readonly IGeminiClient _geminiClient;
 
         public GuestMessageHub(
             MyDbContext context,
             IOptionsMonitor<AppSetting> optionsMonitor,
             NotificationService notificationService,
-            UserService userService
+            UserService userService,
+            IGeminiClient geminiClient
         )
         {
             _context = context;
             _notificationService = notificationService;
             _userService = userService;
+            _geminiClient = geminiClient;
         }
 
         public async Task SendMessageToAll(GuestMessageModel message)
@@ -89,7 +95,6 @@ namespace SignalR.Hub
                 }
                 else
                 {
-
                     var returnMess = new GuestMessageModel();
                     returnMess.Content = "Kết nối đã đóng bởi khách hàng";
                     returnMess.CreateDate = DateTime.UtcNow;
@@ -97,9 +102,8 @@ namespace SignalR.Hub
                     returnMess.Side = 2;
                     returnMess.IsClosed = true;
                     await Clients
-                                        .Client(Context.ConnectionId)
-                                        .SendMessageToAdmin(adminId, email, returnMess);
-
+                        .Client(Context.ConnectionId)
+                        .SendMessageToAdmin(adminId, email, returnMess);
                 }
             }
             catch (Exception ex)
@@ -190,9 +194,93 @@ namespace SignalR.Hub
             }
         }
 
+        public async Task SendMessageToBot(Guid adminId, String email, GuestMessageModel message)
+        {
+            try
+            {
+                var conHis = _context
+                    .GuestMessageConHisList.Include(u => u.GuestCon)
+                    .OrderByDescending(connection => connection.CreateDate)
+                    .Where(u =>
+                        u.GuestCon.GuestEmail == email
+                        && u.GuestCon.Connected
+                        && u.GuestCon.isChatWithBot == 1
+                    )
+                    .FirstOrDefault();
+
+                if (conHis != null)
+                {
+                    var messages = new List<Content>
+                    {
+                        new Content
+                        {
+                            Parts = new List<Part>
+                            {
+                                new Part { Text = message.Content },
+                                new Part
+                                {
+                                    Text =
+                                        "Viết dạng tiếng việt, format sao cho có thể chèn vào thẻ div"
+                                },
+                                new Part
+                                {
+                                    Text =
+                                        "Ngắn gọn không quá 150 kí tự, trả dưới dạng chuỗi kí tự thuần"
+                                }
+                            }
+                        },
+                        // Add more Content objects as needed
+                    };
+
+                    var response = await _geminiClient.TextPrompt(messages);
+
+                    var messageEntity = new GuestMessage
+                    {
+                        Content = message.Content,
+                        IsRead = false,
+                        IsDeleted = false,
+                        AdminMessageConId = conHis.AdminConId,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow,
+                    };
+
+                    var returnMess = new GuestMessageModel
+                    {
+                        Content = response.Candidates[0].Content.Parts[0].Text,
+                        CreateDate = DateTime.UtcNow,
+                        State = 2,
+                        Side = 2,
+
+                    };
+
+                    await Clients
+                        .Client(Context.ConnectionId)
+                        .SendMessageToUser(adminId, email, returnMess);
+                }
+            }
+            catch (Exception ex)
+            {
+                var connectionGuest = _context
+                    .GuestMessageConList.OrderByDescending(connection => connection.CreateDate)
+                    .FirstOrDefault(u => u.GuestEmail == email && u.Connected);
+
+                if (connectionGuest != null)
+                {
+                    var returnMess = message;
+                    returnMess.State = 3;
+                    await Clients
+                        .Client(Context.ConnectionId)
+                        .SendMessageToUser(adminId, email, returnMess);
+                }
+                //await Clients.Client(connection.ConnectionID).SendOffersToUser(userId, null);
+            }
+        }
+
         public override async Task OnConnectedAsync()
         {
             var adminId = (string)Context.GetHttpContext().Request.Query["adminId"];
+
+            var isChatWithBot = (string)Context.GetHttpContext().Request.Query["isChatWithBot"];
             var guestEmail = (string)Context.GetHttpContext().Request.Query["guestEmail"];
             var guestName = (string)Context.GetHttpContext().Request.Query["guestName"];
             var guestPhoneNumber = (string)
@@ -237,7 +325,8 @@ namespace SignalR.Hub
                         await _context.AddAsync(adminCon);
 
                         var conHis = _context
-                            .GuestMessageConHisList.Include(u => u.GuestCon).Include(u => u.AdminCon)
+                            .GuestMessageConHisList.Include(u => u.GuestCon)
+                            .Include(u => u.AdminCon)
                             .OrderByDescending(connection => connection.CreateDate)
                             .FirstOrDefault(u =>
                                 u.GuestCon.GuestEmail == guestEmail
@@ -249,10 +338,7 @@ namespace SignalR.Hub
                         {
                             var oldMessageList = _context
                                 .GuestMessages.Include(entity => entity.AdminMessageCon)
-                                .Where(entity =>
-                                    entity.AdminMessageConId
-                                    == conHis.AdminConId
-                                )
+                                .Where(entity => entity.AdminMessageConId == conHis.AdminConId)
                                 .ToList();
 
                             foreach (var message in oldMessageList)
@@ -260,7 +346,7 @@ namespace SignalR.Hub
                                 message.AdminMessageConId = adminCon.Id;
                             }
 
-                             await _context.SaveChangesAsync();
+                            await _context.SaveChangesAsync();
 
                             conHis.AdminCon = adminCon;
                             var adminInfo = new AdminMessageConDTOModel
@@ -295,12 +381,22 @@ namespace SignalR.Hub
             }
             else if (!guestEmail.IsNullOrEmpty())
             {
+                var botEnable = 0;
+                if (!String.IsNullOrEmpty(isChatWithBot))
+                {
+                    botEnable = int.Parse(isChatWithBot);
+
+                    if (botEnable != 1)
+                        botEnable = 0;
+                }
+
                 var guestCon = new GuestMessageCon
                 {
                     GuestEmail = guestEmail,
                     GuestName = guestName,
                     GuestPhoneNumber = guestPhoneNumber,
                     ConnectionID = Context.ConnectionId,
+                    isChatWithBot = botEnable,
                     UserAgent = Context.GetHttpContext().Request.Headers["User-Agent"].ToString(),
                     Connected = true,
                     CreateDate = DateTime.UtcNow
@@ -355,7 +451,8 @@ namespace SignalR.Hub
             }
 
             var guestConnection = _context
-                .GuestMessageConList.Include(entity => entity.GuestMessageConHis).ThenInclude(entity => entity.AdminCon)
+                .GuestMessageConList.Include(entity => entity.GuestMessageConHis)
+                .ThenInclude(entity => entity.AdminCon)
                 .OrderByDescending(entity => entity.CreateDate)
                 .FirstOrDefault(u => u.ConnectionID == Context.ConnectionId);
             if (guestConnection != null)
@@ -365,9 +462,13 @@ namespace SignalR.Hub
                 await _context.SaveChangesAsync();
 
                 var adminConnection = _context
-                .AdminMessageConList.Include(entity => entity.GuestMessageConHis).ThenInclude(entity => entity.GuestCon).Include(entity => entity.Admin)
-                .OrderByDescending(entity => entity.CreateDate)
-                .FirstOrDefault(u => u.Connected && u.GuestMessageConHis.GuestConId == guestConnection.Id);
+                    .AdminMessageConList.Include(entity => entity.GuestMessageConHis)
+                    .ThenInclude(entity => entity.GuestCon)
+                    .Include(entity => entity.Admin)
+                    .OrderByDescending(entity => entity.CreateDate)
+                    .FirstOrDefault(u =>
+                        u.Connected && u.GuestMessageConHis.GuestConId == guestConnection.Id
+                    );
 
                 if (adminConnection != null)
                 {
@@ -377,10 +478,14 @@ namespace SignalR.Hub
                     returnMess.State = 2;
                     returnMess.Side = 2;
                     returnMess.IsClosed = true;
-                    
+
                     await Clients
-                                        .Client(adminConnection.ConnectionID)
-                                        .SendMessageToAdmin(adminConnection.Admin.Id, adminConnection.Admin.Email, returnMess);
+                        .Client(adminConnection.ConnectionID)
+                        .SendMessageToAdmin(
+                            adminConnection.Admin.Id,
+                            adminConnection.Admin.Email,
+                            returnMess
+                        );
                 }
             }
 
