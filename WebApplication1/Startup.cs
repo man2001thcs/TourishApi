@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Azure.Storage.Blobs;
+using DotnetGeminiSDK;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
@@ -114,6 +115,13 @@ namespace MyWebApiApp
                         ?? "Data Source=tcp:tourishapidbserver.database.windows.net,1433;Initial Catalog=TourishApi_db;User Id=thanagor@tourishapidbserver;Password=Lunafreya2702"
                 )
             );
+
+            services.AddGeminiClient(config =>
+            {
+                config.ApiKey = "AIzaSyCgbwEUfMtMgdJqpj0mbczzIjAHi74eE-A";
+                config.ImageBaseUrl = "CURRENTLY_IMAGE_BASE_URL";
+                config.TextBaseUrl = "https://generativelanguage.googleapis.com/v1/models/gemini-pro";
+            });
 
             // Repo
             services.AddScoped<RestHouseContactRepository>();
