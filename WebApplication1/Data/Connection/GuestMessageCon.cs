@@ -14,7 +14,7 @@ namespace WebApplication1.Data.Connection
         public string GuestPhoneNumber { get; set; }
         public required string ConnectionID { get; set; }
         public string UserAgent { get; set; }
-        public int isChatWithBot { get; set; }
+        public int IsChatWithBot { get; set; }
         public bool Connected { get; set; }
         public DateTime CreateDate { get; set; }
         public GuestMessageConHistory GuestMessageConHis { get; set; }

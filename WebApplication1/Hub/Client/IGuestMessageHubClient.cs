@@ -7,6 +7,7 @@ namespace SignalR.Hub.Client
     {
         Task SendMessageToAdmin(Guid adminId, string email, GuestMessageModel message);
         Task SendMessageToUser(Guid adminId, string email, GuestMessageModel message);
+        Task SendMessageToBot(Guid? adminId, string email, GuestMessageModel message);
         Task SendMessageToAll(GuestMessageModel message);
         Task SendString(String stringA);
         Task NotifyNewCon(String adminId, AdminMessageConDTOModel adminMessageConDTO);

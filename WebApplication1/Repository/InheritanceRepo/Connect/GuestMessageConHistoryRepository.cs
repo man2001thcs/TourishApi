@@ -266,7 +266,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                     .Include(entity => entity.AdminCon)
                     .ThenInclude(entity => entity.GuestMessages)
                     .OrderByDescending(entity => entity.CreateDate)
-                    .Where(entity => entity.GuestCon.ConnectionID == connectionId);
+                    .Where(entity => entity.GuestCon.ConnectionID == connectionId && entity.GuestCon.IsChatWithBot == 0);
 
                 var resultDtoQuery = entity.Select(guestConHis => new GuestMessageConHistoryDTOModel
                 {
@@ -314,7 +314,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                         .GuestMessages.Include(entity => entity.AdminMessageCon)
                         .Include(entity => entity.GuestMessageCon)
                         .Where(entity =>
-                            entity.GuestMessageCon.ConnectionID == connectionId
+                            (entity.GuestMessageCon.ConnectionID == connectionId  && entity.GuestMessageCon.IsChatWithBot == 0)
                             || resultDtoQuery.Count(entity1 =>
                                 entity1.AdminMessageCon.ConnectionID
                                 == entity.AdminMessageCon.ConnectionID

@@ -194,7 +194,7 @@ namespace SignalR.Hub
             }
         }
 
-        public async Task SendMessageToBot(Guid adminId, String email, GuestMessageModel message)
+        public async Task SendMessageToBot(string? adminId, String email, GuestMessageModel message)
         {
             try
             {
@@ -204,12 +204,22 @@ namespace SignalR.Hub
                     .Where(u =>
                         u.GuestCon.GuestEmail == email
                         && u.GuestCon.Connected
-                        && u.GuestCon.isChatWithBot == 1
+                        && u.GuestCon.IsChatWithBot == 1
                     )
                     .FirstOrDefault();
 
                 if (conHis != null)
                 {
+                    var returnMess = message;
+                    returnMess.Id = Guid.NewGuid();
+                    returnMess.State = 1;
+                    returnMess.CreateDate = DateTime.UtcNow;
+                    returnMess.Side = 1;
+
+                    await Clients
+                        .Client(Context.ConnectionId)
+                        .SendMessageToUser(new Guid(), email, returnMess);
+
                     var messages = new List<Content>
                     {
                         new Content
@@ -220,7 +230,7 @@ namespace SignalR.Hub
                                 new Part
                                 {
                                     Text =
-                                        "Viết dạng tiếng việt, format sao cho có thể chèn vào thẻ div"
+                                        "Viết dạng tiếng việt"
                                 },
                                 new Part
                                 {
@@ -234,18 +244,10 @@ namespace SignalR.Hub
 
                     var response = await _geminiClient.TextPrompt(messages);
 
-                    var messageEntity = new GuestMessage
-                    {
-                        Content = message.Content,
-                        IsRead = false,
-                        IsDeleted = false,
-                        AdminMessageConId = conHis.AdminConId,
-                        CreateDate = DateTime.UtcNow,
-                        UpdateDate = DateTime.UtcNow,
-                    };
 
-                    var returnMess = new GuestMessageModel
+                    var returnMessFromBot = new GuestMessageModel
                     {
+                        Id = Guid.NewGuid(),
                         Content = response.Candidates[0].Content.Parts[0].Text,
                         CreateDate = DateTime.UtcNow,
                         State = 2,
@@ -255,14 +257,14 @@ namespace SignalR.Hub
 
                     await Clients
                         .Client(Context.ConnectionId)
-                        .SendMessageToUser(adminId, email, returnMess);
+                        .SendMessageToUser(new Guid(), email, returnMessFromBot);
                 }
             }
             catch (Exception ex)
             {
                 var connectionGuest = _context
                     .GuestMessageConList.OrderByDescending(connection => connection.CreateDate)
-                    .FirstOrDefault(u => u.GuestEmail == email && u.Connected);
+                    .FirstOrDefault(u => u.GuestEmail == email && u.Connected && u.IsChatWithBot == 1);
 
                 if (connectionGuest != null)
                 {
@@ -270,7 +272,7 @@ namespace SignalR.Hub
                     returnMess.State = 3;
                     await Clients
                         .Client(Context.ConnectionId)
-                        .SendMessageToUser(adminId, email, returnMess);
+                        .SendMessageToUser(new Guid(), email, returnMess);
                 }
                 //await Clients.Client(connection.ConnectionID).SendOffersToUser(userId, null);
             }
@@ -396,7 +398,7 @@ namespace SignalR.Hub
                     GuestName = guestName,
                     GuestPhoneNumber = guestPhoneNumber,
                     ConnectionID = Context.ConnectionId,
-                    isChatWithBot = botEnable,
+                    IsChatWithBot = botEnable,
                     UserAgent = Context.GetHttpContext().Request.Headers["User-Agent"].ToString(),
                     Connected = true,
                     CreateDate = DateTime.UtcNow
@@ -411,28 +413,51 @@ namespace SignalR.Hub
                 await _context.AddAsync(hisCon);
                 await _context.SaveChangesAsync();
 
-                var adminConList = await _context
-                    .NotificationConList.Where(entity =>
-                        entity.User.Role == UserRole.Admin && entity.Connected
-                    )
-                    .ToListAsync();
-                foreach (var adminCon in adminConList)
-                {
-                    var notification = new NotificationModel
-                    {
-                        UserCreateId = null,
-                        UserReceiveId = adminCon.UserId,
-                        TourishPlanId = null,
-                        Content = "Hệ thống nhận được yêu cầu tư vấn mới",
-                        ContentCode = "",
-                        IsRead = false,
-                        IsDeleted = false,
-                        CreateDate = DateTime.UtcNow,
-                        UpdateDate = DateTime.UtcNow
-                    };
 
-                    await _notificationService.CreateNewAsync(adminCon.UserId, notification);
+                if (botEnable == 0)
+                {
+                    var adminConList = await _context
+                                        .NotificationConList.Where(entity =>
+                                            entity.User.Role == UserRole.Admin && entity.Connected
+                                        )
+                                        .ToListAsync();
+                    foreach (var adminCon in adminConList)
+                    {
+                        var notification = new NotificationModel
+                        {
+                            UserCreateId = null,
+                            UserReceiveId = adminCon.UserId,
+                            TourishPlanId = null,
+                            Content = "Hệ thống nhận được yêu cầu tư vấn mới",
+                            ContentCode = "",
+                            IsRead = false,
+                            IsDeleted = false,
+                            CreateDate = DateTime.UtcNow,
+                            UpdateDate = DateTime.UtcNow
+                        };
+
+                        await _notificationService.CreateNewAsync(adminCon.UserId, notification);
+                    }
                 }
+
+                if (botEnable == 1)
+                {
+                    var returnMess = new GuestMessageModel();
+                    returnMess.Id = Guid.NewGuid();
+                    returnMess.Content = "Bạn đang chat với bot Gemini của Google, vui lòng đặt câu hỏi";
+                    returnMess.CreateDate = DateTime.UtcNow;
+                    returnMess.State = 2;
+                    returnMess.Side = 2;
+
+                    await Clients
+                        .Client(Context.ConnectionId)
+                        .SendMessageToUser(
+                            new Guid(),
+                            guestEmail,
+                            returnMess
+                        );
+                }
+
             }
             await base.OnConnectedAsync();
         }
