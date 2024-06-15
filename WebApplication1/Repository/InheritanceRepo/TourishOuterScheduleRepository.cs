@@ -16,6 +16,37 @@ namespace WebApplication1.Repository.InheritanceRepo
         private readonly IBlobService _blobService;
         public static int PAGE_SIZE { get; set; } = 5;
 
+        private readonly string[] travelTicketPriceInstructionLines = new string[]
+        {
+            "Hộ chiếu phải còn thời hạn sử dụng trên 6 tháng, tính từ ngày khởi hành đi và về.",
+            "Hành lý quá cước quy định sẽ bị tính thêm phí.",
+            "Xe vận chuyển ngoài chương trình và các show về đêm không bao gồm trong giá vé."
+        };
+
+        private readonly string[] travelTicketCautionInstructionLines = new string[]
+        {
+            "Du khách Việt Kiều hoặc nước ngoài phải có visa tái nhập nhiều lần hoặc miễn thị thực 5 năm.",
+            "Với du lịch nước ngoài, hộ chiếu phải mang theo bản gốc hợp lệ, không bị rạn, phai mờ, và còn thời hạn sử dụng trên 6 tháng (tính từ ngày khởi hành).",
+            "Công ty du lịch không chịu trách nhiệm nếu Quý khách bị từ chối nhập cảnh với bất kỳ lý do nào từ hải quan nước ngoài.",
+            "Công ty được phép thay đổi lịch trình chuyến đi và sử dụng các hãng hàng không thay thế, nhưng vẫn đảm bảo lộ trình.",
+            "Trong trường hợp bất khả kháng như khủng bố, thiên tai hoặc thay đổi lịch trình của phương tiện công cộng (máy bay, tàu hỏa...), Công ty du lịch giữ quyền điều chỉnh lộ trình sao cho phù hợp và an toàn cho khách hàng, mà không phải chịu trách nhiệm bồi thường thiệt hại phát sinh."
+        };
+
+        private readonly string[] bookingPriceInstructionLines = new string[]
+        {
+            "Điện thoại, giặt ủi, nước uống trong phòng khách sạn và các chi phí cá nhân khác không bao gồm trong giá phòng.",
+            "Hành lý quá cước quy định có thể bị tính thêm phí."
+        };
+
+        private readonly string[] bookingCautionInstructionLines = new string[]
+        {
+            "Trẻ em dưới 16 tuổi phải có bố mẹ đi cùng hoặc người được ủy quyền có giấy ủy quyền từ bố mẹ.",
+            "Với du lịch nước ngoài: Không sử dụng thẻ xanh. Nếu sử dụng Sổ Du lịch (yêu cầu visa nước nhập cảnh), vui lòng thông báo cho nhân viên nhận tour nếu Quý khách sử dụng các hồ sơ khác ngoài hộ chiếu.",
+            "Thứ tự điểm tham quan và lộ trình có thể thay đổi tùy theo tình hình thực tế, nhưng vẫn đảm bảo đầy đủ các điểm tham quan như ban đầu.",
+            "Công ty được phép thay đổi lịch trình chuyến đi và sử dụng các hãng hàng không thay thế, nhưng vẫn đảm bảo tham quan đầy đủ các điểm theo chương trình.",
+            "Trong trường hợp bất khả kháng như khủng bố, thiên tai hoặc thay đổi lịch trình của phương tiện công cộng (máy bay, tàu hỏa...), Công ty du lịch giữ quyền điều chỉnh lộ trình tour cho phù hợp và an toàn cho khách hàng, mà không phải chịu trách nhiệm bồi thường thiệt hại phát sinh."
+        };
+
         public TourishOuterScheduleRepository(MyDbContext _context, IBlobService blobService)
         {
             this._context = _context;
@@ -98,6 +129,8 @@ namespace WebApplication1.Repository.InheritanceRepo
                 }
                 addValue.ServiceScheduleList = serviceDataScheduleList;
             }
+
+            addValue.InstructionList = initiateMovingInstructionList();
 
             var scheduleInterest = new ScheduleInterest();
             var scheduleInterestList = new List<ScheduleInterest>();
@@ -199,6 +232,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 addValue.ScheduleInterestList = scheduleInterestList;
             }
 
+            addValue.InstructionList = initiateStayingInstructionList();
             addValue.ScheduleInterestList = scheduleInterestList;
 
             await _context.AddAsync(addValue);
@@ -618,7 +652,7 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response getByStayingScheduleId(Guid id)
         {
             var entity = _context
-                .StayingSchedules.Include(entity => entity.ServiceScheduleList)
+                .StayingSchedules.Include(entity => entity.ServiceScheduleList).Include(entity => entity.InstructionList)
                 .FirstOrDefault((entity => entity.Id == id));
 
             return new Response { resultCd = 0, Data = entity };
@@ -627,7 +661,7 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response clientGetByStayingScheduleId(Guid id)
         {
             var entity = _context
-                .StayingSchedules.Include(entity => entity.ServiceScheduleList)
+                .StayingSchedules.Include(entity => entity.ServiceScheduleList).Include(entity => entity.InstructionList)
                 .FirstOrDefault((entity => entity.Id == id));
 
             entity.ServiceScheduleList = entity
@@ -697,6 +731,29 @@ namespace WebApplication1.Repository.InheritanceRepo
                     }
                 }
 
+                if (entityModel.InstructionList != null && (entityModel.InstructionList ?? new List<InstructionModel>()).Count > 0)
+                {
+                    var instructionList = new List<Instruction>();
+                    foreach (var item in entityModel.InstructionList)
+                    {
+                        instructionList.Add(
+                            new Instruction
+                            {
+                                Id = item.Id.Value,
+                                StayingScheduleId = entity.Id,
+                                Description = item.Description,
+                                InstructionType = item.InstructionType,
+                                CreateDate = item.CreateDate,
+                                UpdateDate = DateTime.UtcNow,
+                            }
+                        );
+                    }
+                    entity.InstructionList = instructionList;
+                } else
+                {
+                    entity.InstructionList = initiateStayingInstructionList();
+                }
+
                 if (entityModel.ServiceScheduleList != null)
                 {
                     var dataScheduleList = new List<ServiceSchedule>();
@@ -759,7 +816,7 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response getByMovingScheduleId(Guid id)
         {
             var entity = _context
-                .MovingSchedules.Include(entity => entity.ServiceScheduleList)
+                .MovingSchedules.Include(entity => entity.ServiceScheduleList).Include(entity => entity.InstructionList)
                 .FirstOrDefault((entity => entity.Id == id));
 
             return new Response { resultCd = 0, Data = entity };
@@ -768,7 +825,7 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response clientGetByMovingScheduleId(Guid id)
         {
             var entity = _context
-                .MovingSchedules.Include(entity => entity.ServiceScheduleList)
+                .MovingSchedules.Include(entity => entity.ServiceScheduleList).Include(entity => entity.InstructionList)
                 .FirstOrDefault((entity => entity.Id == id));
 
             entity.ServiceScheduleList = entity
@@ -837,6 +894,30 @@ namespace WebApplication1.Repository.InheritanceRepo
                             entity.ScheduleInterestList.Add(scheduleInterest);
                         }
                     }
+                }
+
+                if (entityModel.InstructionList != null && (entityModel.InstructionList ?? new List<InstructionModel>()).Count > 0)
+                {
+                    var instructionList = new List<Instruction>();
+                    foreach (var item in entityModel.InstructionList)
+                    {
+                        instructionList.Add(
+                            new Instruction
+                            {
+                                Id = item.Id.Value,
+                                MovingScheduleId = entity.Id,
+                                Description = item.Description,
+                                InstructionType = item.InstructionType,
+                                CreateDate = item.CreateDate,
+                                UpdateDate = DateTime.UtcNow,
+                            }
+                        );
+                    }
+                    entity.InstructionList = instructionList;
+                }
+                else
+                {
+                    entity.InstructionList = initiateMovingInstructionList();
                 }
 
                 if (entityModel.ServiceScheduleList != null)
@@ -1245,6 +1326,72 @@ namespace WebApplication1.Repository.InheritanceRepo
             }
 
             return false;
+        }
+
+        private List<Instruction> initiateMovingInstructionList()
+        {
+            var instructionList = new List<Instruction>();
+
+            foreach (var instruction in travelTicketPriceInstructionLines)
+            {
+                instructionList.Add(
+                    new Instruction
+                    {
+                        InstructionType = InstructionType.Price,
+                        Description = instruction,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow,
+                    }
+                );
+            }
+
+            foreach (var instruction in travelTicketCautionInstructionLines)
+            {
+                instructionList.Add(
+                    new Instruction
+                    {
+                        InstructionType = InstructionType.Caution,
+                        Description = instruction,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow,
+                    }
+                );
+            }
+
+            return instructionList;
+        }
+
+        private List<Instruction> initiateStayingInstructionList()
+        {
+            var instructionList = new List<Instruction>();
+
+            foreach (var instruction in bookingPriceInstructionLines)
+            {
+                instructionList.Add(
+                    new Instruction
+                    {
+                        InstructionType = InstructionType.Price,
+                        Description = instruction,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow,
+                    }
+                );
+            }
+
+            foreach (var instruction in bookingCautionInstructionLines)
+            {
+                instructionList.Add(
+                    new Instruction
+                    {
+                        InstructionType = InstructionType.Caution,
+                        Description = instruction,
+                        CreateDate = DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow,
+                    }
+                );
+            }
+
+            return instructionList;
         }
     }
 }
