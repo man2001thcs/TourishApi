@@ -24,7 +24,7 @@ namespace WebApplication1.Controllers.Notification
         {
             NotificationModel entityInsertModel = entityModel;
             entityInsertModel.IsGenerate = false;
-            return Ok(_entityService.CreateNewAsync(entityModel.UserCreateId.Value, entityInsertModel));
+            return Ok(await _entityService.CreateNewAsync(entityModel.UserReceiveId.Value, entityInsertModel));
         }
     }
 }
