@@ -329,11 +329,45 @@ public class TourishPlanRepository : ITourishPlanRepository
         #region Sorting
         if (!string.IsNullOrEmpty(sortBy))
         {
-            entityQuery = entityQuery.OrderByColumn(sortBy);
-            if (sortDirection == "desc")
+            if (sortBy.Equals("totalTicketInMonth"))
             {
-                entityQuery = entityQuery.OrderByColumnDescending(sortBy);
+                var receiptList = _context
+                .FullReceiptList.Include(entity => entity.TotalReceipt)
+                .Include(entity => entity.TotalReceipt)
+                .Include(entity => entity.TourishSchedule)
+                .ThenInclude(entity => entity.TourishPlan)
+                .Where(entity => (int)entity.Status < 3)
+                .Where(entity =>
+                    (
+                        entity.CreatedDate.Month == DateTime.UtcNow.Month
+                        && entity.CreatedDate.Year == DateTime.UtcNow.Year
+                    )
+                    || (
+                        entity.CompleteDate.Value.Month == DateTime.UtcNow.Month
+                        && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
+                    )
+                )
+                .GroupBy(entity => entity.TotalReceipt.TourishPlan.Id)
+                .Select(group => new
+                {
+                    id = group.Key,
+                    totalTicket = group.Sum(entity => entity.TotalTicket + entity.TotalChildTicket)
+                })
+                .OrderByDescending(group => group.totalTicket)
+                .Take(pageSize)
+                .ToList();
+
+                entityQuery = entityQuery.Where(entity => receiptList.Count(entity1 => entity1.id == entity.Id) >= 1);
             }
+            else
+            {
+                entityQuery = entityQuery.OrderByColumn(sortBy);
+                if (sortDirection == "desc")
+                {
+                    entityQuery = entityQuery.OrderByColumnDescending(sortBy);
+                }
+            }
+
         }
         #endregion
 
