@@ -665,7 +665,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 .FirstOrDefault((entity => entity.Id == id));
 
             entity.ServiceScheduleList = entity
-                .ServiceScheduleList.Where(entity => entity.Status == ScheduleStatus.Created)
+                .ServiceScheduleList.Where(entity => entity.Status == ScheduleStatus.ConfirmInfo)
                 .ToList();
 
             return new Response { resultCd = 0, Data = entity };
@@ -829,7 +829,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 .FirstOrDefault((entity => entity.Id == id));
 
             entity.ServiceScheduleList = entity
-                .ServiceScheduleList.Where(entity => entity.Status == ScheduleStatus.Created)
+                .ServiceScheduleList.Where(entity => entity.Status == ScheduleStatus.ConfirmInfo)
                 .ToList();
 
             return new Response { resultCd = 0, Data = entity };

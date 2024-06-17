@@ -220,7 +220,7 @@ namespace TourishApi.Service.InheritanceService
                     }
                 }
 
-                var result = _entityRepository.getById(id);
+                var result = _entityRepository.clientGetById(id);
                 if (result.Data == null)
                 {
                     var response = new Response { resultCd = 1, MessageCode = "C410", };
