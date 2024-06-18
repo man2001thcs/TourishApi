@@ -290,39 +290,55 @@ namespace TourishApi.Service.InheritanceService
                 var response = await _entityRepository.Update(entityModel, userId);
                 if (response.MessageCode == "I412")
                 {
+
+
                     var interestList = await _entityRepository.getTourInterest(entityModel.Id);
 
                     foreach (var interest in interestList)
                     {
                         if (interest.User.Role == UserRole.User)
                         {
-                            var isInNeedOfNotify = _entityRepository.checkArrangeScheduleFromUser(
+                            var isInNeedOfNotify = await _entityRepository.checkArrangeScheduleFromUser(
                                 interest.User.Email,
-                                entityModel.Id
+                                entityModel.Id,
+                                new List<string>()
                             );
                             if (!isInNeedOfNotify)
                                 continue;
                         }
 
-                        var notification = new NotificationModel
+                        if (response.Change != null)
                         {
-                            UserCreateId = new Guid(userId),
-                            UserReceiveId = interest.UserId,
-                            TourishPlanId = entityModel.Id,
-                            IsGenerate = true,
-                            Content = "",
-                            ContentCode = "I412",
-                            IsRead = false,
-                            IsDeleted = false,
-                            CreateDate = DateTime.UtcNow,
-                            UpdateDate = DateTime.UtcNow
-                        };
+                            // Create property change notification
+                            if (response.Change.propertyChangeList.Count > 0)
+                            {
+                                await CreateNotification(userId, interest.UserId, entityModel.Id, "I412");
+                            }
 
-                        // _notificationService.CreateNew(notification);
+                            // Create schedule change notification
+                            if (response.Change.scheduleChangeList.Count > 0 &&
+                                interest.User.Role == UserRole.User && await _entityRepository.checkArrangeScheduleFromUser(
+                                    interest.User.Email,
+                                    entityModel.Id,
+                                    response.Change.scheduleChangeList
+                                ))
+                            {
+                                await CreateNotification(userId, interest.UserId, entityModel.Id, "I412-schedule");
+                            }
 
-                        await _notificationService.CreateNewAsync(interest.UserId, notification);
+                            if (response.Change.scheduleChangeList.Count > 0 &&
+                                (interest.User.Role == UserRole.Admin || interest.User.Role == UserRole.AdminManager))
+                            {
+                                await CreateNotification(userId, interest.UserId, entityModel.Id, "I412-schedule");
+                            }
+
+                            if (response.Change.isNewScheduleAdded &&
+                               (interest.User.Role == UserRole.Admin || interest.User.Role == UserRole.AdminManager))
+                            {
+                                await CreateNotification(userId, interest.UserId, entityModel.Id, "I412-new-schedule");
+                            }
+                        }
                     }
-                    ;
                 }
 
                 return response;
@@ -340,8 +356,30 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
+        // Helper method to create notifications
+        public async Task<int> CreateNotification(string userId, Guid userReceiveId, Guid tourishPlanId, string contentCode)
+        {
+            var notification = new NotificationModel
+            {
+                UserCreateId = new Guid(userId),
+                UserReceiveId = userReceiveId,
+                TourishPlanId = tourishPlanId,
+                IsGenerate = true,
+                Content = "",
+                ContentCode = contentCode,
+                IsRead = false,
+                IsDeleted = false,
+                CreateDate = DateTime.UtcNow,
+                UpdateDate = DateTime.UtcNow
+            };
+
+            await _notificationService.CreateNewAsync(userReceiveId, notification);
+
+            return 1;
+        }
+
         public async Task<Response> getDescription(string containerName, string blobName)
-        {          
+        {
             var result = new Response
             {
                 resultCd = 0,

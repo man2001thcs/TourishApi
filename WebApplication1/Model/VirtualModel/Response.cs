@@ -15,5 +15,21 @@
         public string? type { get; set; }
 
         public int? count { get; set; }
+        public Change? Change { get; set; }
+    }
+
+    public class Change
+    {
+        public List<string> propertyChangeList { get; set; }
+        public List<string> scheduleChangeList { get; set; }
+        public Boolean isNewScheduleAdded { get; set; }
+
+
+        public Change()
+        {
+            propertyChangeList = new List<string>();
+            scheduleChangeList = new List<string>();
+            isNewScheduleAdded = false; // Assuming default value is false
+        }
     }
 }

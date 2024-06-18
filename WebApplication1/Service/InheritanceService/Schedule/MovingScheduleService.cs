@@ -148,7 +148,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
                         resultJson,
                         TimeSpan.FromMinutes(60)
                     ); // Cache for 10 minutes
-                    return result;                 
+                    return result;
                 }
                 else
                 {
@@ -271,34 +271,50 @@ namespace TourishApi.Service.InheritanceService.Schedule
                     {
                         if (interest.User.Role == UserRole.User)
                         {
-                            var isInNeedOfNotify = _entityRepository.checkArrangeScheduleFromUser(
+                            var isInNeedOfNotify = await _entityRepository.checkArrangeScheduleFromUser(
                                 interest.User.Email,
                                 entityModel.Id,
-                                ScheduleType.MovingSchedule
+                                ScheduleType.MovingSchedule,
+                                new List<string>()
                             );
                             if (!isInNeedOfNotify)
                                 continue;
                         }
 
-                        var notification = new NotificationModel
+                        if (response.Change != null)
                         {
-                            UserCreateId = new Guid(userId),
-                            UserReceiveId = interest.UserId,
-                            MovingScheduleId = entityModel.Id,
-                            Content = "",
-                            IsGenerate = true,
-                            ContentCode = "I432",
-                            IsRead = false,
-                            IsDeleted = false,
-                            CreateDate = DateTime.UtcNow,
-                            UpdateDate = DateTime.UtcNow
-                        };
+                            // Create property change notification
+                            if (response.Change.propertyChangeList.Count > 0)
+                            {
+                                await CreateNotification(userId, interest.UserId, entityModel.Id, null, "I432");
+                            }
 
-                        // _notificationService.CreateNew(notification);
+                            // Create schedule change notification
+                            if (response.Change.scheduleChangeList.Count > 0 &&
+                                interest.User.Role == UserRole.User && await _entityRepository.checkArrangeScheduleFromUser(
+                                    interest.User.Email,
+                                    entityModel.Id,
+                                    ScheduleType.MovingSchedule,
+                                    response.Change.scheduleChangeList
+                                ))
+                            {
+                                await CreateNotification(userId, interest.UserId, entityModel.Id, null, "I432-schedule");
+                            }
 
-                        await _notificationService.CreateNewAsync(interest.UserId, notification);
+                            if (response.Change.scheduleChangeList.Count > 0 &&
+                                (interest.User.Role == UserRole.Admin || interest.User.Role == UserRole.AdminManager))
+                            {
+                                await CreateNotification(userId, interest.UserId, entityModel.Id, null, "I432-schedule");
+                            }
+
+                            if (response.Change.isNewScheduleAdded &&
+                               (interest.User.Role == UserRole.Admin || interest.User.Role == UserRole.AdminManager))
+                            {
+                                await CreateNotification(userId, interest.UserId, entityModel.Id, null, "I432-new-schedule");
+                            }
+                        }
                     }
-                    ;
+
                 }
 
                 return response;
@@ -313,6 +329,28 @@ namespace TourishApi.Service.InheritanceService.Schedule
                 };
                 return response;
             }
+        }
+
+        public async Task<int> CreateNotification(string userId, Guid userReceiveId, Guid? movingScheduleId, Guid? stayingScheduleId, string contentCode)
+        {
+            var notification = new NotificationModel
+            {
+                UserCreateId = new Guid(userId),
+                UserReceiveId = userReceiveId,
+                MovingScheduleId = movingScheduleId,
+                StayingScheduleId = stayingScheduleId,
+                IsGenerate = true,
+                Content = "",
+                ContentCode = contentCode,
+                IsRead = false,
+                IsDeleted = false,
+                CreateDate = DateTime.UtcNow,
+                UpdateDate = DateTime.UtcNow
+            };
+
+            await _notificationService.CreateNewAsync(userReceiveId, notification);
+
+            return 1;
         }
 
         public Response getScheduleInterest(Guid scheduleId, Guid userId)

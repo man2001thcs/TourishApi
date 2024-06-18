@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using TourishApi.Extension;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
@@ -224,12 +225,10 @@ public class TourishPlanRepository : ITourishPlanRepository
             .TourishPlan.Include(entity => entity.MovingSchedules)
             .Include(entity => entity.EatSchedules)
             .Include(entity => entity.StayingSchedules)
-            .Include(entity => entity.InstructionList)
             .Include(entity => entity.TourishScheduleList)
-            .Include(entity => entity.TourishInterestList)
             .Include(entity => entity.TourishCategoryRelations)
             .ThenInclude(entity => entity.TourishCategory)
-            .AsQueryable();
+            .AsSplitQuery();
 
         #region Filtering
         if (!string.IsNullOrEmpty(search))
@@ -327,6 +326,7 @@ public class TourishPlanRepository : ITourishPlanRepository
         #endregion
 
         #region Sorting
+        entityQuery = entityQuery.OrderByColumnDescending("createDate");
         if (!string.IsNullOrEmpty(sortBy))
         {
             if (sortBy.Equals("totalTicketInMonth"))
@@ -516,6 +516,7 @@ public class TourishPlanRepository : ITourishPlanRepository
         #endregion
 
         #region Sorting
+        entityQuery = entityQuery.OrderByColumnDescending("createDate");
         if (!string.IsNullOrEmpty(sortBy))
         {
             entityQuery = entityQuery.OrderByColumn(sortBy);
@@ -553,6 +554,7 @@ public class TourishPlanRepository : ITourishPlanRepository
             .ThenInclude(entity => entity.TourishCategory)
             .Include(entity => entity.TotalReceipt)
             .ThenInclude(entity => entity.FullReceiptList)
+            .AsSplitQuery()
             .FirstOrDefault();
         if (entity == null)
         {
@@ -573,6 +575,7 @@ public class TourishPlanRepository : ITourishPlanRepository
             .Include(entity => entity.TourishScheduleList)
             .Include(entity => entity.TourishCategoryRelations)
             .ThenInclude(entity => entity.TourishCategory)
+            .AsSplitQuery()
             .FirstOrDefault();
 
         if (entity == null)
@@ -594,169 +597,176 @@ public class TourishPlanRepository : ITourishPlanRepository
         return new Response { resultCd = 0, Data = entity };
     }
 
-    public async Task<Response> Update(TourishPlanUpdateModel entityModel, String id)
+    public async Task<Response> Update(TourishPlanUpdateModel entityModel, string id)
     {
-        var entity = _context
-            .TourishPlan.Include(entity => entity.EatSchedules)
-            .Include(entity => entity.StayingSchedules)
-            .Include(entity => entity.MovingSchedules)
-            .Include(entity => entity.TourishInterestList)
-            .FirstOrDefault((entity => entity.Id == entityModel.Id));
-        if (entity != null)
+        List<string> propertyChangeList = new List<string>();
+        List<string> scheduleChangeList = new List<string>();
+        bool isNewScheduleAdded = false;
+
+        var entity = await _context
+            .TourishPlan
+            .Include(e => e.EatSchedules)
+            .Include(e => e.StayingSchedules)
+            .Include(e => e.MovingSchedules)
+            .Include(e => e.TourishInterestList)
+            .FirstOrDefaultAsync(e => e.Id == entityModel.Id);
+
+        if (entity == null)
         {
-            entity.TourName = entityModel.TourName ?? entity.TourName;
+            return new Response { resultCd = 0, MessageCode = "C412" };
+        }
 
-            entity.TourName = entityModel.TourName;
-            // entity.Description = entityModel.Description;
-            entity.StartingPoint = entityModel.StartingPoint;
-            entity.EndPoint = entityModel.EndPoint;
-
-            entity.SupportNumber = entityModel.SupportNumber;
-
-            var tourishInterest = new TourishInterest();
-
-            if (id != null)
+        if (!string.IsNullOrEmpty(id))
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id.ToString() == id);
+            if (user != null)
             {
-                var user = _context.Users.SingleOrDefault(u => u.Id.ToString() == id);
-
-                if (user != null)
+                if (entity.TourishInterestList == null)
                 {
-                    tourishInterest = new TourishInterest
+                    entity.TourishInterestList = new List<TourishInterest>();
+                }
+
+                if (!entity.TourishInterestList.Any(interest => interest.UserId.ToString() == id))
+                {
+                    entity.TourishInterestList.Add(new TourishInterest
                     {
                         InterestStatus = InterestStatus.Modifier,
                         User = user,
                         TourishPlan = entity,
                         UpdateDate = DateTime.UtcNow
-                    };
-
-                    if (entity.TourishInterestList == null)
-                    {
-                        entity.TourishInterestList = new List<TourishInterest>();
-                    }
-
-                    if (
-                        entity.TourishInterestList.Count(interest =>
-                            interest.UserId.ToString() == id
-                        ) <= 0
-                    )
-                    {
-                        entity.TourishInterestList.Add(tourishInterest);
-                    }
+                    });
                 }
             }
+        }
 
-            if (entityModel.TourishCategoryRelations != null)
-            {
-                await _context
-                    .TourishCategoryRelations.Where(a => a.TourishPlanId == entityModel.Id)
-                    .ExecuteDeleteAsync();
-                await _context.SaveChangesAsync();
-                entity.TourishCategoryRelations = entityModel.TourishCategoryRelations;
-            }
-
-            if (entityModel.TourishScheduleList != null)
-            {
-                var tourishDataScheduleList = new List<TourishSchedule>();
-                foreach (var item in entityModel.TourishScheduleList)
-                {
-                    tourishDataScheduleList.Add(
-                        item.Id.HasValue
-                            ? new TourishSchedule
-                            {
-                                Id = item.Id.Value,
-                                TourishPlanId = item.TourishPlanId,
-                                PlanStatus = item.PlanStatus,
-                                StartDate = item.StartDate,
-                                RemainTicket = item.RemainTicket,
-                                TotalTicket = item.TotalTicket,
-                                EndDate = item.EndDate,
-                                CreateDate = item.CreateDate ?? DateTime.UtcNow,
-                                UpdateDate = DateTime.UtcNow,
-                            }
-                            : new TourishSchedule
-                            {
-                                TourishPlanId = item.TourishPlanId,
-                                PlanStatus = item.PlanStatus,
-                                StartDate = item.StartDate,
-                                RemainTicket = item.RemainTicket,
-                                TotalTicket = item.TotalTicket,
-                                EndDate = item.EndDate,
-                                CreateDate = item.CreateDate ?? DateTime.UtcNow,
-                                UpdateDate = DateTime.UtcNow,
-                            }
-                    );
-                }
-                entity.TourishScheduleList = tourishDataScheduleList;
-            }
-
-            if (entityModel.InstructionList != null)
-            {
-                var instructionList = new List<Instruction>();
-                foreach (var item in entityModel.InstructionList)
-                {
-                    instructionList.Add(
-                        new Instruction
-                        {
-                            Id = item.Id.Value,
-                            TourishPlanId = item.TourishPlanId,
-                            Description = item.Description,
-                            InstructionType = item.InstructionType,
-                            CreateDate = item.CreateDate,
-                            UpdateDate = DateTime.UtcNow,
-                        }
-                    );
-                }
-                entity.InstructionList = instructionList;
-            }
-
-            entity.UpdateDate = DateTime.UtcNow;
+        if (entityModel.TourishCategoryRelations != null)
+        {
+            await _context
+                .TourishCategoryRelations
+                .Where(a => a.TourishPlanId == entityModel.Id)
+                .ExecuteDeleteAsync();
 
             await _context.SaveChangesAsync();
+            entity.TourishCategoryRelations = entityModel.TourishCategoryRelations;
+        }
+
+        entity.TourName = entityModel.TourName ?? entity.TourName;
+        entity.StartingPoint = entityModel.StartingPoint;
+        entity.EndPoint = entityModel.EndPoint;
+        entity.SupportNumber = entityModel.SupportNumber;
+
+        if (entityModel.TourishScheduleList != null)
+        {
+            var tourishDataScheduleList = new List<TourishSchedule>();
+            foreach (var item in entityModel.TourishScheduleList)
+            {
+                if (item.Id.HasValue)
+                {
+                    var existSchedule = await _context.TourishScheduleList.FirstOrDefaultAsync(e => e.Id == item.Id.Value);
+                    if (existSchedule != null)
+                    {
+                        existSchedule.PlanStatus = item.PlanStatus;
+                        existSchedule.StartDate = item.StartDate;
+                        existSchedule.RemainTicket = item.RemainTicket;
+                        existSchedule.TotalTicket = item.TotalTicket;
+                        existSchedule.EndDate = item.EndDate;
+
+                         var changedSchedule = GetChangedProperties(existSchedule);
+                        if (changedSchedule.Any()) scheduleChangeList.Add(existSchedule.Id.ToString());
+
+                        existSchedule.UpdateDate = DateTime.UtcNow;
+                        tourishDataScheduleList.Add(existSchedule);                   
+                    }
+                }
+                else
+                {
+                    isNewScheduleAdded = true;
+                    tourishDataScheduleList.Add(new TourishSchedule
+                    {
+                        TourishPlanId = item.TourishPlanId,
+                        PlanStatus = item.PlanStatus,
+                        StartDate = item.StartDate,
+                        RemainTicket = item.RemainTicket,
+                        TotalTicket = item.TotalTicket,
+                        EndDate = item.EndDate,
+                        CreateDate = item.CreateDate ?? DateTime.UtcNow,
+                        UpdateDate = DateTime.UtcNow,
+                    });
+                }
+            }
+
+            entity.TourishScheduleList = tourishDataScheduleList;
+        }
+
+        if (entityModel.InstructionList != null)
+        {
+            var instructionList = new List<Instruction>();
+            foreach (var item in entityModel.InstructionList)
+            {
+                instructionList.Add(new Instruction
+                {
+                    Id = item.Id.Value,
+                    TourishPlanId = item.TourishPlanId,
+                    Description = item.Description,
+                    InstructionType = item.InstructionType,
+                    CreateDate = item.CreateDate,
+                    UpdateDate = DateTime.UtcNow,
+                });
+            }
+            entity.InstructionList = instructionList;
+        }
+
+        var changedProperties = GetChangedProperties(entity);
+        logger.LogInformation($"Change: {System.Text.Json.JsonSerializer.Serialize(changedProperties)}");
+        foreach (var prop in changedProperties)
+        {
+            logger.LogInformation($"Property {prop} has been modified.");
+        }
+
+        propertyChangeList = changedProperties;
+
+        entity.UpdateDate = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        if (!string.IsNullOrEmpty(entityModel.Description))
+        {
             await blobService.UploadStringBlobAsync(
                 "tourish-content-container",
-                entityModel.Description ?? "",
+                entityModel.Description,
                 "text/plain",
-                entityModel.Id.ToString() ?? "" + ".txt"
+                $"{entityModel.Id}.txt"
             );
-
-            if (
-                entityModel.StayingScheduleString != ""
-                && entityModel.StayingScheduleString != null
-            )
-            {
-                await _context
-                    .StayingSchedules.Where(a => a.TourishPlanId == entityModel.Id)
-                    .ExecuteDeleteAsync();
-                await AddStayingSchedule(entity.Id, entityModel.StayingScheduleString);
-            }
-
-            if (entityModel.MovingScheduleString != "" && entityModel.MovingScheduleString != null)
-            {
-                await _context
-                    .MovingSchedules.Where(a => a.TourishPlanId == entityModel.Id)
-                    .ExecuteDeleteAsync();
-                await AddMovingSchedule(entity.Id, entityModel.MovingScheduleString);
-            }
-
-            if (entityModel.EatingScheduleString != "" && entityModel.EatingScheduleString != null)
-            {
-                await _context
-                    .EatSchedules.Where(a => a.TourishPlanId == entityModel.Id)
-                    .ExecuteDeleteAsync();
-                await AddEatSchedule(entity.Id, entityModel.EatingScheduleString);
-            }
-
-            return new Response
-            {
-                resultCd = 0,
-                MessageCode = "I412",
-                // Update type success
-            };
         }
-        else
+
+        if (!string.IsNullOrEmpty(entityModel.StayingScheduleString))
         {
-            return new Response { resultCd = 0, MessageCode = "C412", };
+            await _context.StayingSchedules.Where(a => a.TourishPlanId == entityModel.Id).ExecuteDeleteAsync();
+            await AddStayingSchedule(entity.Id, entityModel.StayingScheduleString);
         }
+
+        if (!string.IsNullOrEmpty(entityModel.MovingScheduleString))
+        {
+            await _context.MovingSchedules.Where(a => a.TourishPlanId == entityModel.Id).ExecuteDeleteAsync();
+            await AddMovingSchedule(entity.Id, entityModel.MovingScheduleString);
+        }
+
+        if (!string.IsNullOrEmpty(entityModel.EatingScheduleString))
+        {
+            await _context.EatSchedules.Where(a => a.TourishPlanId == entityModel.Id).ExecuteDeleteAsync();
+            await AddEatSchedule(entity.Id, entityModel.EatingScheduleString);
+        }
+
+        return new Response
+        {
+            resultCd = 0,
+            MessageCode = "I412",
+            Change = new Change
+            {
+                scheduleChangeList = scheduleChangeList,
+                propertyChangeList = propertyChangeList,
+                isNewScheduleAdded = isNewScheduleAdded
+            }
+        };
     }
 
     public async Task<string> getDescription(string containerName, string blobName)
@@ -1099,21 +1109,56 @@ public class TourishPlanRepository : ITourishPlanRepository
         return new Response { resultCd = 0, Data = entityList };
     }
 
-    public Boolean checkArrangeScheduleFromUser(String email, Guid tourishPlanId)
+    public async Task<Boolean> checkArrangeScheduleFromUser(String email, Guid tourishPlanId, List<string> scheduleList)
     {
-        var count = _context
-            .FullReceiptList.Include(entity => entity.TourishSchedule)
-            .Include(entity => entity.TotalReceipt)
-            .Where(entity =>
-                entity.Email == email
-                && entity.TotalReceipt.TourishPlanId == tourishPlanId
-                && entity.TourishSchedule.EndDate >= DateTime.UtcNow
-            )
-            .Count();
+        if (scheduleList.Count > 0)
+        {
+            var count = await _context
+                       .FullReceiptList.Include(entity => entity.TourishSchedule)
+                       .Include(entity => entity.TotalReceipt)
+                       .Where(entity =>
+                           entity.Email == email
+                           && entity.TotalReceipt.TourishPlanId == tourishPlanId
+                           && entity.TourishSchedule.EndDate >= DateTime.UtcNow
+                           && scheduleList.Any(entity1 => entity1 == entity.TourishSchedule.Id.ToString())
+                       )
+                       .CountAsync();
 
-        if (count >= 1)
-            return true;
+            if (count >= 1)
+                return true;
+        }
+        else
+        {
+            var count = await _context
+           .FullReceiptList.Include(entity => entity.TourishSchedule)
+           .Include(entity => entity.TotalReceipt)
+           .Where(entity =>
+               entity.Email == email
+               && entity.TotalReceipt.TourishPlanId == tourishPlanId
+               && entity.TourishSchedule.EndDate >= DateTime.UtcNow
+           )
+           .CountAsync();
+
+            if (count >= 1)
+                return true;
+        }
 
         return false;
+    }
+
+    private List<string> GetChangedProperties(object entity)
+    {
+        var entry = _context.Entry(entity);
+        var changedProperties = new List<string>();
+
+        foreach (var property in entry.Properties)
+        {
+            if (property.IsModified)
+            {
+                changedProperties.Add(property.Metadata.Name);
+            }
+        }
+
+        return changedProperties;
     }
 }

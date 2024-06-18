@@ -685,20 +685,15 @@ namespace WebApplication1.Repository.InheritanceRepo
             StayingScheduleModel entityModel
         )
         {
+            List<string> propertyChangeList = new List<string>();
+            List<string> scheduleChangeList = new List<string>();
+            var isNewScheduleAdded = false;
+
             var entity = _context
                 .StayingSchedules.Include(entity => entity.ScheduleInterestList)
                 .FirstOrDefault((entity => entity.Id == entityModel.Id));
             if (entity != null)
             {
-                entity.Name = entityModel.Name;
-                entity.UpdateDate = DateTime.UtcNow;
-                entity.PlaceName = entityModel.PlaceName;
-                entity.SupportNumber = entityModel.SupportNumber;
-                entity.Address = entityModel.Address;
-                entity.SinglePrice = entityModel.SinglePrice;
-                entity.RestHouseBranchId = entityModel.RestHouseBranchId;
-                entity.RestHouseType = entityModel.RestHouseType;
-
                 var scheduleInterest = new ScheduleInterest();
                 if (userId != null)
                 {
@@ -731,6 +726,17 @@ namespace WebApplication1.Repository.InheritanceRepo
                     }
                 }
 
+
+                entity.Name = entityModel.Name;
+                entity.PlaceName = entityModel.PlaceName;
+                entity.SupportNumber = entityModel.SupportNumber;
+                entity.Address = entityModel.Address;
+                entity.SinglePrice = entityModel.SinglePrice;
+                entity.RestHouseBranchId = entityModel.RestHouseBranchId;
+                entity.RestHouseType = entityModel.RestHouseType;
+
+
+
                 if (entityModel.InstructionList != null && (entityModel.InstructionList ?? new List<InstructionModel>()).Count > 0)
                 {
                     var instructionList = new List<Instruction>();
@@ -749,7 +755,8 @@ namespace WebApplication1.Repository.InheritanceRepo
                         );
                     }
                     entity.InstructionList = instructionList;
-                } else
+                }
+                else
                 {
                     entity.InstructionList = initiateStayingInstructionList();
                 }
@@ -757,59 +764,75 @@ namespace WebApplication1.Repository.InheritanceRepo
                 if (entityModel.ServiceScheduleList != null)
                 {
                     var dataScheduleList = new List<ServiceSchedule>();
-                    //await _context
-                    //    .ServiceSchedule.Where(a => a.StayingScheduleId == entityModel.Id)
-                    //    .ExecuteDeleteAsync();
                     foreach (var item in entityModel.ServiceScheduleList)
                     {
-                        dataScheduleList.Add(
-                            item.Id.HasValue
-                                ? new ServiceSchedule
+                        if (item.Id.HasValue)
+                        {
+                            var existSchedule = await _context.ServiceSchedule.FirstOrDefaultAsync(e => e.Id == item.Id.Value);
+                            if (existSchedule != null)
+                            {
+                                existSchedule.MovingScheduleId = item.MovingScheduleId;
+                                existSchedule.StayingScheduleId = item.StayingScheduleId;
+                                existSchedule.Status = item.Status;
+                                existSchedule.StartDate = item.StartDate;
+                                existSchedule.RemainTicket = item.RemainTicket;
+                                existSchedule.TotalTicket = item.TotalTicket;
+                                existSchedule.EndDate = item.EndDate;
+
+                                var changedSchedule = GetChangedProperties(existSchedule);
+                                if (changedSchedule.Any()) scheduleChangeList.Add(existSchedule.Id.ToString());
+
+                                existSchedule.UpdateDate = DateTime.UtcNow;
+                                dataScheduleList.Add(existSchedule);
+                            }
+                        }
+                        else
+                        {
+                            isNewScheduleAdded = true;
+                            dataScheduleList.Add(
+                                new ServiceSchedule
                                 {
-                                    Id = item.Id.Value,
                                     MovingScheduleId = item.MovingScheduleId ?? null,
                                     StayingScheduleId = item.StayingScheduleId ?? null,
                                     Status = item.Status,
-                                    StartDate = item.StartDate,
                                     RemainTicket = item.RemainTicket,
                                     TotalTicket = item.TotalTicket,
+                                    StartDate = item.StartDate,
                                     EndDate = item.EndDate,
                                     CreateDate = item.CreateDate ?? DateTime.UtcNow,
                                     UpdateDate = DateTime.UtcNow,
-                                }
-                                : new ServiceSchedule
-                                {
-                                    MovingScheduleId = item.MovingScheduleId ?? null,
-                                    StayingScheduleId = item.StayingScheduleId ?? null,
-                                    Status = item.Status,
-                                    StartDate = item.StartDate,
-                                    RemainTicket = item.RemainTicket,
-                                    TotalTicket = item.TotalTicket,
-                                    EndDate = item.EndDate,
-                                    CreateDate = item.CreateDate ?? DateTime.UtcNow,
-                                    UpdateDate = DateTime.UtcNow,
-                                }
-                        );
+                                });
+                        }
                     }
                     entity.ServiceScheduleList = dataScheduleList;
                 }
 
-                await _context.SaveChangesAsync();
-            }
 
-            if (!String.IsNullOrEmpty(entityModel.Description))
-                await _blobService.UploadStringBlobAsync(
-                    "stayingschedule-content-container",
-                    entityModel.Description ?? "Không có thông tin",
-                    "text/plain",
-                    entity.Id.ToString() ?? "" + ".txt"
-                );
+                var changedProperties = GetChangedProperties(entity);
+                propertyChangeList = changedProperties;
+
+                entity.UpdateDate = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                if (!String.IsNullOrEmpty(entityModel.Description))
+                    await _blobService.UploadStringBlobAsync(
+                        "stayingschedule-content-container",
+                        entityModel.Description ?? "Không có thông tin",
+                        "text/plain",
+                        entity.Id.ToString() ?? "" + ".txt"
+                    );
+            }
 
             return new Response
             {
                 resultCd = 0,
                 MessageCode = "I432",
-                // Update type success
+                Change = new Change
+                {
+                    scheduleChangeList = scheduleChangeList,
+                    propertyChangeList = propertyChangeList,
+                    isNewScheduleAdded = isNewScheduleAdded
+                }
             };
         }
 
@@ -847,27 +870,19 @@ namespace WebApplication1.Repository.InheritanceRepo
             MovingScheduleModel entityModel
         )
         {
-            var entity = _context
+            List<string> propertyChangeList = new List<string>();
+            List<string> scheduleChangeList = new List<string>();
+            var isNewScheduleAdded = false;
+
+            var entity = await _context
                 .MovingSchedules.Include(entity => entity.ScheduleInterestList)
-                .FirstOrDefault((entity => entity.Id == entityModel.Id));
+                .FirstOrDefaultAsync((entity => entity.Id == entityModel.Id));
             if (entity != null)
             {
-                entity.UpdateDate = DateTime.UtcNow;
-                entity.Name = entityModel.Name;
-                entity.BranchName = entityModel.BranchName;
-                entity.PhoneNumber = entityModel.PhoneNumber;
-                entity.TransportId = entityModel.TransportId;
-                entity.VehiclePlate = entityModel.VehiclePlate;
-                entity.VehicleType = entityModel.VehicleType;
-                entity.SinglePrice = entityModel.SinglePrice;
-                entity.DriverName = entityModel.DriverName;
-                entity.StartingPlace = entityModel.StartingPlace;
-                entity.HeadingPlace = entityModel.HeadingPlace;
-
                 var scheduleInterest = new ScheduleInterest();
                 if (userId != null)
                 {
-                    var user = _context.Users.SingleOrDefault(u => u.Id.ToString() == userId);
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id.ToString() == userId);
 
                     if (user != null)
                     {
@@ -896,6 +911,20 @@ namespace WebApplication1.Repository.InheritanceRepo
                     }
                 }
 
+
+                entity.Name = entityModel.Name;
+                entity.BranchName = entityModel.BranchName;
+                entity.PhoneNumber = entityModel.PhoneNumber;
+                entity.TransportId = entityModel.TransportId;
+                entity.VehiclePlate = entityModel.VehiclePlate;
+                entity.VehicleType = entityModel.VehicleType;
+                entity.SinglePrice = entityModel.SinglePrice;
+                entity.DriverName = entityModel.DriverName;
+                entity.StartingPlace = entityModel.StartingPlace;
+                entity.HeadingPlace = entityModel.HeadingPlace;
+
+
+
                 if (entityModel.InstructionList != null && (entityModel.InstructionList ?? new List<InstructionModel>()).Count > 0)
                 {
                     var instructionList = new List<Instruction>();
@@ -923,46 +952,53 @@ namespace WebApplication1.Repository.InheritanceRepo
                 if (entityModel.ServiceScheduleList != null)
                 {
                     var dataScheduleList = new List<ServiceSchedule>();
-
-                    //await _context
-                    //    .ServiceSchedule.Where(a => a.MovingScheduleId == entityModel.Id)
-                    //    .ExecuteDeleteAsync();
-
                     foreach (var item in entityModel.ServiceScheduleList)
                     {
-                        dataScheduleList.Add(
-                            item.Id.HasValue
-                                ? new ServiceSchedule
-                                {
-                                    Id = item.Id.Value,
-                                    MovingScheduleId = item.MovingScheduleId ?? null,
-                                    StayingScheduleId = item.StayingScheduleId ?? null,
-                                    Status = item.Status,
-                                    RemainTicket = item.RemainTicket,
-                                    TotalTicket = item.TotalTicket,
-                                    StartDate = item.StartDate,
-                                    EndDate = item.EndDate,
-                                    CreateDate = item.CreateDate ?? DateTime.UtcNow,
-                                    UpdateDate = DateTime.UtcNow,
-                                }
-                                : new ServiceSchedule
-                                {
-                                    MovingScheduleId = item.MovingScheduleId ?? null,
-                                    StayingScheduleId = item.StayingScheduleId ?? null,
-                                    Status = item.Status,
-                                    RemainTicket = item.RemainTicket,
-                                    TotalTicket = item.TotalTicket,
-                                    StartDate = item.StartDate,
-                                    EndDate = item.EndDate,
-                                    CreateDate = item.CreateDate ?? DateTime.UtcNow,
-                                    UpdateDate = DateTime.UtcNow,
-                                }
-                        );
-                    }
+                        if (item.Id.HasValue)
+                        {
+                            var existSchedule = await _context.ServiceSchedule.FirstOrDefaultAsync(e => e.Id == item.Id.Value);
+                            if (existSchedule != null)
+                            {
+                                existSchedule.MovingScheduleId = item.MovingScheduleId;
+                                existSchedule.StayingScheduleId = item.StayingScheduleId;
+                                existSchedule.Status = item.Status;
+                                existSchedule.StartDate = item.StartDate;
+                                existSchedule.RemainTicket = item.RemainTicket;
+                                existSchedule.TotalTicket = item.TotalTicket;
+                                existSchedule.EndDate = item.EndDate;
 
+                                var changedSchedule = GetChangedProperties(existSchedule);
+                                if (changedSchedule.Any()) scheduleChangeList.Add(existSchedule.Id.ToString());
+
+                                existSchedule.UpdateDate = DateTime.UtcNow;
+                                dataScheduleList.Add(existSchedule);
+                            }
+                        }
+                        else
+                        {
+                            isNewScheduleAdded = true;
+                            dataScheduleList.Add(
+                                new ServiceSchedule
+                                {
+                                    MovingScheduleId = item.MovingScheduleId ?? null,
+                                    StayingScheduleId = item.StayingScheduleId ?? null,
+                                    Status = item.Status,
+                                    RemainTicket = item.RemainTicket,
+                                    TotalTicket = item.TotalTicket,
+                                    StartDate = item.StartDate,
+                                    EndDate = item.EndDate,
+                                    CreateDate = item.CreateDate ?? DateTime.UtcNow,
+                                    UpdateDate = DateTime.UtcNow,
+                                });
+                        }
+                    }
                     entity.ServiceScheduleList = dataScheduleList;
                 }
 
+                var changedProperties = GetChangedProperties(entity);
+                propertyChangeList = changedProperties;
+
+                entity.UpdateDate = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
                 if (!String.IsNullOrEmpty(entityModel.Description))
@@ -978,6 +1014,12 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 resultCd = 0,
                 MessageCode = "I432",
+                Change = new Change
+                {
+                    scheduleChangeList = scheduleChangeList,
+                    propertyChangeList = propertyChangeList,
+                    isNewScheduleAdded = isNewScheduleAdded
+                }
                 // Update type success
             };
         }
@@ -1288,41 +1330,81 @@ namespace WebApplication1.Repository.InheritanceRepo
             };
         }
 
-        public Boolean checkArrangeScheduleFromUser(
+        public async Task<Boolean> checkArrangeScheduleFromUser(
             String email,
             Guid scheduleId,
-            ScheduleType scheduleType
+            ScheduleType scheduleType,
+            List<string> scheduleList
         )
         {
+
             if (scheduleType == ScheduleType.MovingSchedule)
             {
-                var count = _context
-                    .FullScheduleReceiptList.Include(entity => entity.ServiceSchedule)
-                    .Include(entity => entity.TotalReceipt)
-                    .Where(entity =>
-                        entity.Email == email
-                        && entity.TotalReceipt.MovingScheduleId == scheduleId
-                        && entity.ServiceSchedule.EndDate >= DateTime.UtcNow
-                    )
-                    .Count();
+                if (scheduleList.Count > 0)
+                {
+                    var count = await _context
+                        .FullScheduleReceiptList.Include(entity => entity.ServiceSchedule)
+                        .Include(entity => entity.TotalReceipt)
+                        .Where(entity =>
+                            entity.Email == email
+                            && entity.TotalReceipt.MovingScheduleId == scheduleId
+                            && entity.ServiceSchedule.EndDate >= DateTime.UtcNow
+                         && scheduleList.Any(entity1 => entity1 == entity.ServiceSchedule.Id.ToString())
+                        )
+                        .CountAsync();
 
-                if (count >= 1)
-                    return true;
+                    if (count >= 1)
+                        return true;
+                }
+                else
+                {
+                    var count = await _context
+                            .FullScheduleReceiptList.Include(entity => entity.ServiceSchedule)
+                            .Include(entity => entity.TotalReceipt)
+                            .Where(entity =>
+                                entity.Email == email
+                                && entity.TotalReceipt.MovingScheduleId == scheduleId
+                                && entity.ServiceSchedule.EndDate >= DateTime.UtcNow
+                            )
+                            .CountAsync();
+
+                    if (count >= 1)
+                        return true;
+                }
             }
             else if (scheduleType == ScheduleType.StayingSchedule)
             {
-                var count = _context
-                    .FullScheduleReceiptList.Include(entity => entity.ServiceSchedule)
-                    .Include(entity => entity.TotalReceipt)
-                    .Where(entity =>
-                        entity.Email == email
-                        && entity.TotalReceipt.StayingScheduleId == scheduleId
-                        && entity.ServiceSchedule.EndDate >= DateTime.UtcNow
-                    )
-                    .Count();
+                if (scheduleList.Count > 0)
+                {
+                    var count = await _context
+                        .FullScheduleReceiptList.Include(entity => entity.ServiceSchedule)
+                        .Include(entity => entity.TotalReceipt)
+                        .Where(entity =>
+                            entity.Email == email
+                            && entity.TotalReceipt.StayingScheduleId == scheduleId
+                            && entity.ServiceSchedule.EndDate >= DateTime.UtcNow
+                            && scheduleList.Any(entity1 => entity1 == entity.ServiceSchedule.Id.ToString())
+                        )
+                        .CountAsync();
 
-                if (count >= 1)
-                    return true;
+                    if (count >= 1)
+                        return true;
+                }
+                else
+                {
+                    var count = await _context
+                        .FullScheduleReceiptList.Include(entity => entity.ServiceSchedule)
+                        .Include(entity => entity.TotalReceipt)
+                        .Where(entity =>
+                            entity.Email == email
+                            && entity.TotalReceipt.StayingScheduleId == scheduleId
+                            && entity.ServiceSchedule.EndDate >= DateTime.UtcNow
+                        )
+                        .CountAsync();
+
+                    if (count >= 1)
+                        return true;
+                }
             }
 
             return false;
@@ -1393,5 +1475,23 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             return instructionList;
         }
+
+        private List<string> GetChangedProperties(object entity)
+        {
+            var entry = _context.Entry(entity);
+            var changedProperties = new List<string>();
+
+            foreach (var property in entry.Properties)
+            {
+                if (property.IsModified)
+                {
+                    changedProperties.Add(property.Metadata.Name);
+                }
+            }
+
+            return changedProperties;
+        }
     }
+
+
 }
