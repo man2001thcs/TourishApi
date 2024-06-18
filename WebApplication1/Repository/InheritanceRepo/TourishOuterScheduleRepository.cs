@@ -652,7 +652,7 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response getByStayingScheduleId(Guid id)
         {
             var entity = _context
-                .StayingSchedules.Include(entity => entity.ServiceScheduleList).Include(entity => entity.InstructionList)
+                .StayingSchedules.Include(entity => entity.ServiceScheduleList).Include(entity => entity.InstructionList).AsSplitQuery()
                 .FirstOrDefault((entity => entity.Id == id));
 
             return new Response { resultCd = 0, Data = entity };
@@ -661,7 +661,7 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response clientGetByStayingScheduleId(Guid id)
         {
             var entity = _context
-                .StayingSchedules.Include(entity => entity.ServiceScheduleList).Include(entity => entity.InstructionList)
+                .StayingSchedules.Include(entity => entity.ServiceScheduleList).Include(entity => entity.InstructionList).AsSplitQuery()
                 .FirstOrDefault((entity => entity.Id == id));
 
             entity.ServiceScheduleList = entity
@@ -839,7 +839,7 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response getByMovingScheduleId(Guid id)
         {
             var entity = _context
-                .MovingSchedules.Include(entity => entity.ServiceScheduleList).Include(entity => entity.InstructionList)
+                .MovingSchedules.Include(entity => entity.ServiceScheduleList).Include(entity => entity.InstructionList).AsSplitQuery()
                 .FirstOrDefault((entity => entity.Id == id));
 
             return new Response { resultCd = 0, Data = entity };
@@ -848,7 +848,7 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response clientGetByMovingScheduleId(Guid id)
         {
             var entity = _context
-                .MovingSchedules.Include(entity => entity.ServiceScheduleList).Include(entity => entity.InstructionList)
+                .MovingSchedules.Include(entity => entity.ServiceScheduleList).Include(entity => entity.InstructionList).AsSplitQuery()
                 .FirstOrDefault((entity => entity.Id == id));
 
             entity.ServiceScheduleList = entity

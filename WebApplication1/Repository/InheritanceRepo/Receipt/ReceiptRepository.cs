@@ -766,7 +766,7 @@ public class ReceiptRepository
             CompleteDate = entity.CompleteDate,
             FullReceiptList = status != null
                 ? entity
-                    .FullReceiptList.Where(fullReceipt => (int)fullReceipt.Status == (int)status)
+                    .FullReceiptList.Where(fullReceipt => (int)fullReceipt.Status == (int)status).OrderByDescending(entity => entity.CreatedDate)
                     .ToList()
                 : entity.FullReceiptList.ToList(),
             TourishPlan = entity.TourishPlan,
@@ -860,7 +860,7 @@ public class ReceiptRepository
             Description = entity.Description,
             CompleteDate = entity.CompleteDate,
             FullReceiptList = entity
-                .FullReceiptList.Where(entity => (int)entity.Status == (int)status)
+                .FullReceiptList.Where(entity => (int)entity.Status == (int)status).OrderByDescending(entity => entity.CreatedDate)
                 .ToList(),
             StayingSchedule = entity.StayingSchedule,
             MovingSchedule = entity.MovingSchedule,
@@ -942,7 +942,7 @@ public class ReceiptRepository
             CompleteDate = entity.CompleteDate,
 
             FullReceiptList = entity
-                .FullReceiptList.Where(entity => entity.Email == email && entity.Status == status)
+                .FullReceiptList.Where(entity => entity.Email == email && entity.Status == status).OrderByDescending(entity => entity.CreatedDate)
                 .ToList(),
 
             TourishPlan = entity.TourishPlan,
@@ -1035,7 +1035,7 @@ public class ReceiptRepository
             FullReceiptList = entity
                 .FullReceiptList.Where(entity =>
                     entity.Email == email && (int)entity.Status == (int)status
-                )
+                ).OrderByDescending(entity => entity.CreatedDate)
                 .ToList(),
 
             StayingSchedule = entity.StayingSchedule,

@@ -121,13 +121,14 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response GetAllByTourishPlanId(Guid tourishPlanId, string? search, int? type, string? sortBy, string? sortDirection, int page = 1, int pageSize = 5)
         {
-            var entityQuery = _context.TourishComments.Include(entityQuery => entityQuery.User).AsQueryable();
+            var entityQuery = _context.TourishComments.Include(entityQuery => entityQuery.User).AsSplitQuery();
 
             #region Filtering
             entityQuery = entityQuery.Where(entity => entity.TourishPlanId == tourishPlanId);
             #endregion
 
             #region Sorting
+            entityQuery = entityQuery.OrderByDescending(entity => entity.UpdateDate);
             if (!string.IsNullOrEmpty(sortBy))
             {
                 entityQuery = entityQuery.OrderByColumn(sortBy);
