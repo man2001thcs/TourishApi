@@ -652,7 +652,9 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response getByStayingScheduleId(Guid id)
         {
             var entity = _context
-                .StayingSchedules.Include(entity => entity.ServiceScheduleList).Include(entity => entity.InstructionList).AsSplitQuery()
+                .StayingSchedules.Include(entity => entity.ServiceScheduleList)
+                .Include(entity => entity.InstructionList)
+                .AsSplitQuery()
                 .FirstOrDefault((entity => entity.Id == id));
 
             return new Response { resultCd = 0, Data = entity };
@@ -661,7 +663,9 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response clientGetByStayingScheduleId(Guid id)
         {
             var entity = _context
-                .StayingSchedules.Include(entity => entity.ServiceScheduleList).Include(entity => entity.InstructionList).AsSplitQuery()
+                .StayingSchedules.Include(entity => entity.ServiceScheduleList)
+                .Include(entity => entity.InstructionList)
+                .AsSplitQuery()
                 .FirstOrDefault((entity => entity.Id == id));
 
             entity.ServiceScheduleList = entity
@@ -691,6 +695,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             var entity = _context
                 .StayingSchedules.Include(entity => entity.ScheduleInterestList)
+                .Include(entity => entity.InstructionList)
                 .FirstOrDefault((entity => entity.Id == entityModel.Id));
             if (entity != null)
             {
@@ -726,7 +731,6 @@ namespace WebApplication1.Repository.InheritanceRepo
                     }
                 }
 
-
                 entity.Name = entityModel.Name;
                 entity.PlaceName = entityModel.PlaceName;
                 entity.SupportNumber = entityModel.SupportNumber;
@@ -735,30 +739,54 @@ namespace WebApplication1.Repository.InheritanceRepo
                 entity.RestHouseBranchId = entityModel.RestHouseBranchId;
                 entity.RestHouseType = entityModel.RestHouseType;
 
-
-
-                if (entityModel.InstructionList != null && (entityModel.InstructionList ?? new List<InstructionModel>()).Count > 0)
+                if (
+                    entityModel.InstructionList != null
+                    && (entity.InstructionList ?? new List<Instruction>()).Count > 0
+                )
                 {
                     var instructionList = new List<Instruction>();
+
                     foreach (var item in entityModel.InstructionList)
                     {
-                        instructionList.Add(
-                            new Instruction
+                        var existingInstruction = _context.Instructions.FirstOrDefault(i =>
+                            i.Id == item.Id.Value
+                        );
+
+                        if (existingInstruction != null)
+                        {
+                            // If the instruction already exists in the context, update its properties
+                            existingInstruction.StayingScheduleId = entity.Id;
+                            existingInstruction.MovingScheduleId = null;
+                            existingInstruction.Description = item.Description;
+                            existingInstruction.InstructionType = item.InstructionType;
+                            existingInstruction.CreateDate = item.CreateDate;
+                            existingInstruction.UpdateDate = DateTime.UtcNow;
+
+                            instructionList.Add(existingInstruction);
+                        }
+                        else
+                        {
+                            // If the instruction is not already in the context, create a new instance
+                            var newInstruction = new Instruction
                             {
                                 Id = item.Id.Value,
                                 StayingScheduleId = entity.Id,
+                                MovingScheduleId = null,
                                 Description = item.Description,
                                 InstructionType = item.InstructionType,
                                 CreateDate = item.CreateDate,
                                 UpdateDate = DateTime.UtcNow,
-                            }
-                        );
+                            };
+
+                            instructionList.Add(newInstruction);
+                        }
                     }
+
                     entity.InstructionList = instructionList;
                 }
                 else
                 {
-                    entity.InstructionList = initiateStayingInstructionList();
+                    entity.InstructionList = initiateMovingInstructionList();
                 }
 
                 if (entityModel.ServiceScheduleList != null)
@@ -768,7 +796,9 @@ namespace WebApplication1.Repository.InheritanceRepo
                     {
                         if (item.Id.HasValue)
                         {
-                            var existSchedule = await _context.ServiceSchedule.FirstOrDefaultAsync(e => e.Id == item.Id.Value);
+                            var existSchedule = await _context.ServiceSchedule.FirstOrDefaultAsync(
+                                e => e.Id == item.Id.Value
+                            );
                             if (existSchedule != null)
                             {
                                 existSchedule.MovingScheduleId = item.MovingScheduleId;
@@ -780,7 +810,8 @@ namespace WebApplication1.Repository.InheritanceRepo
                                 existSchedule.EndDate = item.EndDate;
 
                                 var changedSchedule = GetChangedProperties(existSchedule);
-                                if (changedSchedule.Any()) scheduleChangeList.Add(existSchedule.Id.ToString());
+                                if (changedSchedule.Any())
+                                    scheduleChangeList.Add(existSchedule.Id.ToString());
 
                                 existSchedule.UpdateDate = DateTime.UtcNow;
                                 dataScheduleList.Add(existSchedule);
@@ -801,12 +832,12 @@ namespace WebApplication1.Repository.InheritanceRepo
                                     EndDate = item.EndDate,
                                     CreateDate = item.CreateDate ?? DateTime.UtcNow,
                                     UpdateDate = DateTime.UtcNow,
-                                });
+                                }
+                            );
                         }
                     }
                     entity.ServiceScheduleList = dataScheduleList;
                 }
-
 
                 var changedProperties = GetChangedProperties(entity);
                 propertyChangeList = changedProperties;
@@ -839,7 +870,9 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response getByMovingScheduleId(Guid id)
         {
             var entity = _context
-                .MovingSchedules.Include(entity => entity.ServiceScheduleList).Include(entity => entity.InstructionList).AsSplitQuery()
+                .MovingSchedules.Include(entity => entity.ServiceScheduleList)
+                .Include(entity => entity.InstructionList)
+                .AsSplitQuery()
                 .FirstOrDefault((entity => entity.Id == id));
 
             return new Response { resultCd = 0, Data = entity };
@@ -848,7 +881,9 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response clientGetByMovingScheduleId(Guid id)
         {
             var entity = _context
-                .MovingSchedules.Include(entity => entity.ServiceScheduleList).Include(entity => entity.InstructionList).AsSplitQuery()
+                .MovingSchedules.Include(entity => entity.ServiceScheduleList)
+                .Include(entity => entity.InstructionList)
+                .AsSplitQuery()
                 .FirstOrDefault((entity => entity.Id == id));
 
             entity.ServiceScheduleList = entity
@@ -876,13 +911,16 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             var entity = await _context
                 .MovingSchedules.Include(entity => entity.ScheduleInterestList)
+                .Include(entity => entity.InstructionList)
                 .FirstOrDefaultAsync((entity => entity.Id == entityModel.Id));
             if (entity != null)
             {
                 var scheduleInterest = new ScheduleInterest();
                 if (userId != null)
                 {
-                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id.ToString() == userId);
+                    var user = await _context.Users.FirstOrDefaultAsync(u =>
+                        u.Id.ToString() == userId
+                    );
 
                     if (user != null)
                     {
@@ -911,7 +949,6 @@ namespace WebApplication1.Repository.InheritanceRepo
                     }
                 }
 
-
                 entity.Name = entityModel.Name;
                 entity.BranchName = entityModel.BranchName;
                 entity.PhoneNumber = entityModel.PhoneNumber;
@@ -923,25 +960,49 @@ namespace WebApplication1.Repository.InheritanceRepo
                 entity.StartingPlace = entityModel.StartingPlace;
                 entity.HeadingPlace = entityModel.HeadingPlace;
 
-
-
-                if (entityModel.InstructionList != null && (entityModel.InstructionList ?? new List<InstructionModel>()).Count > 0)
+                if (
+                    entityModel.InstructionList != null
+                    && (entity.InstructionList ?? new List<Instruction>()).Count > 0
+                )
                 {
                     var instructionList = new List<Instruction>();
+
                     foreach (var item in entityModel.InstructionList)
                     {
-                        instructionList.Add(
-                            new Instruction
+                        var existingInstruction = _context.Instructions.FirstOrDefault(i =>
+                            i.Id == item.Id.Value
+                        );
+
+                        if (existingInstruction != null)
+                        {
+                            // If the instruction already exists in the context, update its properties
+                            existingInstruction.StayingScheduleId = null;
+                            existingInstruction.MovingScheduleId = entity.Id;
+                            existingInstruction.Description = item.Description;
+                            existingInstruction.InstructionType = item.InstructionType;
+                            existingInstruction.CreateDate = item.CreateDate;
+                            existingInstruction.UpdateDate = DateTime.UtcNow;
+
+                            instructionList.Add(existingInstruction);
+                        }
+                        else
+                        {
+                            // If the instruction is not already in the context, create a new instance
+                            var newInstruction = new Instruction
                             {
                                 Id = item.Id.Value,
+                                StayingScheduleId = null,
                                 MovingScheduleId = entity.Id,
                                 Description = item.Description,
                                 InstructionType = item.InstructionType,
                                 CreateDate = item.CreateDate,
                                 UpdateDate = DateTime.UtcNow,
-                            }
-                        );
+                            };
+
+                            instructionList.Add(newInstruction);
+                        }
                     }
+
                     entity.InstructionList = instructionList;
                 }
                 else
@@ -956,7 +1017,9 @@ namespace WebApplication1.Repository.InheritanceRepo
                     {
                         if (item.Id.HasValue)
                         {
-                            var existSchedule = await _context.ServiceSchedule.FirstOrDefaultAsync(e => e.Id == item.Id.Value);
+                            var existSchedule = await _context.ServiceSchedule.FirstOrDefaultAsync(
+                                e => e.Id == item.Id.Value
+                            );
                             if (existSchedule != null)
                             {
                                 existSchedule.MovingScheduleId = item.MovingScheduleId;
@@ -968,7 +1031,8 @@ namespace WebApplication1.Repository.InheritanceRepo
                                 existSchedule.EndDate = item.EndDate;
 
                                 var changedSchedule = GetChangedProperties(existSchedule);
-                                if (changedSchedule.Any()) scheduleChangeList.Add(existSchedule.Id.ToString());
+                                if (changedSchedule.Any())
+                                    scheduleChangeList.Add(existSchedule.Id.ToString());
 
                                 existSchedule.UpdateDate = DateTime.UtcNow;
                                 dataScheduleList.Add(existSchedule);
@@ -989,7 +1053,8 @@ namespace WebApplication1.Repository.InheritanceRepo
                                     EndDate = item.EndDate,
                                     CreateDate = item.CreateDate ?? DateTime.UtcNow,
                                     UpdateDate = DateTime.UtcNow,
-                                });
+                                }
+                            );
                         }
                     }
                     entity.ServiceScheduleList = dataScheduleList;
@@ -1337,7 +1402,6 @@ namespace WebApplication1.Repository.InheritanceRepo
             List<string> scheduleList
         )
         {
-
             if (scheduleType == ScheduleType.MovingSchedule)
             {
                 if (scheduleList.Count > 0)
@@ -1349,7 +1413,9 @@ namespace WebApplication1.Repository.InheritanceRepo
                             entity.Email == email
                             && entity.TotalReceipt.MovingScheduleId == scheduleId
                             && entity.ServiceSchedule.EndDate >= DateTime.UtcNow
-                         && scheduleList.Any(entity1 => entity1 == entity.ServiceSchedule.Id.ToString())
+                            && scheduleList.Any(entity1 =>
+                                entity1 == entity.ServiceSchedule.Id.ToString()
+                            )
                         )
                         .CountAsync();
 
@@ -1359,14 +1425,14 @@ namespace WebApplication1.Repository.InheritanceRepo
                 else
                 {
                     var count = await _context
-                            .FullScheduleReceiptList.Include(entity => entity.ServiceSchedule)
-                            .Include(entity => entity.TotalReceipt)
-                            .Where(entity =>
-                                entity.Email == email
-                                && entity.TotalReceipt.MovingScheduleId == scheduleId
-                                && entity.ServiceSchedule.EndDate >= DateTime.UtcNow
-                            )
-                            .CountAsync();
+                        .FullScheduleReceiptList.Include(entity => entity.ServiceSchedule)
+                        .Include(entity => entity.TotalReceipt)
+                        .Where(entity =>
+                            entity.Email == email
+                            && entity.TotalReceipt.MovingScheduleId == scheduleId
+                            && entity.ServiceSchedule.EndDate >= DateTime.UtcNow
+                        )
+                        .CountAsync();
 
                     if (count >= 1)
                         return true;
@@ -1383,7 +1449,9 @@ namespace WebApplication1.Repository.InheritanceRepo
                             entity.Email == email
                             && entity.TotalReceipt.StayingScheduleId == scheduleId
                             && entity.ServiceSchedule.EndDate >= DateTime.UtcNow
-                            && scheduleList.Any(entity1 => entity1 == entity.ServiceSchedule.Id.ToString())
+                            && scheduleList.Any(entity1 =>
+                                entity1 == entity.ServiceSchedule.Id.ToString()
+                            )
                         )
                         .CountAsync();
 
@@ -1492,6 +1560,4 @@ namespace WebApplication1.Repository.InheritanceRepo
             return changedProperties;
         }
     }
-
-
 }
