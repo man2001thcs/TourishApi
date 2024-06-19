@@ -5,7 +5,7 @@ namespace WebApplication1.Data.Transport
 {
     public enum VehicleType
     {
-        PassengerCar = 0, Plane = 1, Train = 2
+        PassengerCar = 0, Plane = 1, Train = 2, Ship = 3, LocalTransport = 4
     }
 
     [Table("MovingContact")]
