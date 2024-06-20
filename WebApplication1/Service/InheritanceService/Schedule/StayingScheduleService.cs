@@ -6,6 +6,7 @@ using WebApplication1.Model.Schedule;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.InheritanceRepo;
 using StackExchange.Redis;
+using WebApplication1.Service.InheritanceService;
 
 namespace TourishApi.Service.InheritanceService.Schedule
 {
@@ -13,12 +14,15 @@ namespace TourishApi.Service.InheritanceService.Schedule
     {
         private readonly TourishOuterScheduleRepository _entityRepository;
         private readonly NotificationService _notificationService;
+        private readonly UserService _userService;
         private readonly IDatabase _redisDatabase;
 
-        public StayingScheduleService(TourishOuterScheduleRepository entityRepository, NotificationService notificationService, IConnectionMultiplexer connectionMultiplexer)
+        public StayingScheduleService(TourishOuterScheduleRepository entityRepository,
+        UserService userService, NotificationService notificationService, IConnectionMultiplexer connectionMultiplexer)
         {
             _entityRepository = entityRepository;
             _notificationService = notificationService;
+            _userService = userService;
             _redisDatabase = connectionMultiplexer.GetDatabase();
         }
 
@@ -340,6 +344,31 @@ namespace TourishApi.Service.InheritanceService.Schedule
         )
         {
             return await _entityRepository.UpdateInstructionList(scheduleInstructionModel);
+        }
+
+        public async Task<Response> sendTourPaymentNotifyToAdmin(string email, Guid stayingScheduleId, string contentCode)
+        {
+            var user = (User)_userService.getUserByEmail(email).Data;
+
+            if (user != null)
+            {
+                var interestList = await _entityRepository.getScheduleInterest(
+                        stayingScheduleId,
+                        ScheduleType.StayingSchedule
+                    );
+
+                foreach (var interest in interestList)
+                {
+                    if (interest.User.Role == UserRole.User)
+                    {
+                        continue;
+                    }
+
+                    await CreateNotification(user.Id.ToString(), interest.UserId, null, stayingScheduleId, contentCode);
+                }
+            }
+
+            return new Response();
         }
     }
 }

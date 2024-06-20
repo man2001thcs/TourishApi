@@ -12,6 +12,7 @@ using WebApplication1.Model;
 using WebApplication1.Model.Payment;
 using WebApplication1.Model.Receipt;
 using WebApplication1.Model.VirtualModel;
+using WebApplication1.Repository.InheritanceRepo;
 using WebApplication1.Repository.InheritanceRepo.Receipt;
 using WebApplication1.Repository.Interface;
 using WebApplication1.Service;
@@ -42,7 +43,8 @@ namespace TourishApi.Service.InheritanceService
             IConnectionMultiplexer connectionMultiplexer,
             NotificationService notificationService,
             UserService userService,
-            TourishPlanService tourishPlanService
+            TourishPlanService tourishPlanService,
+            TourishPlanRepository tourishPlanRepository
         )
         {
             _receiptRepository = receiptRepository;
@@ -102,6 +104,9 @@ namespace TourishApi.Service.InheritanceService
                         receiptInsertModel
                     );
 
+                    if (receiptReturn.resultCd == 0)
+                        await _tourishPlanService.sendTourPaymentNotifyToAdmin(receiptInsertModel.Email, receiptInsertModel.TourishPlanId.Value, "I511-admin-create");
+
                     return receiptReturn;
                 }
                 else
@@ -109,6 +114,11 @@ namespace TourishApi.Service.InheritanceService
                     var receiptReturn = await _receiptRepository.AddScheduleReceiptForClient(
                         receiptInsertModel
                     );
+
+                    if (receiptReturn.resultCd == 0 && receiptInsertModel.StayingScheduleId.HasValue)
+                        await _stayingScheduleService.sendTourPaymentNotifyToAdmin(receiptInsertModel.Email, receiptInsertModel.StayingScheduleId.Value, "I511-admin-create");
+                    if (receiptReturn.resultCd == 0 && receiptInsertModel.MovingScheduleId.HasValue)
+                        await _movingScheduleService.sendTourPaymentNotifyToAdmin(receiptInsertModel.Email, receiptInsertModel.MovingScheduleId.Value, "I511-admin-create");
 
                     return receiptReturn;
                 }
@@ -409,10 +419,71 @@ namespace TourishApi.Service.InheritanceService
         {
             try
             {
+                var contentCode = "";
+
+                switch (receiptModel.Status)
+                {
+                    case FullReceiptStatus.AwaitPayment:
+                        contentCode = "I511-user-await";
+                        break;
+                    case FullReceiptStatus.Cancelled:
+                        contentCode = "I511-user-cancel";
+                        break;
+                    case FullReceiptStatus.Completed:
+                        contentCode = "I511-user-complete";
+                        break;
+                    default:
+                        // code block
+                        break;
+                }
+
                 if (receiptModel.TourishPlanId != null)
-                    await _receiptRepository.UpdateTourReceipt(receiptModel);
+                {
+                    var result = await _receiptRepository.UpdateTourReceipt(receiptModel);
+
+                    var existReceipt = (FullReceipt)_receiptRepository.getFullTourReceiptById(receiptModel.FullReceiptId).Data;
+
+
+
+                    if (result.resultCd == 0 && existReceipt != null)
+                    {
+
+
+
+                        await sendTourPaymentNotifyToUser(
+                                                        existReceipt.Email,
+                                                        existReceipt.TotalReceipt.TourishPlanId.Value,
+                                                        contentCode
+                                                    );
+                    }
+
+                }
                 else
-                    await _receiptRepository.UpdateScheduleReceipt(receiptModel);
+                {
+                    var result = await _receiptRepository.UpdateScheduleReceipt(receiptModel);
+                    var existReceipt = (FullScheduleReceipt)_receiptRepository.getFullScheduleReceiptById(receiptModel.FullReceiptId).Data;
+
+                    if (result.resultCd == 0 && existReceipt != null)
+                    {
+                        if (existReceipt.TotalReceipt.MovingScheduleId.HasValue)
+                            await sendServicePaymentNotifyToUser(
+                                                            existReceipt.Email,
+                                                            existReceipt.TotalReceipt.MovingScheduleId,
+                                                            null,
+                                                            contentCode
+                                                        );
+
+                        if (existReceipt.TotalReceipt.StayingScheduleId.HasValue)
+                            await sendServicePaymentNotifyToUser(
+                                                            existReceipt.Email,
+                                                            null,
+                                                             existReceipt.TotalReceipt.MovingScheduleId,
+                                                            contentCode
+                                                        );
+                    }
+
+                }
+
 
                 var response = new Response { resultCd = 0, MessageCode = "I512", };
                 return response;
@@ -434,12 +505,49 @@ namespace TourishApi.Service.InheritanceService
             FullReceiptUpdateModel receiptModel
         )
         {
+
             try
             {
+                var contentCode = "";
+
+                switch (receiptModel.Status)
+                {
+                    case FullReceiptStatus.AwaitPayment:
+                        contentCode = "I511-admin-await";
+                        break;
+                    case FullReceiptStatus.Cancelled:
+                        contentCode = "I511-admin-cancel";
+                        break;
+                    case FullReceiptStatus.Completed:
+                        contentCode = "I511-admin-complete";
+                        break;
+                    default:
+                        // code block
+                        break;
+                }
+
                 if (receiptModel.TourishPlanId != null)
-                    await _receiptRepository.UpdateTourReceiptForUser(receiptModel);
+                {
+                    var result = await _receiptRepository.UpdateTourReceiptForUser(receiptModel);
+                    var existReceipt = (FullReceipt)_receiptRepository.getFullTourReceiptById(receiptModel.FullReceiptId).Data;
+
+                    if (result.resultCd == 0) await _tourishPlanService.sendTourPaymentNotifyToAdmin(existReceipt.Email, receiptModel.TourishPlanId.Value, contentCode);
+                }
+
                 else
-                    await _receiptRepository.UpdateScheduleReceiptForUser(receiptModel);
+                {
+                    var result = await _receiptRepository.UpdateScheduleReceiptForUser(receiptModel);
+                    var existReceipt = (FullScheduleReceipt)_receiptRepository.getFullScheduleReceiptById(receiptModel.FullReceiptId).Data;
+
+                    if (result.resultCd == 0)
+                    {
+                        if (existReceipt.TotalReceipt.StayingScheduleId.HasValue)
+                            await _stayingScheduleService.sendTourPaymentNotifyToAdmin(existReceipt.Email, existReceipt.TotalReceipt.StayingScheduleId.Value, contentCode);
+                        if (existReceipt.TotalReceipt.MovingScheduleId.HasValue)
+                            await _movingScheduleService.sendTourPaymentNotifyToAdmin(existReceipt.Email, existReceipt.TotalReceipt.MovingScheduleId.Value, contentCode);
+                    }
+                }
+
 
                 var response = new Response { resultCd = 0, MessageCode = "I512", };
                 return response;
@@ -748,10 +856,11 @@ namespace TourishApi.Service.InheritanceService
                         if (status.Equals("PAID"))
                         {
                             await SendServiceReceiptToEmail(orderId);
-                            await sendServicePaymentNotify(
+                            await sendServicePaymentNotifyToUser(
                                 existReceipt.Email,
                                 existReceipt.ServiceSchedule.MovingScheduleId,
-                                existReceipt.ServiceSchedule.StayingScheduleId
+                                existReceipt.ServiceSchedule.StayingScheduleId,
+                                "I511-user-complete"
                             );
                         }
 
@@ -796,9 +905,10 @@ namespace TourishApi.Service.InheritanceService
                         if (status.Equals("PAID"))
                         {
                             await SendTourReceiptToEmail(orderId);
-                            await sendTourPaymentNotify(
+                            await sendTourPaymentNotifyToUser(
                                 existReceipt.Email,
-                                existReceipt.TourishSchedule.TourishPlanId
+                                existReceipt.TourishSchedule.TourishPlanId,
+                                "I511-user-complete"
                             );
                         }
 
@@ -821,7 +931,7 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public async Task<Response> sendTourPaymentNotify(string email, Guid tourishPlanId)
+        public async Task<Response> sendTourPaymentNotifyToUser(string email, Guid tourishPlanId, string contentCode)
         {
             var user = (User)_userService.getUserByEmail(email).Data;
 
@@ -834,7 +944,7 @@ namespace TourishApi.Service.InheritanceService
                     TourishPlanId = tourishPlanId,
                     IsGenerate = true,
                     Content = "",
-                    ContentCode = "I511",
+                    ContentCode = contentCode,
                     IsRead = false,
                     IsDeleted = false,
                     CreateDate = DateTime.UtcNow,
@@ -849,10 +959,10 @@ namespace TourishApi.Service.InheritanceService
             return new Response();
         }
 
-        public async Task<Response> sendServicePaymentNotify(
+        public async Task<Response> sendServicePaymentNotifyToUser(
             string email,
             Guid? movingServiceId,
-            Guid? stayingServiceId
+            Guid? stayingServiceId, string contentCode
         )
         {
             var user = (User)_userService.getUserByEmail(email).Data;
@@ -867,7 +977,7 @@ namespace TourishApi.Service.InheritanceService
                     StayingScheduleId = stayingServiceId,
                     IsGenerate = true,
                     Content = "",
-                    ContentCode = "I511",
+                    ContentCode = contentCode,
                     IsRead = false,
                     IsDeleted = false,
                     CreateDate = DateTime.UtcNow,
@@ -1092,5 +1202,7 @@ namespace TourishApi.Service.InheritanceService
                 return new Response();
             }
         }
+
+
     }
 }

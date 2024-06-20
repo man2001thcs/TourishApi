@@ -1,4 +1,5 @@
-﻿using WebApplication1.Model;
+﻿using WebApplication1.Data;
+using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 
 namespace TourishApi.Service.Interface
@@ -21,5 +22,7 @@ namespace TourishApi.Service.Interface
         public Task<Response> clientGetById(Guid id);
         public Task<Response> UpdateEntityById(string userId, TourishPlanUpdateModel entityModel);
         public Response DeleteById(Guid id);
+
+        public Task<List<TourishInterest>> getTourInterest(Guid tourId);
     }
 }

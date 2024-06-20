@@ -6,6 +6,7 @@ using WebApplication1.Data;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.Interface;
+using WebApplication1.Service.InheritanceService;
 
 namespace TourishApi.Service.InheritanceService
 {
@@ -13,14 +14,17 @@ namespace TourishApi.Service.InheritanceService
     {
         private readonly ITourishPlanRepository _entityRepository;
         private readonly NotificationService _notificationService;
+        private readonly UserService _userService;
         private readonly IDatabase _redisDatabase;
 
         public TourishPlanService(
             ITourishPlanRepository tourishPlanRepository,
             NotificationService notificationService,
+            UserService userService,
             IConnectionMultiplexer connectionMultiplexer
         )
         {
+            _userService = userService;
             _entityRepository = tourishPlanRepository;
             _notificationService = notificationService;
             _redisDatabase = connectionMultiplexer.GetDatabase();
@@ -429,6 +433,11 @@ namespace TourishApi.Service.InheritanceService
             return _entityRepository.getTourInterest(tourId, userId);
         }
 
+        public async Task<List<TourishInterest>> getTourInterest(Guid tourId)
+        {
+            return await _entityRepository.getTourInterest(tourId);
+        }
+
         public Task<Response> setTourInterest(
             Guid tourId,
             Guid userId,
@@ -455,6 +464,28 @@ namespace TourishApi.Service.InheritanceService
                 };
                 return response;
             }
+        }
+
+        public async Task<Response> sendTourPaymentNotifyToAdmin(string email, Guid tourishPlanId, string contentCode)
+        {
+            var user = (User)_userService.getUserByEmail(email).Data;
+
+            if (user != null)
+            {
+                var interestList = await _entityRepository.getTourInterest(tourishPlanId);
+
+                foreach (var interest in interestList)
+                {
+                    if (interest.User.Role == UserRole.User)
+                    {
+                        continue;
+                    }
+
+                    await CreateNotification(user.Id.ToString(), interest.UserId, tourishPlanId, contentCode);
+                }
+            }
+
+            return new Response();
         }
     }
 }

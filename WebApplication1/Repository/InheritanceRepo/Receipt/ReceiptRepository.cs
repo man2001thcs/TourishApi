@@ -1089,6 +1089,7 @@ public class ReceiptRepository
             .FullReceiptList.Where(receipt => receipt.FullReceiptId == id)
             .Include(entity => entity.TotalReceipt)
             .Include(entity => entity.TourishSchedule)
+            .AsSplitQuery()
             //.ThenInclude(entity => entity.TourishPlan)
             .FirstOrDefault();
         if (receipt == null)
@@ -1105,6 +1106,7 @@ public class ReceiptRepository
             .FullScheduleReceiptList.Where(receipt => receipt.FullReceiptId == id)
             .Include(entity => entity.TotalReceipt)
             .Include(entity => entity.ServiceSchedule)
+            .AsSplitQuery()
             .FirstOrDefault();
         if (receipt == null)
         {
