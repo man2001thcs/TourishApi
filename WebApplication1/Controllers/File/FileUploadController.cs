@@ -84,7 +84,7 @@ namespace WebApplication1.Controllers.File
 
                 var response = new Response
                 {
-                    resultCd = 1,
+                    resultCd = 0,
                     MessageCode = "I912",
                 };
 

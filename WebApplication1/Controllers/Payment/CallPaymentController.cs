@@ -112,12 +112,40 @@ namespace WebApplication1.Controllers.Payment
         }
 
         [HttpGet("pay-os/update/tour/{token}")]
-        public async Task<IActionResult> UpdateReceipt(string id, string orderCode, string status, string token)
+        public async Task<IActionResult> UpdateReceipt(
+            string id,
+            string orderCode,
+            string status,
+            string token
+        )
         {
             if (await _userService.validatePaymentToken(token, orderCode, ""))
-                await _receiptService.thirdPartyPaymentFullReceiptStatusChange(id, orderCode, status);
+                await _receiptService.thirdPartyPaymentFullReceiptStatusChange(
+                    id,
+                    orderCode,
+                    status
+                );
 
-            return Redirect(_appSettings.ClientUrl + "/user/receipt/list?active=2");
+            var receiptStatus = 2;
+            if (status.Equals("PENDING"))
+            {
+                receiptStatus = 1;
+            }
+            else if (status.Equals("PAID"))
+            {
+                receiptStatus = 2;
+            }
+            else if (status.Equals("CANCELLED"))
+            {
+                receiptStatus = 3;
+            }
+
+            return Redirect(
+                _appSettings.ClientUrl
+                    + "/user/receipt/list?active="
+                    + receiptStatus
+                    + "&complete=1"
+            );
         }
 
         [HttpGet("pay-os/update/service/{token}")]
@@ -140,13 +168,26 @@ namespace WebApplication1.Controllers.Payment
 
             if (receipt == null)
             {
+                var receiptStatus = (int)receipt.Status;
                 if (receipt.ServiceSchedule.MovingScheduleId != null)
-                    return Redirect(_appSettings.ClientUrl + "/user/moving/receipt/list?active=2");
+                    return Redirect(
+                        _appSettings.ClientUrl
+                            + "/user/moving/receipt/list?active="
+                            + receiptStatus
+                            + "&complete=1"
+                    );
                 else
-                    return Redirect(_appSettings.ClientUrl + "/user/staying/receipt/list?active=2");
+                    return Redirect(
+                        _appSettings.ClientUrl
+                            + "/user/staying/receipt/list?active="
+                            + receiptStatus
+                            + "&complete=1"
+                    );
             }
 
-            return Redirect(_appSettings.ClientUrl + "/user/moving/receipt/list?active=2");
+            return Redirect(
+                _appSettings.ClientUrl + "/user/moving/receipt/list?active=" + 2 + "&complete=1"
+            );
         }
 
         [HttpPost("pay-os/web-hook/tour")]
