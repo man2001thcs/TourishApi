@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Schedule;
 
-public class RemoveOldMessageTask
+public class RemoveOldMessageConTask
 {
     private readonly MyDbContext _context;
 
-    public RemoveOldMessageTask(MyDbContext _context)
+    public RemoveOldMessageConTask(MyDbContext _context)
     {
         this._context = _context;
     }
