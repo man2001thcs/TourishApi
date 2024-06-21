@@ -18,8 +18,12 @@ public class ScheduleDateChangeTask
     {
         var onGoingTourScheduleList = _context
             .TourishScheduleList.Where(entity =>
-                entity.StartDate < DateTime.UtcNow && entity.EndDate > DateTime.UtcNow && (int) entity.PlanStatus < 3
+                entity.StartDate < DateTime.UtcNow
+                && entity.EndDate > DateTime.UtcNow
+                && (int)entity.PlanStatus < 3
             )
+            .OrderBy(entity => entity.CreateDate)
+            .AsSplitQuery()
             .ToList();
 
         foreach (var item in onGoingTourScheduleList)
@@ -29,8 +33,10 @@ public class ScheduleDateChangeTask
 
         var completeTourScheduleList = _context
             .TourishScheduleList.Where(entity =>
-                entity.EndDate < DateTime.UtcNow && (int) entity.PlanStatus < 3
+                entity.EndDate < DateTime.UtcNow && (int)entity.PlanStatus < 3
             )
+            .OrderBy(entity => entity.CreateDate)
+            .AsSplitQuery()
             .ToList();
 
         foreach (var item in completeTourScheduleList)
@@ -40,8 +46,12 @@ public class ScheduleDateChangeTask
 
         var onGoingScheduleScheduleList = _context
             .ServiceSchedule.Where(entity =>
-                entity.StartDate < DateTime.UtcNow && entity.EndDate > DateTime.UtcNow && (int)entity.Status < 2
+                entity.StartDate < DateTime.UtcNow
+                && entity.EndDate > DateTime.UtcNow
+                && (int)entity.Status < 2
             )
+            .OrderBy(entity => entity.CreateDate)
+            .AsSplitQuery()
             .ToList();
 
         foreach (var item in onGoingScheduleScheduleList)
@@ -53,13 +63,14 @@ public class ScheduleDateChangeTask
             .ServiceSchedule.Where(entity =>
                 entity.EndDate < DateTime.UtcNow && (int)entity.Status < 2
             )
+            .OrderBy(entity => entity.CreateDate)
+            .AsSplitQuery()
             .ToList();
 
         foreach (var item in completeServiceScheduleList)
         {
             item.Status = ScheduleStatus.Completed;
         }
-
 
         await _context.SaveChangesAsync();
     }

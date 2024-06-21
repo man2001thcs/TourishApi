@@ -70,38 +70,44 @@ namespace MyWebApiApp
 
             services.AddDbContext<MyDbContext>(option =>
             {
-                // option.UseSqlServer(Configuration.GetConnectionString("AzureDb"));
-                option.UseSqlServer(Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING") ?? Configuration.GetConnectionString("AzureDb"));
+                option.UseSqlServer(
+                    Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING")
+                        ?? Configuration.GetConnectionString("AzureDb")
+                );
 
-                option.UseTriggers(triggerOptions =>
-                {
-                    triggerOptions.AddTrigger<NotificationConTrigger>();
-                    triggerOptions.AddTrigger<MessageConTrigger>();
-                });
+                //option.UseTriggers(triggerOptions =>
+                //{
+                //    triggerOptions.AddTrigger<NotificationConTrigger>();
+                //    triggerOptions.AddTrigger<MessageConTrigger>();
+                //});
             });
 
-            //services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Configuration.GetConnectionString("Redis")));
-            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("AZURE_REDIS_STRING") ?? Configuration.GetConnectionString("Redis")));
+            services.AddSingleton<IConnectionMultiplexer>(
+                ConnectionMultiplexer.Connect(
+                    Environment.GetEnvironmentVariable("AZURE_REDIS_STRING")
+                        ?? Configuration.GetConnectionString("Redis")
+                )
+            );
 
-            //services.AddScoped(x => new BlobServiceClient(Configuration.GetValue<string>("AzureBlobStorage")));
             services.AddScoped(x => new BlobServiceClient(
-                Environment.GetEnvironmentVariable("AZURE_BLOB_STRING") ?? Configuration.GetValue<string>("AzureBlobStorage")
+                Environment.GetEnvironmentVariable("AZURE_BLOB_STRING")
+                    ?? Configuration.GetConnectionString("AzureBlobStorage")
             ));
 
-            //services.AddHangfire(config =>
-            //    config.UseSqlServerStorage(Configuration.GetConnectionString("AzureDb")));
             services.AddHangfire(config =>
                 config.UseSqlServerStorage(
                     Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING") ?? Configuration.GetConnectionString("AzureDb")
                 )
             );
-
+           
             services.AddGeminiClient(config =>
             {
-                config.ApiKey = Environment.GetEnvironmentVariable("GOOGLE_CHAT_KEY")
-                        ?? "";
+                config.ApiKey =
+                    Environment.GetEnvironmentVariable("GOOGLE_CHAT_KEY")
+                    ?? Configuration.GetConnectionString(" GoogleApiKey");
                 config.ImageBaseUrl = "CURRENTLY_IMAGE_BASE_URL";
-                config.TextBaseUrl = "https://generativelanguage.googleapis.com/v1/models/gemini-pro";
+                config.TextBaseUrl =
+                    "https://generativelanguage.googleapis.com/v1/models/gemini-pro";
             });
 
             // Repo
@@ -342,9 +348,39 @@ namespace MyWebApiApp
             app.UseHangfireDashboard();
 
             RecurringJob.AddOrUpdate<ScheduleDateChangeTask>(
-                "MyScheduledTask",
+                "ScheduleDateChangeTask",
                 x => x.ScheduleDateDueTask(),
-                Cron.DayInterval(2)
+                Cron.DayInterval(1)
+            );
+
+            RecurringJob.AddOrUpdate<ReceiptStatusChangeTask>(
+                "ReceiptStatusChangeTask",
+                x => x.ReceiptStatusTask(),
+                Cron.DayInterval(1)
+            );
+
+            RecurringJob.AddOrUpdate<RemoveOldMessageConTask>(
+                "RemoveOldMessageConTask",
+                x => x.RemoveOldConn(),
+                Cron.DayInterval(1)
+            );
+
+            RecurringJob.AddOrUpdate<RemoveOldNotifyConnTask>(
+                "RemoveOldNotifyConnTask",
+                x => x.RemoveOldConn(),
+                Cron.DayInterval(1)
+            );
+
+            RecurringJob.AddOrUpdate<RemoveOldMessageTask>(
+                "RemoveOldMessageTask",
+                x => x.RemoveOldMessage(),
+                Cron.DayInterval(1)
+            );
+
+            RecurringJob.AddOrUpdate<RemoveOldNotifyTask>(
+                "RemoveOldNotifyTask",
+                x => x.RemoveOldNotify(),
+                Cron.DayInterval(1)
             );
 
             app.UseEndpoints(endpoints =>

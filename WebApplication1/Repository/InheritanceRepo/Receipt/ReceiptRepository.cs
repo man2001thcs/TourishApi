@@ -1141,8 +1141,6 @@ public class ReceiptRepository
             receipt.Status = receiptModel.Status;
 
             receipt.UpdateDate = DateTime.UtcNow;
-            if (receiptModel.Status == FullReceiptStatus.Completed)
-                receipt.CompleteDate = DateTime.UtcNow;
 
             var planExist = _context.TourishPlan.FirstOrDefault(
                 (plan => plan.Id == receipt.TotalReceipt.TourishPlanId)
@@ -1169,6 +1167,8 @@ public class ReceiptRepository
                             existSchedule.RemainTicket
                             - receiptModel.TotalTicket
                             - receiptModel.TotalChildTicket;
+
+                        receipt.CompleteDate = DateTime.UtcNow;
 
                         await _context.SaveChangesAsync();
                     }
@@ -1199,6 +1199,8 @@ public class ReceiptRepository
                             - receiptModel.TotalChildTicket
                             + oldTotalTicket;
 
+                        receipt.CompleteDate = DateTime.UtcNow;
+
                         await _context.SaveChangesAsync();
                     }
                     else
@@ -1223,6 +1225,9 @@ public class ReceiptRepository
                     {
                         existSchedule.RemainTicket = existSchedule.TotalTicket;
                     }
+
+                    receipt.CompleteDate = null;
+                    if (receiptModel.Status == FullReceiptStatus.Cancelled) receipt.CompleteDate = DateTime.UtcNow;
 
                     await _context.SaveChangesAsync();
                 }
@@ -1262,8 +1267,6 @@ public class ReceiptRepository
             receipt.Status = receiptModel.Status;
 
             receipt.UpdateDate = DateTime.UtcNow;
-            if (receiptModel.Status == FullReceiptStatus.Completed)
-                receipt.CompleteDate = DateTime.UtcNow;
 
             if (
                 receipt.Status != FullReceiptStatus.Completed
@@ -1289,6 +1292,7 @@ public class ReceiptRepository
                             existSchedule.RemainTicket
                             - receiptModel.TotalTicket
                             - receiptModel.TotalChildTicket;
+                        receipt.CompleteDate = DateTime.UtcNow;
 
                         await _context.SaveChangesAsync();
                     }
@@ -1321,6 +1325,7 @@ public class ReceiptRepository
                             - receiptModel.TotalTicket
                             - receiptModel.TotalChildTicket
                             + oldTotalTicket;
+                        receipt.CompleteDate = DateTime.UtcNow;
 
                         await _context.SaveChangesAsync();
                     }
@@ -1346,6 +1351,9 @@ public class ReceiptRepository
                     {
                         existSchedule.RemainTicket = existSchedule.TotalTicket;
                     }
+
+                    receipt.CompleteDate = null;
+                    if (receiptModel.Status == FullReceiptStatus.Cancelled) receipt.CompleteDate = DateTime.UtcNow;
 
                     await _context.SaveChangesAsync();
                 }
@@ -1409,6 +1417,8 @@ public class ReceiptRepository
             receipt.TotalChildTicket = receiptModel.TotalChildTicket;
             receipt.TourishScheduleId = receiptModel.TourishScheduleId;
             receipt.UpdateDate = DateTime.UtcNow;
+
+            if (receiptModel.Status == FullReceiptStatus.Cancelled) receipt.CompleteDate = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
         }
@@ -1492,6 +1502,8 @@ public class ReceiptRepository
                     return new Response { resultCd = 1, MessageCode = "C520", };
                 }
             }
+
+            if (receiptModel.Status == FullReceiptStatus.Cancelled) receipt.CompleteDate = DateTime.UtcNow;
 
             receipt.Status = receiptModel.Status;
             receipt.TotalTicket = receiptModel.TotalTicket;
@@ -2106,11 +2118,9 @@ public class ReceiptRepository
                 var existSchedule = _context.ServiceSchedule.FirstOrDefault(entity =>
                     entity.Id == existFullReceipt.ServiceScheduleId
                 );
-                logger.LogInformation("Tester was here 0");
 
                 if (existSchedule != null)
                 {
-                    logger.LogInformation("Tester was here 1: " + existFullReceipt.Status);
                     if (
                         existSchedule.RemainTicket
                             >= (existFullReceipt.TotalTicket + existFullReceipt.TotalChildTicket)
@@ -2123,7 +2133,6 @@ public class ReceiptRepository
                     }
                     else
                     {
-                        logger.LogInformation("Tester was here 2");
                         return new Response { resultCd = 1, MessageCode = "C515", };
                     }
                 }
