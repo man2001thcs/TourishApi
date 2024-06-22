@@ -766,7 +766,8 @@ public class ReceiptRepository
             CompleteDate = entity.CompleteDate,
             FullReceiptList = status != null
                 ? entity
-                    .FullReceiptList.Where(fullReceipt => (int)fullReceipt.Status == (int)status).OrderByDescending(entity => entity.CreatedDate)
+                    .FullReceiptList.Where(fullReceipt => (int)fullReceipt.Status == (int)status)
+                    .OrderByDescending(entity => entity.CreatedDate)
                     .ToList()
                 : entity.FullReceiptList.ToList(),
             TourishPlan = entity.TourishPlan,
@@ -860,7 +861,8 @@ public class ReceiptRepository
             Description = entity.Description,
             CompleteDate = entity.CompleteDate,
             FullReceiptList = entity
-                .FullReceiptList.Where(entity => (int)entity.Status == (int)status).OrderByDescending(entity => entity.CreatedDate)
+                .FullReceiptList.Where(entity => (int)entity.Status == (int)status)
+                .OrderByDescending(entity => entity.CreatedDate)
                 .ToList(),
             StayingSchedule = entity.StayingSchedule,
             MovingSchedule = entity.MovingSchedule,
@@ -942,7 +944,8 @@ public class ReceiptRepository
             CompleteDate = entity.CompleteDate,
 
             FullReceiptList = entity
-                .FullReceiptList.Where(entity => entity.Email == email && entity.Status == status).OrderByDescending(entity => entity.CreatedDate)
+                .FullReceiptList.Where(entity => entity.Email == email && entity.Status == status)
+                .OrderByDescending(entity => entity.CreatedDate)
                 .ToList(),
 
             TourishPlan = entity.TourishPlan,
@@ -1035,7 +1038,8 @@ public class ReceiptRepository
             FullReceiptList = entity
                 .FullReceiptList.Where(entity =>
                     entity.Email == email && (int)entity.Status == (int)status
-                ).OrderByDescending(entity => entity.CreatedDate)
+                )
+                .OrderByDescending(entity => entity.CreatedDate)
                 .ToList(),
 
             StayingSchedule = entity.StayingSchedule,
@@ -1227,7 +1231,8 @@ public class ReceiptRepository
                     }
 
                     receipt.CompleteDate = null;
-                    if (receiptModel.Status == FullReceiptStatus.Cancelled) receipt.CompleteDate = DateTime.UtcNow;
+                    if (receiptModel.Status == FullReceiptStatus.Cancelled)
+                        receipt.CompleteDate = DateTime.UtcNow;
 
                     await _context.SaveChangesAsync();
                 }
@@ -1353,7 +1358,8 @@ public class ReceiptRepository
                     }
 
                     receipt.CompleteDate = null;
-                    if (receiptModel.Status == FullReceiptStatus.Cancelled) receipt.CompleteDate = DateTime.UtcNow;
+                    if (receiptModel.Status == FullReceiptStatus.Cancelled)
+                        receipt.CompleteDate = DateTime.UtcNow;
 
                     await _context.SaveChangesAsync();
                 }
@@ -1376,21 +1382,6 @@ public class ReceiptRepository
 
         if (receipt != null)
         {
-            if (receiptModel.Status == FullReceiptStatus.AwaitPayment)
-            {
-                return new Response { resultCd = 1, MessageCode = "C516-p", };
-            }
-
-            if (receiptModel.Status == FullReceiptStatus.Completed)
-            {
-                return new Response { resultCd = 1, MessageCode = "C516-c", };
-            }
-
-            if (receiptModel.Status == FullReceiptStatus.Cancelled)
-            {
-                return new Response { resultCd = 1, MessageCode = "C516-h", };
-            }
-
             var planExist = _context.TourishPlan.FirstOrDefault(
                 (plan => plan.Id == receipt.TotalReceipt.TourishPlanId)
             );
@@ -1401,25 +1392,52 @@ public class ReceiptRepository
 
             if (scheduleExist.PlanStatus == PlanStatus.OnGoing)
             {
-                return new Response { resultCd = 1, MessageCode = "C517", };
+                return new Response { resultCd = 1, MessageCode = "C517-tour", };
             }
             else if (scheduleExist.PlanStatus == PlanStatus.Complete)
             {
-                return new Response { resultCd = 1, MessageCode = "C518", };
+                return new Response { resultCd = 1, MessageCode = "C518-tour", };
             }
             else if (scheduleExist.PlanStatus == PlanStatus.Cancel)
             {
-                return new Response { resultCd = 1, MessageCode = "C519", };
+                return new Response { resultCd = 1, MessageCode = "C519-tour", };
             }
 
-            receipt.Status = receiptModel.Status;
-            receipt.TotalTicket = receiptModel.TotalTicket;
-            receipt.TotalChildTicket = receiptModel.TotalChildTicket;
-            receipt.TourishScheduleId = receiptModel.TourishScheduleId;
+            if (receipt.Status == FullReceiptStatus.Created)
+            {
+                receipt.Status = receiptModel.Status;
+                receipt.TotalTicket = receiptModel.TotalTicket;
+                receipt.TotalChildTicket = receiptModel.TotalChildTicket;
+                receipt.TourishScheduleId = receiptModel.TourishScheduleId;
+
+                if (receiptModel.Status == FullReceiptStatus.Cancelled)
+                    receipt.CompleteDate = DateTime.UtcNow;
+            }
+
+            if (receipt.Status == FullReceiptStatus.AwaitPayment)
+            {
+                if (receiptModel.Status == FullReceiptStatus.Cancelled)
+                {
+                    receipt.Status = FullReceiptStatus.Cancelled;
+                    receipt.CompleteDate = DateTime.UtcNow;
+                }
+                else
+                {
+                    return new Response { resultCd = 1, MessageCode = "C516-p", };
+                }
+            }
+
+            if (receipt.Status == FullReceiptStatus.Completed)
+            {
+                return new Response { resultCd = 1, MessageCode = "C516-c", };
+            }
+
+            if (receipt.Status == FullReceiptStatus.Cancelled && receiptModel.Status != FullReceiptStatus.Cancelled)
+            {
+                return new Response { resultCd = 1, MessageCode = "C516-h", };
+            }
+
             receipt.UpdateDate = DateTime.UtcNow;
-
-            if (receiptModel.Status == FullReceiptStatus.Cancelled) receipt.CompleteDate = DateTime.UtcNow;
-
             await _context.SaveChangesAsync();
         }
 
@@ -1439,21 +1457,6 @@ public class ReceiptRepository
 
         if (receipt != null)
         {
-            if (receiptModel.Status == FullReceiptStatus.AwaitPayment)
-            {
-                return new Response { resultCd = 1, MessageCode = "C516-p", };
-            }
-
-            if (receiptModel.Status == FullReceiptStatus.Completed)
-            {
-                return new Response { resultCd = 1, MessageCode = "C516-c", };
-            }
-
-            if (receiptModel.Status == FullReceiptStatus.Cancelled)
-            {
-                return new Response { resultCd = 1, MessageCode = "C516-h", };
-            }
-
             if (receiptModel.MovingScheduleId != null)
             {
                 var scheduleExist = _context
@@ -1462,20 +1465,15 @@ public class ReceiptRepository
 
                 if (scheduleExist.Status == ScheduleStatus.OnGoing)
                 {
-                    return new Response { resultCd = 1, MessageCode = "C517", };
+                    return new Response { resultCd = 1, MessageCode = "C517-service", };
                 }
                 else if (scheduleExist.Status == ScheduleStatus.Completed)
                 {
-                    return new Response { resultCd = 1, MessageCode = "C518", };
+                    return new Response { resultCd = 1, MessageCode = "C518-service", };
                 }
                 else if (scheduleExist.Status == ScheduleStatus.Cancelled)
                 {
-                    return new Response { resultCd = 1, MessageCode = "C519", };
-                }
-
-                if (receipt.Status == FullReceiptStatus.Completed)
-                {
-                    return new Response { resultCd = 1, MessageCode = "C520", };
+                    return new Response { resultCd = 1, MessageCode = "C519-service", };
                 }
             }
             else if (receiptModel.StayingScheduleId != null)
@@ -1503,14 +1501,41 @@ public class ReceiptRepository
                 }
             }
 
-            if (receiptModel.Status == FullReceiptStatus.Cancelled) receipt.CompleteDate = DateTime.UtcNow;
+            if (receipt.Status == FullReceiptStatus.Created)
+            {
+                receipt.Status = receiptModel.Status;
+                receipt.TotalTicket = receiptModel.TotalTicket;
+                receipt.TotalChildTicket = receiptModel.TotalChildTicket;
+                receipt.ServiceScheduleId = receiptModel.ServiceScheduleId;
 
-            receipt.Status = receiptModel.Status;
-            receipt.TotalTicket = receiptModel.TotalTicket;
-            receipt.TotalChildTicket = receiptModel.TotalChildTicket;
-            receipt.ServiceScheduleId = receiptModel.ServiceScheduleId;
+                if (receiptModel.Status == FullReceiptStatus.Cancelled)
+                    receipt.CompleteDate = DateTime.UtcNow;
+            }
+
+            if (receipt.Status == FullReceiptStatus.AwaitPayment)
+            {
+                if (receiptModel.Status == FullReceiptStatus.Cancelled)
+                {
+                    receipt.Status = FullReceiptStatus.Cancelled;
+                    receipt.CompleteDate = DateTime.UtcNow;
+                }
+                else
+                {
+                    return new Response { resultCd = 1, MessageCode = "C516-p", };
+                }
+            }
+
+            if (receipt.Status == FullReceiptStatus.Completed)
+            {
+                return new Response { resultCd = 1, MessageCode = "C516-c", };
+            }
+
+            if (receipt.Status == FullReceiptStatus.Cancelled && receiptModel.Status != FullReceiptStatus.Cancelled)
+            {
+                return new Response { resultCd = 1, MessageCode = "C516-h", };
+            }
+
             receipt.UpdateDate = DateTime.UtcNow;
-
             await _context.SaveChangesAsync();
         }
 
@@ -2104,7 +2129,6 @@ public class ReceiptRepository
 
         if (existFullReceipt != null)
         {
-            logger.LogInformation("Tester was here -1");
 
             if (status.Equals("PENDING"))
             {

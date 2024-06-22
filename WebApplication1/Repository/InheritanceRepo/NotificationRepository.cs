@@ -350,7 +350,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public async Task<NotificationCon> getNotificationConAsync(Guid userReceiveId)
         {
-            var connection = await _context.NotificationConList.FirstOrDefaultAsync(u =>
+            var connection = await _context.NotificationConList.OrderByDescending(entity => entity.CreateDate).FirstOrDefaultAsync(u =>
                 u.UserId == userReceiveId && u.Connected
             );
             return connection;

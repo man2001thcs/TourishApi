@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using TourishApi.Service.InheritanceService;
 using WebApplication1.Model.Receipt;
+using WebApplication1.Repository.InheritanceRepo;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,13 +15,16 @@ namespace WebApplication1.Controllers.Receipt
     public class UpdateReceiptController : ControllerBase
     {
         private readonly ReceiptService _receiptService;
+        private readonly ILogger<UpdateReceiptController> _logger;
 
         private readonly char[] delimiter = new char[] { ';' };
 
-        public UpdateReceiptController(ReceiptService receiptService
+        public UpdateReceiptController(ReceiptService receiptService,
+            ILogger<UpdateReceiptController> logger
             )
         {
             _receiptService = receiptService;
+            _logger = logger;
         }
 
 
@@ -26,7 +32,9 @@ namespace WebApplication1.Controllers.Receipt
         [Authorize(Policy = "UpdateReceiptAccess")]
         public async Task<IActionResult> UpdateReceiptById(Guid fullReceiptId, FullReceiptUpdateModel receiptModel)
         {
-            return Ok(await _receiptService.UpdateReceiptById(fullReceiptId, receiptModel));
+            var emailClaim = User.FindFirstValue("Email");
+            _logger.LogInformation("email-here: " + emailClaim);
+            return Ok(await _receiptService.UpdateReceiptById(emailClaim, receiptModel));
         }
 
         [HttpPut("user/{id}")]
