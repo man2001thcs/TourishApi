@@ -231,6 +231,8 @@ public class TourishPlanRepository : ITourishPlanRepository
             .AsSplitQuery();
 
         #region Filtering
+        entityQuery = entityQuery.Where(entity => entity.TourishScheduleList.Count(entity1 => entity1.PlanStatus == PlanStatus.ConfirmInfo) >= 1);
+
         if (!string.IsNullOrEmpty(search))
         {
             entityQuery = entityQuery.Where(entity => entity.TourName.Contains(search));
@@ -671,11 +673,11 @@ public class TourishPlanRepository : ITourishPlanRepository
                         existSchedule.TotalTicket = item.TotalTicket;
                         existSchedule.EndDate = item.EndDate;
 
-                         var changedSchedule = GetChangedProperties(existSchedule);
+                        var changedSchedule = GetChangedProperties(existSchedule);
                         if (changedSchedule.Any()) scheduleChangeList.Add(existSchedule.Id.ToString());
 
                         existSchedule.UpdateDate = DateTime.UtcNow;
-                        tourishDataScheduleList.Add(existSchedule);                   
+                        tourishDataScheduleList.Add(existSchedule);
                     }
                 }
                 else
