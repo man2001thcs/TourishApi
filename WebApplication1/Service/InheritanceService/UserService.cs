@@ -24,13 +24,17 @@ namespace WebApplication1.Service.InheritanceService
         private readonly IUserRepository _userRepository;
         private readonly ISendMailService _sendMailService;
         private readonly ILogger<UserService> logger;
+        private readonly FacebookClientModel _facebookSettings;
+        private readonly HttpClient _httpClient;
 
         public UserService(
             MyDbContext context,
             IUserRepository userRepository,
             IOptionsMonitor<AppSetting> optionsMonitor,
+            IOptions<FacebookClientModel> facebookSettings,
             ILogger<UserService> _logger,
             ISendMailService sendMailService,
+            HttpClient httpClient,
             IOptions<AppSetting> appSettings
         )
         {
@@ -38,7 +42,14 @@ namespace WebApplication1.Service.InheritanceService
             _appSettings = optionsMonitor.CurrentValue;
             _userRepository = userRepository;
             _sendMailService = sendMailService;
+            _httpClient = httpClient;
             logger = _logger;
+
+            _facebookSettings = facebookSettings.Value;
+            _facebookSettings.FacebookClientId = (Environment.GetEnvironmentVariable("FACEBOOK_CLIENT_ID") ?? "").Length > 0
+            ? Environment.GetEnvironmentVariable("FACEBOOK_CLIENT_ID") : _facebookSettings.FacebookClientId;
+            _facebookSettings.FacebookSecretKey = (Environment.GetEnvironmentVariable("FACEBOOK_SECRET_KEY") ?? "").Length > 0
+           ? Environment.GetEnvironmentVariable("FACEBOOK_SECRET_KEY") : _facebookSettings.FacebookSecretKey;
         }
 
         public async Task<Response> Validate(LoginModel model)
@@ -217,6 +228,78 @@ namespace WebApplication1.Service.InheritanceService
                 MessageCode = "I000",
                 Data = token
             };
+        }
+
+        public async Task<Response> FacebookSignIn(UserModel model)
+        {
+            Boolean payload = false;
+
+            payload = await ValidateFaceBookTokenAsync(
+                model.GoogleToken
+            );
+
+            var userExist = _context.Users.Count(p => p.Email == model.Email);
+
+            if (!payload)
+            {
+                return new Response { resultCd = 1, MessageCode = "C008" };
+            }
+
+            if (model.Email == null || model.Email.Length <= 0)
+            {
+                return new Response { resultCd = 1, MessageCode = "C010fe" };
+            }
+
+            if (userExist < 1) //không đúng
+            {
+                var userInsert = new User
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    PasswordHash = "None",
+                    PasswordSalt = "None",
+                    PhoneNumber = model.PhoneNumber,
+                    Role = UserRole.User,
+                    Address = model.Address,
+                    FullName = model.FullName,
+                    CreateDate = DateTime.UtcNow,
+                    UpdateDate = DateTime.UtcNow,
+                };
+                _context.Users.Add(userInsert);
+                await _context.SaveChangesAsync();
+            }
+
+            var user = _context.Users.FirstOrDefault(p => p.Email == model.Email);
+            var token = await GenerateToken(user);
+
+            return new Response
+            {
+                resultCd = 0,
+                MessageCode = "I000",
+                Data = token
+            };
+        }
+
+        public async Task<Boolean> ValidateFaceBookTokenAsync(string accessToken)
+        {
+            try
+            {
+                var response = await _httpClient.GetFromJsonAsync<FacebookTokenDebugResponse>(
+                                $"https://graph.facebook.com/debug_token?input_token={accessToken}&access_token={_facebookSettings.FacebookClientId}|{_facebookSettings.FacebookSecretKey}");
+
+                logger.LogInformation(System.Text.Json.JsonSerializer.Serialize(response.data));
+                if (response == null || response.data == null || !response.data.is_valid)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
         }
 
         public async Task<Response> SignIn(UserModel model)

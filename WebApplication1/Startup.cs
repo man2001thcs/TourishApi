@@ -142,6 +142,7 @@ namespace MyWebApiApp
 
             services.AddScoped<PaymentService>();
             services.AddHttpClient<PaymentService>();
+             services.AddHttpClient<UserService>();
 
             services.AddTransient<ISendMailService, SendMailService>();
 
@@ -155,6 +156,8 @@ namespace MyWebApiApp
             services.Configure<AppSetting>(Configuration.GetSection("AppSettings"));
             services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
             services.Configure<PayOsSetting>(Configuration.GetSection("PayOsSetting"));
+
+            services.Configure<FacebookClientModel>(Configuration.GetSection("FacebookSettings"));
 
             var secretKey = Configuration["AppSettings:SecretKey"];
             var secretKeyBytes = Encoding.UTF8.GetBytes(secretKey);

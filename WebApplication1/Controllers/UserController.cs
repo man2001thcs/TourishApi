@@ -51,6 +51,12 @@ namespace WebApplication1.Controllers
             return Ok(await _userService.GoogleSignIn(model));
         }
 
+        [HttpPost("FacebookSignIn")]
+        public async Task<IActionResult> FacebookSignIn(UserModel model)
+        {
+            return Ok(await _userService.FacebookSignIn(model));
+        }
+
 
         [HttpPost("SignIn")]
         public async Task<IActionResult> SignIn(UserModel model)
