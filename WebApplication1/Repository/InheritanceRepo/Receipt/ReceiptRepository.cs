@@ -1763,7 +1763,10 @@ public class ReceiptRepository
 
         if (receiptList == null)
         {
-            return new Response { resultCd = 1, Data = new FullReceipt() };
+            return new Response { resultCd = 0, Data = new {
+                name = "",
+                totalTicket = 0
+            } };
         }
 
         return new Response { resultCd = 0, Data = receiptList };
