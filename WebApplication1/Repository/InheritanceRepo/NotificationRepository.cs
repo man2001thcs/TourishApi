@@ -187,6 +187,8 @@ namespace WebApplication1.Repository.InheritanceRepo
                     UserCreateId = notification.UserCreateId,
                     UserReceiveId = notification.UserReceiveId,
                     TourishPlanId = notification.TourishPlanId,
+                    MovingScheduleId = notification.MovingScheduleId,
+                    StayingScheduleId = notification.StayingScheduleId,
                     IsDeleted = notification.IsDeleted,
                     IsRead = notification.IsRead,
                     CreateDate = notification.CreateDate,

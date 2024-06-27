@@ -447,7 +447,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             if (!string.IsNullOrEmpty(search))
             {
-                entityQuery = entityQuery.Where(entity => entity.PlaceName.Contains(search));
+                entityQuery = entityQuery.Where(entity => entity.Name.Contains(search));
             }
 
             if (priceFrom != null)
@@ -507,7 +507,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             if (!string.IsNullOrEmpty(search))
             {
-                entityQuery = entityQuery.Where(entity => entity.BranchName.Contains(search));
+                entityQuery = entityQuery.Where(entity => entity.Name.Contains(search));
             }
             if (!string.IsNullOrEmpty(userId))
             {
@@ -567,7 +567,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             
             if (!string.IsNullOrEmpty(search))
             {
-                entityQuery = entityQuery.Where(entity => entity.PlaceName.Contains(search));
+                entityQuery = entityQuery.Where(entity => entity.Name.Contains(search));
             }
             if (!string.IsNullOrEmpty(userId))
             {
@@ -651,6 +651,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 resultCd = 0,
                 MessageCode = "I432",
+                returnId = entityModel.Id
                 // Update type success
             };
         }
@@ -864,6 +865,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 resultCd = 0,
                 MessageCode = "I432",
+                returnId = entityModel.Id,
                 Change = new Change
                 {
                     scheduleChangeList = scheduleChangeList,
@@ -1085,6 +1087,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 resultCd = 0,
                 MessageCode = "I432",
+                returnId = entityModel.Id,
                 Change = new Change
                 {
                     scheduleChangeList = scheduleChangeList,
@@ -1285,7 +1288,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
                     return new Response
                     {
-                        resultCd = 0,
+                        resultCd = 0,                        
                         MessageCode = "I415",
                         // Update type success
                     };
