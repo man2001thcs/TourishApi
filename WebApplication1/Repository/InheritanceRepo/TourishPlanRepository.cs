@@ -344,7 +344,8 @@ public class TourishPlanRepository : ITourishPlanRepository
                         entity.CreatedDate.Month == DateTime.UtcNow.Month
                         && entity.CreatedDate.Year == DateTime.UtcNow.Year
                     )
-                    || (
+                    || 
+                    (
                         entity.CompleteDate.Value.Month == DateTime.UtcNow.Month
                         && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
                     )
@@ -357,6 +358,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                 })
                 .OrderByDescending(group => group.totalTicket)
                 .Take(pageSize)
+                .AsSplitQuery()
                 .ToList();
 
                 entityQuery = entityQuery.Where(entity => receiptList.Count(entity1 => entity1.id == entity.Id) >= 1);
