@@ -358,8 +358,7 @@ public class TourishPlanRepository : ITourishPlanRepository
                 })
                 .OrderByDescending(group => group.totalTicket)
                 .Take(pageSize)
-                .AsSplitQuery()
-                .ToList();
+                .AsSplitQuery();
 
                 entityQuery = entityQuery.Where(entity => receiptList.Count(entity1 => entity1.id == entity.Id) >= 1);
             }
