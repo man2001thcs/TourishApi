@@ -17,10 +17,10 @@ public class RemoveOldNotifyTask
 
     public async Task RemoveOldNotify()
     {
+        var thresholdDate = DateTime.UtcNow.AddDays(-7);
+
         var notificationList = _context
-            .Notifications.Where(entity =>
-                (DateTime.UtcNow - (entity.CreateDate ?? DateTime.UtcNow)).TotalDays >= 7
-            )
+            .Notifications.Where(entity => (entity.CreateDate ?? DateTime.UtcNow) <= thresholdDate)
             .OrderBy(entity => entity.CreateDate)
             .AsSplitQuery()
             .ToList();

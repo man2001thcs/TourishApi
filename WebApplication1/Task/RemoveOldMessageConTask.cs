@@ -17,10 +17,11 @@ public class RemoveOldMessageConTask
 
     public async Task RemoveOldConn()
     {
+        var thresholdDate = DateTime.UtcNow.AddDays(-30);
         var guestHisConList = _context
             .GuestMessageConHisList.Include(entity => entity.AdminCon)
             .Include(entity => entity.GuestCon)
-            .Where(entity => (DateTime.UtcNow - entity.CreateDate).TotalDays >= 30)
+            .Where(entity => entity.CreateDate <= thresholdDate)
             .OrderBy(entity => entity.CreateDate)
             .AsSplitQuery()
             .ToList();

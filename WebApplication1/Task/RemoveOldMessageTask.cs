@@ -17,9 +17,11 @@ public class RemoveOldMessageTask
 
     public async Task RemoveOldMessage()
     {
+        var thresholdDate = DateTime.UtcNow.AddDays(-30);
+
         var guestMessageList = _context
             .GuestMessages
-            .Where(entity => (DateTime.UtcNow - (entity.CreateDate ?? DateTime.UtcNow)).TotalDays >= 30)
+            .Where(entity => (entity.CreateDate ?? DateTime.UtcNow) <= thresholdDate)
             .OrderBy(entity => entity.CreateDate)
             .AsSplitQuery()
             .ToList();

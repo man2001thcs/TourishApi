@@ -41,12 +41,14 @@ public class ReceiptStatusChangeTask
 
     public async Task ReceiptStatusTask()
     {
+        var thresholdDate = DateTime.UtcNow.AddHours(-2);
+
         var createTourReceipt = _context
             .FullReceiptList.Include(entity => entity.TotalReceipt)
             .Where(entity =>
                 entity.CreatedDate < DateTime.UtcNow
                 && entity.Status == FullReceiptStatus.Created
-                && (DateTime.UtcNow - entity.CreatedDate).TotalHours >= 2
+                && entity.CreatedDate <= thresholdDate
             )
             .OrderBy(entity => entity.CreatedDate)
             .AsSplitQuery()
@@ -65,11 +67,12 @@ public class ReceiptStatusChangeTask
         }
 
         var createServiceReceipt = _context
-            .FullScheduleReceiptList.Include(entity => entity.TotalReceipt)
+            .FullScheduleReceiptList
+            .Include(entity => entity.TotalReceipt)
             .Where(entity =>
                 entity.CreatedDate < DateTime.UtcNow
                 && entity.Status == FullReceiptStatus.Created
-                && (DateTime.UtcNow - entity.CreatedDate).TotalHours >= 2
+                && entity.CreatedDate <= thresholdDate
             )
             .OrderBy(entity => entity.CreatedDate)
             .AsSplitQuery()
@@ -93,12 +96,14 @@ public class ReceiptStatusChangeTask
 
     public async Task ReceiptCancelStatusTask()
     {
+        var thresholdDate = DateTime.UtcNow.AddDays(-8);
+
         var onWaitTourReceipt = _context
             .FullReceiptList.Include(entity => entity.TotalReceipt)
             .Where(entity =>
                 entity.CreatedDate < DateTime.UtcNow
                 && entity.Status == FullReceiptStatus.AwaitPayment
-                && (DateTime.UtcNow - entity.CreatedDate).TotalDays > 8
+                && entity.CreatedDate <= thresholdDate
             )
             .OrderBy(entity => entity.CreatedDate)
             .AsSplitQuery()
@@ -127,7 +132,7 @@ public class ReceiptStatusChangeTask
             .Where(entity =>
                 entity.CreatedDate < DateTime.UtcNow
                 && entity.Status == FullReceiptStatus.AwaitPayment
-                && (DateTime.UtcNow - entity.CreatedDate).TotalDays > 8
+                 && entity.CreatedDate <= thresholdDate
             )
             .OrderBy(entity => entity.CreatedDate)
             .AsSplitQuery()
