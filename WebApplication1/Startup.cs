@@ -99,7 +99,7 @@ namespace MyWebApiApp
                     Environment.GetEnvironmentVariable("AZURE_DATABASE_STRING") ?? Configuration.GetConnectionString("AzureDb")
                 )
             );
-           
+
             services.AddGeminiClient(config =>
             {
                 config.ApiKey =
@@ -142,7 +142,7 @@ namespace MyWebApiApp
 
             services.AddScoped<PaymentService>();
             services.AddHttpClient<PaymentService>();
-             services.AddHttpClient<UserService>();
+            services.AddHttpClient<UserService>();
 
             services.AddTransient<ISendMailService, SendMailService>();
 
@@ -358,32 +358,38 @@ namespace MyWebApiApp
 
             RecurringJob.AddOrUpdate<ReceiptStatusChangeTask>(
                 "ReceiptStatusChangeTask",
-                x => x.ReceiptStatusTask(),
+                x => x.ReceiptCancelStatusTask(),
                 Cron.DayInterval(1)
             );
 
-            RecurringJob.AddOrUpdate<RemoveOldMessageConTask>(
-                "RemoveOldMessageConTask",
-                x => x.RemoveOldConn(),
-                Cron.DayInterval(1)
+            RecurringJob.AddOrUpdate<ReceiptStatusChangeTask>(
+                "ReceiptStatusChangeTask",
+                x => x.ReceiptStatusTask(),
+                Cron.Hourly()
             );
 
             RecurringJob.AddOrUpdate<RemoveOldNotifyConnTask>(
                 "RemoveOldNotifyConnTask",
                 x => x.RemoveOldConn(),
-                Cron.DayInterval(1)
-            );
-
-            RecurringJob.AddOrUpdate<RemoveOldMessageTask>(
-                "RemoveOldMessageTask",
-                x => x.RemoveOldMessage(),
-                Cron.DayInterval(1)
+                "0 0 * * *"
             );
 
             RecurringJob.AddOrUpdate<RemoveOldNotifyTask>(
                 "RemoveOldNotifyTask",
                 x => x.RemoveOldNotify(),
-                Cron.DayInterval(1)
+                "30 0 * * *"
+            );
+
+            RecurringJob.AddOrUpdate<RemoveOldMessageConTask>(
+                "RemoveOldMessageConTask",
+                x => x.RemoveOldConn(),
+                "0 1 * * *"
+            );
+
+            RecurringJob.AddOrUpdate<RemoveOldMessageTask>(
+                "RemoveOldMessageTask",
+                x => x.RemoveOldMessage(),
+                "30 1 * * *"
             );
 
             app.UseEndpoints(endpoints =>

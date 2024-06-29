@@ -41,6 +41,58 @@ public class ReceiptStatusChangeTask
 
     public async Task ReceiptStatusTask()
     {
+        var createTourReceipt = _context
+            .FullReceiptList.Include(entity => entity.TotalReceipt)
+            .Where(entity =>
+                entity.CreatedDate < DateTime.UtcNow
+                && entity.Status == FullReceiptStatus.Created
+                && (DateTime.UtcNow - entity.CreatedDate).TotalHours >= 2
+            )
+            .OrderBy(entity => entity.CreatedDate)
+            .AsSplitQuery()
+            .ToList();
+
+        foreach (var item in createTourReceipt)
+        {
+            item.Status = FullReceiptStatus.AwaitPayment;
+            item.CompleteDate = DateTime.UtcNow;
+
+            await sendTourPaymentNotifyToUser(
+                item.Email,
+                item.TotalReceipt.TourishPlanId.Value,
+                "I511-user-await"
+            );
+        }
+
+        var createServiceReceipt = _context
+            .FullScheduleReceiptList.Include(entity => entity.TotalReceipt)
+            .Where(entity =>
+                entity.CreatedDate < DateTime.UtcNow
+                && entity.Status == FullReceiptStatus.Created
+                && (DateTime.UtcNow - entity.CreatedDate).TotalHours >= 2
+            )
+            .OrderBy(entity => entity.CreatedDate)
+            .AsSplitQuery()
+            .ToList();
+
+        foreach (var item in createServiceReceipt)
+        {
+            item.Status = FullReceiptStatus.AwaitPayment;
+            item.CompleteDate = DateTime.UtcNow;
+
+            await sendServicePaymentNotifyToUser(
+                item.Email,
+                item.TotalReceipt.MovingScheduleId,
+                item.TotalReceipt.StayingScheduleId,
+                "I511-user-await"
+            );
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task ReceiptCancelStatusTask()
+    {
         var onWaitTourReceipt = _context
             .FullReceiptList.Include(entity => entity.TotalReceipt)
             .Where(entity =>
@@ -67,29 +119,6 @@ public class ReceiptStatusChangeTask
                 item.Email,
                 item.TotalReceipt.TourishPlanId.Value,
                 "I511-user-cancel"
-            );
-        }
-
-        var createTourReceipt = _context
-            .FullReceiptList.Include(entity => entity.TotalReceipt)
-            .Where(entity =>
-                entity.CreatedDate < DateTime.UtcNow
-                && entity.Status == FullReceiptStatus.Created
-                && (DateTime.UtcNow - entity.CreatedDate).TotalDays >= 1
-            )
-            .OrderBy(entity => entity.CreatedDate)
-            .AsSplitQuery()
-            .ToList();
-
-        foreach (var item in createTourReceipt)
-        {
-            item.Status = FullReceiptStatus.AwaitPayment;
-            item.CompleteDate = DateTime.UtcNow;
-
-            await sendTourPaymentNotifyToUser(
-                item.Email,
-                item.TotalReceipt.TourishPlanId.Value,
-                "I511-user-await"
             );
         }
 
@@ -130,32 +159,9 @@ public class ReceiptStatusChangeTask
                 );
         }
 
-        var createServiceReceipt = _context
-            .FullScheduleReceiptList.Include(entity => entity.TotalReceipt)
-            .Where(entity =>
-                entity.CreatedDate < DateTime.UtcNow
-                && entity.Status == FullReceiptStatus.Created
-                && (DateTime.UtcNow - entity.CreatedDate).TotalDays >= 1
-            )
-            .OrderBy(entity => entity.CreatedDate)
-            .AsSplitQuery()
-            .ToList();
-
-        foreach (var item in createServiceReceipt)
-        {
-            item.Status = FullReceiptStatus.AwaitPayment;
-            item.CompleteDate = DateTime.UtcNow;
-
-            await sendServicePaymentNotifyToUser(
-                item.Email,
-                item.TotalReceipt.MovingScheduleId,
-                item.TotalReceipt.StayingScheduleId,
-                "I511-user-await"
-            );
-        }
-
         await _context.SaveChangesAsync();
     }
+
 
     private async Task<Response> sendTourPaymentNotifyToUser(
         string email,
@@ -163,13 +169,14 @@ public class ReceiptStatusChangeTask
         string contentCode
     )
     {
+        var systemUser = (User)_userService.getByName("admin", 4).Data;
         var user = (User)_userService.getUserByEmail(email).Data;
 
-        if (user != null)
+        if (user != null && systemUser != null)
         {
             var notification = new NotificationModel
             {
-                UserCreateId = user.Id,
+                UserCreateId = systemUser.Id,
                 UserReceiveId = user.Id,
                 TourishPlanId = tourishPlanId,
                 IsGenerate = true,
@@ -196,13 +203,14 @@ public class ReceiptStatusChangeTask
         string contentCode
     )
     {
+        var systemUser = (User)_userService.getByName("admin", 4).Data;
         var user = (User)_userService.getUserByEmail(email).Data;
 
-        if (user != null)
+        if (user != null && systemUser != null)
         {
             var notification = new NotificationModel
             {
-                UserCreateId = user.Id,
+                UserCreateId = systemUser.Id,
                 UserReceiveId = user.Id,
                 MovingScheduleId = movingServiceId,
                 StayingScheduleId = stayingServiceId,

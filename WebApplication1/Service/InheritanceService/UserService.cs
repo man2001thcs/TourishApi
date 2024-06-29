@@ -1387,6 +1387,18 @@ namespace WebApplication1.Service.InheritanceService
             }
         }
 
+        public Response getByName(String userName, int? type)
+        {
+            try
+            {
+                return _userRepository.getByName(userName, type);
+            }
+            catch (Exception ex)
+            {
+                return new Response();
+            }
+        }
+
         private DateTime ConvertUnixTimeToDateTime(long utcExpiredDate)
         {
             var dateTimeInterval = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
