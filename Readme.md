@@ -8,7 +8,7 @@
    - Điền thông tin cơ bản như tên, vùng địa lý, và lựa chọn nền tảng là `.NET Core`.
 
 2. **Cấu hình GitHub Actions:**
-   - Trên repository GitHub của bạn, tạo một workflow mới hoặc sửa đổi workflow hiện tại trong thư mục `.github/workflows`.
+   - Trên repository GitHub của bạn, tạo một workflow mới hoặc sửa đổi workflow hiện tại trong thư mục `.github/workflows`. Sử dụng mẫu dưới đây hoặc tạo từ công cụ Visual Studio:
 
    ```yaml
     name: Build and deploy .NET Core application to Web App TourishApi20240305102130
