@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data.DbContextFile;
 
@@ -11,9 +12,11 @@ using WebApplication1.Data.DbContextFile;
 namespace TourishApi.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240630143716_setTourishScheduleToFalse")]
+    partial class setTourishScheduleToFalse
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1534,19 +1537,16 @@ namespace TourishApi.Migrations
                     b.HasOne("WebApplication1.Data.Schedule.MovingSchedule", "MovingSchedule")
                         .WithMany("InstructionList")
                         .HasForeignKey("MovingScheduleId")
-                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("FK_MovingSchedule_Instruction");
 
                     b.HasOne("WebApplication1.Data.Schedule.StayingSchedule", "StayingSchedule")
                         .WithMany("InstructionList")
                         .HasForeignKey("StayingScheduleId")
-                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("FK_StayingSchedule_Instruction");
 
                     b.HasOne("WebApplication1.Data.TourishPlan", "TourishPlan")
                         .WithMany("InstructionList")
                         .HasForeignKey("TourishPlanId")
-                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("FK_TourishPlan_Instruction");
 
                     b.Navigation("MovingSchedule");
@@ -1571,7 +1571,6 @@ namespace TourishApi.Migrations
                     b.HasOne("WebApplication1.Data.TourishPlan", "TourishPlan")
                         .WithMany("NotificationList")
                         .HasForeignKey("TourishPlanId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("FK_TourishPlan_Notification");
 
                     b.HasOne("WebApplication1.Data.User", "UserCreator")
@@ -1631,7 +1630,6 @@ namespace TourishApi.Migrations
                     b.HasOne("WebApplication1.Data.ServiceSchedule", "ServiceSchedule")
                         .WithMany("FullScheduleReceiptList")
                         .HasForeignKey("ServiceScheduleId")
-                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("FK_FullScheduleReceipt_ServiceSchedule");
 
                     b.HasOne("WebApplication1.Data.Receipt.TotalScheduleReceipt", "TotalReceipt")
@@ -1651,7 +1649,6 @@ namespace TourishApi.Migrations
                     b.HasOne("WebApplication1.Data.TourishPlan", "TourishPlan")
                         .WithOne("TotalReceipt")
                         .HasForeignKey("WebApplication1.Data.Receipt.TotalReceipt", "TourishPlanId")
-                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("FK_TourishPlan_TotalReceipt");
 
                     b.Navigation("TourishPlan");
@@ -1662,13 +1659,11 @@ namespace TourishApi.Migrations
                     b.HasOne("WebApplication1.Data.Schedule.MovingSchedule", "MovingSchedule")
                         .WithOne("TotalReceipt")
                         .HasForeignKey("WebApplication1.Data.Receipt.TotalScheduleReceipt", "MovingScheduleId")
-                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("FK_MovingSchedule_TotalScheduleReceipt");
 
                     b.HasOne("WebApplication1.Data.Schedule.StayingSchedule", "StayingSchedule")
                         .WithOne("TotalReceipt")
                         .HasForeignKey("WebApplication1.Data.Receipt.TotalScheduleReceipt", "StayingScheduleId")
-                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("FK_StayingSchedule_TotalScheduleReceipt");
 
                     b.Navigation("MovingSchedule");
@@ -1696,7 +1691,6 @@ namespace TourishApi.Migrations
                     b.HasOne("WebApplication1.Data.TourishPlan", "TourishPlan")
                         .WithMany("EatSchedules")
                         .HasForeignKey("TourishPlanId")
-                        .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_TourishPlan_EatSchedules");
 
                     b.Navigation("TourishPlan");
@@ -1707,7 +1701,6 @@ namespace TourishApi.Migrations
                     b.HasOne("WebApplication1.Data.TourishPlan", "TourishPlan")
                         .WithMany("MovingSchedules")
                         .HasForeignKey("TourishPlanId")
-                        .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_TourishPlan_MovingSchedule");
 
                     b.Navigation("TourishPlan");
@@ -1718,7 +1711,6 @@ namespace TourishApi.Migrations
                     b.HasOne("WebApplication1.Data.TourishPlan", "TourishPlan")
                         .WithMany("StayingSchedules")
                         .HasForeignKey("TourishPlanId")
-                        .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_TourishPlan_StayingSchedules");
 
                     b.Navigation("TourishPlan");
@@ -1729,13 +1721,11 @@ namespace TourishApi.Migrations
                     b.HasOne("WebApplication1.Data.Schedule.MovingSchedule", "MovingSchedule")
                         .WithMany("ScheduleInterestList")
                         .HasForeignKey("MovingScheduleId")
-                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("FK_MovingSchedule_ScheduleInterest");
 
                     b.HasOne("WebApplication1.Data.Schedule.StayingSchedule", "StayingSchedule")
                         .WithMany("ScheduleInterestList")
                         .HasForeignKey("StayingScheduleId")
-                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("FK_StayingSchedule_ScheduleInterest");
 
                     b.HasOne("WebApplication1.Data.User", "User")
@@ -1755,13 +1745,11 @@ namespace TourishApi.Migrations
                     b.HasOne("WebApplication1.Data.Schedule.MovingSchedule", "MovingSchedule")
                         .WithMany("ServiceScheduleList")
                         .HasForeignKey("MovingScheduleId")
-                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("FK_MovingSchedule_ServiceSchedule");
 
                     b.HasOne("WebApplication1.Data.Schedule.StayingSchedule", "StayingSchedule")
                         .WithMany("ServiceScheduleList")
                         .HasForeignKey("StayingScheduleId")
-                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("FK_StayingSchedule_ServiceSchedule");
 
                     b.Navigation("MovingSchedule");
@@ -1858,7 +1846,6 @@ namespace TourishApi.Migrations
                     b.HasOne("WebApplication1.Data.TourishPlan", "TourishPlan")
                         .WithMany("TourishScheduleList")
                         .HasForeignKey("TourishPlanId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("FK_TourishPlan_TourishSchedule");
 
                     b.Navigation("TourishPlan");

@@ -104,7 +104,8 @@ namespace MyWebApiApp
             {
                 config.ApiKey =
                     Environment.GetEnvironmentVariable("GOOGLE_CHAT_KEY")
-                    ?? Configuration.GetConnectionString(" GoogleApiKey");
+                    ?? Configuration.GetConnectionString("GoogleApiKey");
+
                 config.ImageBaseUrl = "CURRENTLY_IMAGE_BASE_URL";
                 config.TextBaseUrl =
                     "https://generativelanguage.googleapis.com/v1/models/gemini-pro";

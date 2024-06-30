@@ -77,22 +77,22 @@ namespace WebApplication1.Data.DbContextFile
                 entity.HasMany(e => e.MovingSchedules)
                 .WithOne(e => e.TourishPlan)
                 .HasForeignKey(e => e.TourishPlanId).IsRequired(false)
-                .HasConstraintName("FK_TourishPlan_MovingSchedule");
+                .HasConstraintName("FK_TourishPlan_MovingSchedule").OnDelete(DeleteBehavior.NoAction); 
 
                 entity.HasMany(e => e.EatSchedules)
                 .WithOne(e => e.TourishPlan)
                 .HasForeignKey(e => e.TourishPlanId).IsRequired(false)
-                .HasConstraintName("FK_TourishPlan_EatSchedules");
+                .HasConstraintName("FK_TourishPlan_EatSchedules").OnDelete(DeleteBehavior.NoAction); 
 
                 entity.HasMany(e => e.StayingSchedules)
                 .WithOne(e => e.TourishPlan)
                 .HasForeignKey(e => e.TourishPlanId).IsRequired(false)
-                .HasConstraintName("FK_TourishPlan_StayingSchedules");
+                .HasConstraintName("FK_TourishPlan_StayingSchedules").OnDelete(DeleteBehavior.NoAction); 
 
                 entity.HasMany(e => e.NotificationList)
                 .WithOne(e => e.TourishPlan)
-                .HasForeignKey(e => e.TourishPlanId)
-                .HasConstraintName("FK_TourishPlan_Notification");
+                .HasForeignKey(e => e.TourishPlanId).IsRequired(false)
+                .HasConstraintName("FK_TourishPlan_Notification").OnDelete(DeleteBehavior.Cascade); 
             });
 
             modelBuilder.Entity<MovingSchedule>(entity =>
@@ -132,7 +132,8 @@ namespace WebApplication1.Data.DbContextFile
                 entity.HasOne(e => e.TourishPlan)
                .WithMany(e => e.TourishScheduleList)
                .HasForeignKey(e => e.TourishPlanId)
-               .HasConstraintName("FK_TourishPlan_TourishSchedule");
+               .IsRequired(false)
+               .HasConstraintName("FK_TourishPlan_TourishSchedule").OnDelete(DeleteBehavior.Cascade); 
             });
 
             modelBuilder.Entity<ServiceSchedule>(entity =>
@@ -145,13 +146,13 @@ namespace WebApplication1.Data.DbContextFile
                .WithMany(e => e.ServiceScheduleList)
                .HasForeignKey(e => e.MovingScheduleId)
                .IsRequired(false)
-               .HasConstraintName("FK_MovingSchedule_ServiceSchedule");
+               .HasConstraintName("FK_MovingSchedule_ServiceSchedule").OnDelete(DeleteBehavior.SetNull); 
 
                 entity.HasOne(e => e.StayingSchedule)
                .WithMany(e => e.ServiceScheduleList)
                .HasForeignKey(e => e.StayingScheduleId)
                .IsRequired(false)
-               .HasConstraintName("FK_StayingSchedule_ServiceSchedule");
+               .HasConstraintName("FK_StayingSchedule_ServiceSchedule").OnDelete(DeleteBehavior.SetNull); 
             });
 
             modelBuilder.Entity<TourishCategoryRelation>(entity =>
@@ -162,12 +163,12 @@ namespace WebApplication1.Data.DbContextFile
                 entity.HasOne(e => e.TourishPlan)
                 .WithMany(e => e.TourishCategoryRelations)
                 .HasForeignKey(e => e.TourishPlanId)
-                .HasConstraintName("FK_TourishPlan_TourishCategoryRelation");
+                .HasConstraintName("FK_TourishPlan_TourishCategoryRelation").OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(e => e.TourishCategory)
                 .WithMany(e => e.TourishCategoryRelations)
                 .HasForeignKey(e => e.TourishCategoryId)
-                .HasConstraintName("FK_TourishCategory_TourishCategoryRelation");
+                .HasConstraintName("FK_TourishCategory_TourishCategoryRelation").OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<TourishInterest>(entity =>
@@ -178,12 +179,12 @@ namespace WebApplication1.Data.DbContextFile
                 entity.HasOne(e => e.TourishPlan)
                 .WithMany(e => e.TourishInterestList)
                 .HasForeignKey(e => e.TourishPlanId)
-                .HasConstraintName("FK_TourishPlan_TourishInterest");
+                .HasConstraintName("FK_TourishPlan_TourishInterest").OnDelete(DeleteBehavior.Cascade); 
 
                 entity.HasOne(e => e.User)
                 .WithMany(e => e.TourishInterests)
                 .HasForeignKey(e => e.UserId)
-                .HasConstraintName("FK_User_TourishInterest");
+                .HasConstraintName("FK_User_TourishInterest").OnDelete(DeleteBehavior.Cascade); 
             });
 
             modelBuilder.Entity<ScheduleInterest>(entity =>
@@ -195,19 +196,19 @@ namespace WebApplication1.Data.DbContextFile
                 .WithMany(e => e.ScheduleInterestList)
                 .HasForeignKey(e => e.MovingScheduleId)
                 .IsRequired(false)
-                .HasConstraintName("FK_MovingSchedule_ScheduleInterest");
+                .HasConstraintName("FK_MovingSchedule_ScheduleInterest").OnDelete(DeleteBehavior.SetNull); 
 
                 entity.HasOne(e => e.StayingSchedule)
                 .WithMany(e => e.ScheduleInterestList)
                 .HasForeignKey(e => e.StayingScheduleId)
                 .IsRequired(false)
-                .HasConstraintName("FK_StayingSchedule_ScheduleInterest");
+                .HasConstraintName("FK_StayingSchedule_ScheduleInterest").OnDelete(DeleteBehavior.SetNull); 
 
                 entity.HasOne(e => e.User)
                 .WithMany(e => e.ScheduleInterestList)
                 .HasForeignKey(e => e.UserId)
                 .IsRequired(false)
-                .HasConstraintName("FK_User_ScheduleInterest");
+                .HasConstraintName("FK_User_ScheduleInterest"); 
             });
 
             modelBuilder.Entity<Instruction>(entity =>
@@ -219,19 +220,19 @@ namespace WebApplication1.Data.DbContextFile
                 .WithMany(e => e.InstructionList)
                 .IsRequired(false)
                 .HasForeignKey(e => e.MovingScheduleId)
-                .HasConstraintName("FK_MovingSchedule_Instruction");
+                .HasConstraintName("FK_MovingSchedule_Instruction").OnDelete(DeleteBehavior.SetNull); 
 
                 entity.HasOne(e => e.StayingSchedule)
                 .WithMany(e => e.InstructionList)
                 .IsRequired(false)
                 .HasForeignKey(e => e.StayingScheduleId)
-                .HasConstraintName("FK_StayingSchedule_Instruction");
+                .HasConstraintName("FK_StayingSchedule_Instruction").OnDelete(DeleteBehavior.SetNull); 
 
                 entity.HasOne(e => e.TourishPlan)
                 .WithMany(e => e.InstructionList)
                 .IsRequired(false)
                 .HasForeignKey(e => e.TourishPlanId)
-                .HasConstraintName("FK_TourishPlan_Instruction");
+                .HasConstraintName("FK_TourishPlan_Instruction").OnDelete(DeleteBehavior.SetNull); 
             });
 
             modelBuilder.Entity<TourishComment>(entity =>
@@ -242,12 +243,12 @@ namespace WebApplication1.Data.DbContextFile
                 entity.HasOne(e => e.User)
                 .WithMany(e => e.TourishCommentList)
                 .HasForeignKey(e => e.UserId)
-                .HasConstraintName("FK_User_TourishComment");
+                .HasConstraintName("FK_User_TourishComment").OnDelete(DeleteBehavior.Cascade); 
 
                 entity.HasOne(e => e.TourishPlan)
                .WithMany(e => e.TourishCommentList)
                .HasForeignKey(e => e.TourishPlanId)
-               .HasConstraintName("FK_TourishPlan_TourishComment");
+               .HasConstraintName("FK_TourishPlan_TourishComment").OnDelete(DeleteBehavior.Cascade); 
             });
 
             modelBuilder.Entity<TourishRating>(entity =>
@@ -258,12 +259,12 @@ namespace WebApplication1.Data.DbContextFile
                 entity.HasOne(e => e.User)
                 .WithMany(e => e.TourishRatingList)
                 .HasForeignKey(e => e.UserId)
-                .HasConstraintName("FK_User_TourishRating");
+                .HasConstraintName("FK_User_TourishRating").OnDelete(DeleteBehavior.Cascade); 
 
                 entity.HasOne(e => e.TourishPlan)
                .WithMany(e => e.TourishRatingList)
                .HasForeignKey(e => e.TourishPlanId)
-               .HasConstraintName("FK_TourishPlan_TourishRating");
+               .HasConstraintName("FK_TourishPlan_TourishRating").OnDelete(DeleteBehavior.Cascade); 
             });
 
             modelBuilder.Entity<ScheduleRating>(entity =>
@@ -274,7 +275,7 @@ namespace WebApplication1.Data.DbContextFile
                 entity.HasOne(e => e.User)
                 .WithMany(e => e.ScheduleRatingList)
                 .HasForeignKey(e => e.UserId)
-                .HasConstraintName("FK_User_ScheduleRating");
+                .HasConstraintName("FK_User_ScheduleRating"); 
             });
 
             modelBuilder.Entity<TotalReceipt>(entity =>
@@ -293,7 +294,7 @@ namespace WebApplication1.Data.DbContextFile
                 .WithOne(e => e.TotalReceipt)
                 .HasForeignKey<TotalReceipt>(e => e.TourishPlanId)
                 .IsRequired(false)
-                .HasConstraintName("FK_TourishPlan_TotalReceipt");
+                .HasConstraintName("FK_TourishPlan_TotalReceipt").OnDelete(DeleteBehavior.SetNull); 
 
             });
 
@@ -331,13 +332,13 @@ namespace WebApplication1.Data.DbContextFile
             {
                 entity.ToTable(nameof(MovingSchedule));
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");               
+                entity.Property(e => e.CreateDate).IsRequired().HasDefaultValueSql("getutcdate()");
 
                 entity.HasOne(e => e.TotalReceipt)
                 .WithOne(e => e.MovingSchedule)
                 .HasForeignKey<TotalScheduleReceipt>(e => e.MovingScheduleId)
                 .IsRequired(false)
-                .HasConstraintName("FK_MovingSchedule_TotalScheduleReceipt");
+                .HasConstraintName("FK_MovingSchedule_TotalScheduleReceipt").OnDelete(DeleteBehavior.SetNull); 
             });
 
             modelBuilder.Entity<StayingSchedule>(entity =>
@@ -350,7 +351,7 @@ namespace WebApplication1.Data.DbContextFile
                 .WithOne(e => e.StayingSchedule)
                 .HasForeignKey<TotalScheduleReceipt>(e => e.StayingScheduleId)
                 .IsRequired(false)
-                .HasConstraintName("FK_StayingSchedule_TotalScheduleReceipt");
+                .HasConstraintName("FK_StayingSchedule_TotalScheduleReceipt").OnDelete(DeleteBehavior.SetNull); 
             });
 
             modelBuilder.Entity<FullScheduleReceipt>(entity =>
@@ -363,7 +364,7 @@ namespace WebApplication1.Data.DbContextFile
                .WithMany(e => e.FullScheduleReceiptList)
                .IsRequired(false)
                .HasForeignKey(e => e.ServiceScheduleId)
-               .HasConstraintName("FK_FullScheduleReceipt_ServiceSchedule");
+               .HasConstraintName("FK_FullScheduleReceipt_ServiceSchedule").OnDelete(DeleteBehavior.SetNull); 
 
             });
 
