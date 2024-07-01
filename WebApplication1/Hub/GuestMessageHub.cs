@@ -417,7 +417,7 @@ namespace SignalR.Hub
                 if (botEnable == 0)
                 {
                     var adminConList = await _context
-                                        .NotificationConList.Where(entity =>
+                                        .NotificationConList.Include(entity => entity.User).Where(entity =>
                                             entity.User.Role == UserRole.Admin && entity.Connected
                                         )
                                         .ToListAsync();
