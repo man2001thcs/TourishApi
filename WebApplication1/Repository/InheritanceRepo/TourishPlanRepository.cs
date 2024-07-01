@@ -341,12 +341,12 @@ public class TourishPlanRepository : ITourishPlanRepository
                 .Where(entity => (int)entity.Status < 3)
                 .Where(entity =>
                     (
-                        entity.CreatedDate.Month == DateTime.UtcNow.Month
+                        (entity.CreatedDate.Month == DateTime.UtcNow.Month || entity.CreatedDate.Month == DateTime.UtcNow.Month - 1)
                         && entity.CreatedDate.Year == DateTime.UtcNow.Year
                     )
-                    || 
+                    ||
                     (
-                        entity.CompleteDate.Value.Month == DateTime.UtcNow.Month
+                        (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month || entity.CompleteDate.Value.Month == DateTime.UtcNow.Month - 1)
                         && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
                     )
                 )
