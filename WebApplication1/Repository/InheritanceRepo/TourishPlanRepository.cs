@@ -193,6 +193,14 @@ public class TourishPlanRepository : ITourishPlanRepository
         var entity = _context.TourishPlan.FirstOrDefault((entity => entity.Id == id));
         if (entity != null)
         {
+            var movingScheduleList = _context.MovingSchedules.Where(entity => entity.TourishPlanId == id).ToList();
+            _context.RemoveRange(movingScheduleList);
+            var stayingScheduleList = _context.StayingSchedules.Where(entity => entity.TourishPlanId == id).ToList();
+            _context.RemoveRange(stayingScheduleList);
+            var eatingScheduleList = _context.EatSchedules.Where(entity => entity.TourishPlanId == id).ToList();
+            _context.RemoveRange(eatingScheduleList);
+            _context.SaveChanges();
+
             blobService.DeleteFileBlobAsync("tourish-content-container", entity.Id.ToString());
             _context.Remove(entity);
             _context.SaveChanges();
