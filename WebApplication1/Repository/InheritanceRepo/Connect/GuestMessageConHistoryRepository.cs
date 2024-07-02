@@ -206,7 +206,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                                 IsRead = element.IsRead,
                                 Side = element.AdminMessageCon != null ? 1 : 2,
                                 State = 2
-                            })
+                            }).OrderByDescending(entity => entity.CreateDate)
                             .ToList(),
                         GuestName = guestConHis.GuestCon.GuestName,
                         GuestPhoneNumber = guestConHis.GuestCon.GuestPhoneNumber,
@@ -233,7 +233,8 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                     CreateDate = guestConHis.CreateDate,
                     CloseDate = guestConHis.CloseDate,
                 })
-                .OrderByDescending(entity => entity.Status)
+                .OrderByDescending(entity => entity.CreateDate)
+                .ThenByDescending(entity => entity.Status)
                 .ToList();
 
             var entityVM = new Response
