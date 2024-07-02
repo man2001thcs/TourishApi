@@ -148,6 +148,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
             int? type,
             string? sortBy,
             string? sortDirection,
+            string? userId,
             int page = 1,
             int pageSize = 5
         )
@@ -160,6 +161,11 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                 .AsQueryable();
 
             #region Filtering
+            if (!String.IsNullOrEmpty(userId))
+            {
+                entityQuery = entityQuery.Where(entity => entity.AdminCon.Admin.Id.ToString() == userId);
+            }
+
             entityQuery = entityQuery.Where(entity => entity.AdminCon != null);
 
             if (!string.IsNullOrEmpty(search))
@@ -315,7 +321,7 @@ namespace WebApplication1.Repository.InheritanceRepo.Connect
                         .GuestMessages.Include(entity => entity.AdminMessageCon)
                         .Include(entity => entity.GuestMessageCon)
                         .Where(entity =>
-                            (entity.GuestMessageCon.ConnectionID == connectionId  && entity.GuestMessageCon.IsChatWithBot == 0)
+                            (entity.GuestMessageCon.ConnectionID == connectionId && entity.GuestMessageCon.IsChatWithBot == 0)
                             || resultDtoQuery.Count(entity1 =>
                                 entity1.AdminMessageCon.ConnectionID
                                 == entity.AdminMessageCon.ConnectionID
