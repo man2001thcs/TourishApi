@@ -314,6 +314,28 @@ namespace TourishApi.Service.InheritanceService
                         if (response.Change != null)
                         {
                             // Create property change notification
+                            if (response.Change.serviceChangeList.Count > 0)
+                            {
+                                var contentCode = "I412-service";
+                                if (response.Change.serviceChangeList.Contains("moving"))
+                                {
+                                    contentCode = contentCode + "-moving";
+                                }
+
+                                if (response.Change.serviceChangeList.Contains("staying"))
+                                {
+                                    contentCode = contentCode + "-staying";
+                                }
+
+                                if (response.Change.serviceChangeList.Contains("eating"))
+                                {
+                                    contentCode = contentCode + "-eating";
+                                }
+
+                                await CreateNotification(userId, interest.UserId, entityModel.Id, contentCode);
+                            }
+
+                            // Create property change notification
                             if (response.Change.propertyChangeList.Count > 0)
                             {
                                 await CreateNotification(userId, interest.UserId, entityModel.Id, "I412");

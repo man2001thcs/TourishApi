@@ -22,6 +22,7 @@
     {
         public List<string> propertyChangeList { get; set; }
         public List<string> scheduleChangeList { get; set; }
+        public List<string> serviceChangeList { get; set; }
         public Boolean isNewScheduleAdded { get; set; }
 
 
@@ -29,6 +30,7 @@
         {
             propertyChangeList = new List<string>();
             scheduleChangeList = new List<string>();
+            serviceChangeList = new List<string>();
             isNewScheduleAdded = false; // Assuming default value is false
         }
     }

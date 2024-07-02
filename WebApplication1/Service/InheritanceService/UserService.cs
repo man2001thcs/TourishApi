@@ -59,8 +59,6 @@ namespace WebApplication1.Service.InheritanceService
                 HashPassword(model.Password, ConvertStringToByteArray(user.PasswordSalt))
             );
 
-            logger.LogInformation("Test: " + hashInputPassword ?? "");
-
             if (user.LockoutEnd != null)
             {
                 if (user.LockoutEnd > DateTime.UtcNow)
@@ -76,7 +74,7 @@ namespace WebApplication1.Service.InheritanceService
                         {
                             int hours = (int)difference.TotalHours;
                             int minutes = difference.Minutes;
-                            Console.WriteLine($"{hours} giờ {minutes} phút");
+
                             return new Response
                             {
                                 resultCd = 1,

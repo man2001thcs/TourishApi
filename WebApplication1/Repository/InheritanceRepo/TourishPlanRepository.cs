@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections;
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using TourishApi.Extension;
@@ -749,20 +750,25 @@ public class TourishPlanRepository : ITourishPlanRepository
             );
         }
 
+        List<string> updateService = new List<string>();
+
         if (!string.IsNullOrEmpty(entityModel.StayingScheduleString))
         {
+            updateService.Add("staying");
             await _context.StayingSchedules.Where(a => a.TourishPlanId == entityModel.Id).ExecuteDeleteAsync();
             await AddStayingSchedule(entity.Id, entityModel.StayingScheduleString);
         }
 
         if (!string.IsNullOrEmpty(entityModel.MovingScheduleString))
         {
+            updateService.Add("moving");
             await _context.MovingSchedules.Where(a => a.TourishPlanId == entityModel.Id).ExecuteDeleteAsync();
             await AddMovingSchedule(entity.Id, entityModel.MovingScheduleString);
         }
 
         if (!string.IsNullOrEmpty(entityModel.EatingScheduleString))
         {
+            updateService.Add("eating");
             await _context.EatSchedules.Where(a => a.TourishPlanId == entityModel.Id).ExecuteDeleteAsync();
             await AddEatSchedule(entity.Id, entityModel.EatingScheduleString);
         }
@@ -773,6 +779,7 @@ public class TourishPlanRepository : ITourishPlanRepository
             MessageCode = "I412",
             Change = new Change
             {
+                serviceChangeList = updateService,
                 scheduleChangeList = scheduleChangeList,
                 propertyChangeList = propertyChangeList,
                 isNewScheduleAdded = isNewScheduleAdded
