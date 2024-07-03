@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TourishApi.Service.InheritanceService;
 
@@ -22,7 +23,8 @@ namespace WebApplication1.Controllers.TourComment
         public IActionResult DeleteById(Guid id)
         {
             {
-                return Ok(_entityService.DeleteById(id));
+                string userId = User.FindFirstValue("Id");
+                return Ok(_entityService.UserDeleteById(id, userId));
             }
         }
     }

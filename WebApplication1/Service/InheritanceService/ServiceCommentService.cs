@@ -1,4 +1,5 @@
 ﻿using TourishApi.Service.Interface;
+using WebApplication1.Data;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.InheritanceRepo;
@@ -57,6 +58,32 @@ namespace TourishApi.Service.InheritanceService
         {
             try
             {
+                _entityRepository.Delete(id);
+                var response = new Response { resultCd = 0, MessageCode = "I813" };
+                return response;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response
+                {
+                    resultCd = 1,
+                    MessageCode = "C814",
+                    Error = ex.Message
+                };
+                return response;
+            }
+        }
+
+        public Response UserDeleteById(Guid id, string userId)
+        {
+            try
+            {
+                var comment = (ServiceComment)_entityRepository.getById(id).Data;
+
+                if (comment == null) return new Response { resultCd = 1, MessageCode = "C813" };
+
+                if (comment.UserId.ToString() != userId) return new Response { resultCd = 1, MessageCode = "C813" };
+
                 _entityRepository.Delete(id);
                 var response = new Response { resultCd = 0, MessageCode = "I813" };
                 return response;
