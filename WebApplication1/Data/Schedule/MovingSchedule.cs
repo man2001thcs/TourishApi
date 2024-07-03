@@ -34,6 +34,7 @@ namespace WebApplication1.Data.Schedule
         public ICollection<ScheduleInterest>? ScheduleInterestList { get; set; }
         public ICollection<Notification>? NotificationList { get; set; }
         public ICollection<Instruction>? InstructionList { get; set; }
+        public ICollection<ServiceComment> ServiceCommentList { get; set; }
         public ICollection<ServiceSchedule>? ServiceScheduleList { get; set; }
         public TotalScheduleReceipt? TotalReceipt { get; set; }
     }

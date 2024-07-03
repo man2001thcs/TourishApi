@@ -39,7 +39,7 @@ namespace WebApplication1.Service
             {
                 // Get a reference to the container client
                 BlobContainerClient containerClient = GetContainerClient(blobContainerName);
-
+                containerClient.CreateIfNotExists(PublicAccessType.BlobContainer);
                 // Get a reference to the blob client
                 BlobClient blobClient = containerClient.GetBlobClient(blobName);
 

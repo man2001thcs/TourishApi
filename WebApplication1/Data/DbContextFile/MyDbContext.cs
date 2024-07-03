@@ -34,6 +34,8 @@ namespace WebApplication1.Data.DbContextFile
         public DbSet<ScheduleRating> ScheduleRatings { get; set; }
         public DbSet<ScheduleInterest> ScheduleInterests { get; set; }
 
+        public DbSet<ServiceComment> ServiceComments { get; set; }
+
         public DbSet<ServiceSchedule> ServiceSchedule { get; set; }
 
         public DbSet<Instruction> Instructions { get; set; }
@@ -249,6 +251,29 @@ namespace WebApplication1.Data.DbContextFile
                .WithMany(e => e.TourishCommentList)
                .HasForeignKey(e => e.TourishPlanId)
                .HasConstraintName("FK_TourishPlan_TourishComment").OnDelete(DeleteBehavior.Cascade); 
+            });
+
+            modelBuilder.Entity<ServiceComment>(entity =>
+            {
+                entity.ToTable(nameof(ServiceComment));
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.User)
+                .WithMany(e => e.ServiceCommentList)
+                .HasForeignKey(e => e.UserId)
+                .HasConstraintName("FK_User_ServiceComment").OnDelete(DeleteBehavior.Cascade); 
+
+                entity.HasOne(e => e.MovingSchedule)
+                .WithMany(e => e.ServiceCommentList)
+                .IsRequired(false)
+                .HasForeignKey(e => e.MovingScheduleId)
+                .HasConstraintName("FK_MovingSchedule_ServiceComment").OnDelete(DeleteBehavior.SetNull); 
+
+                entity.HasOne(e => e.StayingSchedule)
+                .WithMany(e => e.ServiceCommentList)
+                .IsRequired(false)
+                .HasForeignKey(e => e.StayingScheduleId)
+                .HasConstraintName("FK_StayingSchedule_ServiceComment").OnDelete(DeleteBehavior.SetNull); 
             });
 
             modelBuilder.Entity<TourishRating>(entity =>
