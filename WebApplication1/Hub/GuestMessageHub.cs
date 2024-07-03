@@ -419,7 +419,7 @@ namespace SignalR.Hub
                     var adminConList = await _context
                                         .NotificationConList.Include(entity => entity.User).Where(entity =>
                                             entity.User.Role == UserRole.Admin && entity.Connected
-                                        )
+                                        ).OrderByDescending(entity => entity.CreateDate)
                                         .ToListAsync();
                     foreach (var adminCon in adminConList)
                     {
