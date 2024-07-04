@@ -1663,11 +1663,11 @@ public class ReceiptRepository
             .Where(entity => (int)entity.Status < 3)
             .Where(entity =>
                 (
-                    entity.CreatedDate.Month == DateTime.UtcNow.Month
+                    (entity.CreatedDate.Month == DateTime.UtcNow.Month || entity.CreatedDate.Month == DateTime.UtcNow.Month - 1)
                     && entity.CreatedDate.Year == DateTime.UtcNow.Year
                 )
                 || (
-                    entity.CompleteDate.Value.Month == DateTime.UtcNow.Month
+                    (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month || entity.CompleteDate.Value.Month == DateTime.UtcNow.Month - 1)
                     && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
                 )
             )
@@ -1704,11 +1704,11 @@ public class ReceiptRepository
             .Where(entity => (int)entity.Status < 3)
             .Where(entity =>
                 (
-                    entity.CreatedDate.Month == DateTime.UtcNow.Month
+                    (entity.CreatedDate.Month == DateTime.UtcNow.Month || entity.CreatedDate.Month == DateTime.UtcNow.Month - 1)
                     && entity.CreatedDate.Year == DateTime.UtcNow.Year
                 )
                 || (
-                    entity.CompleteDate.Value.Month == DateTime.UtcNow.Month
+                    (entity.CompleteDate.Value.Month == DateTime.UtcNow.Month || entity.CompleteDate.Value.Month == DateTime.UtcNow.Month - 1)
                     && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
                 )
             )
@@ -1741,7 +1741,7 @@ public class ReceiptRepository
             )
             .Where(entity =>
                 (
-                    entity.CreatedDate.Month == DateTime.UtcNow.Month
+                    (entity.CreatedDate.Month == DateTime.UtcNow.Month || entity.CreatedDate.Month == DateTime.UtcNow.Month - 1)
                     && entity.CreatedDate.Year == DateTime.UtcNow.Year
                 )
                 || (
@@ -1763,10 +1763,15 @@ public class ReceiptRepository
 
         if (receiptList == null)
         {
-            return new Response { resultCd = 0, Data = new {
-                name = "",
-                totalTicket = 0
-            } };
+            return new Response
+            {
+                resultCd = 0,
+                Data = new
+                {
+                    name = "",
+                    totalTicket = 0
+                }
+            };
         }
 
         return new Response { resultCd = 0, Data = receiptList };
@@ -1782,11 +1787,14 @@ public class ReceiptRepository
             .Where(entity => entity.TotalReceipt.MovingScheduleId != null)
             .Where(entity =>
                 (
-                    entity.CreatedDate.Month == DateTime.UtcNow.Month
+                    (entity.CreatedDate.Month == DateTime.UtcNow.Month || entity.CreatedDate.Month == DateTime.UtcNow.Month - 1)
                     && entity.CreatedDate.Year == DateTime.UtcNow.Year
                 )
                 || (
-                    entity.CompleteDate.Value.Month == DateTime.UtcNow.Month
+                    (
+                        entity.CompleteDate.Value.Month == DateTime.UtcNow.Month
+                        || entity.CompleteDate.Value.Month == DateTime.UtcNow.Month - 1
+                    )
                     && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
                 )
             )
@@ -1823,11 +1831,14 @@ public class ReceiptRepository
             .Where(entity => entity.TotalReceipt.StayingScheduleId != null)
             .Where(entity =>
                 (
-                    entity.CreatedDate.Month == DateTime.UtcNow.Month
+                    (entity.CreatedDate.Month == DateTime.UtcNow.Month || entity.CreatedDate.Month == DateTime.UtcNow.Month - 1)
                     && entity.CreatedDate.Year == DateTime.UtcNow.Year
                 )
                 || (
-                    entity.CompleteDate.Value.Month == DateTime.UtcNow.Month
+                    (
+                        entity.CompleteDate.Value.Month == DateTime.UtcNow.Month
+                        || entity.CompleteDate.Value.Month == DateTime.UtcNow.Month - 1
+                    )
                     && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
                 )
             )
@@ -1864,11 +1875,14 @@ public class ReceiptRepository
             .Where(entity => entity.TotalReceipt.MovingScheduleId.HasValue)
             .Where(entity =>
                 (
-                    entity.CreatedDate.Month == DateTime.UtcNow.Month
+                    (entity.CreatedDate.Month == DateTime.UtcNow.Month || entity.CreatedDate.Month == DateTime.UtcNow.Month - 1)
                     && entity.CreatedDate.Year == DateTime.UtcNow.Year
                 )
                 || (
-                    entity.CompleteDate.Value.Month == DateTime.UtcNow.Month
+                    (
+                        entity.CompleteDate.Value.Month == DateTime.UtcNow.Month
+                        || entity.CompleteDate.Value.Month == DateTime.UtcNow.Month - 1
+                    )
                     && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
                 )
             )
@@ -1898,11 +1912,14 @@ public class ReceiptRepository
             .Where(entity => entity.TotalReceipt.StayingScheduleId.HasValue)
             .Where(entity =>
                 (
-                    entity.CreatedDate.Month == DateTime.UtcNow.Month
+                    (entity.CreatedDate.Month == DateTime.UtcNow.Month || entity.CreatedDate.Month == DateTime.UtcNow.Month - 1)
                     && entity.CreatedDate.Year == DateTime.UtcNow.Year
                 )
                 || (
-                    entity.CompleteDate.Value.Month == DateTime.UtcNow.Month
+                    (
+                        entity.CompleteDate.Value.Month == DateTime.UtcNow.Month
+                        || entity.CompleteDate.Value.Month == DateTime.UtcNow.Month - 1
+                    )
                     && entity.CompleteDate.Value.Year == DateTime.UtcNow.Year
                 )
             )
