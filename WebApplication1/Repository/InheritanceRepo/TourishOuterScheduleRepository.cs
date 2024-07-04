@@ -383,6 +383,9 @@ namespace WebApplication1.Repository.InheritanceRepo
             entityQuery = entityQuery.Where(entity => entity.TourishPlan == null);
             entityQuery = entityQuery.Where(entity => entity.ServiceScheduleList.Count(entity1 => entity1.Status == ScheduleStatus.ConfirmInfo) >= 1);
 
+            if (type != null) entityQuery = entityQuery.Where(entity => _context.MovingContactList.Where(entity1 => entity1.Id == entity.TransportId
+            && (int)entity1.VehicleType == type).Any());
+
             if (!string.IsNullOrEmpty(search))
             {
                 entityQuery = entityQuery.Where(entity => entity.BranchName.Contains(search));
@@ -400,7 +403,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             #endregion
 
             #region Sorting
-             entityQuery = entityQuery.OrderByDescending(entity => entity.CreateDate);
+            entityQuery = entityQuery.OrderByDescending(entity => entity.CreateDate);
             if (!string.IsNullOrEmpty(sortBy))
             {
                 entityQuery = entityQuery.OrderByColumn(sortBy);
@@ -444,6 +447,9 @@ namespace WebApplication1.Repository.InheritanceRepo
             #region Filtering
             entityQuery = entityQuery.Where(entity => entity.TourishPlanId == null);
             entityQuery = entityQuery.Where(entity => entity.ServiceScheduleList.Count(entity1 => entity1.Status == ScheduleStatus.ConfirmInfo) >= 1);
+
+            if (type != null) entityQuery = entityQuery.Where(entity => _context.RestHouseContactList.Where(entity1 => entity1.Id == entity.RestHouseBranchId
+                        && (int)entity1.RestHouseType == type).Any());
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -503,7 +509,7 @@ namespace WebApplication1.Repository.InheritanceRepo
                 .AsQueryable();
 
             #region Filtering
-            entityQuery = entityQuery.Where(entity => entity.TourishPlan == null);         
+            entityQuery = entityQuery.Where(entity => entity.TourishPlan == null);
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -564,7 +570,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             #region Filtering
             entityQuery = entityQuery.Where(entity => entity.TourishPlan == null);
-            
+
             if (!string.IsNullOrEmpty(search))
             {
                 entityQuery = entityQuery.Where(entity => entity.Name.Contains(search));
@@ -1288,7 +1294,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
                     return new Response
                     {
-                        resultCd = 0,                        
+                        resultCd = 0,
                         MessageCode = "I415",
                         // Update type success
                     };
