@@ -166,7 +166,7 @@ namespace WebApplication1.Controllers.Payment
             var receipt = (FullScheduleReceipt)
                 _receiptService.GetFullScheduleReceiptById(int.Parse(orderCode)).Data;
 
-            if (receipt == null)
+            if (receipt != null)
             {
                 var receiptStatus = (int)receipt.Status;
                 if (receipt.ServiceSchedule.MovingScheduleId != null)

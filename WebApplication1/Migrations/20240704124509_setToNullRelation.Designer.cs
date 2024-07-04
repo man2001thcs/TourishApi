@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data.DbContextFile;
 
@@ -11,9 +12,11 @@ using WebApplication1.Data.DbContextFile;
 namespace TourishApi.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240704124509_setToNullRelation")]
+    partial class setToNullRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -276,6 +279,7 @@ namespace TourishApi.Migrations
                         .HasDefaultValueSql("getutcdate()");
 
                     b.Property<Guid?>("GuestConId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -285,8 +289,7 @@ namespace TourishApi.Migrations
                         .HasFilter("[AdminConId] IS NOT NULL");
 
                     b.HasIndex("GuestConId")
-                        .IsUnique()
-                        .HasFilter("[GuestConId] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("GuestMessageConHistory", (string)null);
                 });
@@ -1529,6 +1532,7 @@ namespace TourishApi.Migrations
                     b.HasOne("WebApplication1.Data.Connection.GuestMessageCon", "GuestCon")
                         .WithOne("GuestMessageConHis")
                         .HasForeignKey("WebApplication1.Data.Connection.GuestMessageConHistory", "GuestConId")
+                        .IsRequired()
                         .HasConstraintName("FK_GuestMessageCon_GuestMessageConHis_Guest");
 
                     b.Navigation("AdminCon");
