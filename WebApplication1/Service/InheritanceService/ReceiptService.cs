@@ -498,7 +498,7 @@ namespace TourishApi.Service.InheritanceService
                                 emailClaim,
                                 existReceipt.Email,
                                 null,
-                                existReceipt.TotalReceipt.MovingScheduleId,
+                                existReceipt.TotalReceipt.StayingScheduleId,
                                 contentCode
                             );
                     }
