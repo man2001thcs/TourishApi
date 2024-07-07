@@ -601,9 +601,12 @@ public class ReceiptRepository
 
             if (existSchedule != null)
             {
-                if (receipt.Status == FullReceiptStatus.Completed)
+                if (receipt.Status == FullReceiptStatus.Completed && (int)existSchedule.PlanStatus < 3)
+                {
                     existSchedule.RemainTicket =
-                        existSchedule.RemainTicket + receipt.TotalTicket + receipt.TotalChildTicket;
+                                           existSchedule.RemainTicket + receipt.TotalTicket + receipt.TotalChildTicket;
+                }
+
             }
             _context.Remove(receipt);
             _context.SaveChanges();
@@ -630,7 +633,7 @@ public class ReceiptRepository
 
             if (existSchedule != null)
             {
-                if (receipt.Status == FullReceiptStatus.Completed)
+                if (receipt.Status == FullReceiptStatus.Completed && (int)existSchedule.Status < 3)
                     existSchedule.RemainTicket =
                         existSchedule.RemainTicket + receipt.TotalTicket + receipt.TotalChildTicket;
             }
@@ -725,6 +728,8 @@ public class ReceiptRepository
             .AsQueryable();
 
         #region Filtering
+        receiptQuery = receiptQuery.Where(entity => entity.FullReceiptList.Count() > 0);
+
         if (!string.IsNullOrEmpty(tourishPlanId))
         {
             receiptQuery = receiptQuery.Where(receipt =>
@@ -804,6 +809,8 @@ public class ReceiptRepository
             .AsQueryable();
 
         #region Filtering
+        receiptQuery = receiptQuery.Where(entity => entity.FullReceiptList.Count() > 0);
+        
         if (scheduleType != null)
         {
             if (scheduleType == ScheduleType.MovingSchedule)
