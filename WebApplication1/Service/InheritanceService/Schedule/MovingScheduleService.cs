@@ -112,7 +112,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
                 if (String.IsNullOrEmpty(userId))
                 {
                     string cacheKey =
-                        $"moving_service_list_{search ?? ""}_{type ?? 0}_{priceFrom ?? 0}_{priceTo ?? 0}_{sortBy ?? ""}_{sortDirection ?? ""}_page_{page}_pageSize_{pageSize}";
+                        $"moving_service_list_{search ?? ""}_{type ?? -1}_{priceFrom ?? 0}_{priceTo ?? 0}_{sortBy ?? ""}_{sortDirection ?? ""}_page_{page}_pageSize_{pageSize}";
                     string cachedValue = await _redisDatabase.StringGetAsync(cacheKey);
 
                     if (!string.IsNullOrEmpty(cachedValue))

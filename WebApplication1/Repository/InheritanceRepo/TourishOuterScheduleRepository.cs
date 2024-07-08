@@ -383,8 +383,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             entityQuery = entityQuery.Where(entity => entity.TourishPlan == null);
             entityQuery = entityQuery.Where(entity => entity.ServiceScheduleList.Count(entity1 => entity1.Status == ScheduleStatus.ConfirmInfo) >= 1);
 
-            if (type != null) entityQuery = entityQuery.Where(entity => _context.MovingContactList.Where(entity1 => entity1.Id == entity.TransportId
-            && (int)entity1.VehicleType == type).Any());
+            if (type != null) entityQuery = entityQuery.Where(entity => (int) entity.VehicleType == type);
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -448,8 +447,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             entityQuery = entityQuery.Where(entity => entity.TourishPlanId == null);
             entityQuery = entityQuery.Where(entity => entity.ServiceScheduleList.Count(entity1 => entity1.Status == ScheduleStatus.ConfirmInfo) >= 1);
 
-            if (type != null) entityQuery = entityQuery.Where(entity => _context.RestHouseContactList.Where(entity1 => entity1.Id == entity.RestHouseBranchId
-                        && (int)entity1.RestHouseType == type).Any());
+            if (type != null) entityQuery = entityQuery.Where(entity => (int) entity.RestHouseType == type);
 
             if (!string.IsNullOrEmpty(search))
             {
