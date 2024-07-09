@@ -48,7 +48,7 @@ public class ScheduleDateChangeTask
             .ServiceSchedule.Where(entity =>
                 entity.StartDate < DateTime.UtcNow
                 && entity.EndDate > DateTime.UtcNow
-                && (int)entity.Status < 2
+                && (int)entity.Status < 3
             )
             .OrderBy(entity => entity.CreateDate)
             .AsSplitQuery()
@@ -61,7 +61,7 @@ public class ScheduleDateChangeTask
 
         var completeServiceScheduleList = _context
             .ServiceSchedule.Where(entity =>
-                entity.EndDate < DateTime.UtcNow && (int)entity.Status < 2
+                entity.EndDate < DateTime.UtcNow && (int)entity.Status < 3
             )
             .OrderBy(entity => entity.CreateDate)
             .AsSplitQuery()

@@ -383,7 +383,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             entityQuery = entityQuery.Where(entity => entity.TourishPlan == null);
             entityQuery = entityQuery.Where(entity => entity.ServiceScheduleList.Count(entity1 => entity1.Status == ScheduleStatus.ConfirmInfo) >= 1);
 
-            if (type != null) entityQuery = entityQuery.Where(entity => (int) entity.VehicleType == type);
+            if (type != null) entityQuery = entityQuery.Where(entity => (int)entity.VehicleType == type);
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -447,7 +447,7 @@ namespace WebApplication1.Repository.InheritanceRepo
             entityQuery = entityQuery.Where(entity => entity.TourishPlanId == null);
             entityQuery = entityQuery.Where(entity => entity.ServiceScheduleList.Count(entity1 => entity1.Status == ScheduleStatus.ConfirmInfo) >= 1);
 
-            if (type != null) entityQuery = entityQuery.Where(entity => (int) entity.RestHouseType == type);
+            if (type != null) entityQuery = entityQuery.Where(entity => (int)entity.RestHouseType == type);
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -513,6 +513,9 @@ namespace WebApplication1.Repository.InheritanceRepo
             {
                 entityQuery = entityQuery.Where(entity => entity.Name.Contains(search));
             }
+
+            if (type != null) entityQuery = entityQuery.Where(entity => (int)entity.VehicleType == type);
+
             if (!string.IsNullOrEmpty(userId))
             {
                 foreach (var schedule in entityQuery)
@@ -568,6 +571,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             #region Filtering
             entityQuery = entityQuery.Where(entity => entity.TourishPlan == null);
+            if (type != null) entityQuery = entityQuery.Where(entity => (int)entity.RestHouseType == type);
 
             if (!string.IsNullOrEmpty(search))
             {
