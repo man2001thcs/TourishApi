@@ -91,7 +91,8 @@ namespace TourishApi.Service.InheritanceService.Schedule
             }
         }
 
-        public async Task<Response> GetAll(string? search, int? type, double? priceFrom,
+        public async Task<Response> GetAll(string? search, int? type, string? endPoint,
+            string? startingDate, double? priceFrom,
             double? priceTo, string? sortBy, string? sortDirection, string? userId, int page = 1, int pageSize = 5)
         {
             try
@@ -99,7 +100,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
                 if (String.IsNullOrEmpty(userId))
                 {
                     string cacheKey =
-                        $"staying_service_list_{search ?? ""}_{type ?? -1}_{priceFrom ?? 0}_{priceTo ?? 0}_{sortBy ?? ""}_{sortDirection ?? ""}_page_{page}_pageSize_{pageSize}";
+                        $"staying_service_list_{search ?? ""}_{endPoint ?? ""}_{startingDate ?? ""}_{type ?? -1}_{priceFrom ?? 0}_{priceTo ?? 0}_{sortBy ?? ""}_{sortDirection ?? ""}_page_{page}_pageSize_{pageSize}";
                     string cachedValue = await _redisDatabase.StringGetAsync(cacheKey);
 
                     if (!string.IsNullOrEmpty(cachedValue))
@@ -114,7 +115,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
                         }
                     }
 
-                    var result = _entityRepository.GetAllStayingSchedule(search, type, priceFrom, priceTo, sortBy, sortDirection, page, pageSize);
+                    var result = _entityRepository.GetAllStayingSchedule(search, type, endPoint, startingDate, priceFrom, priceTo, sortBy, sortDirection, page, pageSize);
                     string resultJson = JsonConvert.SerializeObject(
                         result,
                         new JsonSerializerSettings

@@ -23,6 +23,8 @@ namespace WebApplication1.Controllers.Schedule
         public async Task<IActionResult> GetAll(
             string? search,
             int? type,
+            string? endPoint,
+            string? startingDate,
              double? priceFrom,
             double? priceTo,
             string? sortBy,
@@ -32,7 +34,7 @@ namespace WebApplication1.Controllers.Schedule
         )
         {
             return Ok(
-                await _entityService.GetAll(search, type, priceFrom, priceTo, sortBy, sortDirection, "", page, pageSize)
+                await _entityService.GetAll(search, type, endPoint, startingDate, priceFrom, priceTo, sortBy, sortDirection, "", page, pageSize)
             );
         }
 
@@ -41,6 +43,8 @@ namespace WebApplication1.Controllers.Schedule
         public async Task<IActionResult> GetAllWithAuthority(
             string? search,
             int? type,
+            string? endPoint,
+            string? startingDate,
              double? priceFrom,
             double? priceTo,
             string? sortBy,
@@ -51,7 +55,7 @@ namespace WebApplication1.Controllers.Schedule
         {
             string userId = User.FindFirstValue("Id");
             return Ok(
-                await _entityService.GetAll(search, type, priceFrom, priceTo, sortBy, sortDirection, userId, page, pageSize)
+                await _entityService.GetAll(search, type, endPoint, startingDate, priceFrom, priceTo, sortBy, sortDirection, userId, page, pageSize)
             );
         }
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Globalization;
+using Microsoft.EntityFrameworkCore;
 using TourishApi.Extension;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
@@ -365,6 +366,8 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response GetAllMovingSchedule(
             string? search,
             int? type,
+            string? endPoint,
+            string? startingDate,
             double? priceFrom,
             double? priceTo,
             string? sortBy,
@@ -382,6 +385,37 @@ namespace WebApplication1.Repository.InheritanceRepo
             #region Filtering
             entityQuery = entityQuery.Where(entity => entity.TourishPlan == null);
             entityQuery = entityQuery.Where(entity => entity.ServiceScheduleList.Count(entity1 => entity1.Status == ScheduleStatus.ConfirmInfo) >= 1);
+
+            if (!string.IsNullOrEmpty(endPoint))
+            {
+                entityQuery = entityQuery.Where(entity => entity.HeadingPlace.Contains(endPoint));
+            }
+
+            if (!string.IsNullOrEmpty(startingDate))
+            {
+                // Mảng chứa các mẫu định dạng mà bạn cho phép
+                string[] formats = { "ddd MMM dd yyyy HH:mm:ss 'GMT'zzz", "yyyy-MM-ddTHH:mm:sszzz" }; // Thêm các định dạng khác nếu cần
+                DateTime dateTime;
+                if (
+                    DateTime.TryParseExact(
+                        startingDate,
+                        formats,
+                        CultureInfo.InvariantCulture,
+                        DateTimeStyles.None,
+                        out dateTime
+                    )
+                )
+                {
+
+                    entityQuery = entityQuery.Where(entity =>
+                        entity.ServiceScheduleList.Count(schedule =>
+                            schedule.StartDate.Day == dateTime.Day
+                            && schedule.StartDate.Month == dateTime.Month
+                            && schedule.StartDate.Year == dateTime.Year
+                        ) >= 1
+                    );
+                }
+            }
 
             if (type != null) entityQuery = entityQuery.Where(entity => (int)entity.VehicleType == type);
 
@@ -429,6 +463,8 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response GetAllStayingSchedule(
             string? search,
             int? type,
+            string? endPoint,
+            string? startingDate,
             double? priceFrom,
             double? priceTo,
             string? sortBy,
@@ -445,6 +481,38 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             #region Filtering
             entityQuery = entityQuery.Where(entity => entity.TourishPlanId == null);
+
+            if (!string.IsNullOrEmpty(endPoint))
+            {
+                entityQuery = entityQuery.Where(entity => entity.Address.Contains(endPoint));
+            }
+
+            if (!string.IsNullOrEmpty(startingDate))
+            {
+                // Mảng chứa các mẫu định dạng mà bạn cho phép
+                string[] formats = { "ddd MMM dd yyyy HH:mm:ss 'GMT'zzz", "yyyy-MM-ddTHH:mm:sszzz" }; // Thêm các định dạng khác nếu cần
+                DateTime dateTime;
+                if (
+                    DateTime.TryParseExact(
+                        startingDate,
+                        formats,
+                        CultureInfo.InvariantCulture,
+                        DateTimeStyles.None,
+                        out dateTime
+                    )
+                )
+                {
+
+                    entityQuery = entityQuery.Where(entity =>
+                        entity.ServiceScheduleList.Count(schedule =>
+                            schedule.StartDate.Day == dateTime.Day
+                            && schedule.StartDate.Month == dateTime.Month
+                            && schedule.StartDate.Year == dateTime.Year
+                        ) >= 1
+                    );
+                }
+            }
+
             entityQuery = entityQuery.Where(entity => entity.ServiceScheduleList.Count(entity1 => entity1.Status == ScheduleStatus.ConfirmInfo) >= 1);
 
             if (type != null) entityQuery = entityQuery.Where(entity => (int)entity.RestHouseType == type);

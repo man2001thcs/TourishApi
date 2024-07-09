@@ -98,6 +98,8 @@ namespace TourishApi.Service.InheritanceService.Schedule
         public async Task<Response> GetAll(
             string? search,
             int? type,
+            string? endPoint,
+            string? startingDate,
             double? priceFrom,
             double? priceTo,
             string? sortBy,
@@ -112,7 +114,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
                 if (String.IsNullOrEmpty(userId))
                 {
                     string cacheKey =
-                        $"moving_service_list_{search ?? ""}_{type ?? -1}_{priceFrom ?? 0}_{priceTo ?? 0}_{sortBy ?? ""}_{sortDirection ?? ""}_page_{page}_pageSize_{pageSize}";
+                        $"moving_service_list_{search ?? ""}_{type ?? -1}_{endPoint ?? ""}_{startingDate ?? ""}_{priceFrom ?? 0}_{priceTo ?? 0}_{sortBy ?? ""}_{sortDirection ?? ""}_page_{page}_pageSize_{pageSize}";
                     string cachedValue = await _redisDatabase.StringGetAsync(cacheKey);
 
                     if (!string.IsNullOrEmpty(cachedValue))
@@ -130,6 +132,8 @@ namespace TourishApi.Service.InheritanceService.Schedule
                     var result = _entityRepository.GetAllMovingSchedule(
                         search,
                         type,
+                        endPoint,
+                        startingDate,
                         priceFrom,
                         priceTo,
                         sortBy,
