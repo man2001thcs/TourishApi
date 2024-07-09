@@ -277,6 +277,8 @@ namespace TourishApi.Service.InheritanceService.Schedule
 
                     foreach (var interest in interestList)
                     {
+                        if (interest.InterestStatus == InterestStatus.NotInterested) continue;
+                        
                         if (interest.User.Role == UserRole.User)
                         {
                             var isInNeedOfNotify = await _entityRepository.checkArrangeScheduleFromUser(

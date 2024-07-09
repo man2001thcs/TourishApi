@@ -803,6 +803,7 @@ public class TourishPlanRepository : ITourishPlanRepository
             .TourishPlan.Where(entity => entity.Id == id)
             .Include(tour => tour.TourishInterestList)
             .ThenInclude(entity => entity.User)
+            .AsSplitQuery()
             .FirstOrDefaultAsync();
         if (entity == null)
         {
