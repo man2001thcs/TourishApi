@@ -419,7 +419,7 @@ public class TourishPlanRepository : ITourishPlanRepository
             .Include(entity => entity.TourishInterestList)
             .Include(entity => entity.TourishCategoryRelations)
             .ThenInclude(entity => entity.TourishCategory)
-            .AsQueryable();
+            .AsSplitQuery();
 
         #region Filtering
         if (!string.IsNullOrEmpty(search))
@@ -529,6 +529,7 @@ public class TourishPlanRepository : ITourishPlanRepository
 
         #region Sorting
         entityQuery = entityQuery.OrderByColumnDescending("createDate");
+        
         if (!string.IsNullOrEmpty(sortBy))
         {
             entityQuery = entityQuery.OrderByColumn(sortBy);
