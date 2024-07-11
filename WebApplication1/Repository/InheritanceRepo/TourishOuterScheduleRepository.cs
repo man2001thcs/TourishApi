@@ -421,7 +421,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             if (!string.IsNullOrEmpty(search))
             {
-                entityQuery = entityQuery.Where(entity => entity.BranchName.Contains(search));
+                entityQuery = entityQuery.Where(entity => entity.Name.Contains(search));
             }
 
             if (priceFrom != null)
