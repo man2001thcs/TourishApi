@@ -810,7 +810,7 @@ public class ReceiptRepository
 
         #region Filtering
         receiptQuery = receiptQuery.Where(entity => entity.FullReceiptList.Count() > 0);
-        
+
         if (scheduleType != null)
         {
             if (scheduleType == ScheduleType.MovingSchedule)
@@ -1129,6 +1129,8 @@ public class ReceiptRepository
 
     public async Task<Response> UpdateTourReceipt(FullReceiptUpdateModel receiptModel)
     {
+        List<string> propertyChangeList = new List<string>();
+
         var receipt = _context
             .FullReceiptList.Include(entity => entity.TotalReceipt)
             .FirstOrDefault((receipt => receipt.FullReceiptId == receiptModel.FullReceiptId));
@@ -1150,6 +1152,15 @@ public class ReceiptRepository
             receipt.TourishScheduleId = receiptModel.TourishScheduleId;
             receipt.Description = receiptModel.Description;
             receipt.Status = receiptModel.Status;
+
+            var changedProperties = GetChangedProperties(receipt);
+            logger.LogInformation($"Change: {System.Text.Json.JsonSerializer.Serialize(changedProperties)}");
+            foreach (var prop in changedProperties)
+            {
+                logger.LogInformation($"Property {prop} has been modified.");
+            }
+
+            propertyChangeList = changedProperties;
 
             receipt.UpdateDate = DateTime.UtcNow;
 
@@ -1250,12 +1261,18 @@ public class ReceiptRepository
         {
             resultCd = 0,
             MessageCode = "I512",
+            Change = new Change
+            {
+                propertyChangeList = propertyChangeList
+            }
             // Update type success
         };
     }
 
     public async Task<Response> UpdateScheduleReceipt(FullReceiptUpdateModel receiptModel)
     {
+        List<string> propertyChangeList = new List<string>();
+
         var receipt = _context
             .FullScheduleReceiptList.Include(entity => entity.TotalReceipt)
             .FirstOrDefault((receipt => receipt.FullReceiptId == receiptModel.FullReceiptId));
@@ -1277,6 +1294,15 @@ public class ReceiptRepository
             receipt.ServiceScheduleId = receiptModel.ServiceScheduleId;
             receipt.Description = receiptModel.Description;
             receipt.Status = receiptModel.Status;
+
+            var changedProperties = GetChangedProperties(receipt);
+            logger.LogInformation($"Change: {System.Text.Json.JsonSerializer.Serialize(changedProperties)}");
+            foreach (var prop in changedProperties)
+            {
+                logger.LogInformation($"Property {prop} has been modified.");
+            }
+
+            propertyChangeList = changedProperties;
 
             receipt.UpdateDate = DateTime.UtcNow;
 
@@ -1377,12 +1403,18 @@ public class ReceiptRepository
         {
             resultCd = 0,
             MessageCode = "I512",
+            Change = new Change
+            {
+                propertyChangeList = propertyChangeList
+            }
             // Update type success
         };
     }
 
     public async Task<Response> UpdateTourReceiptForUser(FullReceiptUpdateModel receiptModel)
     {
+        List<string> propertyChangeList = new List<string>();
+
         var receipt = _context
             .FullReceiptList.Include(entity => entity.TotalReceipt)
             .FirstOrDefault((receipt => receipt.FullReceiptId == receiptModel.FullReceiptId));
@@ -1444,6 +1476,9 @@ public class ReceiptRepository
                 return new Response { resultCd = 1, MessageCode = "C516-h", };
             }
 
+            var changedProperties = GetChangedProperties(receipt);
+            propertyChangeList = changedProperties;
+
             receipt.UpdateDate = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
@@ -1452,12 +1487,18 @@ public class ReceiptRepository
         {
             resultCd = 0,
             MessageCode = "I512",
+            Change = new Change
+            {
+                propertyChangeList = propertyChangeList
+            }
             // Update type success
         };
     }
 
     public async Task<Response> UpdateScheduleReceiptForUser(FullReceiptUpdateModel receiptModel)
     {
+        List<string> propertyChangeList = new List<string>();
+
         var receipt = _context
             .FullScheduleReceiptList.Include(entity => entity.TotalReceipt)
             .FirstOrDefault((receipt => receipt.FullReceiptId == receiptModel.FullReceiptId));
@@ -1542,6 +1583,9 @@ public class ReceiptRepository
                 return new Response { resultCd = 1, MessageCode = "C516-h", };
             }
 
+            var changedProperties = GetChangedProperties(receipt);
+            propertyChangeList = changedProperties;
+
             receipt.UpdateDate = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
@@ -1550,6 +1594,10 @@ public class ReceiptRepository
         {
             resultCd = 0,
             MessageCode = "I512",
+            Change = new Change
+            {
+                propertyChangeList = propertyChangeList
+            }
             // Update type success
         };
     }
@@ -2204,5 +2252,21 @@ public class ReceiptRepository
         }
 
         return new Response { resultCd = 1, MessageCode = "C521" };
+    }
+
+    private List<string> GetChangedProperties(object entity)
+    {
+        var entry = _context.Entry(entity);
+        var changedProperties = new List<string>();
+
+        foreach (var property in entry.Properties)
+        {
+            if (property.IsModified)
+            {
+                changedProperties.Add(property.Metadata.Name);
+            }
+        }
+
+        return changedProperties;
     }
 }

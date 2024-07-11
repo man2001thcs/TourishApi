@@ -438,25 +438,6 @@ namespace TourishApi.Service.InheritanceService
 
                 var contentCode = "";
 
-                switch (receiptModel.Status)
-                {
-                    case FullReceiptStatus.Created:
-                        contentCode = "I512-user-create";
-                        break;
-                    case FullReceiptStatus.AwaitPayment:
-                        contentCode = "I511-user-await";
-                        break;
-                    case FullReceiptStatus.Cancelled:
-                        contentCode = "I511-user-cancel";
-                        break;
-                    case FullReceiptStatus.Completed:
-                        contentCode = "I511-user-complete";
-                        break;
-                    default:
-                        // code block
-                        break;
-                }
-
                 if (receiptModel.TourishPlanId != null)
                 {
                     result = await _receiptRepository.UpdateTourReceipt(receiptModel);
@@ -464,14 +445,77 @@ namespace TourishApi.Service.InheritanceService
                     var existReceipt = (FullReceipt)
                         _receiptRepository.getFullTourReceiptById(receiptModel.FullReceiptId).Data;
 
-                    if (result.resultCd == 0 && existReceipt != null)
+                    switch (receiptModel.Status)
                     {
-                        await sendTourPaymentNotifyToUser(
-                            emailClaim,
-                            existReceipt.Email,
-                            existReceipt.TotalReceipt.TourishPlanId.Value,
-                            contentCode
-                        );
+                        case FullReceiptStatus.Created:
+                            {
+                                contentCode = "I512-user-create";
+                                break;
+                            }
+                        case FullReceiptStatus.AwaitPayment:
+                            {
+                                if (result.Change != null)
+                                {
+                                    if (result.Change.propertyChangeList.Contains("Status"))
+                                    {
+                                        contentCode = "I511-user-await";
+                                    }
+                                    else contentCode = "I512-user-create";
+                                }
+                                else contentCode = "I512-user-create";
+
+                                break;
+                            }
+                        case FullReceiptStatus.Cancelled:
+                            {
+                                if (result.Change != null)
+                                {
+                                    if (result.Change.propertyChangeList.Contains("Status"))
+                                    {
+                                        contentCode = "I511-user-cancel";
+                                    }
+                                    else contentCode = "I512-user-create";
+                                }
+                                else contentCode = "I512-user-create";
+
+                                break;
+                            }
+                        case FullReceiptStatus.Completed:
+                            {
+                                if (result.Change != null)
+                                {
+                                    if (result.Change.propertyChangeList.Contains("Status"))
+                                    {
+                                        contentCode = "I511-user-complete";
+                                    }
+                                    else contentCode = "I512-user-create";
+                                }
+                                else contentCode = "I512-user-create";
+                                break;
+                            }
+                        default:
+                            // code block
+                            break;
+                    }
+
+                    if (result.resultCd == 0 && existReceipt != null && result.Change != null)
+                    {
+                        if (result.Change.propertyChangeList.Count > 0)
+                        {
+                            await sendTourPaymentNotifyToUser(
+                                emailClaim,
+                                emailClaim,
+                                existReceipt.TotalReceipt.TourishPlanId.Value,
+                                contentCode.Replace("user", "admin")
+                            );
+
+                            await sendTourPaymentNotifyToUser(
+                                emailClaim,
+                                existReceipt.Email,
+                                existReceipt.TotalReceipt.TourishPlanId.Value,
+                                contentCode
+                            );
+                        }
                     }
                 }
                 else
@@ -482,25 +526,89 @@ namespace TourishApi.Service.InheritanceService
                             .getFullScheduleReceiptById(receiptModel.FullReceiptId)
                             .Data;
 
-                    if (result.resultCd == 0 && existReceipt != null)
+                    switch (receiptModel.Status)
                     {
-                        if (existReceipt.TotalReceipt.MovingScheduleId.HasValue)
-                            await sendServicePaymentNotifyToUser(
-                                emailClaim,
-                                existReceipt.Email,
-                                existReceipt.TotalReceipt.MovingScheduleId,
-                                null,
-                                contentCode
-                            );
+                        case FullReceiptStatus.Created:
+                            {
+                                contentCode = "I512-user-create";
+                                break;
+                            }
+                        case FullReceiptStatus.AwaitPayment:
+                            {
+                                if (result.Change != null)
+                                {
+                                    if (result.Change.propertyChangeList.Contains("Status"))
+                                    {
+                                        contentCode = "I511-user-await";
+                                    }
+                                    else contentCode = "I512-user-create";
+                                }
+                                else contentCode = "I512-user-create";
 
-                        if (existReceipt.TotalReceipt.StayingScheduleId.HasValue)
+                                break;
+                            }
+                        case FullReceiptStatus.Cancelled:
+                            {
+                                if (result.Change != null)
+                                {
+                                    if (result.Change.propertyChangeList.Contains("Status"))
+                                    {
+                                        contentCode = "I511-user-cancel";
+                                    }
+                                    else contentCode = "I512-user-create";
+                                }
+                                else contentCode = "I512-user-create";
+
+                                break;
+                            }
+                        case FullReceiptStatus.Completed:
+                            {
+                                if (result.Change != null)
+                                {
+                                    if (result.Change.propertyChangeList.Contains("Status"))
+                                    {
+                                        contentCode = "I511-user-complete";
+                                    }
+                                    else contentCode = "I512-user-create";
+                                }
+                                else contentCode = "I512-user-create";
+                                break;
+                            }
+                        default:
+                            // code block
+                            break;
+                    }
+
+                    if (result.resultCd == 0 && existReceipt != null && result.Change != null)
+                    {
+                        if (result.Change.propertyChangeList.Count > 0)
+                        {
                             await sendServicePaymentNotifyToUser(
-                                emailClaim,
-                                existReceipt.Email,
-                                null,
-                                existReceipt.TotalReceipt.StayingScheduleId,
-                                contentCode
-                            );
+                                    emailClaim,
+                                    emailClaim,
+                                    existReceipt.TotalReceipt.MovingScheduleId,
+                                    existReceipt.TotalReceipt.StayingScheduleId,
+                                    contentCode.Replace("user", "admin")
+                                );
+
+                            if (existReceipt.TotalReceipt.MovingScheduleId.HasValue)
+                                await sendServicePaymentNotifyToUser(
+                                    emailClaim,
+                                    existReceipt.Email,
+                                    existReceipt.TotalReceipt.MovingScheduleId,
+                                    null,
+                                    contentCode
+                                );
+
+                            if (existReceipt.TotalReceipt.StayingScheduleId.HasValue)
+                                await sendServicePaymentNotifyToUser(
+                                    emailClaim,
+                                    existReceipt.Email,
+                                    null,
+                                    existReceipt.TotalReceipt.StayingScheduleId,
+                                    contentCode
+                                );
+                        }
                     }
                 }
 
@@ -553,20 +661,23 @@ namespace TourishApi.Service.InheritanceService
                     var existReceipt = (FullReceipt)
                         _receiptRepository.getFullTourReceiptById(receiptModel.FullReceiptId).Data;
 
-                    if (result.resultCd == 0)
+                    if (result.resultCd == 0 && result.Change != null)
                     {
-                        await sendTourPaymentNotifyToUser(
-                                existReceipt.Email,
+                        if (result.Change.propertyChangeList.Count > 0)
+                        {
+                            await sendTourPaymentNotifyToUser(
+                                    existReceipt.Email,
+                                    existReceipt.Email,
+                                    existReceipt.TotalReceipt.TourishPlanId.Value,
+                                    contentCode.Replace("admin", "user")
+                                );
+
+                            await _tourishPlanService.sendTourPaymentNotifyToAdmin(
                                 existReceipt.Email,
                                 existReceipt.TotalReceipt.TourishPlanId.Value,
-                                contentCode.Replace("admin", "user")
+                                contentCode
                             );
-
-                        await _tourishPlanService.sendTourPaymentNotifyToAdmin(
-                            existReceipt.Email,
-                            existReceipt.TotalReceipt.TourishPlanId.Value,
-                            contentCode
-                        );
+                        }
                     }
 
                 }
@@ -578,28 +689,31 @@ namespace TourishApi.Service.InheritanceService
                             .getFullScheduleReceiptById(receiptModel.FullReceiptId)
                             .Data;
 
-                    if (result.resultCd == 0)
+                    if (result.resultCd == 0 && result.Change != null)
                     {
-                        await sendServicePaymentNotifyToUser(
-                                existReceipt.Email,
-                                existReceipt.Email,
-                                existReceipt.TotalReceipt.MovingScheduleId,
-                                existReceipt.TotalReceipt.StayingScheduleId,
-                                contentCode.Replace("admin", "user")
-                            );
+                        if (result.Change.propertyChangeList.Count > 0)
+                        {
+                            await sendServicePaymentNotifyToUser(
+                                                            existReceipt.Email,
+                                                            existReceipt.Email,
+                                                            existReceipt.TotalReceipt.MovingScheduleId,
+                                                            existReceipt.TotalReceipt.StayingScheduleId,
+                                                            contentCode.Replace("admin", "user")
+                                                        );
 
-                        if (existReceipt.TotalReceipt.StayingScheduleId.HasValue)
-                            await _stayingScheduleService.sendTourPaymentNotifyToAdmin(
-                                existReceipt.Email,
-                                existReceipt.TotalReceipt.StayingScheduleId.Value,
-                                contentCode
-                            );
-                        if (existReceipt.TotalReceipt.MovingScheduleId.HasValue)
-                            await _movingScheduleService.sendTourPaymentNotifyToAdmin(
-                                existReceipt.Email,
-                                existReceipt.TotalReceipt.MovingScheduleId.Value,
-                                contentCode
-                            );
+                            if (existReceipt.TotalReceipt.StayingScheduleId.HasValue)
+                                await _stayingScheduleService.sendTourPaymentNotifyToAdmin(
+                                    existReceipt.Email,
+                                    existReceipt.TotalReceipt.StayingScheduleId.Value,
+                                    contentCode
+                                );
+                            if (existReceipt.TotalReceipt.MovingScheduleId.HasValue)
+                                await _movingScheduleService.sendTourPaymentNotifyToAdmin(
+                                    existReceipt.Email,
+                                    existReceipt.TotalReceipt.MovingScheduleId.Value,
+                                    contentCode
+                                );
+                        }
                     }
                 }
 
