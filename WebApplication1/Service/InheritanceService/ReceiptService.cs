@@ -554,11 +554,21 @@ namespace TourishApi.Service.InheritanceService
                         _receiptRepository.getFullTourReceiptById(receiptModel.FullReceiptId).Data;
 
                     if (result.resultCd == 0)
+                    {
+                        await sendTourPaymentNotifyToUser(
+                                existReceipt.Email,
+                                existReceipt.Email,
+                                existReceipt.TotalReceipt.TourishPlanId.Value,
+                                contentCode.Replace("admin", "user")
+                            );
+
                         await _tourishPlanService.sendTourPaymentNotifyToAdmin(
                             existReceipt.Email,
                             existReceipt.TotalReceipt.TourishPlanId.Value,
                             contentCode
                         );
+                    }
+
                 }
                 else
                 {
@@ -570,6 +580,14 @@ namespace TourishApi.Service.InheritanceService
 
                     if (result.resultCd == 0)
                     {
+                        await sendServicePaymentNotifyToUser(
+                                existReceipt.Email,
+                                existReceipt.Email,
+                                existReceipt.TotalReceipt.MovingScheduleId,
+                                existReceipt.TotalReceipt.StayingScheduleId,
+                                contentCode.Replace("admin", "user")
+                            );
+
                         if (existReceipt.TotalReceipt.StayingScheduleId.HasValue)
                             await _stayingScheduleService.sendTourPaymentNotifyToAdmin(
                                 existReceipt.Email,
