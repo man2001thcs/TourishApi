@@ -1814,6 +1814,7 @@ public class ReceiptRepository
                 totalTicket = group.Sum(entity => entity.TotalTicket + entity.TotalChildTicket)
             })
             .OrderByDescending(group => group.totalTicket)
+            .AsSplitQuery()
             .FirstOrDefault();
 
         if (receiptList == null)

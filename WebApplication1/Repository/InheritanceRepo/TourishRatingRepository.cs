@@ -96,7 +96,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public Response GetAllByTourishPlanId(Guid tourishPlanId)
         {
-            var entityQuery = _context.TourishRatings.Include(entityQuery => entityQuery.User).AsQueryable();
+            var entityQuery = _context.TourishRatings.Include(entityQuery => entityQuery.User).AsSplitQuery();
 
             #region Filtering
             entityQuery = entityQuery.Where(entity => entity.TourishPlanId == tourishPlanId);
@@ -141,7 +141,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public TourishRating getByUserIdAndTourId(Guid UserId, Guid TourId)
         {
-            var entity = _context.TourishRatings.FirstOrDefault((entity
+            var entity = _context.TourishRatings.AsSplitQuery().FirstOrDefault((entity
                 => entity.UserId == UserId && entity.TourishPlanId == TourId));
 
             return entity;

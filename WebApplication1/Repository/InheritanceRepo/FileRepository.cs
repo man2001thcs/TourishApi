@@ -62,7 +62,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
         public async Task<Response> getById(Guid id)
         {
-            var file = await _context.SaveFileList.FirstOrDefaultAsync((file
+            var file = await _context.SaveFileList.AsSplitQuery().FirstOrDefaultAsync((file
                 => file.Id == id));
 
             return new Response
@@ -76,7 +76,7 @@ namespace WebApplication1.Repository.InheritanceRepo
         public Response getByProductId(Guid id, ResourceTypeEnum type)
         {
             var fileList = _context.SaveFileList.Where((file
-                => file.AccessSourceId == id && file.ResourceType == type)).ToList();
+                => file.AccessSourceId == id && file.ResourceType == type)).OrderBy(entity => entity.CreatedDate).AsSplitQuery().ToList();
 
             return new Response
             {
