@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using DotnetGeminiSDK;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -9,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SignalR.Hub;
 using StackExchange.Redis;
+using System.Text;
 using TourishApi.Service.InheritanceService;
 using TourishApi.Service.InheritanceService.Schedule;
 using TourishApi.Service.Payment;
@@ -25,7 +25,6 @@ using WebApplication1.Repository.InheritanceRepo.Transport;
 using WebApplication1.Repository.Interface;
 using WebApplication1.Service;
 using WebApplication1.Service.InheritanceService;
-using WebApplication1.Trigger;
 
 namespace MyWebApiApp
 {

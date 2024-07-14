@@ -1,10 +1,8 @@
 ﻿namespace TourishApi.Task;
 
-using System.Threading.Tasks;
-using EntityFrameworkCore.Triggered;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using WebApplication1.Data.DbContextFile;
-using WebApplication1.Data.Schedule;
 
 public class RemoveOldNotifyConnTask
 {

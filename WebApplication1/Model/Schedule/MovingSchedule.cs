@@ -1,5 +1,4 @@
-﻿using WebApplication1.Data;
-using WebApplication1.Data.Schedule;
+﻿using WebApplication1.Data.Schedule;
 using WebApplication1.Data.Transport;
 
 namespace WebApplication1.Model.Schedule

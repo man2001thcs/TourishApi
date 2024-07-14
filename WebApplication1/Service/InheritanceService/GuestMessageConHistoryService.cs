@@ -71,7 +71,7 @@ namespace TourishApi.Service.InheritanceService
             }
         }
 
-        public Response GetAllForAdmin(string? search, int? type, string? sortBy, string? sortDirection, string? userId,  int page = 1, int pageSize = 5)
+        public Response GetAllForAdmin(string? search, int? type, string? sortBy, string? sortDirection, string? userId, int page = 1, int pageSize = 5)
         {
             try
             {

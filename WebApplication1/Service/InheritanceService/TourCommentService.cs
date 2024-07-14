@@ -57,7 +57,7 @@ namespace TourishApi.Service.InheritanceService
         public Response DeleteById(Guid id)
         {
             try
-            {          
+            {
                 _entityRepository.Delete(id);
                 var response = new Response { resultCd = 0, MessageCode = "I813" };
                 return response;

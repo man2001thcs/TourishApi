@@ -58,7 +58,7 @@ namespace WebApplication1.Repository.InheritanceRepo
 
             await _context.AddAsync(addValue);
             await _context.SaveChangesAsync();
-            
+
             await blobService.UploadStringBlobAsync("service-comment-container", addModel.Content ?? "", "text/plain", addValue.Id.ToString() ?? "" + ".txt");
 
             return new Response

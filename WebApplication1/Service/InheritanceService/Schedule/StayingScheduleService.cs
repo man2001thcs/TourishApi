@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json.Serialization;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using StackExchange.Redis;
 using WebApplication1.Data;
 using WebApplication1.Model;
 using WebApplication1.Model.Schedule;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.InheritanceRepo;
-using StackExchange.Redis;
 using WebApplication1.Service.InheritanceService;
 
 namespace TourishApi.Service.InheritanceService.Schedule
@@ -247,7 +247,7 @@ namespace TourishApi.Service.InheritanceService.Schedule
                     foreach (var interest in interestList)
                     {
                         if (interest.InterestStatus == InterestStatus.NotInterested) continue;
-                        
+
                         if (interest.User.Role == UserRole.User)
                         {
                             var isInNeedOfNotify = await _entityRepository.checkArrangeScheduleFromUser(

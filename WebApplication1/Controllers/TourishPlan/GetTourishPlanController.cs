@@ -1,10 +1,7 @@
-﻿using System.Globalization;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using StackExchange.Redis;
+using System.Security.Claims;
 using TourishApi.Service.InheritanceService;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -43,7 +40,7 @@ namespace WebApplication1.Controllers.TourishPlan
             int page = 1,
             int pageSize = 5
         )
-        {         
+        {
             var result = await _entityService.GetAll(
                 search,
                 category,
@@ -108,7 +105,7 @@ namespace WebApplication1.Controllers.TourishPlan
 
         [HttpGet("client/{id}")]
         public async Task<IActionResult> ClientGetById(Guid id)
-        {         
+        {
             var result = await _entityService.clientGetById(id);
 
             return Ok(result);

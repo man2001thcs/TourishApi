@@ -1,12 +1,11 @@
-﻿using System.Security.Claims;
-using DotnetGeminiSDK.Client.Interfaces;
+﻿using DotnetGeminiSDK.Client.Interfaces;
 using DotnetGeminiSDK.Model.Request;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SignalR.Hub.Client;
+using System.Security.Claims;
 using TourishApi.Service.InheritanceService;
 using WebApplication1.Data;
 using WebApplication1.Data.Chat;
@@ -420,7 +419,10 @@ namespace SignalR.Hub
                                         .NotificationConList.Include(entity => entity.User).Where(entity =>
                                             entity.User.Role == UserRole.Admin && entity.Connected
                                         ).OrderByDescending(entity => entity.CreateDate)
+                                        .GroupBy(entity => entity.UserId)  // Group by UserId to ensure uniqueness
+                                        .Select(group => group.OrderByDescending(entity => entity.CreateDate).First())   // Select the first entity from each group
                                         .ToListAsync();
+
                     foreach (var adminCon in adminConList)
                     {
                         var notification = new NotificationModel

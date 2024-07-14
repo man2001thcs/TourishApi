@@ -100,7 +100,7 @@ namespace WebApplication1.Controllers
             return Ok(_userService.GetUserList(bearer_token, search, type, sortBy, sortDirection, page, pageSize));
         }
 
-        [Authorize(Roles ="Admin, AdminManager")]
+        [Authorize(Roles = "Admin, AdminManager")]
         [HttpGet("GetUser")]
         public IActionResult GetUser(Guid id, int type)
         {

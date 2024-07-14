@@ -1,19 +1,13 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
+﻿using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using TourishApi.Service.InheritanceService;
 using WebApplication1.Data.Receipt;
 using WebApplication1.Model;
 using WebApplication1.Model.Payment;
 using WebApplication1.Service.InheritanceService;
-using Azure.Storage.Queues.Models;
-using MailKit;
-using WebApplication1.Service;
-using WebApplication1.Model.VirtualModel;
 
 namespace TourishApi.Service.Payment
 {

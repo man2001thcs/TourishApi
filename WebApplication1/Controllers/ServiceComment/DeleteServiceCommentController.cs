@@ -1,8 +1,7 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TourishApi.Service.InheritanceService;
-using WebApplication1.Data;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -25,7 +24,7 @@ namespace WebApplication1.Controllers.ServiceComment
         {
             {
                 string userId = User.FindFirstValue("Id");
-                return Ok(_entityService. UserDeleteById(id, userId));
+                return Ok(_entityService.UserDeleteById(id, userId));
             }
         }
     }

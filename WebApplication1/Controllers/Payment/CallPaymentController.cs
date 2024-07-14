@@ -1,5 +1,4 @@
-﻿using System.Threading.Channels;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using TourishApi.Service.InheritanceService;
@@ -9,7 +8,6 @@ using WebApplication1.Model;
 using WebApplication1.Model.Payment;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Service.InheritanceService;
-using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 

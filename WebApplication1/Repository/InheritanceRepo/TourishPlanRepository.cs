@@ -1,7 +1,5 @@
-﻿using System.Collections;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Globalization;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using TourishApi.Extension;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
@@ -529,7 +527,7 @@ public class TourishPlanRepository : ITourishPlanRepository
 
         #region Sorting
         entityQuery = entityQuery.OrderByColumnDescending("createDate");
-        
+
         if (!string.IsNullOrEmpty(sortBy))
         {
             entityQuery = entityQuery.OrderByColumn(sortBy);

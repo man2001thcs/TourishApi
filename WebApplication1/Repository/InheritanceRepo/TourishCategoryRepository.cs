@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using TourishApi.Extension;
 using TourishApi.Repository.Interface;
 using WebApplication1.Data;

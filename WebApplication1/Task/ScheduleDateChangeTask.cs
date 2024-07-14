@@ -1,7 +1,7 @@
 ﻿namespace TourishApi.Task;
 
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Schedule;
 

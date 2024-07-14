@@ -1,13 +1,12 @@
 ﻿namespace TourishApi.Task;
 
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using TourishApi.Service.InheritanceService;
 using TourishApi.Service.InheritanceService.Schedule;
 using WebApplication1.Data;
 using WebApplication1.Data.DbContextFile;
 using WebApplication1.Data.Receipt;
-using WebApplication1.Data.Schedule;
 using WebApplication1.Model;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Service.InheritanceService;

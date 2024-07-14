@@ -1,20 +1,15 @@
-﻿using MailKit;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Org.BouncyCastle.Utilities;
 using StackExchange.Redis;
 using TourishApi.Service.InheritanceService.Schedule;
-using TourishApi.Service.Payment;
 using WebApplication1.Data;
 using WebApplication1.Data.Receipt;
 using WebApplication1.Data.Schedule;
 using WebApplication1.Model;
-using WebApplication1.Model.Payment;
 using WebApplication1.Model.Receipt;
 using WebApplication1.Model.VirtualModel;
 using WebApplication1.Repository.InheritanceRepo;
 using WebApplication1.Repository.InheritanceRepo.Receipt;
-using WebApplication1.Repository.Interface;
 using WebApplication1.Service;
 using WebApplication1.Service.InheritanceService;
 
