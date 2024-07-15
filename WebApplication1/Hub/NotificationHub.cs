@@ -90,7 +90,7 @@ namespace SignalR.Hub
         {
             try
             {
-                var notification = _context.Notifications.Where(u => (u.Id == notificationId)).FirstOrDefault();
+                var notification = await _context.Notifications.Where(u => (u.Id == notificationId)).AsSplitQuery().FirstOrDefaultAsync();
                 if (notification != null)
                 {
                     notification.IsRead = true;
