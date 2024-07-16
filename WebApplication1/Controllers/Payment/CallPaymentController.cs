@@ -95,7 +95,7 @@ namespace WebApplication1.Controllers.Payment
             if (paymentId.Length > 0)
                 return Ok(new Response { resultCd = 0, MessageCode = "I510" });
             else
-                return Ok(new Response { resultCd = 0, MessageCode = "I515-m" });
+                return Ok(new Response { resultCd = 1, MessageCode = "C515-m" });
         }
 
         [Authorize]
@@ -106,7 +106,7 @@ namespace WebApplication1.Controllers.Payment
             if (paymentId.Length > 0)
                 return Ok(new Response { resultCd = 0, MessageCode = "I510" });
             else
-                return Ok(new Response { resultCd = 0, MessageCode = "I515-m" });
+                return Ok(new Response { resultCd = 1, MessageCode = "C515-m" });
         }
 
         [HttpGet("pay-os/update/tour/{token}")]
