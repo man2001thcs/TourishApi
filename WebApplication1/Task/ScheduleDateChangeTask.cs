@@ -16,6 +16,19 @@ public class ScheduleDateChangeTask
 
     public async Task ScheduleDateDueTask()
     {
+        var outOfTicketTourScheduleList = _context
+            .TourishScheduleList.Where(entity =>
+                entity.RemainTicket <= 0 && (int) entity.PlanStatus <= 1
+            )
+            .OrderBy(entity => entity.CreateDate)
+            .AsSplitQuery()
+            .ToList();
+
+        foreach (var item in outOfTicketTourScheduleList)
+        {
+            item.PlanStatus = WebApplication1.Data.PlanStatus.OnGoing;
+        }
+
         var onGoingTourScheduleList = _context
             .TourishScheduleList.Where(entity =>
                 entity.StartDate < DateTime.UtcNow
@@ -42,6 +55,19 @@ public class ScheduleDateChangeTask
         foreach (var item in completeTourScheduleList)
         {
             item.PlanStatus = WebApplication1.Data.PlanStatus.Complete;
+        }
+
+        var outOfTicketServiceScheduleList = _context
+            .ServiceSchedule.Where(entity =>
+                entity.RemainTicket <= 0 && (int)entity.Status <= 1
+            )
+            .OrderBy(entity => entity.CreateDate)
+            .AsSplitQuery()
+            .ToList();
+
+        foreach (var item in outOfTicketServiceScheduleList)
+        {
+            item.Status = ScheduleStatus.OnGoing;
         }
 
         var onGoingScheduleScheduleList = _context

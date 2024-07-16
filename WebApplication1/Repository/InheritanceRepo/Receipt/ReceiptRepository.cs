@@ -1412,7 +1412,7 @@ public class ReceiptRepository
         List<string> propertyChangeList = new List<string>();
 
         var receipt = _context
-            .FullReceiptList.Include(entity => entity.TotalReceipt)
+            .FullReceiptList.Include(entity => entity.TotalReceipt).Include(entity => entity.TourishSchedule).AsSplitQuery()
             .FirstOrDefault((receipt => receipt.FullReceiptId == receiptModel.FullReceiptId));
 
         if (receipt != null)
@@ -1438,8 +1438,28 @@ public class ReceiptRepository
                 return new Response { resultCd = 1, MessageCode = "C519-tour", };
             }
 
+            var existSchedule = _context.TourishScheduleList.FirstOrDefault(entity =>
+                entity.Id == receipt.TourishScheduleId
+            );
+
             if (receipt.Status == FullReceiptStatus.Created)
             {
+                if (existSchedule != null)
+                {
+                    if (
+                        existSchedule.RemainTicket
+                        < receiptModel.TotalTicket + receiptModel.TotalChildTicket
+                    )
+                    {
+                        return new Response
+                        {
+                            resultCd = 1,
+                            MessageCode = "C515"
+                            // Out of ticket
+                        };
+                    }
+                }
+
                 receipt.Status = receiptModel.Status;
                 receipt.TotalTicket = receiptModel.TotalTicket;
                 receipt.TotalChildTicket = receiptModel.TotalChildTicket;
@@ -1547,6 +1567,26 @@ public class ReceiptRepository
 
             if (receipt.Status == FullReceiptStatus.Created)
             {
+                var existSchedule = _context.ServiceSchedule.FirstOrDefault(entity =>
+                    entity.Id == receipt.ServiceScheduleId
+                );
+
+                if (existSchedule != null)
+                {
+                    if (
+                        existSchedule.RemainTicket
+                        < receiptModel.TotalTicket + receiptModel.TotalChildTicket
+                    )
+                    {
+                        return new Response
+                        {
+                            resultCd = 1,
+                            MessageCode = "C515"
+                            // Out of ticket
+                        };
+                    }
+                }
+
                 receipt.Status = receiptModel.Status;
                 receipt.TotalTicket = receiptModel.TotalTicket;
                 receipt.TotalChildTicket = receiptModel.TotalChildTicket;
